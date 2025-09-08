@@ -11,7 +11,6 @@ import {
   ArrowRightOnRectangleIcon,
   Bars3Icon,
   XMarkIcon,
-  BellIcon,
   CogIcon,
   ClipboardDocumentListIcon,
   DocumentChartBarIcon,

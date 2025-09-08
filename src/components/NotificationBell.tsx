@@ -3,7 +3,7 @@ import { BellIcon } from '@heroicons/react/24/outline';
 import { useNotificationPolling } from '../hooks/useNotificationPolling';
 
 const NotificationBell: React.FC = () => {
-  const { allNotifications, unreadCount, markAsRead, markAllAsRead, isLoading } = useNotificationPolling();
+  const { allNotifications, unreadCount, markAsRead, markAllAsRead } = useNotificationPolling();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -122,7 +122,7 @@ const NotificationBell: React.FC = () => {
               </div>
             ) : (
               <div className="py-2">
-                {allNotifications.slice(0, 10).map((notification) => (
+                {allNotifications.slice(0, 10).map((notification: any) => (
                   <div
                     key={notification._id}
                     className={`notification-item px-4 py-3 border-b transition-colors cursor-pointer ${

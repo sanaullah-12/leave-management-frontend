@@ -61,7 +61,7 @@ const Avatar: React.FC<AvatarProps> = ({
       .substring(0, 2);
   };
 
-  const getBackgroundClass = (name: string) => {
+  const getBackgroundClass = () => {
     // Use theme-aware background color instead of random colors
     return 'user-initials-circle';
   };
@@ -93,7 +93,7 @@ const Avatar: React.FC<AvatarProps> = ({
       }}
     />
   ) : name ? (
-    <div className={`w-full h-full rounded-full ${getBackgroundClass(name)} text-white font-semibold flex items-center justify-center`}>
+    <div className={`w-full h-full rounded-full ${getBackgroundClass()} text-white font-semibold flex items-center justify-center`}>
       {getInitials(name)}
     </div>
   ) : (

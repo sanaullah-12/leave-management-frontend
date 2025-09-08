@@ -37,7 +37,10 @@ export const useNotificationPolling = () => {
   // Poll for unread notifications every 10 seconds
   const { data, isLoading, error } = useQuery<NotificationResponse>({
     queryKey: ['notifications', 'polling'],
-    queryFn: () => notificationsAPI.getNotifications(1, 50, true), // Get unread notifications
+    queryFn: async () => {
+      const response = await notificationsAPI.getNotifications(1, 50, true);
+      return response.data;
+    },
     refetchInterval: 10 * 1000, // Poll every 10 seconds
     refetchIntervalInBackground: true, // Continue polling in background
     refetchOnWindowFocus: true, // Refetch when user comes back to tab
@@ -51,7 +54,10 @@ export const useNotificationPolling = () => {
     refetch: refetchAllNotifications 
   } = useQuery<NotificationResponse>({
     queryKey: ['notifications', 'all'],
-    queryFn: () => notificationsAPI.getNotifications(1, 20, false), // Get all notifications
+    queryFn: async () => {
+      const response = await notificationsAPI.getNotifications(1, 20, false);
+      return response.data;
+    },
     refetchInterval: 30 * 1000, // Refresh all notifications every 30 seconds
     refetchIntervalInBackground: true,
   });
@@ -63,11 +69,11 @@ export const useNotificationPolling = () => {
       
       // If this is the first load or we have new notifications
       if (previousNotifications && Array.isArray((previousNotifications as any)?.notifications)) {
-        const prevNotificationIds = (previousNotifications as NotificationResponse).notifications.map(n => n._id);
-        const newNotifications = data.notifications.filter(n => !prevNotificationIds.includes(n._id));
+        const prevNotificationIds = (previousNotifications as NotificationResponse).notifications.map((n: Notification) => n._id);
+        const newNotifications = data.notifications.filter((n: Notification) => !prevNotificationIds.includes(n._id));
         
         // Show new notifications in the toast system
-        newNotifications.forEach(notification => {
+        newNotifications.forEach((notification: Notification) => {
           const notificationType = notification.type === 'leave_approved' ? 'success' 
                                  : notification.type === 'leave_rejected' ? 'warning'
                                  : 'info';

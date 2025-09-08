@@ -16,8 +16,7 @@ import {
   EnvelopeIcon,
   BuildingOfficeIcon,
   PhoneIcon,
-  UserIcon,
-  ArrowLeftIcon
+  UserIcon
 } from '@heroicons/react/24/outline';
 import '../styles/design-system.css';
 
@@ -49,7 +48,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
   });
 
   // Fetch employee's leave balance - pass employeeId for specific employee
-  const { data: leaveBalanceData, isLoading: balanceLoading } = useQuery({
+  const { data: leaveBalanceData } = useQuery({
     queryKey: ['employee-leave-balance', employeeId],
     queryFn: () => leavesAPI.getLeaveBalance(isCurrentUser ? undefined : employeeId),
     enabled: true, // Always try to fetch balance data
@@ -111,9 +110,9 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
     Object.entries(policyMapping).forEach(([type, total]) => {
       const used = leaveTypeUsage[type] || 0;
       leaveBalance[type] = {
-        total,
+        total: total as number,
         used,
-        remaining: Math.max(0, total - used)
+        remaining: Math.max(0, (total as number) - used)
       };
     });
   } else {
@@ -295,8 +294,8 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
                   </div>
 
                   <div className="flex flex-wrap gap-2 mt-4">
-                    <span className={`badge ${user.status === 'active' ? 'badge-success' : 'badge-warning'}`}>
-                      {user.status === 'active' ? '✅ Active' : '⏸️ Inactive'}
+                    <span className={`badge ${(user as any).isActive ? 'badge-success' : 'badge-warning'}`}>
+                      {(user as any).isActive ? '✅ Active' : '⏸️ Inactive'}
                     </span>
                     <span className="badge badge-primary">
                       👤 Employee

@@ -47,7 +47,7 @@ const EmployeesPage: React.FC = () => {
 
   const inviteEmployeeMutation = useMutation({
     mutationFn: authAPI.inviteEmployee,
-    onSuccess: (response, variables) => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       setShowInviteForm(false);
       reset();
@@ -76,7 +76,7 @@ const EmployeesPage: React.FC = () => {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       }),
-    onSuccess: (response, variables) => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       setShowInviteAdminForm(false);
       adminReset();
@@ -100,7 +100,7 @@ const EmployeesPage: React.FC = () => {
 
   const deactivateEmployeeMutation = useMutation({
     mutationFn: usersAPI.deactivateEmployee,
-    onSuccess: (response, employeeId) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       
       // Show success notification
@@ -122,7 +122,7 @@ const EmployeesPage: React.FC = () => {
 
   const activateEmployeeMutation = useMutation({
     mutationFn: usersAPI.activateEmployee,
-    onSuccess: (response, employeeId) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       
       // Show success notification
@@ -144,7 +144,7 @@ const EmployeesPage: React.FC = () => {
 
   const deleteEmployeeMutation = useMutation({
     mutationFn: usersAPI.deleteEmployee,
-    onSuccess: (response, employeeId) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       setDeleteConfirm({ show: false, employee: null });
       
