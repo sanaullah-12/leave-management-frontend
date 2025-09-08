@@ -43,7 +43,7 @@ const VerifyInvitationPage: React.FC = () => {
   useEffect(() => {
     const fetchInvitationDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/auth/invitation/${token}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/auth/invitation/${token}`);
         setInvitation(response.data.user);
       } catch (error: any) {
         setError(error.response?.data?.message || 'Invalid invitation link');
@@ -106,7 +106,7 @@ const VerifyInvitationPage: React.FC = () => {
     setError('');
 
     try {
-      const response = await axios.post(`http://localhost:5000/api/auth/verify-invitation/${token}`, {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/verify-invitation/${token}`, {
         password: data.password
       });
 

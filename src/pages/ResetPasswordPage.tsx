@@ -44,7 +44,7 @@ const ResetPasswordPage: React.FC = () => {
   useEffect(() => {
     const validateToken = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/auth/reset-password/${token}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/auth/reset-password/${token}`);
         setTokenValidation(response.data);
       } catch (error: any) {
         setError(error.response?.data?.message || 'Invalid or expired reset token');
@@ -64,7 +64,7 @@ const ResetPasswordPage: React.FC = () => {
     setError('');
 
     try {
-      await axios.post(`http://localhost:5000/api/auth/reset-password/${token}`, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/auth/reset-password/${token}`, {
         password: data.password
       });
       setSuccess(true);

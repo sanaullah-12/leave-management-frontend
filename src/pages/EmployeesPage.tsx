@@ -71,7 +71,7 @@ const EmployeesPage: React.FC = () => {
 
   const inviteAdminMutation = useMutation({
     mutationFn: (data: { name: string; email: string; department?: string; position?: string }) =>
-      axios.post('http://localhost:5000/api/auth/invite-admin', data, {
+      axios.post(`${import.meta.env.VITE_API_URL}/auth/invite-admin`, data, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }

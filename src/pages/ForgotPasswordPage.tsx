@@ -25,7 +25,7 @@ const ForgotPasswordPage: React.FC = () => {
     setError('');
 
     try {
-      await axios.post('http://localhost:5000/api/auth/forgot-password', data);
+      await axios.post(`${import.meta.env.VITE_API_URL}/auth/forgot-password`, data);
       setSuccess(true);
     } catch (error: any) {
       setError(error.response?.data?.message || 'Failed to send reset email');
