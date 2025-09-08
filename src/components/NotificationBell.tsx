@@ -67,7 +67,7 @@ const NotificationBell: React.FC = () => {
       {/* Bell Icon with Badge */}
       <button
         onClick={toggleDropdown}
-        className="relative p-2 text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+        className="notification-bell relative p-2 text-gray-600 dark:text-gray-300 transition-colors"
       >
         <BellIcon className={`h-6 w-6 ${unreadCount > 0 ? 'notification-bell-blink' : ''}`} />
         
@@ -86,7 +86,7 @@ const NotificationBell: React.FC = () => {
 
       {/* Dropdown Panel */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-lg shadow-lg border z-50"
+        <div className="dropdown-menu absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-lg shadow-lg border z-50"
              style={{ 
                backgroundColor: 'var(--surface)',
                borderColor: 'var(--border-primary)'
@@ -125,7 +125,7 @@ const NotificationBell: React.FC = () => {
                 {allNotifications.slice(0, 10).map((notification) => (
                   <div
                     key={notification._id}
-                    className={`px-4 py-3 border-b transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 ${
+                    className={`notification-item px-4 py-3 border-b transition-colors cursor-pointer ${
                       !notification.read ? 'bg-blue-50 dark:bg-blue-900/20' : ''
                     }`}
                     style={{ borderColor: 'var(--border-primary)' }}

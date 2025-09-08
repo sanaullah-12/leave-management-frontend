@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { Navigate, Outlet, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useTheme } from "../context/ThemeContext";
 import Avatar from "./Avatar";
-import DarkModeToggle from "./DarkModeToggle";
 import NotificationBell from "./NotificationBell";
 import {
   HomeIcon,
@@ -15,17 +13,15 @@ import {
   XMarkIcon,
   BellIcon,
   CogIcon,
-  SunIcon,
-  MoonIcon,
   ClipboardDocumentListIcon,
   DocumentChartBarIcon,
+  SwatchIcon,
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 import Companylogo from "../assets/companylogo.png";
 
 const Layout: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -52,6 +48,7 @@ const Layout: React.FC = () => {
           { name: "Analytics", href: "/analytics", icon: ChartBarIcon },
         ]
       : []),
+    { name: "Theme", href: "/theme", icon: SwatchIcon },
   ];
 
   const isActive = (path: string) => {
@@ -82,7 +79,7 @@ const Layout: React.FC = () => {
       >
         {/* Logo */}
         <div
-          className="h-16 flex items-center justify-between px-6 bg-gradient-to-r from-primary-600 to-primary-700"
+          className="sidebar-logo-area h-16 flex items-center justify-between px-6"
           style={{ borderBottom: "1px solid var(--border-color)" }}
         >
           {/* <span className="  font-bold text-white">Leave Manager 23</span> */}
@@ -98,7 +95,7 @@ const Layout: React.FC = () => {
 
         {/* User Profile Section */}
         <div
-          className="p-6"
+          className="profile-background p-6"
           style={{ borderBottom: "1px solid var(--border-color)" }}
         >
           <div className="flex items-center space-x-3">
@@ -132,7 +129,7 @@ const Layout: React.FC = () => {
                 to={item.href}
                 onClick={() => setSidebarOpen(false)}
                 className={`nav-item ${
-                  isActive(item.href) ? "nav-item-active" : ""
+                  isActive(item.href) ? "active" : ""
                 }`}
               >
                 <item.icon className="nav-icon" />
@@ -156,17 +153,6 @@ const Layout: React.FC = () => {
               <CogIcon className="nav-icon" />
               <span className="nav-text">Settings</span>
             </Link>
-
-            <button onClick={toggleTheme} className="nav-item w-full text-left">
-              {isDark ? (
-                <SunIcon className="nav-icon" />
-              ) : (
-                <MoonIcon className="nav-icon" />
-              )}
-              <span className="nav-text">
-                {isDark ? "Light Mode" : "Dark Mode"}
-              </span>
-            </button>
           </div>
         </nav>
       </div>
@@ -195,7 +181,6 @@ const Layout: React.FC = () => {
         </h1>
 
         <div className="flex items-center space-x-3">
-          <DarkModeToggle />
           <NotificationBell />
           <button
             onClick={logout}
@@ -234,7 +219,6 @@ const Layout: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-4">
-          <DarkModeToggle />
           <NotificationBell />
 
           <div
@@ -244,7 +228,7 @@ const Layout: React.FC = () => {
 
           <Link
             to="/profile"
-            className="flex items-center space-x-3 p-2 rounded-lg transition-all group hover:bg-opacity-10 hover:bg-gray-500"
+            className="flex items-center space-x-3 p-2 rounded-lg transition-all group hover:bg-primary-50 dark:hover:bg-primary-900/30"
           >
             <Avatar src={user?.profilePicture} name={user?.name} size="sm" />
             <span
@@ -257,7 +241,7 @@ const Layout: React.FC = () => {
 
           <button
             onClick={logout}
-            className="p-2 rounded-lg transition-all hover:bg-opacity-10 hover:bg-gray-500"
+            className="p-2 rounded-lg transition-all hover:bg-primary-50 dark:hover:bg-primary-900/30"
             style={{ color: "var(--text-secondary)" }}
             title="Logout"
           >

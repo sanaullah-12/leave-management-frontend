@@ -563,7 +563,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
               {filteredRequests.map((leave: any) => (
                 <div 
                   key={leave._id} 
-                  className="flex items-start space-x-4 p-4 rounded-lg border border-opacity-50 hover:bg-opacity-5 hover:bg-gray-500 transition-all"
+                  className="flex items-start space-x-4 p-4 rounded-lg border border-opacity-50 hover:bg-primary-50/30 dark:hover:bg-primary-900/20 transition-all"
                   style={{ borderColor: 'var(--border-color)' }}
                 >
                   {/* Status Icon */}
@@ -633,7 +633,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
 
                   {/* Action */}
                   <div className="flex-shrink-0">
-                    <button className="p-2 rounded-lg hover:bg-opacity-10 hover:bg-gray-500 transition-all">
+                    <button className="p-2 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-all">
                       <EyeIcon className="h-4 w-4" style={{ color: 'var(--text-tertiary)' }} />
                     </button>
                   </div>

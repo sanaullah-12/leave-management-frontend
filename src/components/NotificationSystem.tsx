@@ -151,7 +151,7 @@ const NotificationContainer: React.FC = () => {
             <div className="ml-4 flex-shrink-0">
               <button
                 onClick={() => removeNotification(notification.id)}
-                className="inline-flex text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="inline-flex text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
               >
                 <XMarkIcon className="h-4 w-4" />
               </button>

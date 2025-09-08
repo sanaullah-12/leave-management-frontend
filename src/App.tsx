@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { NotificationProvider } from './components/NotificationSystem';
+import './styles/themes.css';
 import Layout from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -17,6 +18,7 @@ import MyLeaveActivityPage from './pages/MyLeaveActivityPage';
 import ProfilePage from './pages/ProfilePage';
 import VerifyInvitationPage from './pages/VerifyInvitationPage';
 import ReportsPage from './pages/ReportsPage';
+import ThemePage from './pages/ThemePage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,6 +53,7 @@ const App: React.FC = () => {
                     <Route path="my-leave-activity" element={<MyLeaveActivityPage />} />
                     <Route path="reports" element={<ReportsPage />} />
                     <Route path="profile" element={<ProfilePage />} />
+                    <Route path="theme" element={<ThemePage />} />
                   </Route>
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

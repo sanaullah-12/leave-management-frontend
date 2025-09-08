@@ -12,7 +12,7 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
   EyeIcon,
-  EyeSlashIcon
+  EyeSlashIcon,
 } from '@heroicons/react/24/outline';
 import '../styles/design-system.css';
 
@@ -531,6 +531,7 @@ const ProfilePage: React.FC = () => {
               </form>
             </div>
           )}
+
           </div>
         </div>
       </div>

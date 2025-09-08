@@ -61,24 +61,9 @@ const Avatar: React.FC<AvatarProps> = ({
       .substring(0, 2);
   };
 
-  const getGradientFromName = (name: string) => {
-    const colors = [
-      'from-blue-500 to-blue-600',
-      'from-purple-500 to-purple-600',
-      'from-green-500 to-green-600',
-      'from-yellow-500 to-yellow-600',
-      'from-red-500 to-red-600',
-      'from-indigo-500 to-indigo-600',
-      'from-pink-500 to-pink-600',
-      'from-teal-500 to-teal-600'
-    ];
-    
-    const hash = name.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
-      return a & a;
-    }, 0);
-    
-    return colors[Math.abs(hash) % colors.length];
+  const getBackgroundClass = (name: string) => {
+    // Use theme-aware background color instead of random colors
+    return 'user-initials-circle';
   };
 
   const baseClasses = `
@@ -108,7 +93,7 @@ const Avatar: React.FC<AvatarProps> = ({
       }}
     />
   ) : name ? (
-    <div className={`w-full h-full rounded-full bg-gradient-to-br ${getGradientFromName(name)} text-white font-semibold flex items-center justify-center`}>
+    <div className={`w-full h-full rounded-full ${getBackgroundClass(name)} text-white font-semibold flex items-center justify-center`}>
       {getInitials(name)}
     </div>
   ) : (
@@ -121,7 +106,7 @@ const Avatar: React.FC<AvatarProps> = ({
     <div className={baseClasses} onClick={onClick}>
       {content}
       {showUploadIcon && (
-        <div className="absolute -bottom-1 -right-1 bg-primary-600 rounded-full p-1 shadow-lg">
+        <div className="absolute -bottom-1 -right-1 profile-icon rounded-full p-1 shadow-lg">
           <CameraIcon className={`${uploadIconSizes[size]} text-white`} />
         </div>
       )}
