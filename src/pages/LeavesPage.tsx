@@ -807,12 +807,11 @@ const LeavesPage: React.FC = () => {
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
               placeholder="Enter rejection reason..."
-              className="w-full p-3 border rounded-md resize-none focus:outline-none focus:ring-2"
+              className="w-full p-3 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
               style={{ 
                 backgroundColor: 'var(--surface-secondary)', 
                 borderColor: 'var(--border-primary)',
-                color: 'var(--text-primary)',
-                '--tw-ring-color': 'var(--primary-color)'
+                color: 'var(--text-primary)'
               }}
               rows={4}
               maxLength={500}
