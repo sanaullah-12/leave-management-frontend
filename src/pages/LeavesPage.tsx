@@ -790,7 +790,13 @@ const LeavesPage: React.FC = () => {
       {/* Rejection Reason Popup */}
       {showRejectionPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4" style={{ backgroundColor: 'var(--surface-primary)' }}>
+          <div 
+            className="rounded-lg p-6 w-full max-w-md mx-4 border shadow-lg" 
+            style={{ 
+              backgroundColor: 'var(--surface-primary)',
+              borderColor: 'var(--border-primary)'
+            }}
+          >
             <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
               Rejection Reason
             </h3>
@@ -801,11 +807,12 @@ const LeavesPage: React.FC = () => {
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
               placeholder="Enter rejection reason..."
-              className="w-full p-3 border rounded-md resize-none"
+              className="w-full p-3 border rounded-md resize-none focus:outline-none focus:ring-2"
               style={{ 
                 backgroundColor: 'var(--surface-secondary)', 
                 borderColor: 'var(--border-primary)',
-                color: 'var(--text-primary)'
+                color: 'var(--text-primary)',
+                '--tw-ring-color': 'var(--primary-color)'
               }}
               rows={4}
               maxLength={500}
