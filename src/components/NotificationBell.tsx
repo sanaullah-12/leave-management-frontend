@@ -3,7 +3,7 @@ import { BellIcon } from '@heroicons/react/24/outline';
 import { useNotificationPolling } from '../hooks/useNotificationPolling';
 
 const NotificationBell: React.FC = () => {
-  const { allNotifications, unreadCount, markAsRead, markAllAsRead } = useNotificationPolling();
+  const { allNotifications, unreadCount, markAsRead, markAllAsRead, refetchAllNotifications } = useNotificationPolling();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -21,9 +21,14 @@ const NotificationBell: React.FC = () => {
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
-    if (!isOpen && unreadCount > 0) {
-      // Mark all as read when opening the dropdown
-      setTimeout(() => markAllAsRead(), 500);
+    if (!isOpen) {
+      // Fetch latest notifications when opening the dropdown
+      refetchAllNotifications();
+      
+      if (unreadCount > 0) {
+        // Mark all as read when opening the dropdown
+        setTimeout(() => markAllAsRead(), 500);
+      }
     }
   };
 

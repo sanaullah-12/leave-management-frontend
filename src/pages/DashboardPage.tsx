@@ -22,26 +22,29 @@ const DashboardPage: React.FC = () => {
     queryKey: ["dashboard-stats"],
     queryFn: () => leavesAPI.getDashboardStats(),
     enabled: user?.role === "admin",
-    refetchInterval: 45 * 1000, // Refetch every 45 seconds
-    refetchIntervalInBackground: true, // Continue refetching in background
-    refetchOnWindowFocus: true, // Refetch when user comes back to the page
+    refetchInterval: false, // Disabled auto-refresh
+    refetchIntervalInBackground: false, // Disabled background refresh
+    refetchOnWindowFocus: false, // Disabled window focus refresh
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   });
 
   const { data: leaveBalance, isLoading: balanceLoading } = useQuery({
     queryKey: ["leave-balance"],
     queryFn: () => leavesAPI.getLeaveBalance(),
     enabled: user?.role === "employee",
-    refetchInterval: 60 * 1000, // Refetch every 60 seconds
-    refetchIntervalInBackground: true, // Continue refetching in background
-    refetchOnWindowFocus: true, // Refetch when user comes back to the page
+    refetchInterval: false, // Disabled auto-refresh
+    refetchIntervalInBackground: false, // Disabled background refresh
+    refetchOnWindowFocus: false, // Disabled window focus refresh
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   });
 
   const { data: recentLeaves, isLoading: leavesLoading } = useQuery({
     queryKey: ["recent-leaves"],
     queryFn: () => leavesAPI.getLeaves(1, 5),
-    refetchInterval: 30 * 1000, // Refetch every 30 seconds
-    refetchIntervalInBackground: true, // Continue refetching in background
-    refetchOnWindowFocus: true, // Refetch when user comes back to the page
+    refetchInterval: false, // Disabled auto-refresh
+    refetchIntervalInBackground: false, // Disabled background refresh
+    refetchOnWindowFocus: false, // Disabled window focus refresh
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   });
 
   if (statsLoading && user?.role === "admin") {

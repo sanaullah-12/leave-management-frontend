@@ -34,20 +34,20 @@ export const useNotificationPolling = () => {
   const queryClient = useQueryClient();
   const { addNotification } = useNotifications();
 
-  // Poll for unread notifications every 10 seconds
+  // Poll for unread notifications every 60 seconds (reduced from 10 seconds)
   const { data, isLoading, error } = useQuery<NotificationResponse>({
     queryKey: ['notifications', 'polling'],
     queryFn: async () => {
       const response = await notificationsAPI.getNotifications(1, 50, true);
       return response.data;
     },
-    refetchInterval: 10 * 1000, // Poll every 10 seconds
-    refetchIntervalInBackground: true, // Continue polling in background
-    refetchOnWindowFocus: true, // Refetch when user comes back to tab
-    staleTime: 5 * 1000, // Consider data stale after 5 seconds
+    refetchInterval: 60 * 1000, // Poll every 60 seconds (reduced frequency)
+    refetchIntervalInBackground: false, // Don't poll in background to save resources
+    refetchOnWindowFocus: true, // Only refetch when user comes back to tab
+    staleTime: 30 * 1000, // Consider data stale after 30 seconds (increased from 5)
   });
 
-  // Get all notifications for the bell dropdown
+  // Get all notifications for the bell dropdown (only fetch on demand)
   const { 
     data: allNotificationsData, 
     isLoading: allNotificationsLoading,
@@ -58,8 +58,10 @@ export const useNotificationPolling = () => {
       const response = await notificationsAPI.getNotifications(1, 20, false);
       return response.data;
     },
-    refetchInterval: 30 * 1000, // Refresh all notifications every 30 seconds
-    refetchIntervalInBackground: true,
+    refetchInterval: false, // Disable automatic polling - only fetch on demand
+    refetchIntervalInBackground: false, // Don't poll in background
+    refetchOnWindowFocus: false, // Don't auto-refetch on window focus
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   });
 
   // Process new notifications and show them in the UI

@@ -28,9 +28,10 @@ const LeavesPage: React.FC = () => {
   const { data: leavesData, isLoading, refetch } = useQuery({
     queryKey: ["leaves", selectedStatus],
     queryFn: () => leavesAPI.getLeaves(1, 20, selectedStatus),
-    refetchInterval: 30 * 1000, // Refetch every 30 seconds for real-time updates
-    refetchIntervalInBackground: true, // Continue refetching in background
-    refetchOnWindowFocus: true, // Refetch when user comes back to the page
+    refetchInterval: false, // Disabled auto-refresh - only manual refresh
+    refetchIntervalInBackground: false, // Disabled background refresh
+    refetchOnWindowFocus: false, // Only refetch on manual action
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   });
 
   const handleRefresh = () => {
