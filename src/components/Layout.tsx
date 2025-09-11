@@ -81,9 +81,7 @@ const Layout: React.FC = () => {
           className="sidebar-logo-area h-16 flex items-center justify-between px-6"
           style={{ borderBottom: "1px solid var(--border-color)" }}
         >
-          {/* <span className="  font-bold text-white">Leave Manager 23</span> */}
-          <img src={Companylogo} alt="img" className="h-6 w-40  " />
-          {/* <h1 className="text-xl font-bold text-white">Leave Manager 23</h1> */}
+          <img src={Companylogo} alt="img" className="h-6 w-40" />
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden text-white hover:text-gray-200 transition-colors"
@@ -127,9 +125,7 @@ const Layout: React.FC = () => {
                 key={item.name}
                 to={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`nav-item ${
-                  isActive(item.href) ? "active" : ""
-                }`}
+                className={`nav-item ${isActive(item.href) ? "active" : ""}`}
               >
                 <item.icon className="nav-icon" />
                 <span className="nav-text">{item.name}</span>
@@ -146,7 +142,7 @@ const Layout: React.FC = () => {
               to="/profile"
               onClick={() => setSidebarOpen(false)}
               className={`nav-item ${
-                location.pathname === "/profile" ? "nav-item-active" : ""
+                location.pathname === "/profile" ? "active" : ""
               }`}
             >
               <CogIcon className="nav-icon" />
@@ -176,7 +172,7 @@ const Layout: React.FC = () => {
           className="text-lg font-semibold"
           style={{ color: "var(--text-primary)" }}
         >
-          Leave Manager
+          Comrex Leave Manager
         </h1>
 
         <div className="flex items-center space-x-3">

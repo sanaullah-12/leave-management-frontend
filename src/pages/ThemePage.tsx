@@ -1,6 +1,5 @@
 import React from "react";
 import ThemeSelector from "../components/ThemeSelector";
-import ThemeDemo from "../components/ThemeDemo";
 import { SwatchIcon } from "@heroicons/react/24/outline";
 
 const ThemePage: React.FC = () => {
@@ -82,9 +81,7 @@ const ThemePage: React.FC = () => {
       </div>
 
       {/* Theme Demo Section */}
-      <div className="max-w-4xl">
-        <ThemeDemo />
-      </div>
+      <div className="max-w-4xl">{/* <ThemeDemo /> */}</div>
     </div>
   );
 };

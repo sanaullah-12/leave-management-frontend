@@ -159,7 +159,7 @@ const ReportsPage: React.FC = () => {
   const leaveBalance = leaveBalanceData?.data?.balance || {};
 
   return (
-    <div className="min-h-screen bg-surface transition-colors duration-300  dark:bg-[#1a1a1a]">
+    <div className="min-h-screen bg-gradient-to-br rounded-3xl from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 px-4 sm:px-6 lg:px-8 py-6">
       <div className="space-y-6 fade-in">
         {/* Header */}
         <div className="flex justify-between items-center">
@@ -203,7 +203,7 @@ const ReportsPage: React.FC = () => {
         {/* Report Content */}
         <div
           id="report-content"
-          className="space-y-6 text-primary bg-surface dark:bg-[#1a1a1a] "
+          className="space-y-6 text-primary bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700"
         >
           {/* Report Header */}
           <div className="card-elevated">
@@ -413,7 +413,7 @@ const ReportsPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="mt-6 p-4 rounded-lg border-2 border-dashed border-color bg-surface dark:bg-[#1a1a1a]">
+              <div className="mt-6 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
                 <div className="flex justify-between items-center">
                   <div className="text-center flex-1">
                     <div className="text-3xl font-bold text-primary">

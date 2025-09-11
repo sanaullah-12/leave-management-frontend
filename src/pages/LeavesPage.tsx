@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import { useSearchParams } from "react-router-dom";
 import { leavesAPI } from "../services/api";
 import { useNotifications } from "../components/NotificationSystem";
 // Inline type definition
@@ -12,18 +13,83 @@ interface LeaveRequest {
   reason: string;
 }
 import LoadingSpinner from "../components/LoadingSpinner";
-import { PlusIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import { 
+  PlusIcon, 
+  ArrowPathIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  ClockIcon
+} from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 
 const LeavesPage: React.FC = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { addNotification } = useNotifications();
+  const [searchParams] = useSearchParams();
   const [showForm, setShowForm] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [showRejectionPopup, setShowRejectionPopup] = useState(false);
   const [selectedLeaveId, setSelectedLeaveId] = useState<string>("");
   const [rejectionReason, setRejectionReason] = useState("");
+
+  // Initialize selectedStatus from URL parameters on mount
+  useEffect(() => {
+    const statusFromUrl = searchParams.get('status');
+    if (statusFromUrl) {
+      setSelectedStatus(statusFromUrl);
+    }
+  }, [searchParams]);
+
+  // Function to get badge colors for leave types
+  const getLeaveTypeBadge = (leaveType: string) => {
+    switch (leaveType.toLowerCase()) {
+      case 'annual':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200';
+      case 'sick':
+        return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200';
+      case 'casual':
+        return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200';
+      case 'maternity':
+        return 'bg-pink-100 text-pink-800 dark:bg-pink-800 dark:text-pink-200';
+      case 'paternity':
+        return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-800 dark:text-indigo-200';
+      case 'emergency':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-200';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+    }
+  };
+
+  // Function to get status icons and colors
+  const getStatusDisplay = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'approved':
+        return {
+          icon: <CheckCircleIcon className="w-4 h-4" />,
+          className: 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200',
+          text: 'Approved'
+        };
+      case 'rejected':
+        return {
+          icon: <XCircleIcon className="w-4 h-4" />,
+          className: 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200',
+          text: 'Rejected'
+        };
+      case 'pending':
+        return {
+          icon: <ClockIcon className="w-4 h-4" />,
+          className: 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-200',
+          text: 'Pending'
+        };
+      default:
+        return {
+          icon: <ClockIcon className="w-4 h-4" />,
+          className: 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+          text: status
+        };
+    }
+  };
 
   const { data: leavesData, isLoading, refetch } = useQuery({
     queryKey: ["leaves", selectedStatus],
@@ -517,14 +583,14 @@ const LeavesPage: React.FC = () => {
       )}
 
       {/* Leave Requests Section */}
-      <div className="card">
+      <div className="mt-10 bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
         {leaves.length > 0 ? (
           <>
             {/* Desktop Table View - Hidden on mobile */}
-            <div className="hidden lg:block">
-              <div className="overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="" style={{ backgroundColor: 'var(--surface-hover)' }}>
+            <div className="hidden lg:block p-8">
+              <div className="overflow-hidden rounded-xl border border-gray-200/30 dark:border-gray-700/30">
+                <table className="min-w-full divide-y divide-gray-200/30 dark:divide-gray-700/30">
+                  <thead className="bg-gradient-to-r from-gray-50/80 to-gray-100/50 dark:from-gray-800/60 dark:to-gray-900/30">
                     <tr>
                       {user?.role === "admin" && (
                         <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
@@ -553,9 +619,9 @@ const LeavesPage: React.FC = () => {
                       )}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700" style={{ backgroundColor: 'var(--surface)' }}>
+                  <tbody className="bg-white/50 dark:bg-gray-800/20 divide-y divide-gray-200/20 dark:divide-gray-700/20">
                     {leaves.map((leave: any) => (
-                      <tr key={leave._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <tr key={leave._id} className="group hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/30 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/10 transition-all duration-300 ease-in-out hover:shadow-md rounded-lg cursor-pointer">
                         {user?.role === "admin" && (
                           <td className="px-4 py-4 whitespace-nowrap">
                             <div>
@@ -578,7 +644,7 @@ const LeavesPage: React.FC = () => {
                           </td>
                         )}
                         <td className="px-4 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200 capitalize">
+                          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium capitalize ${getLeaveTypeBadge(leave.leaveType)}`}>
                             {leave.leaveType}
                           </span>
                         </td>
@@ -605,16 +671,11 @@ const LeavesPage: React.FC = () => {
                         </td>
                         <td className="px-4 py-4">
                           <div className="flex flex-col space-y-1">
-                            <span
-                              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full w-fit ${
-                                leave.status === "approved"
-                                  ? "badge-success"
-                                  : leave.status === "rejected"
-                                  ? "badge-error"
-                                  : "badge-warning"
-                              }`}
-                            >
-                              {leave.status}
+                            <span className={getStatusDisplay(leave.status).className}>
+                              <span className="mr-2">
+                                {getStatusDisplay(leave.status).icon}
+                              </span>
+                              {getStatusDisplay(leave.status).text}
                             </span>
                             {leave.status === "rejected" && leave.reviewComments && (
                               <div className="text-xs p-2 rounded border-l-4 border-red-400 bg-red-50 dark:bg-red-900/20 max-w-xs">
@@ -660,36 +721,27 @@ const LeavesPage: React.FC = () => {
             </div>
 
             {/* Mobile Card View - Shown on mobile and tablet */}
-            <div className="lg:hidden space-y-4">
+            <div className="lg:hidden space-y-4 p-8">
               {leaves.map((leave: any) => (
-                <div key={leave._id} className="rounded-lg p-4 border transition-all hover:shadow-md" 
-                     style={{ 
-                       backgroundColor: 'var(--surface-hover)',
-                       borderColor: 'var(--border-primary)'
-                     }}>
+                <div key={leave._id} className="rounded-xl p-6 border border-gray-200/30 dark:border-gray-700/30 bg-gradient-to-br from-white/80 to-gray-50/40 dark:from-gray-800/40 dark:to-gray-900/20 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02] cursor-pointer">
                   
                   {/* Header with Type and Status */}
-                  <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200 capitalize">
+                      <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium capitalize ${getLeaveTypeBadge(leave.leaveType)}`}>
                         {leave.leaveType}
                       </span>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
+                      <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
                         {leave.totalDays} {leave.totalDays === 1 ? 'day' : 'days'}
                       </span>
                     </div>
                     
                     <div className="flex flex-col space-y-2">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full w-fit ${
-                          leave.status === "approved"
-                            ? "badge-success"
-                            : leave.status === "rejected"
-                            ? "badge-error"
-                            : "badge-warning"
-                        }`}
-                      >
-                        {leave.status}
+                      <span className={getStatusDisplay(leave.status).className}>
+                        <span className="mr-2">
+                          {getStatusDisplay(leave.status).icon}
+                        </span>
+                        {getStatusDisplay(leave.status).text}
                       </span>
                       {leave.status === "rejected" && leave.reviewComments && (
                         <div className="text-xs p-3 rounded-md border-l-4 border-red-400 bg-red-50 dark:bg-red-900/20">
@@ -780,9 +832,18 @@ const LeavesPage: React.FC = () => {
             </div>
           </>
         ) : (
-          <div className="text-center py-8">
-            <p style={{ color: "var(--text-secondary)" }}>
+          <div className="text-center py-16 px-8">
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-2xl flex items-center justify-center">
+              <ClockIcon
+                className="w-10 h-10"
+                style={{ color: "var(--text-tertiary)" }}
+              />
+            </div>
+            <p className="text-lg font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
               No leave requests found
+            </p>
+            <p className="text-sm max-w-md mx-auto" style={{ color: "var(--text-tertiary)" }}>
+              {selectedStatus ? `No ${selectedStatus} leave requests found` : 'Submit your first leave request to see it here'}
             </p>
           </div>
         )}

@@ -2,19 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
-import { usersAPI, authAPI } from '../services/api';
+import { usersAPI } from '../services/api';
 import { useNotifications } from '../components/NotificationSystem';
-import axios from 'axios';
-// Using inline type instead of import to resolve module issue
-type InviteEmployeeData = {
-  name: string;
-  email: string;
-  department: string;
-  position: string;
-  joinDate: string;
-};
 import LoadingSpinner from '../components/LoadingSpinner';
+import EmployeeInviteModal from '../components/EmployeeInviteModal';
+import AdminInviteModal from '../components/AdminInviteModal';
 import { PlusIcon, UserIcon, TrashIcon, ExclamationTriangleIcon, MagnifyingGlassIcon, DocumentChartBarIcon } from '@heroicons/react/24/outline';
 import '../styles/design-system.css';
 
@@ -23,8 +15,8 @@ const EmployeesPage: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { addNotification } = useNotifications();
-  const [showInviteForm, setShowInviteForm] = useState(false);
-  const [showInviteAdminForm, setShowInviteAdminForm] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showAdminInviteModal, setShowAdminInviteModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; employee: any }>({
     show: false,
     employee: null
@@ -40,63 +32,13 @@ const EmployeesPage: React.FC = () => {
     queryKey: ['employees'],
     queryFn: () => usersAPI.getEmployees(),
     enabled: user?.role === 'admin',
-    refetchInterval: 60 * 1000, // Refetch every 60 seconds
-    refetchIntervalInBackground: true, // Continue refetching in background
-    refetchOnWindowFocus: true, // Refetch when user comes back to the page
+    refetchInterval: false, // Disabled auto-refresh
+    refetchIntervalInBackground: false, // Disabled background refresh
+    refetchOnWindowFocus: false, // Disabled window focus refresh
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   });
 
-  const inviteEmployeeMutation = useMutation({
-    mutationFn: authAPI.inviteEmployee,
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
-      setShowInviteForm(false);
-      reset();
-      
-      // Show success notification
-      addNotification({
-        type: 'success',
-        title: 'Employee Invited',
-        message: `Invitation sent to ${variables.email} successfully.`,
-      });
-    },
-    onError: (error: any) => {
-      console.error('Failed to invite employee:', error);
-      addNotification({
-        type: 'error',
-        title: 'Invitation Failed',
-        message: error?.response?.data?.message || 'Failed to send employee invitation. Please try again.',
-      });
-    },
-  });
-
-  const inviteAdminMutation = useMutation({
-    mutationFn: (data: { name: string; email: string; department?: string; position?: string }) =>
-      axios.post(`${import.meta.env.VITE_API_URL}/auth/invite-admin`, data, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      }),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
-      setShowInviteAdminForm(false);
-      adminReset();
-      
-      // Show success notification
-      addNotification({
-        type: 'success',
-        title: 'Admin Invited',
-        message: `Admin invitation sent to ${variables.email} successfully.`,
-      });
-    },
-    onError: (error: any) => {
-      console.error('Failed to invite admin:', error);
-      addNotification({
-        type: 'error',
-        title: 'Admin Invitation Failed',
-        message: error?.response?.data?.message || 'Failed to send admin invitation. Please try again.',
-      });
-    },
-  });
+  // Admin invite mutation now handled in modal
 
   const deactivateEmployeeMutation = useMutation({
     mutationFn: usersAPI.deactivateEmployee,
@@ -165,19 +107,7 @@ const EmployeesPage: React.FC = () => {
     },
   });
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<InviteEmployeeData>();
-
-  const {
-    register: adminRegister,
-    handleSubmit: adminHandleSubmit,
-    reset: adminReset,
-    formState: { errors: adminErrors },
-  } = useForm<{ name: string; email: string; department?: string; position?: string }>();
+  // Admin form hooks now handled in modal
 
   if (user?.role !== 'admin') {
     return (
@@ -187,21 +117,7 @@ const EmployeesPage: React.FC = () => {
     );
   }
 
-  const onSubmit = async (data: InviteEmployeeData) => {
-    try {
-      await inviteEmployeeMutation.mutateAsync(data);
-    } catch (error: any) {
-      console.error('Failed to invite employee:', error);
-    }
-  };
-
-  const onAdminSubmit = async (data: { name: string; email: string; department?: string; position?: string }) => {
-    try {
-      await inviteAdminMutation.mutateAsync(data);
-    } catch (error: any) {
-      console.error('Failed to invite admin:', error);
-    }
-  };
+  // Admin submit now handled in modal
 
   const handleToggleStatus = async (employeeId: string, isActive: boolean) => {
     try {
@@ -286,14 +202,14 @@ const EmployeesPage: React.FC = () => {
         
         <div className="flex space-x-3">
           <button
-            onClick={() => setShowInviteForm(true)}
+            onClick={() => setShowInviteModal(true)}
             className="btn-primary inline-flex items-center"
           >
             <PlusIcon className="h-5 w-5 mr-2" />
             Invite Employee
           </button>
           <button
-            onClick={() => setShowInviteAdminForm(true)}
+            onClick={() => setShowAdminInviteModal(true)}
             className="btn-secondary inline-flex items-center"
           >
             <PlusIcon className="h-5 w-5 mr-2" />
@@ -328,28 +244,26 @@ const EmployeesPage: React.FC = () => {
             {/* Date From */}
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-                Report Date From
+                Start Date (for reports)
               </label>
               <input
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className="input-field w-full"
-                placeholder="Start date for report"
+                className="input-field w-full date-input"
               />
             </div>
             
             {/* Date To */}
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-                Report Date To
+                End Date (for reports)
               </label>
               <input
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                className="input-field w-full"
-                placeholder="End date for report"
+                className="input-field w-full date-input"
               />
             </div>
             
@@ -389,209 +303,19 @@ const EmployeesPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Invite Employee Form */}
-      {showInviteForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="card-elevated rounded-lg p-6 w-full max-w-md mx-4">
-            <h2 className="text-lg font-medium mb-4" style={{ color: 'var(--text-primary)' }}>Invite Employee</h2>
-            
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  {...register('name', { required: 'Name is required' })}
-                  className="mt-1 input-field"
-                  placeholder="Enter employee name"
-                />
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-                )}
-              </div>
+      {/* Employee Invite Modal */}
+      <EmployeeInviteModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+      />
 
-              <div>
-                <label className="block text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Email
-                </label>
-                <input
-                  type="email"
-                  {...register('email', {
-                    required: 'Email is required',
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Invalid email address',
-                    },
-                  })}
-                  className="mt-1 input-field"
-                  placeholder="employee@company.com"
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-                )}
-              </div>
+      {/* Admin Invite Modal */}
+      <AdminInviteModal
+        isOpen={showAdminInviteModal}
+        onClose={() => setShowAdminInviteModal(false)}
+      />
 
-              <div>
-                <label className="block text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Department
-                </label>
-                <input
-                  type="text"
-                  {...register('department', { required: 'Department is required' })}
-                  className="mt-1 input-field"
-                  placeholder="e.g., Engineering, HR, Sales"
-                />
-                {errors.department && (
-                  <p className="mt-1 text-sm text-red-600">{errors.department.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Position
-                </label>
-                <input
-                  type="text"
-                  {...register('position', { required: 'Position is required' })}
-                  className="mt-1 input-field"
-                  placeholder="e.g., Software Developer, Manager"
-                />
-                {errors.position && (
-                  <p className="mt-1 text-sm text-red-600">{errors.position.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Join Date
-                </label>
-                <input
-                  type="date"
-                  {...register('joinDate', { required: 'Join date is required' })}
-                  className="mt-1 input-field"
-                />
-                {errors.joinDate && (
-                  <p className="mt-1 text-sm text-red-600">{errors.joinDate.message}</p>
-                )}
-              </div>
-
-              <div className="flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowInviteForm(false);
-                    reset();
-                  }}
-                  className="btn-secondary"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={inviteEmployeeMutation.isPending}
-                  className="btn-primary"
-                >
-                  {inviteEmployeeMutation.isPending ? <LoadingSpinner size="sm" /> : 'Send Invitation'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Invite Admin Form */}
-      {showInviteAdminForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="card-elevated rounded-lg p-6 w-full max-w-md mx-4">
-            <h2 className="text-lg font-medium mb-4" style={{ color: 'var(--text-primary)' }}>Invite Admin</h2>
-            
-            <form onSubmit={adminHandleSubmit(onAdminSubmit)} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  {...adminRegister('name', { required: 'Name is required' })}
-                  className="mt-1 input-field"
-                  placeholder="Enter admin name"
-                />
-                {adminErrors.name && (
-                  <p className="mt-1 text-sm text-red-600">{adminErrors.name.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Email
-                </label>
-                <input
-                  type="email"
-                  {...adminRegister('email', {
-                    required: 'Email is required',
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Invalid email address',
-                    },
-                  })}
-                  className="mt-1 input-field"
-                  placeholder="admin@company.com"
-                />
-                {adminErrors.email && (
-                  <p className="mt-1 text-sm text-red-600">{adminErrors.email.message}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Department (Optional)
-                </label>
-                <input
-                  type="text"
-                  {...adminRegister('department')}
-                  className="mt-1 input-field"
-                  placeholder="Administration"
-                  defaultValue="Administration"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Position (Optional)
-                </label>
-                <input
-                  type="text"
-                  {...adminRegister('position')}
-                  className="mt-1 input-field"
-                  placeholder="Administrator"
-                  defaultValue="Administrator"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowInviteAdminForm(false);
-                    adminReset();
-                  }}
-                  className="btn-secondary"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={inviteAdminMutation.isPending}
-                  className="btn-primary"
-                >
-                  {inviteAdminMutation.isPending ? <LoadingSpinner size="sm" /> : 'Send Invitation'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Admin invite now handled by modal */}
 
       {/* Delete Confirmation Dialog */}
       {deleteConfirm.show && (
@@ -668,14 +392,14 @@ const EmployeesPage: React.FC = () => {
       )}
 
       {/* Employees Section */}
-      <div className="card">
+      <div className="mt-10 bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-md border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
         {filteredEmployees.length > 0 ? (
           <>
             {/* Desktop Table View - Hidden on mobile */}
-            <div className="hidden lg:block">
-              <div className="overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="" style={{ backgroundColor: 'var(--surface-hover)' }}>
+            <div className="hidden lg:block p-8">
+              <div className="overflow-hidden rounded-xl border border-gray-200/30 dark:border-gray-700/30">
+                <table className="min-w-full divide-y divide-gray-200/30 dark:divide-gray-700/30">
+                  <thead className="bg-gradient-to-r from-gray-50/80 to-gray-100/50 dark:from-gray-800/60 dark:to-gray-900/30">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
                         Employee
@@ -697,9 +421,9 @@ const EmployeesPage: React.FC = () => {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700" style={{ backgroundColor: 'var(--surface)' }}>
+                  <tbody className="bg-white/50 dark:bg-gray-800/20 divide-y divide-gray-200/20 dark:divide-gray-700/20">
                     {filteredEmployees.map((employee: any) => (
-                      <tr key={employee._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <tr key={employee._id} className="group hover:bg-gradient-to-r hover:from-blue-50/40 hover:to-indigo-50/30 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/10 transition-all duration-300 ease-in-out hover:shadow-sm rounded-lg cursor-pointer">
                         <td className="px-4 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-10 w-10">
@@ -789,13 +513,9 @@ const EmployeesPage: React.FC = () => {
             </div>
 
             {/* Mobile Card View - Shown on mobile and tablet */}
-            <div className="lg:hidden space-y-4">
+            <div className="lg:hidden space-y-4 p-8">
               {filteredEmployees.map((employee: any) => (
-                <div key={employee._id} className="rounded-lg p-4 border transition-all hover:shadow-md" 
-                     style={{ 
-                       backgroundColor: 'var(--surface-hover)',
-                       borderColor: 'var(--border-primary)'
-                     }}>
+                <div key={employee._id} className="rounded-xl p-6 border border-gray-200/30 dark:border-gray-700/30 bg-gradient-to-br from-white/80 to-gray-50/40 dark:from-gray-800/40 dark:to-gray-900/20 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.01] cursor-pointer">
                   
                   {/* Employee Info Header */}
                   <div className="flex items-start justify-between mb-3">
@@ -908,11 +628,16 @@ const EmployeesPage: React.FC = () => {
             </div>
           </>
         ) : (
-          <div className="text-center py-8">
-            <UserIcon className="mx-auto h-12 w-12" style={{ color: 'var(--text-tertiary)' }} />
-            <h3 className="mt-2 text-sm font-medium" style={{ color: 'var(--text-primary)' }}>No employees</h3>
-            <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Get started by inviting your first employee.
+          <div className="text-center py-16 px-8">
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-2xl flex items-center justify-center">
+              <UserIcon className="w-10 h-10" style={{ color: 'var(--text-tertiary)' }} />
+            </div>
+            <h3 className="text-lg font-medium mb-2" style={{ color: 'var(--text-primary)' }}>No employees found</h3>
+            <p className="text-sm max-w-md mx-auto" style={{ color: 'var(--text-secondary)' }}>
+              {isSearchActive 
+                ? 'No employees match your search criteria. Try adjusting your filters.'
+                : 'Get started by inviting your first employee to the company.'
+              }
             </p>
           </div>
         )}
