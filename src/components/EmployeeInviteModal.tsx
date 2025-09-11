@@ -114,10 +114,7 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
             <input
               type="text"
               {...register("name", { required: "Full name is required" })}
-              className={`w-full px-4 py-3 rounded-lg border transition-colors 
-                focus:ring-2 focus:ring-blue-500 focus:border-transparent 
-                bg-white border-gray-300 text-gray-900
-                dark:bg-[var(--surface)] dark:border-[var(--border-primary)] dark:text-[var(--text-primary)]`}
+              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
               placeholder="Enter full name"
             />
             {errors.name && (
@@ -142,10 +139,7 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
                   message: "Invalid email address",
                 },
               })}
-              className={`w-full px-4 py-3 rounded-lg border transition-colors 
-                focus:ring-2 focus:ring-blue-500 focus:border-transparent 
-                bg-white border-gray-300 text-gray-900
-                dark:bg-[var(--surface)] dark:border-[var(--border-primary)] dark:text-[var(--text-primary)]`}
+              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
               placeholder="employee@company.com"
             />
             {errors.email && (
@@ -165,10 +159,7 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
               {...register("department", {
                 required: "Department is required",
               })}
-              className={`w-full px-4 py-3 rounded-lg border transition-colors 
-                focus:ring-2 focus:ring-blue-500 focus:border-transparent 
-                bg-white border-gray-300 text-gray-900
-                dark:bg-[var(--surface)] dark:border-[var(--border-primary)] dark:text-[var(--text-primary)]`}
+              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
             >
               <option value="">Select department</option>
               <option value="Engineering">Engineering</option>
@@ -197,12 +188,10 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
             </label>
             <select
               {...register("position", { required: "Position is required" })}
-              className={`w-full px-4 py-3 rounded-lg border transition-colors 
-                focus:ring-2 focus:ring-blue-500 focus:border-transparent 
-                bg-white border-gray-300 text-gray-900
-                dark:bg-[var(--surface)] dark:border-[var(--border-primary)] dark:text-[var(--text-primary)]`}
+              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
             >
               <option value="">Select position</option>
+              <option value="Intern">Intern</option>
               <option value="Jr.Software Engineer">Jr.Software Engineer</option>
               <option value="Sr.Software Engineer">Sr.Software Engineer</option>
               <option value="Sr.Project Manager">Sr.Project Manager</option>
@@ -230,10 +219,7 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
             <input
               type="date"
               {...register("joinDate", { required: "Join date is required" })}
-              className={`w-full px-4 py-3 rounded-lg border transition-colors 
-                focus:ring-2 focus:ring-blue-500 focus:border-transparent 
-                bg-white border-gray-300 text-gray-900
-                dark:bg-[var(--surface)] dark:border-[var(--border-primary)] dark:text-[var(--text-primary)]`}
+              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
             />
             {errors.joinDate && (
               <p className="mt-2 text-sm text-red-600 flex items-center">
@@ -253,10 +239,7 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={handleAddTag}
-              className={`w-full px-4 py-3 rounded-lg border transition-colors 
-                focus:ring-2 focus:ring-blue-500 focus:border-transparent 
-                bg-white border-gray-300 text-gray-900
-                dark:bg-[var(--surface)] dark:border-[var(--border-primary)] dark:text-[var(--text-primary)]`}
+              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
               placeholder="Add tags and press Enter"
             />
 
@@ -301,9 +284,7 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
           <button
             type="submit"
             disabled={inviteEmployeeMutation.isPending}
-            className="px-8 py-3 text-sm font-medium text-white rounded-lg transition-colors 
-              bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 
-              disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
+            className="btn-primary px-8 py-3 text-sm font-medium text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
           >
             {inviteEmployeeMutation.isPending ? (
               <>

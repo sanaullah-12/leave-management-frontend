@@ -49,10 +49,11 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
 
   // Fetch employee's leave balance - pass employeeId for specific employee
   const { data: leaveBalanceData } = useQuery({
-    queryKey: ['employee-leave-balance', employeeId],
+    queryKey: ['employee-leave-balance', employeeId, Date.now()],
     queryFn: () => leavesAPI.getLeaveBalance(isCurrentUser ? undefined : employeeId),
     enabled: true, // Always try to fetch balance data
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 0, // Always fetch fresh data
+    cacheTime: 0, // Don't cache
     retry: 1, // Only retry once on failure
     refetchInterval: false, // Disabled to prevent rate limiting
     refetchIntervalInBackground: false,
@@ -367,7 +368,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
         <div className="card">
           <div className="card-header">
             <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-              💼 Leave Balance {dateFilter && (dateFilter.dateFrom || dateFilter.dateTo) ? '(Filtered Period)' : selectedYear}
+              💼 Leave Balance {dateFilter && (dateFilter.dateFrom || dateFilter.dateTo) ? '(Filtered Period)' : ''}
             </h4>
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
               Current allocation status

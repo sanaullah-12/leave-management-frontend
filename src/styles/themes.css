@@ -2,6 +2,7 @@
 
 /* Blue Theme (Default) */
 html.theme-blue {
+  --color-primary-25: #f8faff;
   --color-primary-50: #eff6ff;
   --color-primary-100: #dbeafe;
   --color-primary-200: #bfdbfe;
@@ -12,10 +13,12 @@ html.theme-blue {
   --color-primary-700: #1d4ed8;
   --color-primary-800: #1e40af;
   --color-primary-900: #1e3a8a;
+  --color-primary-950: #172554;
 }
 
 /* Purple Theme */
 html.theme-purple {
+  --color-primary-25: #fdfdff;
   --color-primary-50: #faf5ff;
   --color-primary-100: #f3e8ff;
   --color-primary-200: #e9d5ff;
@@ -26,10 +29,12 @@ html.theme-purple {
   --color-primary-700: #7c3aed;
   --color-primary-800: #6b21a8;
   --color-primary-900: #581c87;
+  --color-primary-950: #3b0764;
 }
 
 /* Green Theme */
 html.theme-green {
+  --color-primary-25: #f7fef8;
   --color-primary-50: #f0fdf4;
   --color-primary-100: #dcfce7;
   --color-primary-200: #bbf7d0;
@@ -40,10 +45,12 @@ html.theme-green {
   --color-primary-700: #15803d;
   --color-primary-800: #166534;
   --color-primary-900: #14532d;
+  --color-primary-950: #052e16;
 }
 
 /* Custom Theme */
 html.theme-custom {
+  --color-primary-25: #f8fcff;
   --color-primary-50: #f0f9ff;
   --color-primary-100: #e0f2fe;
   --color-primary-200: #bae6fd;
@@ -54,6 +61,7 @@ html.theme-custom {
   --color-primary-700: #0369a1;
   --color-primary-800: #075985;
   --color-primary-900: #0c4a6e;
+  --color-primary-950: #082f49;
 }
 
 /* Theme-aware component styles */

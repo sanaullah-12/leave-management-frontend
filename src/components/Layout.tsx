@@ -223,7 +223,7 @@ const Layout: React.FC = () => {
 
           <Link
             to="/profile"
-            className="flex items-center space-x-3 p-2 rounded-lg transition-all group hover:bg-primary-50 dark:hover:bg-primary-900/30"
+            className="flex items-center space-x-3 p-2 rounded-lg transition-all group hover-theme"
           >
             <Avatar src={user?.profilePicture} name={user?.name} size="sm" />
             <span
@@ -236,7 +236,7 @@ const Layout: React.FC = () => {
 
           <button
             onClick={logout}
-            className="p-2 rounded-lg transition-all hover:bg-primary-50 dark:hover:bg-primary-900/30"
+            className="p-2 rounded-lg transition-all hover-theme"
             style={{ color: "var(--text-secondary)" }}
             title="Logout"
           >

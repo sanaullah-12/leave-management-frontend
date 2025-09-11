@@ -717,60 +717,52 @@ const EmployeeDetailPageReal: React.FC = () => {
 
         <div className="card-body">
           {leaveHistory.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="table">
-                <thead className="table-header">
-                  <tr>
-                    <th className="table-header-cell">Leave Type</th>
-                    <th className="table-header-cell">Duration</th>
-                    <th className="table-header-cell">Days</th>
-                    <th className="table-header-cell">Status</th>
-                    <th className="table-header-cell">Reason</th>
-                    <th className="table-header-cell">Applied</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leaveHistory.map((leave: any) => (
-                    <tr key={leave._id} className="table-row">
-                      <td className="table-cell">
-                        <span className="badge badge-gray capitalize">
-                          {leave.leaveType}
-                        </span>
-                      </td>
-                      <td className="table-cell">
-                        <div>
-                          <div className="font-medium">
-                            {formatDate(leave.startDate)}
-                          </div>
-                          <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-                            to {formatDate(leave.endDate)}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="table-cell">
-                        <span className="font-medium">
-                          {leave.totalDays || 1} days
-                        </span>
-                      </td>
-                      <td className="table-cell">
-                        <span className={getStatusBadge(leave.status)}>
-                          {leave.status.charAt(0).toUpperCase() + leave.status.slice(1)}
-                        </span>
-                      </td>
-                      <td className="table-cell max-w-xs">
-                        <div className="truncate" title={leave.reason}>
-                          {leave.reason}
-                        </div>
-                      </td>
-                      <td className="table-cell">
-                        <div className="text-sm">
-                          {formatDate(leave.createdAt || leave.startDate)}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="space-y-3">
+              {leaveHistory.map((leave: any) => (
+                <div key={leave._id} className="bg-white dark:bg-gray-800 rounded-xl p-6 table-row-hover transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700">
+                  <div className="grid grid-cols-6 gap-6 items-center">
+                    <div>
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">LEAVE TYPE</div>
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                        {leave.leaveType}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">DURATION</div>
+                      <div className="font-medium text-gray-900 dark:text-gray-100">
+                        {formatDate(leave.startDate)}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        to {formatDate(leave.endDate)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">DAYS</div>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">
+                        {leave.totalDays || 1} days
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">STATUS</div>
+                      <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${getStatusBadge(leave.status)}`}>
+                        {leave.status.charAt(0).toUpperCase() + leave.status.slice(1)}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">REASON</div>
+                      <div className="text-sm text-gray-900 dark:text-gray-100 truncate max-w-xs" title={leave.reason}>
+                        {leave.reason}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">APPLIED</div>
+                      <div className="text-sm text-gray-900 dark:text-gray-100">
+                        {formatDate(leave.createdAt || leave.startDate)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="text-center py-12">

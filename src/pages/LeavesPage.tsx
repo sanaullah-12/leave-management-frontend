@@ -621,24 +621,33 @@ const LeavesPage: React.FC = () => {
                   </thead>
                   <tbody className="bg-white/50 dark:bg-gray-800/20 divide-y divide-gray-200/20 dark:divide-gray-700/20">
                     {leaves.map((leave: any) => (
-                      <tr key={leave._id} className="group hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/30 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/10 transition-all duration-300 ease-in-out hover:shadow-md rounded-lg cursor-pointer">
+                      <tr key={leave._id} className="group table-row-hover transition-all duration-300 ease-in-out hover:shadow-md rounded-lg cursor-pointer">
                         {user?.role === "admin" && (
-                          <td className="px-4 py-4 whitespace-nowrap">
-                            <div>
-                              <div
-                                className="text-sm font-medium"
-                                style={{ color: "var(--text-primary)" }}
-                              >
+                          <td className="pl-2 pr-4 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center text-primary-600 dark:text-primary-400 text-sm font-medium">
                                 {typeof leave.employee === "object" &&
                                 leave.employee?.name
                                   ? leave.employee.name
-                                  : "Unknown"}
+                                      .split(" ")
+                                      .map((n: string) => n[0])
+                                      .join("")
+                                      .substring(0, 2)
+                                  : "U"}
                               </div>
-                              <div className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                                {typeof leave.employee === "object" &&
-                                leave.employee?.employeeId
-                                  ? leave.employee.employeeId
-                                  : "N/A"}
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium text-white">
+                                  {typeof leave.employee === "object" &&
+                                  leave.employee?.name
+                                    ? leave.employee.name
+                                    : "Unknown"}
+                                </span>
+                                <span className="text-xs text-gray-400">
+                                  {typeof leave.employee === "object" &&
+                                  leave.employee?.employeeId
+                                    ? leave.employee.employeeId
+                                    : "N/A"}
+                                </span>
                               </div>
                             </div>
                           </td>

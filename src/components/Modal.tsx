@@ -36,11 +36,7 @@ const Modal: React.FC<ModalProps> = ({
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
         <div 
-          className={`relative w-full ${sizeClasses[size]} transform rounded-2xl shadow-2xl transition-all`}
-          style={{ 
-            backgroundColor: 'var(--surface)',
-            border: '1px solid var(--border-primary)'
-          }}
+          className={`relative w-full ${sizeClasses[size]} transform rounded-2xl shadow-2xl transition-all bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700`}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">

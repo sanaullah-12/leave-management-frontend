@@ -114,15 +114,25 @@ const EmployeeDetailPage: React.FC = () => {
   const employee = employeeData?.data?.employee;
   const leaveHistory = leaveHistoryData?.data?.leaves || [];
   const leaveBalance = leaveBalanceData?.data?.balance || {
-    annual: { total: 25, used: 5, remaining: 20 },
-    sick: { total: 10, used: 2, remaining: 8 },
-    casual: { total: 5, used: 1, remaining: 4 }
+    annual: { total: 10, used: 5, remaining: 5 },
+    casual: { total: 10, used: 2, remaining: 8 },
+    sick: { total: 8, used: 1, remaining: 7 }
   };
 
   // Calculate leave statistics
   const totalAllocated = Object.values(leaveBalance).reduce((sum: number, balance: any) => sum + balance.total, 0);
   const totalUsed = Object.values(leaveBalance).reduce((sum: number, balance: any) => sum + balance.used, 0);
   const totalRemaining = totalAllocated - totalUsed;
+
+  // Calculate status counts
+  const statusCounts = leaveHistory.reduce((acc: any, leave: any) => {
+    acc[leave.status] = (acc[leave.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  const approvedCount = statusCounts.approved || 0;
+  const pendingCount = statusCounts.pending || 0;
+  const rejectedCount = statusCounts.rejected || 0;
 
   // Prepare chart data
   const pieData = [
@@ -274,47 +284,53 @@ const EmployeeDetailPage: React.FC = () => {
 
             {/* Quick Stats */}
             <div className="flex-1 w-full lg:w-auto">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="stats-card text-center hover-lift">
-                  <div className="p-4">
-                    <div className="flex items-center justify-center mb-2">
-                      <CalendarDaysIcon className="h-8 w-8 text-blue-500" />
-                    </div>
-                    <p className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
-                      {totalAllocated}
-                    </p>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      Total Allocated
-                    </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300 border border-green-200 dark:border-green-700/50">
+                  <div className="flex items-center justify-center mb-2">
+                    <span className="text-2xl">✅</span>
                   </div>
+                  <p className="text-2xl font-bold mb-1 text-green-700 dark:text-green-300">
+                    {approvedCount}
+                  </p>
+                  <p className="text-sm text-green-600 dark:text-green-400">
+                    Approved
+                  </p>
                 </div>
 
-                <div className="stats-card text-center hover-lift">
-                  <div className="p-4">
-                    <div className="flex items-center justify-center mb-2">
-                      <CheckCircleIcon className="h-8 w-8 text-red-500" />
-                    </div>
-                    <p className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
-                      {totalUsed}
-                    </p>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      Leaves Taken
-                    </p>
+                <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300 border border-amber-200 dark:border-amber-700/50">
+                  <div className="flex items-center justify-center mb-2">
+                    <span className="text-2xl">⏳</span>
                   </div>
+                  <p className="text-2xl font-bold mb-1 text-amber-700 dark:text-amber-300">
+                    {pendingCount}
+                  </p>
+                  <p className="text-sm text-amber-600 dark:text-amber-400">
+                    Pending
+                  </p>
                 </div>
 
-                <div className="stats-card text-center hover-lift">
-                  <div className="p-4">
-                    <div className="flex items-center justify-center mb-2">
-                      <ClockIcon className="h-8 w-8 text-green-500" />
-                    </div>
-                    <p className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
-                      {totalRemaining}
-                    </p>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      Remaining
-                    </p>
+                <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300 border border-red-200 dark:border-red-700/50">
+                  <div className="flex items-center justify-center mb-2">
+                    <span className="text-2xl">❌</span>
                   </div>
+                  <p className="text-2xl font-bold mb-1 text-red-700 dark:text-red-300">
+                    {rejectedCount}
+                  </p>
+                  <p className="text-sm text-red-600 dark:text-red-400">
+                    Rejected
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300 border border-blue-200 dark:border-blue-700/50">
+                  <div className="flex items-center justify-center mb-2">
+                    <span className="text-2xl">📊</span>
+                  </div>
+                  <p className="text-2xl font-bold mb-1 text-blue-700 dark:text-blue-300">
+                    {totalUsed}
+                  </p>
+                  <p className="text-sm text-blue-600 dark:text-blue-400">
+                    Days Used
+                  </p>
                 </div>
               </div>
             </div>
@@ -330,7 +346,7 @@ const EmployeeDetailPage: React.FC = () => {
             <div className="card-header">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
                 <div>
-                  <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300">
                     Leave Analytics
                   </h3>
                   <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
@@ -445,7 +461,7 @@ const EmployeeDetailPage: React.FC = () => {
         <div className="space-y-6">
           <div className="card">
             <div className="card-header">
-              <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+              <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300">
                 Leave Balance
               </h3>
               <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
@@ -501,7 +517,7 @@ const EmployeeDetailPage: React.FC = () => {
         <div className="card-header">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+              <h3 className="text-xl font-semibold text-purple-700 dark:text-purple-300">
                 Leave History
               </h3>
               <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
@@ -516,60 +532,54 @@ const EmployeeDetailPage: React.FC = () => {
 
         <div className="card-body">
           {leaveHistory.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="table">
-                <thead className="table-header">
-                  <tr>
-                    <th className="table-header-cell">Leave Type</th>
-                    <th className="table-header-cell">Duration</th>
-                    <th className="table-header-cell">Days</th>
-                    <th className="table-header-cell">Status</th>
-                    <th className="table-header-cell">Reason</th>
-                    <th className="table-header-cell">Applied</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leaveHistory.map((leave: any) => (
-                    <tr key={leave._id} className="table-row">
-                      <td className="table-cell">
-                        <span className="badge badge-gray capitalize">
-                          {leave.leaveType}
-                        </span>
-                      </td>
-                      <td className="table-cell">
-                        <div>
-                          <div className="font-medium">
-                            {formatDate(leave.startDate)}
-                          </div>
-                          <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-                            to {formatDate(leave.endDate)}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="table-cell">
-                        <span className="font-medium">
-                          {leave.totalDays} days
-                        </span>
-                      </td>
-                      <td className="table-cell">
-                        <span className={getStatusBadge(leave.status)}>
-                          {leave.status.charAt(0).toUpperCase() + leave.status.slice(1)}
-                        </span>
-                      </td>
-                      <td className="table-cell max-w-xs">
-                        <div className="truncate" title={leave.reason}>
-                          {leave.reason}
-                        </div>
-                      </td>
-                      <td className="table-cell">
-                        <div className="text-sm">
-                          {formatDate(leave.createdAt)}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="space-y-3">
+              {leaveHistory.map((leave: any) => (
+                <div key={leave._id} className="bg-white dark:bg-gray-800 rounded-xl p-6 table-row-hover transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700">
+                  <div className="grid grid-cols-6 gap-6 items-center">
+                    <div>
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">LEAVE TYPE</div>
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                        {leave.leaveType}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">DURATION</div>
+                      <div className="font-medium text-gray-900 dark:text-gray-100">
+                        {formatDate(leave.startDate)}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        to {formatDate(leave.endDate)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">DAYS</div>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">
+                        {leave.totalDays} days
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">STATUS</div>
+                      <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${getStatusBadge(leave.status)} ${
+                        leave.status === 'pending' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300' : ''
+                      }`}>
+                        {leave.status.charAt(0).toUpperCase() + leave.status.slice(1)}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">REASON</div>
+                      <div className="text-sm text-gray-900 dark:text-gray-100 truncate max-w-xs" title={leave.reason}>
+                        {leave.reason}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">APPLIED</div>
+                      <div className="text-sm text-gray-900 dark:text-gray-100">
+                        {formatDate(leave.createdAt)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="text-center py-12">

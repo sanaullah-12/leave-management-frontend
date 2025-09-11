@@ -75,9 +75,9 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
     <Modal isOpen={isOpen} onClose={handleClose} title="Invite Administrator" size="md">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Admin Profile Header */}
-        <div className="flex items-center space-x-4 p-4 rounded-xl" style={{ backgroundColor: 'var(--surface-hover)' }}>
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800 flex items-center justify-center">
-            <ShieldCheckIcon className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+        <div className="flex items-center space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-700">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--color-primary-100), var(--color-primary-200))' }}>
+            <ShieldCheckIcon className="w-8 h-8" style={{ color: 'var(--color-primary-600)' }} />
           </div>
           <div>
             <h3 className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>
@@ -100,12 +100,7 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
             <input
               type="text"
               {...register('name', { required: 'Full name is required' })}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              style={{ 
-                backgroundColor: 'var(--surface)', 
-                borderColor: errors.name ? '#ef4444' : 'var(--border-primary)',
-                color: 'var(--text-primary)'
-              }}
+              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
               placeholder="Enter administrator name"
             />
             {errors.name && (
@@ -133,12 +128,7 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
                   message: 'Invalid email address',
                 },
               })}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              style={{ 
-                backgroundColor: 'var(--surface)', 
-                borderColor: errors.email ? '#ef4444' : 'var(--border-primary)',
-                color: 'var(--text-primary)'
-              }}
+              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
               placeholder="admin@company.com"
             />
             {errors.email && (
@@ -161,12 +151,7 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
               <input
                 type="text"
                 {...register('department')}
-                className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                style={{ 
-                  backgroundColor: 'var(--surface)', 
-                  borderColor: 'var(--border-primary)',
-                  color: 'var(--text-primary)'
-                }}
+                className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
                 placeholder="Administration"
               />
             </div>
@@ -180,26 +165,21 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
               <input
                 type="text"
                 {...register('position')}
-                className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                style={{ 
-                  backgroundColor: 'var(--surface)', 
-                  borderColor: 'var(--border-primary)',
-                  color: 'var(--text-primary)'
-                }}
+                className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
                 placeholder="Administrator"
               />
             </div>
           </div>
 
           {/* Admin Privileges Notice */}
-          <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
+          <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800" style={{ backgroundColor: 'var(--color-primary-50)', borderColor: 'var(--color-primary-200)' }}>
             <div className="flex items-center">
-              <ShieldCheckIcon className="w-5 h-5 text-purple-600 dark:text-purple-400 mr-2" />
-              <p className="text-sm font-medium text-purple-800 dark:text-purple-200">
+              <ShieldCheckIcon className="w-5 h-5 mr-2" style={{ color: 'var(--color-primary-600)' }} />
+              <p className="text-sm font-medium" style={{ color: 'var(--color-primary-800)' }}>
                 Administrator Privileges
               </p>
             </div>
-            <ul className="text-sm text-purple-700 dark:text-purple-300 mt-2 space-y-1 list-disc list-inside">
+            <ul className="text-sm mt-2 space-y-1 list-disc list-inside" style={{ color: 'var(--color-primary-700)' }}>
               <li>Manage all employees in the organization</li>
               <li>Approve or reject leave requests</li>
               <li>View company-wide reports and analytics</li>
@@ -226,7 +206,7 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
           <button
             type="submit"
             disabled={inviteAdminMutation.isPending}
-            className="px-8 py-3 text-sm font-medium text-white rounded-lg transition-colors bg-purple-600 hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
+            className="btn-primary px-8 py-3 text-sm font-medium text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
           >
             {inviteAdminMutation.isPending ? (
               <>
