@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useSearchParams } from "react-router-dom";
 import { leavesAPI } from "../services/api";
 import { useNotifications } from "../components/NotificationSystem";
+import xlogoImage from "../assets/xlogoanimate.png";
 // Inline type definition
 interface LeaveRequest {
   leaveType: string;
@@ -400,7 +401,16 @@ const LeavesPage: React.FC = () => {
             disabled={isLoading}
             className="btn-secondary inline-flex items-center"
           >
-            <ArrowPathIcon className={`h-5 w-5 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            {isLoading ? (
+              <img 
+                src={xlogoImage} 
+                alt="Loading..." 
+                className="h-5 w-5 mr-2 animate-pulse object-contain"
+                style={{ animation: 'pulse 1s ease-in-out infinite' }}
+              />
+            ) : (
+              <ArrowPathIcon className="h-5 w-5 mr-2" />
+            )}
             Refresh
           </button>
           

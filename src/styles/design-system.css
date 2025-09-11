@@ -4,6 +4,7 @@
 
 /* Root Variables */
 :root {
+  --color-primary-25: #fefcff;
   --color-primary-50: #eff6ff;
   --color-primary-100: #dbeafe;
   --color-primary-200: #bfdbfe;
@@ -14,6 +15,7 @@
   --color-primary-700: #1d4ed8;
   --color-primary-800: #1e40af;
   --color-primary-900: #1e3a8a;
+  --color-primary-950: #1e3a8a;
 
   --color-success-500: #22c55e;
   --color-warning-500: #eab308;
@@ -345,9 +347,9 @@ body {
 }
 
 .dark .badge-primary {
-  background-color: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
-  border-color: rgba(59, 130, 246, 0.3);
+  background-color: var(--color-primary-900);
+  color: var(--color-primary-300);
+  border-color: var(--color-primary-700);
 }
 
 .badge-gray {
@@ -497,7 +499,7 @@ body {
   left: -8px;
   right: -8px;
   bottom: 0;
-  background: linear-gradient(90deg, rgba(59, 130, 246, 0.08) 0%, rgba(99, 102, 241, 0.05) 100%);
+  background: linear-gradient(90deg, var(--color-primary-50) 0%, var(--color-primary-25) 100%);
   border-radius: 12px;
   opacity: 0;
   transform: scale(0.95);
@@ -512,7 +514,7 @@ body {
 }
 
 .dark .table-row-hover::before {
-  background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(99, 102, 241, 0.08) 100%);
+  background: linear-gradient(90deg, var(--color-primary-900) 0%, var(--color-primary-950) 100%);
 }
 
 /* Glassmorphism card effects */
@@ -553,7 +555,7 @@ body {
 
 .input-field:focus {
   border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
   background: rgba(255, 255, 255, 1);
 }
 
@@ -565,7 +567,7 @@ body {
 .dark .input-field:focus {
   background: rgba(31, 41, 55, 0.8);
   border-color: var(--color-primary-400);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 0 3px var(--color-primary-900);
 }
 
 /* ============================= */
@@ -588,7 +590,7 @@ body {
 
 .date-input::-webkit-calendar-picker-indicator:hover {
   filter: invert(0.3);
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: var(--color-primary-100);
 }
 
 /* Dark mode date input improvements */
@@ -603,7 +605,7 @@ body {
 
 .dark .date-input::-webkit-calendar-picker-indicator:hover {
   filter: invert(0.9);
-  background-color: rgba(59, 130, 246, 0.2);
+  background-color: var(--color-primary-900);
 }
 
 /* Date input placeholder/empty state styling */

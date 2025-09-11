@@ -18,18 +18,18 @@ html.theme-blue {
 
 /* Purple Theme */
 html.theme-purple {
-  --color-primary-25: #fdfdff;
-  --color-primary-50: #faf5ff;
-  --color-primary-100: #f3e8ff;
-  --color-primary-200: #e9d5ff;
-  --color-primary-300: #d8b4fe;
-  --color-primary-400: #c084fc;
-  --color-primary-500: #a855f7;
-  --color-primary-600: #9333ea;
-  --color-primary-700: #7c3aed;
-  --color-primary-800: #6b21a8;
-  --color-primary-900: #581c87;
-  --color-primary-950: #3b0764;
+  --color-primary-25: #fefcff;
+  --color-primary-50: #fdf8ff;
+  --color-primary-100: #f9efff;
+  --color-primary-200: #f2deff;
+  --color-primary-300: #e7c4ff;
+  --color-primary-400: #d49eff;
+  --color-primary-500: #AE75DA;
+  --color-primary-600: #9c5fd1;
+  --color-primary-700: #8a4bc8;
+  --color-primary-800: #7839bf;
+  --color-primary-900: #6629b6;
+  --color-primary-950: #4a1d8a;
 }
 
 /* Green Theme */

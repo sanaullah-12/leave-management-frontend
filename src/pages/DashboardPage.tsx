@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { leavesAPI } from "../services/api";
 import LoadingSpinner from "../components/LoadingSpinner";
+import ParticleBackground from "../components/ParticleBackground";
 import {
   UsersIcon,
   CalendarDaysIcon,
@@ -61,7 +62,12 @@ const DashboardPage: React.FC = () => {
   const balance = leaveBalance?.data?.balance || {};
 
   return (
-    <div className="space-y-8 fade-in">
+    <div className="relative space-y-8 fade-in">
+      {/* Particle Background */}
+      <ParticleBackground />
+      
+      {/* Main Content */}
+      <div className="relative" style={{ zIndex: 10 }}>
       {/* Welcome Header */}
       <div
         className="-mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-8 mb-8"
@@ -493,6 +499,7 @@ const DashboardPage: React.FC = () => {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

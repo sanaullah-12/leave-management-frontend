@@ -10,6 +10,7 @@ export default {
       colors: {
         // Dynamic primary colors using CSS variables
         primary: {
+          25: 'var(--color-primary-25)',
           50: 'var(--color-primary-50)',
           100: 'var(--color-primary-100)',
           200: 'var(--color-primary-200)',
@@ -20,6 +21,7 @@ export default {
           700: 'var(--color-primary-700)',
           800: 'var(--color-primary-800)',
           900: 'var(--color-primary-900)',
+          950: 'var(--color-primary-950)',
         },
         // Surface colors from design system
         surface: {
