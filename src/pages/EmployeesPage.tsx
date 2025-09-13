@@ -7,6 +7,7 @@ import { useNotifications } from "../components/NotificationSystem";
 import LoadingSpinner from "../components/LoadingSpinner";
 import EmployeeInviteModal from "../components/EmployeeInviteModal";
 import AdminInviteModal from "../components/AdminInviteModal";
+import Avatar from "../components/Avatar";
 import {
   PlusIcon,
   UserIcon,
@@ -418,19 +419,19 @@ const EmployeesPage: React.FC = () => {
                       >
                         <td className="pl-2 pr-4 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 text-sm font-medium">
-                              {employee.name
-                                ? employee.name
-                                    .split(" ")
-                                    .map((n: string) => n[0])
-                                    .join("")
-                                    .substring(0, 2)
-                                : "U"}
-                            </div>
+                            <Avatar
+                              src={employee.profilePicture}
+                              name={employee.name}
+                              size="md"
+                              className="flex-shrink-0"
+                            />
                             <div className="flex flex-col">
-                              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                              <button
+                                onClick={() => navigate(`/employees/${employee._id}`)}
+                                className="text-left text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer underline-offset-2 hover:underline"
+                              >
                                 {employee.name}
-                              </span>
+                              </button>
                               <span className="text-xs text-gray-500 dark:text-gray-400">
                                 {employee.employeeId}
                               </span>
@@ -514,17 +515,18 @@ const EmployeesPage: React.FC = () => {
               {filteredEmployees.map((employee: any) => (
                 <div key={employee._id} className="rounded-xl p-6 border border-gray-200/30 dark:border-gray-700/30 bg-gradient-to-br from-white/80 to-gray-50/40 dark:from-gray-800/40 dark:to-gray-900/20 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 text-sm font-medium">
-                      {employee.name
-                        ? employee.name
-                            .split(" ")
-                            .map((n: string) => n[0])
-                            .join("")
-                            .substring(0, 2)
-                        : "U"}
-                    </div>
+                    <Avatar
+                      src={employee.profilePicture}
+                      name={employee.name}
+                      size="md"
+                    />
                     <div>
-                      <p className="font-medium text-gray-900 dark:text-gray-100">{employee.name}</p>
+                      <button
+                        onClick={() => navigate(`/employees/${employee._id}`)}
+                        className="text-left font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer underline-offset-2 hover:underline"
+                      >
+                        {employee.name}
+                      </button>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
                         {employee.employeeId}
                       </p>

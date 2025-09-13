@@ -12,6 +12,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import DashboardPage from './pages/DashboardPage';
 import LeavesPage from './pages/LeavesPage';
+import AttendancePage from './pages/AttendancePage';
 import EmployeesPage from './pages/EmployeesPage';
 import EmployeeDetailPageReal from './pages/EmployeeDetailPageReal';
 import MyLeaveActivityPage from './pages/MyLeaveActivityPage';
@@ -48,6 +49,7 @@ const App: React.FC = () => {
                   <Route path="/" element={<Layout />}>
                     <Route index element={<DashboardPage />} />
                     <Route path="leaves" element={<LeavesPage />} />
+                    <Route path="attendance" element={<AttendancePage />} />
                     <Route path="employees" element={<EmployeesPage />} />
                     <Route path="employees/:id" element={<EmployeeDetailPageReal />} />
                     <Route path="my-leave-activity" element={<MyLeaveActivityPage />} />

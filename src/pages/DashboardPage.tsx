@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { leavesAPI } from "../services/api";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ParticleBackground from "../components/ParticleBackground";
+import Avatar from "../components/Avatar";
 import {
   UsersIcon,
   CalendarDaysIcon,
@@ -333,23 +334,26 @@ const DashboardPage: React.FC = () => {
                           {user?.role === "admin" && (
                             <td className="pl-2 pr-4 py-4 whitespace-nowrap">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 text-sm font-medium flex-shrink-0">
-                                  {typeof leave.employee === "object" &&
-                                  leave.employee?.name
-                                    ? leave.employee.name
-                                        .split(" ")
-                                        .map((n: string) => n[0])
-                                        .join("")
-                                        .substring(0, 2)
-                                    : "U"}
-                                </div>
+                                <Avatar
+                                  src={typeof leave.employee === "object" ? leave.employee?.profilePicture : null}
+                                  name={typeof leave.employee === "object" && leave.employee?.name ? leave.employee.name : "Unknown"}
+                                  size="md"
+                                  className="flex-shrink-0"
+                                />
                                 <div className="flex flex-col">
-                                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                  <button
+                                    onClick={() => {
+                                      if (typeof leave.employee === "object" && leave.employee?._id) {
+                                        navigate(`/employees/${leave.employee._id}`);
+                                      }
+                                    }}
+                                    className="text-left text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer underline-offset-2 hover:underline"
+                                  >
                                     {typeof leave.employee === "object" &&
                                     leave.employee?.name
                                       ? leave.employee.name
                                       : "Unknown"}
-                                  </span>
+                                  </button>
                                   <span className="text-xs text-gray-400">
                                     {typeof leave.employee === "object" &&
                                     leave.employee?.employeeId
@@ -427,23 +431,26 @@ const DashboardPage: React.FC = () => {
                     className="bg-white/50 dark:bg-gray-800/50 rounded-xl shadow p-4 space-y-4"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 text-sm font-medium flex-shrink-0">
-                        {typeof leave.employee === "object" &&
-                        leave.employee?.name
-                          ? leave.employee.name
-                              .split(" ")
-                              .map((n: string) => n[0])
-                              .join("")
-                              .substring(0, 2)
-                          : "U"}
-                      </div>
+                      <Avatar
+                        src={typeof leave.employee === "object" ? leave.employee?.profilePicture : null}
+                        name={typeof leave.employee === "object" && leave.employee?.name ? leave.employee.name : "Unknown"}
+                        size="md"
+                        className="flex-shrink-0"
+                      />
                       <div>
-                        <p className="font-medium">
+                        <button
+                          onClick={() => {
+                            if (typeof leave.employee === "object" && leave.employee?._id) {
+                              navigate(`/employees/${leave.employee._id}`);
+                            }
+                          }}
+                          className="text-left font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer underline-offset-2 hover:underline"
+                        >
                           {typeof leave.employee === "object" &&
                           leave.employee?.name
                             ? leave.employee.name
                             : "Unknown"}
-                        </p>
+                        </button>
                         <p className="text-xs text-gray-400">
                           {leave.leaveType}
                         </p>

@@ -7,6 +7,7 @@ import NotificationBell from "./NotificationBell";
 import {
   HomeIcon,
   CalendarDaysIcon,
+  ClockIcon,
   UsersIcon,
   ChartBarIcon,
   ArrowRightOnRectangleIcon,
@@ -33,6 +34,7 @@ const Layout: React.FC = () => {
   const navigation = [
     { name: "Dashboard", href: "/", icon: HomeIcon },
     { name: "Leave Requests", href: "/leaves", icon: CalendarDaysIcon },
+    { name: "Attendance", href: "/attendance", icon: ClockIcon },
     ...(user?.role === "employee"
       ? [
           {

@@ -175,7 +175,7 @@ body {
 /* ============================= */
 
 .input-field {
-  @apply w-full px-3 py-2 bg-white dark:bg-gray-800/60 border border-gray-200/50 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-all duration-200 ease-in-out;
+  @apply w-full px-4 py-3 bg-white dark:bg-gray-800/80 border border-gray-200/50 dark:border-gray-700/50 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-all duration-200 ease-in-out shadow-sm;
 }
 
 .input-field:focus {
@@ -387,3 +387,188 @@ html.theme-custom .from-blue-900 { @apply from-custom-900; }
 html.theme-custom .to-blue-800 { @apply to-custom-800; }
 html.theme-custom .text-blue-600 { @apply text-custom-600; }
 html.theme-custom .text-blue-400 { @apply text-custom-400; }
+
+/* ============================= */
+/* 📌 Profile Container Gradients */
+/* ============================= */
+
+.profile-gradient {
+  @apply bg-gradient-to-r from-blue-100 to-blue-400 dark:from-blue-700 dark:to-blue-900;
+}
+
+html.theme-purple .profile-gradient {
+  @apply from-purple-100 to-purple-400 dark:from-purple-700 dark:to-purple-900;
+}
+
+html.theme-green .profile-gradient {
+  @apply from-green-100 to-green-400 dark:from-green-700 dark:to-green-900;
+}
+
+html.theme-custom .profile-gradient {
+  @apply from-custom-100 to-custom-400 dark:from-custom-700 dark:to-custom-900;
+}
+
+/* ============================= */
+/* 📌 Form Label Styling */
+/* ============================= */
+
+.form-label {
+  @apply block text-sm font-medium mb-3 text-gray-900 dark:text-white;
+}
+
+/* ============================= */
+/* 📌 Tab Border Theme Overrides */
+/* ============================= */
+
+html.theme-purple .border-primary-500 {
+  @apply border-purple-500;
+}
+
+html.theme-green .border-primary-500 {
+  @apply border-green-500;
+}
+
+html.theme-custom .border-primary-500 {
+  @apply border-custom-500;
+}
+
+html.theme-purple .border-primary-200 {
+  @apply border-purple-200;
+}
+
+html.theme-green .border-primary-200 {
+  @apply border-green-200;
+}
+
+html.theme-custom .border-primary-200 {
+  @apply border-custom-200;
+}
+
+html.theme-purple .dark\\:border-primary-800 {
+  @apply dark:border-purple-800;
+}
+
+html.theme-green .dark\\:border-primary-800 {
+  @apply dark:border-green-800;
+}
+
+html.theme-custom .dark\\:border-primary-800 {
+  @apply dark:border-custom-800;
+}
+
+/* ============================= */
+/* 📌 Coming Soon Animations */
+/* ============================= */
+
+/* Animation delays */
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animation-delay-500 {
+  animation-delay: 500ms;
+}
+
+.animation-delay-1000 {
+  animation-delay: 1000ms;
+}
+
+.animation-delay-1500 {
+  animation-delay: 1500ms;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2000ms;
+}
+
+/* Fade in up animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+/* Progress bar animation */
+@keyframes progressBar {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 75%;
+  }
+}
+
+.animate-progress-bar {
+  animation: progressBar 2s ease-out;
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Glow animation */
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
+  }
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* Pulse text animation */
+@keyframes pulseText {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse-text {
+  animation: pulseText 2s ease-in-out infinite;
+}
+
+/* Shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}

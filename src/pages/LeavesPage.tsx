@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { leavesAPI } from "../services/api";
 import { useNotifications } from "../components/NotificationSystem";
 import xlogoImage from "../assets/xlogoanimate.png";
@@ -14,6 +14,7 @@ interface LeaveRequest {
   reason: string;
 }
 import LoadingSpinner from "../components/LoadingSpinner";
+import Avatar from "../components/Avatar";
 import { 
   PlusIcon, 
   ArrowPathIcon,
@@ -25,6 +26,7 @@ import "../styles/design-system.css";
 
 const LeavesPage: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { addNotification } = useNotifications();
   const [searchParams] = useSearchParams();
@@ -629,23 +631,26 @@ const LeavesPage: React.FC = () => {
                         {user?.role === "admin" && (
                           <td className="pl-2 pr-4 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 text-sm font-medium">
-                                {typeof leave.employee === "object" &&
-                                leave.employee?.name
-                                  ? leave.employee.name
-                                      .split(" ")
-                                      .map((n: string) => n[0])
-                                      .join("")
-                                      .substring(0, 2)
-                                  : "U"}
-                              </div>
+                              <Avatar
+                                src={typeof leave.employee === "object" ? leave.employee?.profilePicture : null}
+                                name={typeof leave.employee === "object" && leave.employee?.name ? leave.employee.name : "Unknown"}
+                                size="md"
+                                className="flex-shrink-0"
+                              />
                               <div className="flex flex-col">
-                                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                <button
+                                  onClick={() => {
+                                    if (typeof leave.employee === "object" && leave.employee?._id) {
+                                      navigate(`/employees/${leave.employee._id}`);
+                                    }
+                                  }}
+                                  className="text-left text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer underline-offset-2 hover:underline"
+                                >
                                   {typeof leave.employee === "object" &&
                                   leave.employee?.name
                                     ? leave.employee.name
                                     : "Unknown"}
-                                </span>
+                                </button>
                                 <span className="text-xs text-gray-400">
                                   {typeof leave.employee === "object" &&
                                   leave.employee?.employeeId
@@ -772,15 +777,31 @@ const LeavesPage: React.FC = () => {
                   {/* Employee Info (Admin only) */}
                   {user?.role === "admin" && (
                     <div className="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
-                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                        {typeof leave.employee === "object" && leave.employee?.name
-                          ? leave.employee.name
-                          : "Unknown"}
-                      </div>
-                      <div className="text-xs text-gray-600 dark:text-gray-300">
-                        {typeof leave.employee === "object" && leave.employee?.employeeId
-                          ? leave.employee.employeeId
-                          : "N/A"}
+                      <div className="flex items-center gap-3">
+                        <Avatar
+                          src={typeof leave.employee === "object" ? leave.employee?.profilePicture : null}
+                          name={typeof leave.employee === "object" && leave.employee?.name ? leave.employee.name : "Unknown"}
+                          size="sm"
+                        />
+                        <div>
+                          <button
+                            onClick={() => {
+                              if (typeof leave.employee === "object" && leave.employee?._id) {
+                                navigate(`/employees/${leave.employee._id}`);
+                              }
+                            }}
+                            className="text-left text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer underline-offset-2 hover:underline"
+                          >
+                            {typeof leave.employee === "object" && leave.employee?.name
+                              ? leave.employee.name
+                              : "Unknown"}
+                          </button>
+                          <div className="text-xs text-gray-600 dark:text-gray-300">
+                            {typeof leave.employee === "object" && leave.employee?.employeeId
+                              ? leave.employee.employeeId
+                              : "N/A"}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}

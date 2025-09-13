@@ -49,11 +49,10 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
 
   // Fetch employee's leave balance - pass employeeId for specific employee
   const { data: leaveBalanceData } = useQuery({
-    queryKey: ['employee-leave-balance', employeeId, Date.now()],
+    queryKey: ['employee-leave-balance', employeeId],
     queryFn: () => leavesAPI.getLeaveBalance(isCurrentUser ? undefined : employeeId),
     enabled: true, // Always try to fetch balance data
-    staleTime: 0, // Always fetch fresh data
-    cacheTime: 0, // Don't cache
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
     retry: 1, // Only retry once on failure
     refetchInterval: false, // Disabled to prevent rate limiting
     refetchIntervalInBackground: false,

@@ -80,16 +80,16 @@ const Avatar: React.FC<AvatarProps> = ({
     return `${baseUrl}${src}`;
   };
 
-  const content = src ? (
+  const [imageError, setImageError] = React.useState(false);
+
+  const content = src && !imageError ? (
     <img
       src={getImageUrl(src)}
       alt={alt || name || 'Avatar'}
       className="w-full h-full rounded-full object-cover"
-      onError={(e) => {
+      onError={() => {
         console.error('Avatar image failed to load:', getImageUrl(src));
-        // Fallback to initials if image fails to load
-        const target = e.target as HTMLImageElement;
-        target.style.display = 'none';
+        setImageError(true);
       }}
     />
   ) : name ? (
@@ -109,14 +109,6 @@ const Avatar: React.FC<AvatarProps> = ({
         <div className="absolute -bottom-1 -right-1 profile-icon rounded-full p-1 shadow-lg">
           <CameraIcon className={`${uploadIconSizes[size]} text-white`} />
         </div>
-      )}
-      {!src && name && (
-        <img
-          src=""
-          alt=""
-          className="hidden"
-          onError={() => {}} // Hidden fallback image for error handling
-        />
       )}
     </div>
   );

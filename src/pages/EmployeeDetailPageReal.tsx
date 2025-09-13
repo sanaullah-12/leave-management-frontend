@@ -55,6 +55,7 @@ const EmployeeDetailPageReal: React.FC = () => {
     sick: 8,
     annual: 10
   });
+  const [savedAllocation, setSavedAllocation] = useState<LeaveAllocation | null>(null);
 
   // All hooks must be at the top - before any conditional returns
   // Fetch all employees and find the specific one (since individual employee endpoint might not exist)
@@ -86,8 +87,12 @@ const EmployeeDetailPageReal: React.FC = () => {
     mutationFn: (allocations: LeaveAllocation) => 
       leavesAPI.updateEmployeeLeaveAllocation(id!, allocations),
     onSuccess: () => {
+      // Update saved allocation state to reflect the new values
+      setSavedAllocation(editAllocation);
       queryClient.invalidateQueries({ queryKey: ['employee-leaves', id] });
       queryClient.invalidateQueries({ queryKey: ['employees'] });
+      queryClient.invalidateQueries({ queryKey: ['employee-leave-balance', id] });
+      queryClient.invalidateQueries({ queryKey: ['leave-policy'] });
       setIsEditingAllocation(false);
     },
   });
@@ -99,17 +104,6 @@ const EmployeeDetailPageReal: React.FC = () => {
     annual: 10
   };
 
-  // Initialize editAllocation with default policy if not set
-  React.useEffect(() => {
-    if (!isEditingAllocation && defaultPolicy) {
-      setEditAllocation({
-        casual: defaultPolicy.casual || 10,
-        sick: defaultPolicy.sick || 8,
-        annual: defaultPolicy.annual || 10
-      });
-    }
-  }, [defaultPolicy.casual, defaultPolicy.sick, defaultPolicy.annual, isEditingAllocation]);
-
   // Memoize employee finding to prevent recalculation
   const employees = React.useMemo(() => 
     employeesData?.data?.employees || [], 
@@ -120,6 +114,29 @@ const EmployeeDetailPageReal: React.FC = () => {
     employees.find((emp: any) => emp._id === id),
     [employees, id]
   );
+
+  // Initialize editAllocation only once when component mounts or when we have employee data
+  React.useEffect(() => {
+    if (employee && employee.leaveQuota && !savedAllocation) {
+      // Employee has custom allocations
+      const customAllocation = {
+        casual: employee.leaveQuota.casual || defaultPolicy.casual || 10,
+        sick: employee.leaveQuota.sick || defaultPolicy.sick || 8,
+        annual: employee.leaveQuota.annual || defaultPolicy.annual || 10
+      };
+      setSavedAllocation(customAllocation);
+      setEditAllocation(customAllocation);
+    } else if (!savedAllocation && defaultPolicy) {
+      // Use default policy
+      const defaultAllocation = {
+        casual: defaultPolicy.casual || 10,
+        sick: defaultPolicy.sick || 8,
+        annual: defaultPolicy.annual || 10
+      };
+      setSavedAllocation(defaultAllocation);
+      setEditAllocation(defaultAllocation);
+    }
+  }, [employee, defaultPolicy, savedAllocation]);
 
   // Get leave history for this employee
   const leaveHistory = React.useMemo(() => 
@@ -135,11 +152,11 @@ const EmployeeDetailPageReal: React.FC = () => {
       return leaveYear === currentYear && leave.status === 'approved';
     });
 
-    // Use current allocations or default policy
-    const allocations = {
-      casual: editAllocation.casual || defaultPolicy.casual || 10,
-      sick: editAllocation.sick || defaultPolicy.sick || 8,
-      annual: editAllocation.annual || defaultPolicy.annual || 10
+    // Use saved allocations (actual employee allocations) for calculations
+    const allocations = savedAllocation || {
+      casual: defaultPolicy.casual || 10,
+      sick: defaultPolicy.sick || 8,
+      annual: defaultPolicy.annual || 10
     };
 
     const balance = {
@@ -304,19 +321,21 @@ const EmployeeDetailPageReal: React.FC = () => {
   };
 
   const handleCancelEdit = () => {
-    setEditAllocation({
-      casual: leaveBalance.casual.total,
-      sick: leaveBalance.sick.total,
-      annual: leaveBalance.annual.total
+    // Reset to saved allocation values
+    setEditAllocation(savedAllocation || {
+      casual: defaultPolicy.casual || 10,
+      sick: defaultPolicy.sick || 8,
+      annual: defaultPolicy.annual || 10
     });
     setIsEditingAllocation(false);
   };
 
   const handleStartEdit = () => {
-    setEditAllocation({
-      casual: leaveBalance.casual.total,
-      sick: leaveBalance.sick.total,
-      annual: leaveBalance.annual.total
+    // Start editing with current saved allocation values
+    setEditAllocation(savedAllocation || {
+      casual: defaultPolicy.casual || 10,
+      sick: defaultPolicy.sick || 8,
+      annual: defaultPolicy.annual || 10
     });
     setIsEditingAllocation(true);
   };
