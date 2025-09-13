@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Navigate, Outlet, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import Avatar from "./Avatar";
 import NotificationBell from "./NotificationBell";
 import {
@@ -21,6 +22,7 @@ import Companylogo from "../assets/companylogo.png";
 
 const Layout: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth();
+  const { colorScheme } = useTheme();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -56,8 +58,37 @@ const Layout: React.FC = () => {
     return false;
   };
 
+  // Theme-aware color classes
+  const getThemeColors = () => {
+    const colors = {
+      blue: {
+        gradient: "from-blue-600 to-blue-700",
+        active: "bg-gradient-to-r from-blue-600 to-blue-700",
+        hover: "hover:bg-slate-800 dark:hover:bg-gray-800"
+      },
+      purple: {
+        gradient: "from-purple-600 to-purple-700", 
+        active: "bg-gradient-to-r from-purple-600 to-purple-700",
+        hover: "hover:bg-slate-800 dark:hover:bg-gray-800"
+      },
+      green: {
+        gradient: "from-green-600 to-green-700",
+        active: "bg-gradient-to-r from-green-600 to-green-700", 
+        hover: "hover:bg-slate-800 dark:hover:bg-gray-800"
+      },
+      custom: {
+        gradient: "from-custom-600 to-custom-700",
+        active: "bg-gradient-to-r from-custom-600 to-custom-700",
+        hover: "hover:bg-slate-800 dark:hover:bg-gray-800"
+      }
+    };
+    return colors[colorScheme];
+  };
+
+  const themeColors = getThemeColors();
+
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--surface)" }}>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
@@ -69,18 +100,14 @@ const Layout: React.FC = () => {
       {/* Fixed Sidebar */}
       <div
         className={`
-          fixed inset-y-0 left-0 z-50 w-64 shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col
+          fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col
           ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           }
         `}
-        style={{ backgroundColor: "var(--surface-sidebar)" }}
       >
         {/* Logo */}
-        <div
-          className="sidebar-logo-area h-16 flex items-center justify-between px-6"
-          style={{ borderBottom: "1px solid var(--border-color)" }}
-        >
+        <div className={`h-16 flex items-center justify-between px-6 bg-gradient-to-r ${themeColors.gradient} border-b border-opacity-50`}>
           <img src={Companylogo} alt="img" className="h-6 w-40" />
           <button
             onClick={() => setSidebarOpen(false)}
@@ -91,23 +118,14 @@ const Layout: React.FC = () => {
         </div>
 
         {/* User Profile Section */}
-        <div
-          className="profile-background p-6"
-          style={{ borderBottom: "1px solid var(--border-color)" }}
-        >
+        <div className="p-6 bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
           <div className="flex items-center space-x-3">
             <Avatar src={user?.profilePicture} name={user?.name} size="lg" />
             <div className="min-w-0 flex-1">
-              <p
-                className="text-sm font-semibold truncate"
-                style={{ color: "var(--text-primary)" }}
-              >
+              <p className="text-sm font-semibold truncate text-gray-900 dark:text-gray-100">
                 {user?.name}
               </p>
-              <p
-                className="text-xs truncate"
-                style={{ color: "var(--text-secondary)" }}
-              >
+              <p className="text-xs truncate text-gray-600 dark:text-gray-300">
                 {user?.email}
               </p>
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium badge-primary mt-1">
@@ -118,35 +136,30 @@ const Layout: React.FC = () => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 overflow-y-auto">
-          <div className="space-y-2">
+        <nav className="flex-1 px-4 py-6 overflow-y-auto bg-white dark:bg-gray-800">
+          <div className="space-y-1">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`nav-item ${isActive(item.href) ? "active" : ""}`}
+                className={`nav-item ${isActive(item.href) ? 'active' : ''}`}
               >
                 <item.icon className="nav-icon" />
-                <span className="nav-text">{item.name}</span>
+                <span>{item.name}</span>
               </Link>
             ))}
           </div>
 
           {/* Bottom Navigation */}
-          <div
-            className="mt-auto pt-6 space-y-2"
-            style={{ borderTop: "1px solid var(--border-color)" }}
-          >
+          <div className="mt-auto pt-6 space-y-1 border-t border-gray-200 dark:border-gray-600">
             <Link
               to="/profile"
               onClick={() => setSidebarOpen(false)}
-              className={`nav-item ${
-                location.pathname === "/profile" ? "active" : ""
-              }`}
+              className={`nav-item ${location.pathname === "/profile" ? 'active' : ''}`}
             >
               <CogIcon className="nav-icon" />
-              <span className="nav-text">Settings</span>
+              <span>Settings</span>
             </Link>
           </div>
         </nav>
@@ -154,23 +167,17 @@ const Layout: React.FC = () => {
 
       {/* Fixed Mobile Header */}
       <header
-        className="lg:hidden fixed top-0 left-0 right-0 z-40 h-16 shadow-sm flex items-center justify-between px-4"
-        style={{
-          backgroundColor: "var(--surface-elevated)",
-          borderBottom: "1px solid var(--border-color)",
-        }}
+        className="lg:hidden fixed top-0 left-0 right-0 z-40 h-16 shadow-sm flex items-center justify-between px-4 bg-white dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700"
       >
         <button
           onClick={() => setSidebarOpen(true)}
-          className="transition-colors"
-          style={{ color: "var(--text-secondary)" }}
+          className="transition-colors text-gray-600 dark:text-gray-300"
         >
           <Bars3Icon className="w-6 h-6" />
         </button>
 
         <h1
-          className="text-lg font-semibold"
-          style={{ color: "var(--text-primary)" }}
+          className="text-lg font-semibold text-gray-900 dark:text-gray-100"
         >
           Comrex Leave Manager
         </h1>
@@ -179,8 +186,7 @@ const Layout: React.FC = () => {
           <NotificationBell />
           <button
             onClick={logout}
-            className="transition-colors"
-            style={{ color: "var(--text-secondary)" }}
+            className="transition-colors text-gray-600 dark:text-gray-300"
           >
             <ArrowRightOnRectangleIcon className="w-5 h-5" />
           </button>
@@ -189,21 +195,16 @@ const Layout: React.FC = () => {
 
       {/* Fixed Desktop Header */}
       <header
-        className="hidden lg:flex fixed top-0 left-64 right-0 z-30 h-16 shadow-sm items-center justify-between px-8"
-        style={{
-          backgroundColor: "var(--surface-elevated)",
-          borderBottom: "1px solid var(--border-color)",
-        }}
+        className="hidden lg:flex fixed top-0 left-64 right-0 z-30 h-16 shadow-sm items-center justify-between px-8 bg-white dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700"
       >
         <div className="flex items-center space-x-6">
           <div>
             <h2
-              className="text-lg font-semibold"
-              style={{ color: "var(--text-primary)" }}
+              className="text-lg font-semibold text-gray-900 dark:text-gray-100"
             >
               Welcome back, {user?.name}
             </h2>
-            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               {typeof user?.department === "object" &&
               (user?.department as any)?.name
                 ? (user.department as any).name
@@ -217,8 +218,7 @@ const Layout: React.FC = () => {
           <NotificationBell />
 
           <div
-            className="h-8 w-px"
-            style={{ backgroundColor: "var(--border-color)" }}
+            className="h-8 w-px bg-gray-200 dark:bg-gray-700"
           ></div>
 
           <Link
@@ -227,8 +227,7 @@ const Layout: React.FC = () => {
           >
             <Avatar src={user?.profilePicture} name={user?.name} size="sm" />
             <span
-              className="text-sm font-medium group-hover:opacity-80 transition-opacity"
-              style={{ color: "var(--text-primary)" }}
+              className="text-sm font-medium group-hover:opacity-80 transition-opacity text-gray-900 dark:text-gray-100"
             >
               {user?.name}
             </span>
@@ -236,8 +235,7 @@ const Layout: React.FC = () => {
 
           <button
             onClick={logout}
-            className="p-2 rounded-lg transition-all hover-theme"
-            style={{ color: "var(--text-secondary)" }}
+            className="p-2 rounded-lg transition-all hover-theme text-gray-600 dark:text-gray-300"
             title="Logout"
           >
             <ArrowRightOnRectangleIcon className="w-5 h-5" />
@@ -246,7 +244,7 @@ const Layout: React.FC = () => {
       </header>
 
       {/* Main Content Area */}
-      <main className="pt-16 lg:pt-16 lg:ml-64 min-h-screen overflow-y-auto">
+      <main className="pt-16 lg:pt-16 lg:ml-64 min-h-screen overflow-y-auto bg-gray-50 dark:bg-gray-900">
         <div className="p-4 lg:p-8">
           <div className="max-w-7xl mx-auto">
             <Outlet />

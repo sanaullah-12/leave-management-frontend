@@ -76,14 +76,14 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Admin Profile Header */}
         <div className="flex items-center space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-700">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, var(--color-primary-100), var(--color-primary-200))' }}>
-            <ShieldCheckIcon className="w-8 h-8" style={{ color: 'var(--color-primary-600)' }} />
+          <div className="w-16 h-16 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800">
+            <ShieldCheckIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <h3 className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
               New Administrator
             </h3>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Grant admin privileges to manage employees
             </p>
           </div>
@@ -93,7 +93,7 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
         <div className="space-y-6">
           {/* Full Name */}
           <div>
-            <label className="flex items-center text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
               <UserIcon className="w-4 h-4 mr-2 text-gray-400" />
               Full Name
             </label>
@@ -115,7 +115,7 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
 
           {/* Email */}
           <div>
-            <label className="flex items-center text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
               <EnvelopeIcon className="w-4 h-4 mr-2 text-gray-400" />
               Email Address
             </label>
@@ -144,7 +144,7 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Department */}
             <div>
-              <label className="flex items-center text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+              <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
                 <BuildingOfficeIcon className="w-4 h-4 mr-2 text-gray-400" />
                 Department (Optional)
               </label>
@@ -158,7 +158,7 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
 
             {/* Position */}
             <div>
-              <label className="flex items-center text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+              <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
                 <BriefcaseIcon className="w-4 h-4 mr-2 text-gray-400" />
                 Position (Optional)
               </label>
@@ -172,14 +172,14 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
           </div>
 
           {/* Admin Privileges Notice */}
-          <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800" style={{ backgroundColor: 'var(--color-primary-50)', borderColor: 'var(--color-primary-200)' }}>
+          <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
             <div className="flex items-center">
-              <ShieldCheckIcon className="w-5 h-5 mr-2" style={{ color: 'var(--color-primary-600)' }} />
-              <p className="text-sm font-medium" style={{ color: 'var(--color-primary-800)' }}>
+              <ShieldCheckIcon className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
+              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
                 Administrator Privileges
               </p>
             </div>
-            <ul className="text-sm mt-2 space-y-1 list-disc list-inside" style={{ color: 'var(--color-primary-700)' }}>
+            <ul className="text-sm mt-2 space-y-1 list-disc list-inside text-blue-700 dark:text-blue-300">
               <li>Manage all employees in the organization</li>
               <li>Approve or reject leave requests</li>
               <li>View company-wide reports and analytics</li>
@@ -189,16 +189,11 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end space-x-3 pt-6 border-t" style={{ borderColor: 'var(--border-primary)' }}>
+        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
           <button
             type="button"
             onClick={handleClose}
-            className="px-6 py-3 text-sm font-medium rounded-lg transition-colors"
-            style={{ 
-              backgroundColor: 'var(--surface-hover)', 
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border-primary)'
-            }}
+            className="px-6 py-3 text-sm font-medium rounded-lg transition-colors bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
             disabled={inviteAdminMutation.isPending}
           >
             Cancel

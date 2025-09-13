@@ -91,16 +91,12 @@ const NotificationBell: React.FC = () => {
 
       {/* Dropdown Panel */}
       {isOpen && (
-        <div className="dropdown-menu absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-lg shadow-lg border z-50"
-             style={{ 
-               backgroundColor: 'var(--surface)',
-               borderColor: 'var(--border-primary)'
-             }}>
+        <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-lg shadow-lg border z-50 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           
           {/* Header */}
-          <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border-primary)' }}>
+          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 Notifications
               </h3>
               {allNotifications.length > 0 && (
@@ -108,7 +104,7 @@ const NotificationBell: React.FC = () => {
                   onClick={() => {
                     markAllAsRead();
                   }}
-                  className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+                  className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   Mark all read
                 </button>
@@ -121,7 +117,7 @@ const NotificationBell: React.FC = () => {
             {allNotifications.length === 0 ? (
               <div className="px-4 py-8 text-center">
                 <BellIcon className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
                   No notifications yet
                 </p>
               </div>
@@ -130,10 +126,9 @@ const NotificationBell: React.FC = () => {
                 {allNotifications.slice(0, 10).map((notification: any) => (
                   <div
                     key={notification._id}
-                    className={`notification-item px-4 py-3 border-b transition-colors cursor-pointer ${
+                    className={`px-4 py-3 border-b border-gray-200 dark:border-gray-700 transition-colors cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 ${
                       !notification.read ? 'bg-blue-50 dark:bg-blue-900/20' : ''
                     }`}
-                    style={{ borderColor: 'var(--border-primary)' }}
                     onClick={() => {
                       if (!notification.read) {
                         markAsRead(notification._id);
@@ -146,7 +141,7 @@ const NotificationBell: React.FC = () => {
                       </span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                          <p className="text-sm font-medium truncate text-gray-900 dark:text-gray-100">
                             {notification.title}
                           </p>
                           {!notification.read && (
@@ -154,11 +149,11 @@ const NotificationBell: React.FC = () => {
                           )}
                         </div>
                         {notification.message && (
-                          <p className="text-sm mt-1 line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
+                          <p className="text-sm mt-1 line-clamp-2 text-gray-600 dark:text-gray-300">
                             {notification.message}
                           </p>
                         )}
-                        <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
+                        <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
                           {getTimeAgo(new Date(notification.createdAt))}
                         </p>
                       </div>
@@ -171,8 +166,8 @@ const NotificationBell: React.FC = () => {
 
           {/* Footer */}
           {allNotifications.length > 10 && (
-            <div className="px-4 py-3 border-t text-center" style={{ borderColor: 'var(--border-primary)' }}>
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+            <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 text-center">
+              <p className="text-xs text-gray-600 dark:text-gray-300">
                 Showing latest 10 notifications
               </p>
             </div>

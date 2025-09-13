@@ -194,21 +194,21 @@ const EmployeeDetailPageReal: React.FC = () => {
             <ArrowLeftIcon className="h-5 w-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+            <h1 className="text-2xl font-bold" className="text-gray-900 dark:text-gray-100">
               Employee Not Found
             </h1>
-            <p style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-gray-600 dark:text-gray-300">
               The requested employee could not be found
             </p>
           </div>
         </div>
         
         <div className="card-elevated p-8 text-center">
-          <UserIcon className="mx-auto h-16 w-16 mb-4" style={{ color: 'var(--text-tertiary)' }} />
-          <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+          <UserIcon className="mx-auto h-16 w-16 mb-4" className="text-gray-400 dark:text-gray-500" />
+          <h2 className="text-xl font-semibold mb-2" className="text-gray-900 dark:text-gray-100">
             Employee Not Found
           </h2>
-          <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
+          <p className="mb-6" className="text-gray-600 dark:text-gray-300">
             This employee may have been removed or the ID is incorrect.
           </p>
           <button
@@ -287,7 +287,7 @@ const EmployeeDetailPageReal: React.FC = () => {
     if (active && payload && payload.length) {
       return (
         <div className="card-elevated p-3 shadow-lg">
-          <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{label}</p>
+          <p className="font-medium" className="text-gray-900 dark:text-gray-100">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} style={{ color: entry.color }}>
               {entry.name}: {entry.value}
@@ -333,10 +333,10 @@ const EmployeeDetailPageReal: React.FC = () => {
             <ArrowLeftIcon className="h-5 w-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+            <h1 className="text-2xl font-bold" className="text-gray-900 dark:text-gray-100">
               Employee Details
             </h1>
-            <p style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-gray-600 dark:text-gray-300">
               Comprehensive overview and analytics
             </p>
           </div>
@@ -346,7 +346,7 @@ const EmployeeDetailPageReal: React.FC = () => {
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
               <ExclamationTriangleIcon className="h-4 w-4 text-blue-500" />
-              <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              <span className="text-sm" className="text-gray-600 dark:text-gray-300">
                 Company Policy: {defaultPolicy.casual}C • {defaultPolicy.sick}S • {defaultPolicy.annual}A
               </span>
             </div>
@@ -376,21 +376,21 @@ const EmployeeDetailPageReal: React.FC = () => {
                 className="hover-lift"
               />
               <div className="text-center sm:text-left">
-                <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="text-3xl font-bold mb-2" className="text-gray-900 dark:text-gray-100">
                   {employee.name}
                 </h2>
-                <p className="text-lg mb-4" style={{ color: 'var(--text-secondary)' }}>
+                <p className="text-lg mb-4" className="text-gray-600 dark:text-gray-300">
                   {employee.position}
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center space-x-2">
-                    <EnvelopeIcon className="h-4 w-4" style={{ color: 'var(--text-tertiary)' }} />
-                    <span style={{ color: 'var(--text-secondary)' }}>{employee.email}</span>
+                    <EnvelopeIcon className="h-4 w-4" className="text-gray-400 dark:text-gray-500" />
+                    <span className="text-gray-600 dark:text-gray-300">{employee.email}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <BuildingOfficeIcon className="h-4 w-4" style={{ color: 'var(--text-tertiary)' }} />
-                    <span style={{ color: 'var(--text-secondary)' }}>
+                    <BuildingOfficeIcon className="h-4 w-4" className="text-gray-400 dark:text-gray-500" />
+                    <span className="text-gray-600 dark:text-gray-300">
                       {typeof employee.department === 'object' && (employee.department as any)?.name 
                         ? (employee.department as any).name 
                         : employee.department}
@@ -398,13 +398,13 @@ const EmployeeDetailPageReal: React.FC = () => {
                   </div>
                   {employee.phone && (
                     <div className="flex items-center space-x-2">
-                      <PhoneIcon className="h-4 w-4" style={{ color: 'var(--text-tertiary)' }} />
-                      <span style={{ color: 'var(--text-secondary)' }}>{employee.phone}</span>
+                      <PhoneIcon className="h-4 w-4" className="text-gray-400 dark:text-gray-500" />
+                      <span className="text-gray-600 dark:text-gray-300">{employee.phone}</span>
                     </div>
                   )}
                   <div className="flex items-center space-x-2">
-                    <UserIcon className="h-4 w-4" style={{ color: 'var(--text-tertiary)' }} />
-                    <span style={{ color: 'var(--text-secondary)' }}>ID: {employee.employeeId}</span>
+                    <UserIcon className="h-4 w-4" className="text-gray-400 dark:text-gray-500" />
+                    <span className="text-gray-600 dark:text-gray-300">ID: {employee.employeeId}</span>
                   </div>
                 </div>
 
@@ -432,10 +432,10 @@ const EmployeeDetailPageReal: React.FC = () => {
                     <div className="flex items-center justify-center mb-2">
                       <CalendarDaysIcon className="h-8 w-8 text-blue-500" />
                     </div>
-                    <p className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+                    <p className="text-2xl font-bold mb-1" className="text-gray-900 dark:text-gray-100">
                       {totalAllocated}
                     </p>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    <p className="text-sm" className="text-gray-600 dark:text-gray-300">
                       Total Allocated
                     </p>
                   </div>
@@ -446,10 +446,10 @@ const EmployeeDetailPageReal: React.FC = () => {
                     <div className="flex items-center justify-center mb-2">
                       <CheckCircleIcon className="h-8 w-8 text-red-500" />
                     </div>
-                    <p className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+                    <p className="text-2xl font-bold mb-1" className="text-gray-900 dark:text-gray-100">
                       {totalUsed}
                     </p>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    <p className="text-sm" className="text-gray-600 dark:text-gray-300">
                       Leaves Taken
                     </p>
                   </div>
@@ -460,10 +460,10 @@ const EmployeeDetailPageReal: React.FC = () => {
                     <div className="flex items-center justify-center mb-2">
                       <ClockIcon className="h-8 w-8 text-green-500" />
                     </div>
-                    <p className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+                    <p className="text-2xl font-bold mb-1" className="text-gray-900 dark:text-gray-100">
                       {totalRemaining}
                     </p>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    <p className="text-sm" className="text-gray-600 dark:text-gray-300">
                       Remaining
                     </p>
                   </div>
@@ -482,10 +482,10 @@ const EmployeeDetailPageReal: React.FC = () => {
             <div className="card-header">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
                 <div>
-                  <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  <h3 className="text-lg font-semibold" className="text-gray-900 dark:text-gray-100">
                     Leave Analytics
                   </h3>
-                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                  <p className="text-sm" className="text-gray-600 dark:text-gray-300">
                     Visual breakdown of leave usage patterns for {new Date().getFullYear()}
                   </p>
                 </div>
@@ -545,15 +545,15 @@ const EmployeeDetailPageReal: React.FC = () => {
                 {activeChart === 'line' && (
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={monthlyData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
                       <XAxis 
                         dataKey="month" 
-                        tick={{ fill: 'var(--text-secondary)' }}
-                        axisLine={{ stroke: 'var(--border-color)' }}
+                        tick={{ fill: '#6b7280' }}
+                        axisLine={{ stroke: '#e5e7eb' }}
                       />
                       <YAxis 
-                        tick={{ fill: 'var(--text-secondary)' }}
-                        axisLine={{ stroke: 'var(--border-color)' }}
+                        tick={{ fill: '#6b7280' }}
+                        axisLine={{ stroke: '#e5e7eb' }}
                       />
                       <Tooltip content={<CustomTooltip />} />
                       <Line 
@@ -571,15 +571,15 @@ const EmployeeDetailPageReal: React.FC = () => {
                 {activeChart === 'bar' && (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={leaveTypeData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-gray-200 dark:stroke-gray-700" />
                       <XAxis 
                         dataKey="type" 
-                        tick={{ fill: 'var(--text-secondary)' }}
-                        axisLine={{ stroke: 'var(--border-color)' }}
+                        tick={{ fill: '#6b7280' }}
+                        axisLine={{ stroke: '#e5e7eb' }}
                       />
                       <YAxis 
-                        tick={{ fill: 'var(--text-secondary)' }}
-                        axisLine={{ stroke: 'var(--border-color)' }}
+                        tick={{ fill: '#6b7280' }}
+                        axisLine={{ stroke: '#e5e7eb' }}
                       />
                       <Tooltip content={<CustomTooltip />} />
                       <Legend />
@@ -599,10 +599,10 @@ const EmployeeDetailPageReal: React.FC = () => {
             <div className="card-header">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  <h3 className="text-lg font-semibold" className="text-gray-900 dark:text-gray-100">
                     Leave Balance
                   </h3>
-                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                  <p className="text-sm" className="text-gray-600 dark:text-gray-300">
                     Current allocation status
                   </p>
                 </div>
@@ -631,9 +631,9 @@ const EmployeeDetailPageReal: React.FC = () => {
             </div>
             <div className="card-body space-y-4">
               {Object.entries(leaveBalance).map(([type, data]: [string, any]) => (
-                <div key={type} className="p-4 rounded-lg border" style={{ borderColor: 'var(--border-color)' }}>
+                <div key={type} className="p-4 rounded-lg border" className="border-gray-200 dark:border-gray-700">
                   <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium capitalize" style={{ color: 'var(--text-primary)' }}>
+                    <h4 className="font-medium capitalize" className="text-gray-900 dark:text-gray-100">
                       {type} Leave
                     </h4>
                     <div className="flex items-center space-x-2">
@@ -659,19 +659,19 @@ const EmployeeDetailPageReal: React.FC = () => {
                   
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span style={{ color: 'var(--text-secondary)' }}>Allocated</span>
-                      <span style={{ color: 'var(--text-primary)' }}>
+                      <span className="text-gray-600 dark:text-gray-300">Allocated</span>
+                      <span className="text-gray-900 dark:text-gray-100">
                         {isEditingAllocation && user?.role === 'admin' 
                           ? editAllocation[type as keyof LeaveAllocation] 
                           : data.total}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span style={{ color: 'var(--text-secondary)' }}>Used</span>
+                      <span className="text-gray-600 dark:text-gray-300">Used</span>
                       <span className="text-red-600">{data.used}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span style={{ color: 'var(--text-secondary)' }}>Remaining</span>
+                      <span className="text-gray-600 dark:text-gray-300">Remaining</span>
                       <span className="text-green-600">
                         {isEditingAllocation && user?.role === 'admin' 
                           ? Math.max(0, editAllocation[type as keyof LeaveAllocation] - data.used)
@@ -702,10 +702,10 @@ const EmployeeDetailPageReal: React.FC = () => {
         <div className="card-header">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+              <h3 className="text-xl font-semibold" className="text-gray-900 dark:text-gray-100">
                 Leave History
               </h3>
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-sm" className="text-gray-600 dark:text-gray-300">
                 Complete record of leave requests and approvals
               </p>
             </div>
@@ -768,12 +768,12 @@ const EmployeeDetailPageReal: React.FC = () => {
             <div className="text-center py-12">
               <CalendarDaysIcon 
                 className="w-16 h-16 mx-auto mb-4" 
-                style={{ color: 'var(--text-tertiary)' }} 
+                className="text-gray-400 dark:text-gray-500" 
               />
-              <p className="text-lg font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+              <p className="text-lg font-medium mb-2" className="text-gray-900 dark:text-gray-100">
                 No Leave History
               </p>
-              <p style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-gray-600 dark:text-gray-300">
                 This employee hasn't submitted any leave requests yet.
               </p>
             </div>

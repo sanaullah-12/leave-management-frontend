@@ -70,15 +70,11 @@ const DashboardPage: React.FC = () => {
       <div className="relative" style={{ zIndex: 10 }}>
       {/* Welcome Header */}
       <div
-        className="-mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-8 mb-8"
-        style={{
-          backgroundColor: "var(--surface-elevated)",
-          borderBottom: "1px solid var(--border-color)",
-        }}
+        className="-mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-8 mb-8 bg-white dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700"
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-2">
+            <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">
               Welcome back, {user?.name}! 👋
             </h1>
             <p className="text-sm text-gray-400">
@@ -93,8 +89,7 @@ const DashboardPage: React.FC = () => {
                 {user?.role === "admin" ? "👑 Administrator" : "👤 Employee"}
               </span>
               <span
-                className="text-sm"
-                style={{ color: "var(--text-tertiary)" }}
+                className="text-sm text-gray-400 dark:text-gray-500"
               >
                 {typeof user?.department === "object" &&
                 (user?.department as any)?.name
@@ -252,8 +247,8 @@ const DashboardPage: React.FC = () => {
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
-                        <p className="text-lg font-bold">{data.remaining}</p>
-                        <p style={{ color: "var(--text-tertiary)" }}>left</p>
+                        <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{data.remaining}</p>
+                        <p className="text-gray-400 dark:text-gray-500">left</p>
                       </div>
                     </div>
                   </div>
@@ -262,7 +257,7 @@ const DashboardPage: React.FC = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-sm text-gray-400">Total:</span>
-                      <span className="font-semibold">{data.total}</span>
+                      <span className="font-semibold text-gray-900 dark:text-gray-100">{data.total}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-sm text-gray-400">Used:</span>
@@ -287,10 +282,9 @@ const DashboardPage: React.FC = () => {
       <div className="mt-12 bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
         <div className="px-8 py-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/80 dark:to-gray-900/40 border-b border-gray-200/50 dark:border-gray-700/50">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">📅 Recent Leave Requests</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">📅 Recent Leave Requests</h2>
             <span
-              className="text-sm px-3 py-1 rounded-full bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm"
-              style={{ color: "var(--text-tertiary)" }}
+              className="text-sm px-3 py-1 rounded-full bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm text-gray-400 dark:text-gray-500"
             >
               Last {recentLeaves?.data?.leaves?.length || 0} requests
             </span>
@@ -333,13 +327,13 @@ const DashboardPage: React.FC = () => {
                       {recentLeaves!.data.leaves.map((leave: any) => (
                         <tr
                           key={leave._id}
-                          className="group transition-all duration-300 ease-in-out hover:bg-muted/50 hover:shadow-md rounded-lg cursor-pointer"
+                          className="group table-row-hover transition-all duration-300"
                         >
                           {/* ✅ Employee Column Fixed */}
                           {user?.role === "admin" && (
                             <td className="pl-2 pr-4 py-4 whitespace-nowrap">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center text-primary-600 dark:text-primary-400 text-sm font-medium flex-shrink-0">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 text-sm font-medium flex-shrink-0">
                                   {typeof leave.employee === "object" &&
                                   leave.employee?.name
                                     ? leave.employee.name
@@ -350,7 +344,7 @@ const DashboardPage: React.FC = () => {
                                     : "U"}
                                 </div>
                                 <div className="flex flex-col">
-                                  <span className="text-sm font-medium text-white">
+                                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                     {typeof leave.employee === "object" &&
                                     leave.employee?.name
                                       ? leave.employee.name
@@ -377,11 +371,11 @@ const DashboardPage: React.FC = () => {
                           {/* Duration */}
                           <td className="px-4 py-4 whitespace-nowrap text-sm">
                             <div>
-                              <span className="font-medium">
+                              <span className="font-medium text-gray-900 dark:text-gray-100">
                                 {new Date(leave.startDate).toLocaleDateString()}
                               </span>{" "}
                               -{" "}
-                              <span className="font-medium">
+                              <span className="font-medium text-gray-900 dark:text-gray-100">
                                 {new Date(leave.endDate).toLocaleDateString()}
                               </span>
                             </div>
@@ -433,7 +427,7 @@ const DashboardPage: React.FC = () => {
                     className="bg-white/50 dark:bg-gray-800/50 rounded-xl shadow p-4 space-y-4"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center text-primary-600 dark:text-primary-400 text-sm font-medium flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 text-sm font-medium flex-shrink-0">
                         {typeof leave.employee === "object" &&
                         leave.employee?.name
                           ? leave.employee.name
@@ -456,7 +450,7 @@ const DashboardPage: React.FC = () => {
                       </div>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>
+                      <span className="text-gray-900 dark:text-gray-100">
                         {new Date(leave.startDate).toLocaleDateString()} -{" "}
                         {new Date(leave.endDate).toLocaleDateString()}
                       </span>

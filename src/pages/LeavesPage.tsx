@@ -383,12 +383,11 @@ const LeavesPage: React.FC = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1
-            className="text-2xl font-bold"
-            style={{ color: "var(--text-primary)" }}
+            className="text-2xl font-bold text-gray-900 dark:text-gray-100"
           >
             Leave Requests
           </h1>
-          <p style={{ color: "var(--text-secondary)" }}>
+          <p className="text-gray-600 dark:text-gray-300">
             {user?.role === "admin"
               ? "Manage employee leave requests"
               : "View and submit your leave requests"}
@@ -467,8 +466,7 @@ const LeavesPage: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="card-elevated rounded-lg p-6 w-full max-w-md mx-4">
             <h2
-              className="text-lg font-medium mb-4"
-              style={{ color: "var(--text-primary)" }}
+              className="text-lg font-medium mb-4 text-gray-900 dark:text-gray-100"
             >
               Request Leave
             </h2>
@@ -476,8 +474,7 @@ const LeavesPage: React.FC = () => {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
                 <label
-                  className="block text-sm font-medium"
-                  style={{ color: "var(--text-primary)" }}
+                  className="block text-sm font-medium text-gray-900 dark:text-gray-100"
                 >
                   Leave Type
                 </label>
@@ -504,8 +501,7 @@ const LeavesPage: React.FC = () => {
 
               <div>
                 <label
-                  className="block text-sm font-medium"
-                  style={{ color: "var(--text-primary)" }}
+                  className="block text-sm font-medium text-gray-900 dark:text-gray-100"
                 >
                   Start Date
                 </label>
@@ -526,8 +522,7 @@ const LeavesPage: React.FC = () => {
 
               <div>
                 <label
-                  className="block text-sm font-medium"
-                  style={{ color: "var(--text-primary)" }}
+                  className="block text-sm font-medium text-gray-900 dark:text-gray-100"
                 >
                   End Date
                 </label>
@@ -546,8 +541,7 @@ const LeavesPage: React.FC = () => {
 
               <div>
                 <label
-                  className="block text-sm font-medium"
-                  style={{ color: "var(--text-primary)" }}
+                  className="block text-sm font-medium text-gray-900 dark:text-gray-100"
                 >
                   Reason
                 </label>
@@ -603,27 +597,27 @@ const LeavesPage: React.FC = () => {
                   <thead className="bg-gradient-to-r from-gray-50/80 to-gray-100/50 dark:from-gray-800/60 dark:to-gray-900/30">
                     <tr>
                       {user?.role === "admin" && (
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
                           Employee
                         </th>
                       )}
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
                         Type
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
                         Duration
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
                         Days
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
                         Reason
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
                         Status
                       </th>
                       {user?.role === "admin" && (
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
                           Actions
                         </th>
                       )}
@@ -635,7 +629,7 @@ const LeavesPage: React.FC = () => {
                         {user?.role === "admin" && (
                           <td className="pl-2 pr-4 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900 dark:to-primary-800 flex items-center justify-center text-primary-600 dark:text-primary-400 text-sm font-medium">
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 text-sm font-medium">
                                 {typeof leave.employee === "object" &&
                                 leave.employee?.name
                                   ? leave.employee.name
@@ -646,7 +640,7 @@ const LeavesPage: React.FC = () => {
                                   : "U"}
                               </div>
                               <div className="flex flex-col">
-                                <span className="text-sm font-medium text-white">
+                                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                   {typeof leave.employee === "object" &&
                                   leave.employee?.name
                                     ? leave.employee.name
@@ -667,12 +661,12 @@ const LeavesPage: React.FC = () => {
                             {leave.leaveType}
                           </span>
                         </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm" style={{ color: "var(--text-primary)" }}>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                           <div>
-                            <span className="text-xs" style={{ color: "var(--text-secondary)" }}>From: </span>
+                            <span className="text-xs text-gray-600 dark:text-gray-300">From: </span>
                             <span>{new Date(leave.startDate).toLocaleDateString()}</span>
                             <span className="mx-2">-</span>
-                            <span className="text-xs" style={{ color: "var(--text-secondary)" }}>To: </span>
+                            <span className="text-xs text-gray-600 dark:text-gray-300">To: </span>
                             <span>{new Date(leave.endDate).toLocaleDateString()}</span>
                           </div>
                         </td>
@@ -683,7 +677,7 @@ const LeavesPage: React.FC = () => {
                         </td>
                         <td className="px-4 py-4">
                           <div className="max-w-xs">
-                            <div className="text-sm line-clamp-2" style={{ color: "var(--text-primary)" }} title={leave.reason}>
+                            <div className="text-sm line-clamp-2 text-gray-900 dark:text-gray-100" title={leave.reason}>
                               {leave.reason}
                             </div>
                           </div>
@@ -777,13 +771,13 @@ const LeavesPage: React.FC = () => {
 
                   {/* Employee Info (Admin only) */}
                   {user?.role === "admin" && (
-                    <div className="mb-3 pb-3 border-b" style={{ borderColor: 'var(--border-primary)' }}>
-                      <div className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                    <div className="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         {typeof leave.employee === "object" && leave.employee?.name
                           ? leave.employee.name
                           : "Unknown"}
                       </div>
-                      <div className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                      <div className="text-xs text-gray-600 dark:text-gray-300">
                         {typeof leave.employee === "object" && leave.employee?.employeeId
                           ? leave.employee.employeeId
                           : "N/A"}
@@ -793,17 +787,16 @@ const LeavesPage: React.FC = () => {
 
                   {/* Duration */}
                   <div className="mb-3">
-                    <div className="text-xs font-medium uppercase tracking-wider mb-2" 
-                         style={{ color: 'var(--text-secondary)' }}>
+                    <div className="text-xs font-medium uppercase tracking-wider mb-2 text-gray-600 dark:text-gray-300">
                       Duration
                     </div>
-                    <div className="flex justify-between text-sm" style={{ color: 'var(--text-primary)' }}>
+                    <div className="flex justify-between text-sm text-gray-900 dark:text-gray-100">
                       <div>
-                        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>From: </span>
+                        <span className="text-xs text-gray-600 dark:text-gray-300">From: </span>
                         {new Date(leave.startDate).toLocaleDateString()}
                       </div>
                       <div>
-                        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>To: </span>
+                        <span className="text-xs text-gray-600 dark:text-gray-300">To: </span>
                         {new Date(leave.endDate).toLocaleDateString()}
                       </div>
                     </div>
@@ -811,19 +804,17 @@ const LeavesPage: React.FC = () => {
 
                   {/* Expandable Reason Section */}
                   <div className="mb-4">
-                    <div className="text-xs font-medium uppercase tracking-wider mb-2" 
-                         style={{ color: 'var(--text-secondary)' }}>
+                    <div className="text-xs font-medium uppercase tracking-wider mb-2 text-gray-600 dark:text-gray-300">
                       Reason
                     </div>
-                    <div className="text-sm line-clamp-3 bg-gray-50 dark:bg-gray-800 p-3 rounded-md" 
-                         style={{ color: 'var(--text-primary)' }}>
+                    <div className="text-sm line-clamp-3 bg-gray-50 dark:bg-gray-800 p-3 rounded-md text-gray-900 dark:text-gray-100">
                       {leave.reason}
                     </div>
                   </div>
 
                   {/* Action Buttons (Admin only) */}
                   {user?.role === "admin" && leave.status === "pending" && (
-                    <div className="flex space-x-3 pt-3 border-t" style={{ borderColor: 'var(--border-primary)' }}>
+                    <div className="flex space-x-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                       <button
                         onClick={() => handleReview(leave._id, "approved")}
                         disabled={reviewLeaveMutation.isPending}
@@ -842,7 +833,7 @@ const LeavesPage: React.FC = () => {
                   )}
                   
                   {user?.role === "admin" && leave.status !== "pending" && (
-                    <div className="pt-3 border-t text-center" style={{ borderColor: 'var(--border-primary)' }}>
+                    <div className="pt-3 border-t text-center border-gray-200 dark:border-gray-700">
                       <span className="text-sm text-gray-400">Request Reviewed</span>
                     </div>
                   )}
@@ -854,14 +845,13 @@ const LeavesPage: React.FC = () => {
           <div className="text-center py-16 px-8">
             <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-2xl flex items-center justify-center">
               <ClockIcon
-                className="w-10 h-10"
-                style={{ color: "var(--text-tertiary)" }}
+                className="w-10 h-10 text-gray-400 dark:text-gray-500"
               />
             </div>
-            <p className="text-lg font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
+            <p className="text-lg font-medium mb-2 text-gray-600 dark:text-gray-300">
               No leave requests found
             </p>
-            <p className="text-sm max-w-md mx-auto" style={{ color: "var(--text-tertiary)" }}>
+            <p className="text-sm max-w-md mx-auto text-gray-400 dark:text-gray-500">
               {selectedStatus ? `No ${selectedStatus} leave requests found` : 'Submit your first leave request to see it here'}
             </p>
           </div>
@@ -872,32 +862,23 @@ const LeavesPage: React.FC = () => {
       {showRejectionPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div 
-            className="rounded-lg p-6 w-full max-w-md mx-4 border shadow-lg" 
-            style={{ 
-              backgroundColor: 'var(--surface-primary)',
-              borderColor: 'var(--border-primary)'
-            }}
+            className="rounded-lg p-6 w-full max-w-md mx-4 border shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
           >
-            <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
               Rejection Reason
             </h3>
-            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-sm mb-4 text-gray-600 dark:text-gray-300">
               Please provide a reason for rejecting this leave request:
             </p>
             <textarea
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
               placeholder="Enter rejection reason..."
-              className="w-full p-3 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-              style={{ 
-                backgroundColor: 'var(--surface-secondary)', 
-                borderColor: 'var(--border-primary)',
-                color: 'var(--text-primary)'
-              }}
+              className="w-full p-3 border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100"
               rows={4}
               maxLength={500}
             />
-            <div className="text-xs mt-1 mb-4" style={{ color: 'var(--text-secondary)' }}>
+            <div className="text-xs mt-1 mb-4 text-gray-600 dark:text-gray-300">
               {rejectionReason.length}/500 characters
             </div>
             <div className="flex space-x-3">

@@ -119,46 +119,69 @@ const NotificationContainer: React.FC = () => {
     }
   };
 
+  const getTextStyles = (type: Notification['type']) => {
+    switch (type) {
+      case 'success':
+        return {
+          title: 'text-green-800 dark:text-green-200',
+          message: 'text-green-700 dark:text-green-300'
+        };
+      case 'error':
+        return {
+          title: 'text-red-800 dark:text-red-200',
+          message: 'text-red-700 dark:text-red-300'
+        };
+      case 'warning':
+        return {
+          title: 'text-yellow-800 dark:text-yellow-200',
+          message: 'text-yellow-700 dark:text-yellow-300'
+        };
+      case 'info':
+      default:
+        return {
+          title: 'text-blue-800 dark:text-blue-200',
+          message: 'text-blue-700 dark:text-blue-300'
+        };
+    }
+  };
+
   if (notifications.length === 0) return null;
 
   return (
     <div className="fixed top-4 right-4 z-50 space-y-2 max-w-sm">
-      {notifications.map((notification) => (
-        <div
-          key={notification.id}
-          className={`rounded-lg border p-4 shadow-lg transition-all duration-300 ${getNotificationStyles(notification.type)}`}
-        >
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              {getNotificationIcon(notification.type)}
-            </div>
-            <div className="ml-3 flex-1">
-              <h3 
-                className="text-sm font-medium" 
-                style={{ color: 'var(--text-primary)' }}
-              >
-                {notification.title}
-              </h3>
-              {notification.message && (
-                <p 
-                  className="mt-1 text-sm" 
-                  style={{ color: 'var(--text-secondary)' }}
+      {notifications.map((notification) => {
+        const textStyles = getTextStyles(notification.type);
+        return (
+          <div
+            key={notification.id}
+            className={`rounded-lg border p-4 shadow-lg transition-all duration-300 ${getNotificationStyles(notification.type)}`}
+          >
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                {getNotificationIcon(notification.type)}
+              </div>
+              <div className="ml-3 flex-1">
+                <h3 className={`text-sm font-medium ${textStyles.title}`}>
+                  {notification.title}
+                </h3>
+                {notification.message && (
+                  <p className={`mt-1 text-sm ${textStyles.message}`}>
+                    {notification.message}
+                  </p>
+                )}
+              </div>
+              <div className="ml-4 flex-shrink-0">
+                <button
+                  onClick={() => removeNotification(notification.id)}
+                  className="inline-flex text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 >
-                  {notification.message}
-                </p>
-              )}
-            </div>
-            <div className="ml-4 flex-shrink-0">
-              <button
-                onClick={() => removeNotification(notification.id)}
-                className="inline-flex text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-              >
-                <XMarkIcon className="h-4 w-4" />
-              </button>
+                  <XMarkIcon className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

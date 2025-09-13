@@ -262,21 +262,21 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
                   className="hover-lift"
                 />
                 <div className="text-center sm:text-left">
-                  <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+                  <h2 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">
                     {user.name}
                   </h2>
-                  <p className="text-lg mb-4" style={{ color: 'var(--text-secondary)' }}>
+                  <p className="text-lg mb-4 text-gray-600 dark:text-gray-300">
                     {user.position}
                   </p>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div className="flex items-center space-x-2">
-                      <EnvelopeIcon className="h-4 w-4" style={{ color: 'var(--text-tertiary)' }} />
-                      <span style={{ color: 'var(--text-secondary)' }}>{user.email}</span>
+                      <EnvelopeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                      <span className="text-gray-600 dark:text-gray-300">{user.email}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <BuildingOfficeIcon className="h-4 w-4" style={{ color: 'var(--text-tertiary)' }} />
-                      <span style={{ color: 'var(--text-secondary)' }}>
+                      <BuildingOfficeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                      <span className="text-gray-600 dark:text-gray-300">
                         {typeof user.department === 'object' && (user.department as any)?.name 
                           ? (user.department as any).name 
                           : user.department}
@@ -284,13 +284,13 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
                     </div>
                     {user.phone && (
                       <div className="flex items-center space-x-2">
-                        <PhoneIcon className="h-4 w-4" style={{ color: 'var(--text-tertiary)' }} />
-                        <span style={{ color: 'var(--text-secondary)' }}>{user.phone}</span>
+                        <PhoneIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                        <span className="text-gray-600 dark:text-gray-300">{user.phone}</span>
                       </div>
                     )}
                     <div className="flex items-center space-x-2">
-                      <UserIcon className="h-4 w-4" style={{ color: 'var(--text-tertiary)' }} />
-                      <span style={{ color: 'var(--text-secondary)' }}>ID: {user.employeeId}</span>
+                      <UserIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                      <span className="text-gray-600 dark:text-gray-300">ID: {user.employeeId}</span>
                     </div>
                   </div>
 
@@ -317,12 +317,12 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
                     <div className="stats-card text-center hover-lift">
                       <div className="p-4">
                         <div className="flex items-center justify-center mb-2">
-                          <CalendarDaysIcon className="h-8 w-8 text-blue-500" />
+                          <CalendarDaysIcon className="h-6 w-6 text-blue-500" />
                         </div>
-                        <p className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+                        <p className="text-2xl font-bold mb-1 text-gray-900 dark:text-gray-100">
                           {totals.totalAllocated}
                         </p>
-                        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
                           Total Allocated
                         </p>
                       </div>
@@ -331,12 +331,12 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
                     <div className="stats-card text-center hover-lift">
                       <div className="p-4">
                         <div className="flex items-center justify-center mb-2">
-                          <CheckCircleIcon className="h-8 w-8 text-red-500" />
+                          <CheckCircleIcon className="h-6 w-6 text-red-500" />
                         </div>
-                        <p className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+                        <p className="text-2xl font-bold mb-1 text-gray-900 dark:text-gray-100">
                           {totals.totalUsed}
                         </p>
-                        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
                           Leaves Taken
                         </p>
                       </div>
@@ -345,12 +345,12 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
                     <div className="stats-card text-center hover-lift">
                       <div className="p-4">
                         <div className="flex items-center justify-center mb-2">
-                          <ClockIcon className="h-8 w-8 text-green-500" />
+                          <ClockIcon className="h-6 w-6 text-green-500" />
                         </div>
-                        <p className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+                        <p className="text-2xl font-bold mb-1 text-gray-900 dark:text-gray-100">
                           {totals.totalRemaining}
                         </p>
-                        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
                           Remaining
                         </p>
                       </div>
@@ -367,22 +367,22 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
       {Object.keys(leaveBalance).length > 0 && (
         <div className="card">
           <div className="card-header">
-            <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+            <h4 className="font-semibold text-gray-900 dark:text-gray-100">
               💼 Leave Balance {dateFilter && (dateFilter.dateFrom || dateFilter.dateTo) ? '(Filtered Period)' : ''}
             </h4>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Current allocation status
             </p>
           </div>
           <div className="card-body">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {Object.entries(leaveBalance).map(([type, data]: [string, any]) => (
-                <div key={type} className="p-4 rounded-lg" style={{ backgroundColor: 'var(--surface-hover)' }}>
+                <div key={type} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-900">
                   <div className="flex items-center justify-between mb-2">
-                    <h5 className="font-medium capitalize" style={{ color: 'var(--text-primary)' }}>
+                    <h5 className="font-medium capitalize text-gray-900 dark:text-gray-100">
                       {type} Leave
                     </h5>
-                    <span className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
+                    <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
                       {data.remaining}/{data.total}
                     </span>
                   </div>
@@ -397,7 +397,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
                       style={{ width: `${(data.used / data.total) * 100}%` }}
                     ></div>
                   </div>
-                  <div className="flex justify-between text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>
+                  <div className="flex justify-between text-xs mt-1 text-gray-400 dark:text-gray-500">
                     <span>Used: {data.used}</span>
                     <span>Available: {data.remaining}</span>
                   </div>
@@ -415,10 +415,10 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
             <div className="flex items-center justify-center mb-2">
               <DocumentTextIcon className="h-6 w-6 text-blue-500" />
             </div>
-            <p className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+            <p className="text-2xl font-bold mb-1" className="text-gray-900 dark:text-gray-100">
               {stats.total}
             </p>
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-xs" className="text-gray-600 dark:text-gray-300">
               Total Requests
             </p>
           </div>
@@ -429,10 +429,10 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
             <div className="flex items-center justify-center mb-2">
               <CheckCircleIcon className="h-6 w-6 text-green-500" />
             </div>
-            <p className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+            <p className="text-2xl font-bold mb-1" className="text-gray-900 dark:text-gray-100">
               {stats.approved}
             </p>
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-xs" className="text-gray-600 dark:text-gray-300">
               Approved
             </p>
           </div>
@@ -443,10 +443,10 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
             <div className="flex items-center justify-center mb-2">
               <ClockIcon className="h-6 w-6 text-yellow-500" />
             </div>
-            <p className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+            <p className="text-2xl font-bold mb-1" className="text-gray-900 dark:text-gray-100">
               {stats.pending}
             </p>
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-xs" className="text-gray-600 dark:text-gray-300">
               Pending
             </p>
           </div>
@@ -457,10 +457,10 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
             <div className="flex items-center justify-center mb-2">
               <XCircleIcon className="h-6 w-6 text-red-500" />
             </div>
-            <p className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+            <p className="text-2xl font-bold mb-1" className="text-gray-900 dark:text-gray-100">
               {stats.rejected}
             </p>
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-xs" className="text-gray-600 dark:text-gray-300">
               Rejected
             </p>
           </div>
@@ -471,10 +471,10 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
             <div className="flex items-center justify-center mb-2">
               <ChartBarIcon className="h-6 w-6 text-purple-500" />
             </div>
-            <p className="text-2xl font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
+            <p className="text-2xl font-bold mb-1" className="text-gray-900 dark:text-gray-100">
               {stats.totalDaysUsed}
             </p>
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-xs" className="text-gray-600 dark:text-gray-300">
               Days Used
             </p>
           </div>
@@ -520,7 +520,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
 
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
-            <FunnelIcon className="h-4 w-4" style={{ color: 'var(--text-tertiary)' }} />
+            <FunnelIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(parseInt(e.target.value))}
@@ -537,34 +537,33 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
 
       {/* Leave Requests Timeline */}
       <div className="card-elevated">
-        <div className="card-header">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+              <h4 className="font-semibold text-gray-900 dark:text-gray-100">
                 📋 Leave Requests {dateFilter && (dateFilter.dateFrom || dateFilter.dateTo) 
                   ? `(${dateFilter.dateFrom ? new Date(dateFilter.dateFrom).toLocaleDateString() : 'All time'} - ${dateFilter.dateTo ? new Date(dateFilter.dateTo).toLocaleDateString() : 'All time'})`
                   : selectedYear}
               </h4>
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 {filteredRequests.length} requests found {dateFilter && (dateFilter.dateFrom || dateFilter.dateTo) ? 'in date range' : 'for this year'}
               </p>
             </div>
             {isCurrentUser && (
-              <div className="text-xs badge badge-primary">
+              <div className="badge badge-primary text-xs">
                 👤 Employee View - Read Only
               </div>
             )}
           </div>
         </div>
 
-        <div className="card-body">
+        <div className="p-6">
           {filteredRequests.length > 0 ? (
             <div className="space-y-4">
               {filteredRequests.map((leave: any) => (
                 <div 
                   key={leave._id} 
-                  className="flex items-start space-x-4 p-4 rounded-lg border border-opacity-50 hover:bg-primary-50/30 dark:hover:bg-primary-900/20 transition-all"
-                  style={{ borderColor: 'var(--border-color)' }}
+                  className="flex items-start space-x-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 border-opacity-50 hover:bg-primary-50/30 dark:hover:bg-primary-900/20 transition-all"
                 >
                   {/* Status Icon */}
                   <div className="flex-shrink-0 mt-1">
@@ -575,14 +574,14 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-3">
-                        <h5 className="font-medium capitalize" style={{ color: 'var(--text-primary)' }}>
+                        <h5 className="font-medium capitalize text-gray-900 dark:text-gray-100">
                           {leave.leaveType} Leave
                         </h5>
                         <span className={`text-xs ${getStatusBadge(leave.status)}`}>
                           {leave.status.charAt(0).toUpperCase() + leave.status.slice(1)}
                         </span>
                       </div>
-                      <div className="flex items-center space-x-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                      <div className="flex items-center space-x-2 text-xs text-gray-400 dark:text-gray-500">
                         <CalendarDaysIcon className="h-3 w-3" />
                         <span>Applied {formatDate(leave.createdAt || leave.startDate)}</span>
                       </div>
@@ -590,18 +589,18 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                       <div>
-                        <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
                           Duration
                         </p>
-                        <p className="text-sm" style={{ color: 'var(--text-primary)' }}>
+                        <p className="text-sm text-gray-900 dark:text-gray-100">
                           {getDurationString(leave.startDate, leave.endDate)}
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
                           Total Days
                         </p>
-                        <p className="text-sm" style={{ color: 'var(--text-primary)' }}>
+                        <p className="text-sm text-gray-900 dark:text-gray-100">
                           {leave.totalDays || 1} days
                         </p>
                       </div>
@@ -609,22 +608,22 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
 
                     {leave.reason && (
                       <div className="mb-3">
-                        <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                        <p className="text-sm font-medium mb-1 text-gray-600 dark:text-gray-300">
                           Reason
                         </p>
-                        <p className="text-sm" style={{ color: 'var(--text-primary)' }}>
+                        <p className="text-sm text-gray-900 dark:text-gray-100">
                           {leave.reason}
                         </p>
                       </div>
                     )}
 
                     {leave.reviewComments && (
-                      <div className="p-3 rounded-md" style={{ backgroundColor: 'var(--surface-hover)' }}>
-                        <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                      <div className="p-3 rounded-md" className="bg-gray-50 dark:bg-gray-900">
+                        <p className="text-sm font-medium mb-1" className="text-gray-600 dark:text-gray-300">
                           {leave.status === 'approved' ? '✅ Approval Comments' : 
                            leave.status === 'rejected' ? '❌ Rejection Comments' : '💬 Review Comments'}
                         </p>
-                        <p className="text-sm" style={{ color: 'var(--text-primary)' }}>
+                        <p className="text-sm" className="text-gray-900 dark:text-gray-100">
                           {leave.reviewComments}
                         </p>
                       </div>
@@ -634,7 +633,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
                   {/* Action */}
                   <div className="flex-shrink-0">
                     <button className="p-2 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-all">
-                      <EyeIcon className="h-4 w-4" style={{ color: 'var(--text-tertiary)' }} />
+                      <EyeIcon className="h-4 w-4" className="text-gray-400 dark:text-gray-500" />
                     </button>
                   </div>
                 </div>
@@ -644,19 +643,19 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
             <div className="text-center py-12">
               <CalendarDaysIcon 
                 className="w-16 h-16 mx-auto mb-4" 
-                style={{ color: 'var(--text-tertiary)' }} 
+                className="text-gray-400 dark:text-gray-500" 
               />
-              <p className="text-lg font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+              <p className="text-lg font-medium mb-2" className="text-gray-900 dark:text-gray-100">
                 No Leave Requests Found
               </p>
-              <p style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-gray-600 dark:text-gray-300">
                 {selectedStatus 
                   ? `No ${selectedStatus} leave requests found for ${selectedYear}.`
                   : `No leave requests found for ${selectedYear}.`
                 }
               </p>
               {isCurrentUser && (
-                <p className="text-sm mt-2" style={{ color: 'var(--text-tertiary)' }}>
+                <p className="text-sm mt-2" className="text-gray-400 dark:text-gray-500">
                   Submit your first leave request to see it here.
                 </p>
               )}

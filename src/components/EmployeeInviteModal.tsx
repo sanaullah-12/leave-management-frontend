@@ -266,17 +266,11 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div
-          className="flex justify-end space-x-3 pt-6 border-t"
-          style={{ borderColor: "var(--border-primary)" }}
-        >
+        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
           <button
             type="button"
             onClick={handleClose}
-            className="px-6 py-3 text-sm font-medium rounded-lg transition-colors
-              bg-gray-100 text-gray-700 border border-gray-300
-              hover:bg-gray-200
-              dark:bg-[var(--surface-hover)] dark:text-[var(--text-secondary)] dark:border-[var(--border-primary)]"
+            className="btn-secondary px-6 py-3"
             disabled={inviteEmployeeMutation.isPending}
           >
             Cancel
@@ -284,7 +278,7 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
           <button
             type="submit"
             disabled={inviteEmployeeMutation.isPending}
-            className="btn-primary px-8 py-3 text-sm font-medium text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
+            className="btn-primary px-8 py-3 inline-flex items-center"
           >
             {inviteEmployeeMutation.isPending ? (
               <>

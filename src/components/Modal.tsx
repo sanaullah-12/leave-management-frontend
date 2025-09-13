@@ -41,15 +41,14 @@ const Modal: React.FC<ModalProps> = ({
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h2 
-              className="text-xl font-semibold"
-              style={{ color: 'var(--text-primary)' }}
+              className="text-xl font-semibold text-gray-900 dark:text-gray-100"
             >
               {title}
             </h2>
             <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-              style={{ color: 'var(--text-secondary)' }}
+              className="text-gray-600 dark:text-gray-300"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>
