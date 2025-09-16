@@ -414,10 +414,10 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
             <div className="flex items-center justify-center mb-2">
               <DocumentTextIcon className="h-6 w-6 text-blue-500" />
             </div>
-            <p className="text-2xl font-bold mb-1" className="text-gray-900 dark:text-gray-100">
+            <p className="text-2xl font-bold mb-1 text-gray-900 dark:text-gray-100">
               {stats.total}
             </p>
-            <p className="text-xs" className="text-gray-600 dark:text-gray-300">
+            <p className="text-xs text-gray-600 dark:text-gray-300">
               Total Requests
             </p>
           </div>
@@ -428,10 +428,10 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
             <div className="flex items-center justify-center mb-2">
               <CheckCircleIcon className="h-6 w-6 text-green-500" />
             </div>
-            <p className="text-2xl font-bold mb-1" className="text-gray-900 dark:text-gray-100">
+            <p className="text-2xl font-bold mb-1 text-gray-900 dark:text-gray-100">
               {stats.approved}
             </p>
-            <p className="text-xs" className="text-gray-600 dark:text-gray-300">
+            <p className="text-xs text-gray-600 dark:text-gray-300">
               Approved
             </p>
           </div>
@@ -442,10 +442,10 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
             <div className="flex items-center justify-center mb-2">
               <ClockIcon className="h-6 w-6 text-yellow-500" />
             </div>
-            <p className="text-2xl font-bold mb-1" className="text-gray-900 dark:text-gray-100">
+            <p className="text-2xl font-bold mb-1 text-gray-900 dark:text-gray-100">
               {stats.pending}
             </p>
-            <p className="text-xs" className="text-gray-600 dark:text-gray-300">
+            <p className="text-xs text-gray-600 dark:text-gray-300">
               Pending
             </p>
           </div>
@@ -456,10 +456,10 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
             <div className="flex items-center justify-center mb-2">
               <XCircleIcon className="h-6 w-6 text-red-500" />
             </div>
-            <p className="text-2xl font-bold mb-1" className="text-gray-900 dark:text-gray-100">
+            <p className="text-2xl font-bold mb-1 text-gray-900 dark:text-gray-100">
               {stats.rejected}
             </p>
-            <p className="text-xs" className="text-gray-600 dark:text-gray-300">
+            <p className="text-xs text-gray-600 dark:text-gray-300">
               Rejected
             </p>
           </div>
@@ -470,10 +470,10 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
             <div className="flex items-center justify-center mb-2">
               <ChartBarIcon className="h-6 w-6 text-purple-500" />
             </div>
-            <p className="text-2xl font-bold mb-1" className="text-gray-900 dark:text-gray-100">
+            <p className="text-2xl font-bold mb-1 text-gray-900 dark:text-gray-100">
               {stats.totalDaysUsed}
             </p>
-            <p className="text-xs" className="text-gray-600 dark:text-gray-300">
+            <p className="text-xs text-gray-600 dark:text-gray-300">
               Days Used
             </p>
           </div>
@@ -617,12 +617,12 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
                     )}
 
                     {leave.reviewComments && (
-                      <div className="p-3 rounded-md" className="bg-gray-50 dark:bg-gray-900">
-                        <p className="text-sm font-medium mb-1" className="text-gray-600 dark:text-gray-300">
+                      <div className="p-3 rounded-md bg-gray-50 dark:bg-gray-900">
+                        <p className="text-sm font-medium mb-1 text-gray-600 dark:text-gray-300">
                           {leave.status === 'approved' ? '✅ Approval Comments' : 
                            leave.status === 'rejected' ? '❌ Rejection Comments' : '💬 Review Comments'}
                         </p>
-                        <p className="text-sm" className="text-gray-900 dark:text-gray-100">
+                        <p className="text-sm text-gray-900 dark:text-gray-100">
                           {leave.reviewComments}
                         </p>
                       </div>
@@ -632,7 +632,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
                   {/* Action */}
                   <div className="flex-shrink-0">
                     <button className="p-2 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-all">
-                      <EyeIcon className="h-4 w-4" className="text-gray-400 dark:text-gray-500" />
+                      <EyeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                     </button>
                   </div>
                 </div>
@@ -640,11 +640,10 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
             </div>
           ) : (
             <div className="text-center py-12">
-              <CalendarDaysIcon 
-                className="w-16 h-16 mx-auto mb-4" 
-                className="text-gray-400 dark:text-gray-500" 
+              <CalendarDaysIcon
+                className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-500"
               />
-              <p className="text-lg font-medium mb-2" className="text-gray-900 dark:text-gray-100">
+              <p className="text-lg font-medium mb-2 text-gray-900 dark:text-gray-100">
                 No Leave Requests Found
               </p>
               <p className="text-gray-600 dark:text-gray-300">
@@ -654,7 +653,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
                 }
               </p>
               {isCurrentUser && (
-                <p className="text-sm mt-2" className="text-gray-400 dark:text-gray-500">
+                <p className="text-sm mt-2 text-gray-400 dark:text-gray-500">
                   Submit your first leave request to see it here.
                 </p>
               )}

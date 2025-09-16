@@ -86,8 +86,11 @@ export const authAPI = {
 
 // Users API
 export const usersAPI = {
-  getEmployees: (page = 1, limit = 10) => 
+  getEmployees: (page = 1, limit = 10) =>
     api.get(`/users?page=${page}&limit=${limit}`),
+
+  getAdmins: (page = 1, limit = 10) =>
+    api.get(`/users/admins/list?page=${page}&limit=${limit}`),
   
   getEmployee: (id: string) => 
     api.get(`/users/${id}`),
@@ -148,19 +151,9 @@ export const leavesAPI = {
     api.put(`/leaves/allocation/${employeeId}`, { allocations }),
 };
 
-// Notification API
-export const notificationsAPI = {
-  getNotifications: (page = 1, limit = 20, unread = false) => 
-    api.get(`/notifications?page=${page}&limit=${limit}&unread=${unread}`),
-  
-  markAsRead: (notificationId: string) => 
-    api.put(`/notifications/${notificationId}/read`),
-  
-  markAllAsRead: () => 
-    api.put('/notifications/mark-all-read'),
-  
-  deleteNotification: (notificationId: string) => 
-    api.delete(`/notifications/${notificationId}`),
-};
+// Notification API - Removed for Socket.IO implementation
+// export const notificationsAPI = {
+//   // Will be implemented with Socket.IO in the future
+// };
 
 export default api;

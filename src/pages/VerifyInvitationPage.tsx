@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import PasswordInput from '../components/PasswordInput';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
@@ -25,6 +26,7 @@ interface InvitationData {
 const VerifyInvitationPage: React.FC = () => {
   const { token } = useParams<{ token: string }>();
   const { isAuthenticated } = useAuth();
+  const { isDark } = useTheme();
   const [invitation, setInvitation] = useState<InvitationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
@@ -63,7 +65,7 @@ const VerifyInvitationPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -71,11 +73,11 @@ const VerifyInvitationPage: React.FC = () => {
 
   if (error && !invitation) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-8 text-center">
           <XCircleIcon className="h-16 w-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Invalid Invitation</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Invalid Invitation</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">{error}</p>
           <a 
             href="/login" 
             className="btn-primary inline-block"
@@ -89,11 +91,11 @@ const VerifyInvitationPage: React.FC = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8 text-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 p-8 text-center">
           <CheckCircleIcon className="h-16 w-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Account Verified!</h2>
-          <p className="text-gray-600 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Account Verified!</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
             Your account has been successfully verified. You will be redirected to the dashboard.
           </p>
         </div>
@@ -129,24 +131,24 @@ const VerifyInvitationPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
           <CheckCircleIcon className="h-12 w-12 text-green-500 mx-auto mb-4" />
-          <h2 className="text-3xl font-extrabold text-gray-900">Complete Your Registration</h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100">Complete Your Registration</h2>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             You've been invited to join the team!
           </p>
         </div>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow-lg border border-gray-200 dark:border-gray-700 sm:rounded-lg sm:px-10">
           {/* Invitation Details */}
           {invitation && (
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
-              <h3 className="text-sm font-medium text-blue-900 mb-2">Invitation Details</h3>
-              <dl className="text-sm text-blue-800 space-y-1">
+            <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+              <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">Invitation Details</h3>
+              <dl className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
                 <div className="flex justify-between">
                   <dt className="font-medium">Name:</dt>
                   <dd>{invitation.name}</dd>
@@ -172,7 +174,7 @@ const VerifyInvitationPage: React.FC = () => {
           )}
 
           {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
+            <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-md">
               {error}
             </div>
           )}
@@ -190,6 +192,7 @@ const VerifyInvitationPage: React.FC = () => {
                 label="Create Password"
                 placeholder="Enter your password"
                 error={errors.password?.message}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors"
               />
             </div>
 
@@ -203,6 +206,7 @@ const VerifyInvitationPage: React.FC = () => {
                 label="Confirm Password"
                 placeholder="Confirm your password"
                 error={errors.confirmPassword?.message}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors"
               />
             </div>
 
@@ -210,7 +214,7 @@ const VerifyInvitationPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary w-full"
               >
                 {isSubmitting ? <LoadingSpinner size="sm" /> : 'Complete Registration'}
               </button>
@@ -219,7 +223,7 @@ const VerifyInvitationPage: React.FC = () => {
 
           <div className="mt-6">
             <div className="text-center">
-              <a href="/login" className="text-sm text-primary-600 hover:text-primary-500">
+              <a href="/login" className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
                 Already have an account? Sign in
               </a>
             </div>

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersAPI } from "../services/api";
-import { useNotifications } from "../components/NotificationSystem";
+// import { useNotifications } from "../components/NotificationSystem"; // Removed for Socket.IO implementation
 import LoadingSpinner from "../components/LoadingSpinner";
 import EmployeeInviteModal from "../components/EmployeeInviteModal";
 import AdminInviteModal from "../components/AdminInviteModal";
@@ -15,6 +15,7 @@ import {
   ExclamationTriangleIcon,
   MagnifyingGlassIcon,
   DocumentChartBarIcon,
+  ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 
@@ -22,7 +23,7 @@ const EmployeesPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { addNotification } = useNotifications();
+  // const { addNotification } = useNotifications(); // Removed for Socket.IO implementation
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showAdminInviteModal, setShowAdminInviteModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<{
@@ -32,6 +33,8 @@ const EmployeesPage: React.FC = () => {
     show: false,
     employee: null,
   });
+  const [error, setError] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<"employees" | "admins">("employees");
 
   // Search functionality state
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,7 +42,7 @@ const EmployeesPage: React.FC = () => {
   const [dateTo, setDateTo] = useState("");
   const [isSearchActive, setIsSearchActive] = useState(false);
 
-  const { data: employeesData, isLoading } = useQuery({
+  const { data: employeesData, isLoading: employeesLoading } = useQuery({
     queryKey: ["employees"],
     queryFn: () => usersAPI.getEmployees(),
     enabled: user?.role === "admin",
@@ -49,25 +52,52 @@ const EmployeesPage: React.FC = () => {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: adminsData, isLoading: adminsLoading } = useQuery({
+    queryKey: ["admins"],
+    queryFn: () => usersAPI.getAdmins(),
+    enabled: user?.role === "admin",
+    refetchInterval: false,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const isLoading = activeTab === "employees" ? employeesLoading : adminsLoading;
+  const currentData = activeTab === "employees" ? employeesData : adminsData;
+
+  // Debug logging
+  console.log('activeTab:', activeTab);
+  console.log('employeesData:', employeesData);
+  console.log('adminsData:', adminsData);
+  console.log('currentData:', currentData);
+
+  // Try both with and without .data wrapper
+  const currentUsers = activeTab === "employees"
+    ? (currentData?.data?.employees || currentData?.employees)
+    : (currentData?.data?.admins || currentData?.admins);
+
   const deactivateEmployeeMutation = useMutation({
     mutationFn: usersAPI.deactivateEmployee,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
-      addNotification({
-        type: "warning",
-        title: "Employee Deactivated",
-        message: "Employee has been deactivated successfully.",
-      });
+      queryClient.invalidateQueries({ queryKey: ["admins"] });
+      // addNotification({
+      //   type: "warning",
+      //   title: "Employee Deactivated",
+      //   message: "Employee has been deactivated successfully.",
+      // });
+      console.log('Employee deactivated successfully');
     },
     onError: (error: any) => {
       console.error("Failed to deactivate employee:", error);
-      addNotification({
-        type: "error",
-        title: "Deactivation Failed",
-        message:
-          error?.response?.data?.message ||
-          "Failed to deactivate employee. Please try again.",
-      });
+      // addNotification({
+      //   type: "error",
+      //   title: "Deactivation Failed",
+      //   message:
+      //     error?.response?.data?.message ||
+      //     "Failed to deactivate employee. Please try again.",
+      // });
+      console.error('Failed to deactivate employee:', error?.response?.data?.message || error.message);
     },
   });
 
@@ -75,21 +105,24 @@ const EmployeesPage: React.FC = () => {
     mutationFn: usersAPI.activateEmployee,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
-      addNotification({
-        type: "success",
-        title: "Employee Activated",
-        message: "Employee has been activated successfully.",
-      });
+      queryClient.invalidateQueries({ queryKey: ["admins"] });
+      // addNotification({
+      //   type: "success",
+      //   title: "Employee Activated",
+      //   message: "Employee has been activated successfully.",
+      // });
+      console.log('Employee activated successfully');
     },
     onError: (error: any) => {
       console.error("Failed to activate employee:", error);
-      addNotification({
-        type: "error",
-        title: "Activation Failed",
-        message:
-          error?.response?.data?.message ||
-          "Failed to activate employee. Please try again.",
-      });
+      // addNotification({
+      //   type: "error",
+      //   title: "Activation Failed",
+      //   message:
+      //     error?.response?.data?.message ||
+      //     "Failed to activate employee. Please try again.",
+      // });
+      console.error('Failed to activate employee:', error?.response?.data?.message || error.message);
     },
   });
 
@@ -97,22 +130,16 @@ const EmployeesPage: React.FC = () => {
     mutationFn: usersAPI.deleteEmployee,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
+      queryClient.invalidateQueries({ queryKey: ["admins"] });
       setDeleteConfirm({ show: false, employee: null });
-      addNotification({
-        type: "success",
-        title: "Employee Deleted",
-        message: "Employee has been deleted successfully.",
-      });
+      setError(""); // Clear any previous errors
+      console.log('Employee deleted successfully');
     },
     onError: (error: any) => {
       console.error("Failed to delete employee:", error);
-      addNotification({
-        type: "error",
-        title: "Deletion Failed",
-        message:
-          error?.response?.data?.message ||
-          "Failed to delete employee. Please try again.",
-      });
+      const errorMessage = error?.response?.data?.message || "Failed to delete employee. Please try again.";
+      setError(errorMessage);
+      console.error('Failed to delete employee:', errorMessage);
     },
   });
 
@@ -148,6 +175,7 @@ const EmployeesPage: React.FC = () => {
 
   const showDeleteConfirm = (employee: any) => {
     setDeleteConfirm({ show: true, employee });
+    setError(""); // Clear any previous errors when opening modal
   };
 
   const handleSearch = () => {
@@ -181,13 +209,13 @@ const EmployeesPage: React.FC = () => {
     );
   }
 
-  const employees = employeesData?.data?.employees || [];
-  const filteredEmployees = employees.filter((employee: any) => {
+  const users = currentUsers || [];
+  const filteredUsers = users.filter((user: any) => {
     const matchesName =
       searchTerm === "" ||
-      employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.employeeId?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesName;
   });
 
@@ -196,27 +224,58 @@ const EmployeesPage: React.FC = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Employees
+            Team Management
           </h1>
           <p className="text-gray-600 dark:text-gray-300">
-            Manage your company employees
+            Manage your company team members
           </p>
         </div>
 
         <div className="flex space-x-3">
+          {activeTab === "employees" ? (
+            <button
+              onClick={() => setShowInviteModal(true)}
+              className="btn-primary inline-flex items-center"
+            >
+              <PlusIcon className="h-5 w-5 mr-2" />
+              Invite Employee
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowAdminInviteModal(true)}
+              className="btn-primary inline-flex items-center"
+            >
+              <PlusIcon className="h-5 w-5 mr-2" />
+              Invite Admin
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Tabs Section */}
+      <div className="card">
+        <div className="flex space-x-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
           <button
-            onClick={() => setShowInviteModal(true)}
-            className="btn-primary inline-flex items-center"
+            onClick={() => setActiveTab("employees")}
+            className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+              activeTab === "employees"
+                ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow"
+                : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+            }`}
           >
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Invite Employee
+            <UserIcon className="w-4 h-4 inline mr-2" />
+            Employees ({(employeesData?.data?.employees?.length || employeesData?.employees?.length || 0)})
           </button>
           <button
-            onClick={() => setShowAdminInviteModal(true)}
-            className="btn-secondary inline-flex items-center"
+            onClick={() => setActiveTab("admins")}
+            className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
+              activeTab === "admins"
+                ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow"
+                : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+            }`}
           >
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Invite Admin
+            <ShieldCheckIcon className="w-4 h-4 inline mr-2" />
+            Admins ({(adminsData?.data?.admins?.length || adminsData?.admins?.length || 0)})
           </button>
         </div>
       </div>
@@ -292,8 +351,8 @@ const EmployeesPage: React.FC = () => {
         {isSearchActive && (
           <div className="mt-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-900">
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Found {filteredEmployees.length} employee
-              {filteredEmployees.length !== 1 ? "s" : ""}
+              Found {filteredUsers.length} {activeTab === "employees" ? "employee" : "admin"}
+              {filteredUsers.length !== 1 ? "s" : ""}
               {searchTerm && <span> matching "{searchTerm}"</span>}
               {(dateFrom || dateTo) && (
                 <span className="block mt-1">
@@ -341,19 +400,32 @@ const EmployeesPage: React.FC = () => {
                   <strong>⚠️ Warning:</strong>
                   <ul className="mt-1 list-disc list-inside space-y-1">
                     <li>This action cannot be undone</li>
-                    <li>Employee's historical data will be removed</li>
+                    <li>Employee's account and all data will be removed</li>
                     <li>
-                      Cannot delete if employee has pending/approved leaves
+                      All associated leave requests will also be deleted
                     </li>
                   </ul>
                 </div>
               </div>
             </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-md">
+                <div className="flex items-center">
+                  <ExclamationTriangleIcon className="w-5 h-5 mr-2" />
+                  <span className="text-sm font-medium">Error:</span>
+                </div>
+                <p className="text-sm mt-1">{error}</p>
+              </div>
+            )}
+
             <div className="flex justify-end space-x-3">
               <button
-                onClick={() =>
-                  setDeleteConfirm({ show: false, employee: null })
-                }
+                onClick={() => {
+                  setDeleteConfirm({ show: false, employee: null });
+                  setError(""); // Clear error when closing modal
+                }}
                 className="btn-secondary"
                 disabled={deleteEmployeeMutation.isPending}
               >
@@ -383,7 +455,7 @@ const EmployeesPage: React.FC = () => {
 
       {/* Employees Section */}
       <div className="mt-10 bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
-        {filteredEmployees.length > 0 ? (
+        {filteredUsers.length > 0 ? (
           <>
             {/* Desktop Table */}
             <div className="hidden lg:block p-8">
@@ -412,7 +484,7 @@ const EmployeesPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white/50 dark:bg-gray-800/20 divide-y divide-gray-200/20 dark:divide-gray-700/20">
-                    {filteredEmployees.map((employee: any) => (
+                    {filteredUsers.map((employee: any) => (
                       <tr
                         key={employee._id}
                         className="group table-row-hover transition-all duration-300"
@@ -469,23 +541,25 @@ const EmployeesPage: React.FC = () => {
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap">
                           <div className="flex items-center space-x-2">
-                            <button
-                              onClick={() =>
-                                handleToggleStatus(
-                                  employee._id,
-                                  employee.isActive
-                                )
-                              }
-                              disabled={
-                                deactivateEmployeeMutation.isPending ||
-                                activateEmployeeMutation.isPending
-                              }
-                              className={`px-3 py-1 text-xs rounded transition-colors ${
-                                employee.isActive ? "btn-danger" : "btn-success"
-                              }`}
-                            >
-                              {employee.isActive ? "Deactivate" : "Activate"}
-                            </button>
+                            {activeTab === "employees" && (
+                              <button
+                                onClick={() =>
+                                  handleToggleStatus(
+                                    employee._id,
+                                    employee.isActive
+                                  )
+                                }
+                                disabled={
+                                  deactivateEmployeeMutation.isPending ||
+                                  activateEmployeeMutation.isPending
+                                }
+                                className={`px-3 py-1 text-xs rounded transition-colors ${
+                                  employee.isActive ? "btn-danger" : "btn-success"
+                                }`}
+                              >
+                                {employee.isActive ? "Deactivate" : "Activate"}
+                              </button>
+                            )}
 
                             <button
                               onClick={() => handleGenerateReport(employee)}
@@ -495,12 +569,14 @@ const EmployeesPage: React.FC = () => {
                               Report
                             </button>
 
-                            <button
-                              onClick={() => showDeleteConfirm(employee)}
-                              className="btn-danger px-3 py-1 text-xs"
-                            >
-                              Delete
-                            </button>
+                            {activeTab === "employees" && (
+                              <button
+                                onClick={() => showDeleteConfirm(employee)}
+                                className="btn-danger px-3 py-1 text-xs"
+                              >
+                                Delete
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -512,7 +588,7 @@ const EmployeesPage: React.FC = () => {
 
             {/* Mobile Cards */}
             <div className="lg:hidden space-y-4 p-8">
-              {filteredEmployees.map((employee: any) => (
+              {filteredUsers.map((employee: any) => (
                 <div key={employee._id} className="rounded-xl p-6 border border-gray-200/30 dark:border-gray-700/30 bg-gradient-to-br from-white/80 to-gray-50/40 dark:from-gray-800/40 dark:to-gray-900/20 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
                   <div className="flex items-center gap-3 mb-4">
                     <Avatar
@@ -569,16 +645,18 @@ const EmployeesPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex justify-end space-x-2">
-                    <button
-                      onClick={() =>
-                        handleToggleStatus(employee._id, employee.isActive)
-                      }
-                      className={`px-3 py-1 text-xs rounded ${
-                        employee.isActive ? "btn-danger" : "btn-success"
-                      }`}
-                    >
-                      {employee.isActive ? "Deactivate" : "Activate"}
-                    </button>
+                    {activeTab === "employees" && (
+                      <button
+                        onClick={() =>
+                          handleToggleStatus(employee._id, employee.isActive)
+                        }
+                        className={`px-3 py-1 text-xs rounded ${
+                          employee.isActive ? "btn-danger" : "btn-success"
+                        }`}
+                      >
+                        {employee.isActive ? "Deactivate" : "Activate"}
+                      </button>
+                    )}
                     <button
                       onClick={() => handleGenerateReport(employee)}
                       className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-700"
@@ -586,12 +664,14 @@ const EmployeesPage: React.FC = () => {
                       <DocumentChartBarIcon className="h-4 w-4 mr-1" />
                       Report
                     </button>
-                    <button
-                      onClick={() => showDeleteConfirm(employee)}
-                      className="btn-danger px-3 py-1 text-xs"
-                    >
-                      Delete
-                    </button>
+                    {activeTab === "employees" && (
+                      <button
+                        onClick={() => showDeleteConfirm(employee)}
+                        className="btn-danger px-3 py-1 text-xs"
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

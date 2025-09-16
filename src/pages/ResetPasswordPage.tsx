@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { useTheme } from '../context/ThemeContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import PasswordInput from '../components/PasswordInput';
 import { 
@@ -26,6 +27,7 @@ interface TokenValidation {
 
 const ResetPasswordPage: React.FC = () => {
   const { token } = useParams<{ token: string }>();
+  const { isDark } = useTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string>('');
@@ -77,10 +79,10 @@ const ResetPasswordPage: React.FC = () => {
 
   if (isLoadingToken) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
           <LoadingSpinner size="lg" />
-          <p className="mt-4 text-gray-600">Validating reset token...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Validating reset token...</p>
         </div>
       </div>
     );
@@ -88,24 +90,24 @@ const ResetPasswordPage: React.FC = () => {
 
   if (!tokenValidation?.valid) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="text-center">
             <XCircleIcon className="h-16 w-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-3xl font-extrabold text-gray-900">Invalid Reset Link</h2>
-            <p className="mt-4 text-sm text-gray-600">
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100">Invalid Reset Link</h2>
+            <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
               {error || 'This password reset link is invalid or has expired.'}
             </p>
           </div>
         </div>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 text-center">
+          <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow-lg border border-gray-200 dark:border-gray-700 sm:rounded-lg sm:px-10 text-center">
             <div className="space-y-4">
-              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
                 <div className="flex">
                   <ClockIcon className="h-5 w-5 text-yellow-400 mt-0.5 mr-3" />
-                  <div className="text-sm text-yellow-800">
+                  <div className="text-sm text-yellow-800 dark:text-yellow-200">
                     <p><strong>Reset links expire after 15 minutes</strong></p>
                     <p className="mt-1">For security reasons, password reset links have a short expiration time.</p>
                   </div>
@@ -135,19 +137,19 @@ const ResetPasswordPage: React.FC = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <div className="text-center">
             <CheckCircleIcon className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-3xl font-extrabold text-gray-900">Password Reset Complete</h2>
-            <p className="mt-4 text-sm text-gray-600">
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100">Password Reset Complete</h2>
+            <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
               Your password has been successfully reset. You can now log in with your new password.
             </p>
           </div>
         </div>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 text-center">
+          <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow-lg border border-gray-200 dark:border-gray-700 sm:rounded-lg sm:px-10 text-center">
             <Link
               to="/login"
               className="btn-primary w-full"
@@ -161,24 +163,24 @@ const ResetPasswordPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
-          <KeyIcon className="h-12 w-12 text-primary-500 mx-auto mb-4" />
-          <h2 className="text-3xl font-extrabold text-gray-900">Reset Your Password</h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <KeyIcon className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100">Reset Your Password</h2>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             Create a new password for your account
           </p>
         </div>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow-lg border border-gray-200 dark:border-gray-700 sm:rounded-lg sm:px-10">
           {/* User Info */}
           {tokenValidation?.user && (
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
-              <h3 className="text-sm font-medium text-blue-900 mb-2">Resetting password for:</h3>
-              <div className="text-sm text-blue-800">
+            <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+              <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">Resetting password for:</h3>
+              <div className="text-sm text-blue-800 dark:text-blue-200">
                 <p className="font-medium">{tokenValidation.user.name}</p>
                 <p>{tokenValidation.user.email}</p>
               </div>
@@ -186,7 +188,7 @@ const ResetPasswordPage: React.FC = () => {
           )}
 
           {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
+            <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-md">
               {error}
             </div>
           )}
@@ -204,6 +206,7 @@ const ResetPasswordPage: React.FC = () => {
                 label="New Password"
                 placeholder="Enter your new password"
                 error={errors.password?.message}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors"
               />
             </div>
 
@@ -217,14 +220,15 @@ const ResetPasswordPage: React.FC = () => {
                 label="Confirm New Password"
                 placeholder="Confirm your new password"
                 error={errors.confirmPassword?.message}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors"
               />
             </div>
 
-            <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
-              <h4 className="text-xs font-medium text-gray-900 mb-2">Password Requirements:</h4>
-              <ul className="text-xs text-gray-600 space-y-1">
+            <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-md p-3">
+              <h4 className="text-xs font-medium text-gray-900 dark:text-gray-100 mb-2">Password Requirements:</h4>
+              <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
                 <li className="flex items-center">
-                  <span className={`mr-2 ${password && password.length >= 6 ? 'text-green-500' : 'text-gray-400'}`}>
+                  <span className={`mr-2 ${password && password.length >= 6 ? 'text-green-500' : 'text-gray-400 dark:text-gray-500'}`}>
                     {password && password.length >= 6 ? '✓' : '○'}
                   </span>
                   At least 6 characters long
@@ -236,7 +240,7 @@ const ResetPasswordPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary w-full"
               >
                 {isSubmitting ? <LoadingSpinner size="sm" /> : 'Reset Password'}
               </button>
@@ -247,7 +251,7 @@ const ResetPasswordPage: React.FC = () => {
             <div className="text-center">
               <Link
                 to="/login"
-                className="text-sm text-primary-600 hover:text-primary-500"
+                className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
               >
                 Remember your password? Sign in
               </Link>

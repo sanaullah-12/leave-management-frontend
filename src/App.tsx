@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
-import { NotificationProvider } from './components/NotificationSystem';
+// import { NotificationProvider } from './components/NotificationSystem'; // Removed for Socket.IO implementation
 import './styles/themes.css';
 import Layout from './components/Layout';
 import LoginPage from './pages/LoginPage';
@@ -36,7 +36,6 @@ const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <NotificationProvider>
           <AuthProvider>
             <Router>
               <div className="App">
@@ -62,7 +61,6 @@ const App: React.FC = () => {
               </div>
             </Router>
           </AuthProvider>
-        </NotificationProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

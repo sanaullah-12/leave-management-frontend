@@ -14,7 +14,7 @@ const MyLeaveActivityPage: React.FC = () => {
   if (!user) {
     return (
       <div className="text-center py-8">
-        <p style={{ color: 'var(--text-secondary)' }}>Please login to view your leave activity.</p>
+        <p className="text-gray-600 dark:text-gray-300">Please login to view your leave activity.</p>
       </div>
     );
   }
@@ -24,24 +24,24 @@ const MyLeaveActivityPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             My Leave Activity
           </h1>
-          <p style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-gray-600 dark:text-gray-300">
             Track your leave requests, approvals, and leave history
           </p>
         </div>
         
         <div className="hidden sm:flex items-center space-x-4">
           <div className="text-right">
-            <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
               {user.name}
             </p>
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-xs text-gray-600 dark:text-gray-300">
               {user.department} • {user.position}
             </p>
           </div>
-          <div className="w-px h-8" style={{ backgroundColor: 'var(--border-color)' }}></div>
+          <div className="w-px h-8 bg-gray-200 dark:bg-gray-700"></div>
           <span className="badge badge-primary">Employee</span>
         </div>
       </div>
@@ -55,10 +55,10 @@ const MyLeaveActivityPage: React.FC = () => {
                 <ClipboardDocumentListIcon className="h-8 w-8 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
-            <h3 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+            <h3 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">
               Leave Requests
             </h3>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               View and track all your leave requests and their current status
             </p>
           </div>
@@ -71,10 +71,10 @@ const MyLeaveActivityPage: React.FC = () => {
                 <ChartBarIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
               </div>
             </div>
-            <h3 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+            <h3 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">
               Leave Balance
             </h3>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Monitor your remaining leave days and usage statistics
             </p>
           </div>
@@ -87,10 +87,10 @@ const MyLeaveActivityPage: React.FC = () => {
                 <CalendarDaysIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
               </div>
             </div>
-            <h3 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+            <h3 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">
               Leave History
             </h3>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Review your complete leave history and patterns
             </p>
           </div>
@@ -106,15 +106,15 @@ const MyLeaveActivityPage: React.FC = () => {
       {/* Read-Only Notice */}
       <div className="card">
         <div className="card-body">
-          <div className="flex items-start space-x-3 p-4 rounded-lg" style={{ backgroundColor: 'var(--surface-hover)' }}>
+          <div className="flex items-start space-x-3 p-4 rounded-lg bg-gray-50 dark:bg-gray-900">
             <div className="flex-shrink-0">
               <ClipboardDocumentListIcon className="h-6 w-6 text-blue-500" />
             </div>
             <div>
-              <h4 className="font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
+              <h4 className="font-medium mb-2 text-gray-900 dark:text-gray-100">
                 Employee View - Read Only
               </h4>
-              <div className="space-y-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
+              <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
                 <p>• You can view all your leave requests and their current status</p>
                 <p>• Track your leave balance and usage throughout the year</p>
                 <p>• Review approval/rejection comments from your manager</p>

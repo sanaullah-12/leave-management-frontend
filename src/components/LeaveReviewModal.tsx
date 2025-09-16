@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { leavesAPI } from '../services/api';
-import { useNotifications } from '../components/NotificationSystem';
+// import { useNotifications } from '../components/NotificationSystem'; // Removed for Socket.IO implementation
 import Modal from './Modal';
 import LoadingSpinner from './LoadingSpinner';
 import { 
@@ -34,7 +34,7 @@ const LeaveReviewModal: React.FC<LeaveReviewModalProps> = ({
   action 
 }) => {
   const queryClient = useQueryClient();
-  const { addNotification } = useNotifications();
+  // const { addNotification } = useNotifications(); // Removed for Socket.IO implementation
 
   const {
     register,
@@ -54,18 +54,20 @@ const LeaveReviewModal: React.FC<LeaveReviewModalProps> = ({
       reset();
       onClose();
       
-      addNotification({
-        type: action === 'approve' ? 'success' : 'warning',
-        title: `Leave ${action === 'approve' ? 'Approved' : 'Rejected'}`,
-        message: `Leave request has been ${action === 'approve' ? 'approved' : 'rejected'} successfully.`,
-      });
+      // addNotification({
+      //   type: action === 'approve' ? 'success' : 'warning',
+      //   title: `Leave ${action === 'approve' ? 'Approved' : 'Rejected'}`,
+      //   message: `Leave request has been ${action === 'approve' ? 'approved' : 'rejected'} successfully.`,
+      // });
+      console.log(`Leave request ${action === 'approve' ? 'approved' : 'rejected'} successfully`);
     },
     onError: (error: any) => {
-      addNotification({
-        type: 'error',
-        title: 'Review Failed',
-        message: error?.response?.data?.message || `Failed to ${action} leave request. Please try again.`,
-      });
+      // addNotification({
+      //   type: 'error',
+      //   title: 'Review Failed',
+      //   message: error?.response?.data?.message || `Failed to ${action} leave request. Please try again.`,
+      // });
+      console.error(`Failed to ${action} leave request:`, error?.response?.data?.message || error.message);
     },
   });
 

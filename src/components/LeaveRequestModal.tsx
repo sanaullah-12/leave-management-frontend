@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { leavesAPI } from '../services/api';
-import { useNotifications } from '../components/NotificationSystem';
+// import { useNotifications } from '../components/NotificationSystem'; // Removed for Socket.IO implementation
 import { useAuth } from '../context/AuthContext';
 import Modal from './Modal';
 import LoadingSpinner from './LoadingSpinner';
@@ -33,7 +33,7 @@ interface LeaveRequestModalProps {
 const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { addNotification } = useNotifications();
+  // const { addNotification } = useNotifications(); // Removed for Socket.IO implementation
   const [attachments, setAttachments] = useState<File[]>([]);
 
   const {
@@ -67,18 +67,20 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
       setAttachments([]);
       onClose();
       
-      addNotification({
-        type: 'success',
-        title: 'Leave Request Submitted',
-        message: 'Your leave request has been submitted successfully and is pending approval.',
-      });
+      // addNotification({
+      //   type: 'success',
+      //   title: 'Leave Request Submitted',
+      //   message: 'Your leave request has been submitted successfully and is pending approval.',
+      // });
+      console.log('Leave request submitted successfully');
     },
     onError: (error: any) => {
-      addNotification({
-        type: 'error',
-        title: 'Submission Failed',
-        message: error?.response?.data?.message || 'Failed to submit leave request. Please try again.',
-      });
+      // addNotification({
+      //   type: 'error',
+      //   title: 'Submission Failed',
+      //   message: error?.response?.data?.message || 'Failed to submit leave request. Please try again.',
+      // });
+      console.error('Leave request submission failed:', error?.response?.data?.message || error.message);
     },
   });
 
@@ -117,27 +119,27 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
     <Modal isOpen={isOpen} onClose={handleClose} title="Request Leave" size="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Employee Profile Header */}
-        <div className="flex items-center space-x-4 p-4 rounded-xl" className="bg-gray-50 dark:bg-gray-900">
+        <div className="flex items-center space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-900">
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 flex items-center justify-center">
             <UserIcon className="w-8 h-8 text-green-600 dark:text-green-400" />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-medium" className="text-gray-900 dark:text-gray-100">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
               {user?.name}
             </h3>
-            <p className="text-sm" className="text-gray-600 dark:text-gray-300">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               {user?.position} • {user?.department}
             </p>
-            <p className="text-xs" className="text-gray-400 dark:text-gray-500">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
               Employee ID: {user?.employeeId}
             </p>
           </div>
           {calculateDays() > 0 && (
             <div className="text-right">
-              <div className="text-2xl font-bold" className="text-blue-600 dark:text-blue-400">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {calculateDays()}
               </div>
-              <div className="text-xs" className="text-gray-600 dark:text-gray-300">
+              <div className="text-xs text-gray-600 dark:text-gray-300">
                 {calculateDays() === 1 ? 'Day' : 'Days'}
               </div>
             </div>
@@ -147,7 +149,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Leave Type */}
           <div>
-            <label className="flex items-center text-sm font-medium mb-2" className="text-gray-900 dark:text-gray-100">
+            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
               <CalendarDaysIcon className="w-4 h-4 mr-2 text-gray-400" />
               Leave Type
             </label>
@@ -176,13 +178,13 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
           {/* Duration Badge */}
           <div className="flex items-end">
             {calculateDays() > 0 && (
-              <div className="flex-1 p-4 rounded-lg" className="bg-gray-50 dark:bg-gray-900">
+              <div className="flex-1 p-4 rounded-lg bg-gray-50 dark:bg-gray-900">
                 <div className="text-center">
                   <ClockIcon className="w-6 h-6 mx-auto mb-2 text-blue-500" />
-                  <div className="text-sm font-medium" className="text-gray-900 dark:text-gray-100">
+                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                     Duration
                   </div>
-                  <div className="text-lg font-bold" className="text-blue-600 dark:text-blue-400">
+                  <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
                     {calculateDays()} {calculateDays() === 1 ? 'Day' : 'Days'}
                   </div>
                 </div>
@@ -192,7 +194,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
 
           {/* Start Date */}
           <div>
-            <label className="flex items-center text-sm font-medium mb-2" className="text-gray-900 dark:text-gray-100">
+            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
               <CalendarDaysIcon className="w-4 h-4 mr-2 text-gray-400" />
               Start Date
             </label>
@@ -215,7 +217,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
 
           {/* End Date */}
           <div>
-            <label className="flex items-center text-sm font-medium mb-2" className="text-gray-900 dark:text-gray-100">
+            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
               <CalendarDaysIcon className="w-4 h-4 mr-2 text-gray-400" />
               End Date
             </label>
@@ -238,7 +240,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
 
           {/* Emergency Contact */}
           <div>
-            <label className="flex items-center text-sm font-medium mb-2" className="text-gray-900 dark:text-gray-100">
+            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
               <UserIcon className="w-4 h-4 mr-2 text-gray-400" />
               Emergency Contact
             </label>
@@ -253,7 +255,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
 
           {/* Emergency Phone */}
           <div>
-            <label className="flex items-center text-sm font-medium mb-2" className="text-gray-900 dark:text-gray-100">
+            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
               <ClockIcon className="w-4 h-4 mr-2 text-gray-400" />
               Emergency Phone
             </label>
@@ -268,7 +270,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
 
           {/* Reason */}
           <div className="md:col-span-2">
-            <label className="flex items-center text-sm font-medium mb-2" className="text-gray-900 dark:text-gray-100">
+            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
               <DocumentTextIcon className="w-4 h-4 mr-2 text-gray-400" />
               Reason for Leave
             </label>
@@ -291,7 +293,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
 
           {/* File Attachments */}
           <div className="md:col-span-2">
-            <label className="flex items-center text-sm font-medium mb-2" className="text-gray-900 dark:text-gray-100">
+            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
               <PaperClipIcon className="w-4 h-4 mr-2 text-gray-400" />
               Attachments (Optional)
             </label>
@@ -314,10 +316,10 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
                   >
                     <div className="flex items-center">
                       <PaperClipIcon className="w-4 h-4 mr-2 text-blue-500" />
-                      <span className="text-sm" className="text-gray-900 dark:text-gray-100">
+                      <span className="text-sm text-gray-900 dark:text-gray-100">
                         {file.name}
                       </span>
-                      <span className="text-xs ml-2" className="text-gray-600 dark:text-gray-300">
+                      <span className="text-xs ml-2 text-gray-600 dark:text-gray-300">
                         ({(file.size / 1024).toFixed(1)} KB)
                       </span>
                     </div>
@@ -351,7 +353,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
         )}
 
         {/* Action Buttons */}
-        <div className="flex justify-end space-x-3 pt-6 border-t" className="border-gray-200 dark:border-gray-700">
+        <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
           <button
             type="button"
             onClick={handleClose}

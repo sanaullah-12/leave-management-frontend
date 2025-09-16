@@ -2,7 +2,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { authAPI } from "../services/api";
-import { useNotifications } from "../components/NotificationSystem";
+// import { useNotifications } from "../components/NotificationSystem"; // Removed for Socket.IO implementation
 import Modal from "./Modal";
 import LoadingSpinner from "./LoadingSpinner";
 import {
@@ -34,7 +34,7 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
   onClose,
 }) => {
   const queryClient = useQueryClient();
-  const { addNotification } = useNotifications();
+  // const { addNotification } = useNotifications(); // Removed for Socket.IO implementation
   const [tags, setTags] = React.useState<string[]>([]);
   const [tagInput, setTagInput] = React.useState("");
 
@@ -53,20 +53,22 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
       setTags([]);
       onClose();
 
-      addNotification({
-        type: "success",
-        title: "Employee Invited",
-        message: `Invitation sent to ${variables.email} successfully.`,
-      });
+      // addNotification({
+      //   type: "success",
+      //   title: "Employee Invited",
+      //   message: `Invitation sent to ${variables.email} successfully.`,
+      // });
+      console.log('Employee invitation sent successfully to', variables.email);
     },
     onError: (error: any) => {
-      addNotification({
-        type: "error",
-        title: "Invitation Failed",
-        message:
-          error?.response?.data?.message ||
-          "Failed to send employee invitation. Please try again.",
-      });
+      // addNotification({
+      //   type: "error",
+      //   title: "Invitation Failed",
+      //   message:
+      //     error?.response?.data?.message ||
+      //     "Failed to send employee invitation. Please try again.",
+      // });
+      console.error('Employee invitation failed:', error?.response?.data?.message || error.message);
     },
   });
 

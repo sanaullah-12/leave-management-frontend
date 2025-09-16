@@ -47,8 +47,7 @@ const Modal: React.FC<ModalProps> = ({
             </h2>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-              className="text-gray-600 dark:text-gray-300"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-600 dark:text-gray-300"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>

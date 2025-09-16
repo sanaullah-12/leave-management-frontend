@@ -211,7 +211,7 @@ const EmployeeDetailPageReal: React.FC = () => {
             <ArrowLeftIcon className="h-5 w-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold" className="text-gray-900 dark:text-gray-100">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               Employee Not Found
             </h1>
             <p className="text-gray-600 dark:text-gray-300">
@@ -221,11 +221,11 @@ const EmployeeDetailPageReal: React.FC = () => {
         </div>
         
         <div className="card-elevated p-8 text-center">
-          <UserIcon className="mx-auto h-16 w-16 mb-4" className="text-gray-400 dark:text-gray-500" />
-          <h2 className="text-xl font-semibold mb-2" className="text-gray-900 dark:text-gray-100">
+          <UserIcon className="mx-auto h-16 w-16 mb-4 text-gray-400 dark:text-gray-500" />
+          <h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">
             Employee Not Found
           </h2>
-          <p className="mb-6" className="text-gray-600 dark:text-gray-300">
+          <p className="mb-6 text-gray-600 dark:text-gray-300">
             This employee may have been removed or the ID is incorrect.
           </p>
           <button
@@ -304,7 +304,7 @@ const EmployeeDetailPageReal: React.FC = () => {
     if (active && payload && payload.length) {
       return (
         <div className="card-elevated p-3 shadow-lg">
-          <p className="font-medium" className="text-gray-900 dark:text-gray-100">{label}</p>
+          <p className="font-medium text-gray-900 dark:text-gray-100">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} style={{ color: entry.color }}>
               {entry.name}: {entry.value}
@@ -352,7 +352,7 @@ const EmployeeDetailPageReal: React.FC = () => {
             <ArrowLeftIcon className="h-5 w-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold" className="text-gray-900 dark:text-gray-100">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               Employee Details
             </h1>
             <p className="text-gray-600 dark:text-gray-300">
@@ -365,7 +365,7 @@ const EmployeeDetailPageReal: React.FC = () => {
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
               <ExclamationTriangleIcon className="h-4 w-4 text-blue-500" />
-              <span className="text-sm" className="text-gray-600 dark:text-gray-300">
+              <span className="text-sm text-gray-600 dark:text-gray-300">
                 Company Policy: {defaultPolicy.casual}C • {defaultPolicy.sick}S • {defaultPolicy.annual}A
               </span>
             </div>
@@ -395,20 +395,20 @@ const EmployeeDetailPageReal: React.FC = () => {
                 className="hover-lift"
               />
               <div className="text-center sm:text-left">
-                <h2 className="text-3xl font-bold mb-2" className="text-gray-900 dark:text-gray-100">
+                <h2 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">
                   {employee.name}
                 </h2>
-                <p className="text-lg mb-4" className="text-gray-600 dark:text-gray-300">
+                <p className="text-lg mb-4 text-gray-600 dark:text-gray-300">
                   {employee.position}
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center space-x-2">
-                    <EnvelopeIcon className="h-4 w-4" className="text-gray-400 dark:text-gray-500" />
+                    <EnvelopeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                     <span className="text-gray-600 dark:text-gray-300">{employee.email}</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <BuildingOfficeIcon className="h-4 w-4" className="text-gray-400 dark:text-gray-500" />
+                    <BuildingOfficeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                     <span className="text-gray-600 dark:text-gray-300">
                       {typeof employee.department === 'object' && (employee.department as any)?.name 
                         ? (employee.department as any).name 
@@ -417,12 +417,12 @@ const EmployeeDetailPageReal: React.FC = () => {
                   </div>
                   {employee.phone && (
                     <div className="flex items-center space-x-2">
-                      <PhoneIcon className="h-4 w-4" className="text-gray-400 dark:text-gray-500" />
+                      <PhoneIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                       <span className="text-gray-600 dark:text-gray-300">{employee.phone}</span>
                     </div>
                   )}
                   <div className="flex items-center space-x-2">
-                    <UserIcon className="h-4 w-4" className="text-gray-400 dark:text-gray-500" />
+                    <UserIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                     <span className="text-gray-600 dark:text-gray-300">ID: {employee.employeeId}</span>
                   </div>
                 </div>
@@ -451,10 +451,10 @@ const EmployeeDetailPageReal: React.FC = () => {
                     <div className="flex items-center justify-center mb-2">
                       <CalendarDaysIcon className="h-8 w-8 text-blue-500" />
                     </div>
-                    <p className="text-2xl font-bold mb-1" className="text-gray-900 dark:text-gray-100">
+                    <p className="text-2xl font-bold mb-1 text-gray-900 dark:text-gray-100">
                       {totalAllocated}
                     </p>
-                    <p className="text-sm" className="text-gray-600 dark:text-gray-300">
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
                       Total Allocated
                     </p>
                   </div>
@@ -465,10 +465,10 @@ const EmployeeDetailPageReal: React.FC = () => {
                     <div className="flex items-center justify-center mb-2">
                       <CheckCircleIcon className="h-8 w-8 text-red-500" />
                     </div>
-                    <p className="text-2xl font-bold mb-1" className="text-gray-900 dark:text-gray-100">
+                    <p className="text-2xl font-bold mb-1 text-gray-900 dark:text-gray-100">
                       {totalUsed}
                     </p>
-                    <p className="text-sm" className="text-gray-600 dark:text-gray-300">
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
                       Leaves Taken
                     </p>
                   </div>
@@ -479,10 +479,10 @@ const EmployeeDetailPageReal: React.FC = () => {
                     <div className="flex items-center justify-center mb-2">
                       <ClockIcon className="h-8 w-8 text-green-500" />
                     </div>
-                    <p className="text-2xl font-bold mb-1" className="text-gray-900 dark:text-gray-100">
+                    <p className="text-2xl font-bold mb-1 text-gray-900 dark:text-gray-100">
                       {totalRemaining}
                     </p>
-                    <p className="text-sm" className="text-gray-600 dark:text-gray-300">
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
                       Remaining
                     </p>
                   </div>
@@ -501,10 +501,10 @@ const EmployeeDetailPageReal: React.FC = () => {
             <div className="card-header">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
                 <div>
-                  <h3 className="text-lg font-semibold" className="text-gray-900 dark:text-gray-100">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                     Leave Analytics
                   </h3>
-                  <p className="text-sm" className="text-gray-600 dark:text-gray-300">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
                     Visual breakdown of leave usage patterns for {new Date().getFullYear()}
                   </p>
                 </div>
@@ -618,10 +618,10 @@ const EmployeeDetailPageReal: React.FC = () => {
             <div className="card-header">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-semibold" className="text-gray-900 dark:text-gray-100">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                     Leave Balance
                   </h3>
-                  <p className="text-sm" className="text-gray-600 dark:text-gray-300">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
                     Current allocation status
                   </p>
                 </div>
@@ -650,9 +650,9 @@ const EmployeeDetailPageReal: React.FC = () => {
             </div>
             <div className="card-body space-y-4">
               {Object.entries(leaveBalance).map(([type, data]: [string, any]) => (
-                <div key={type} className="p-4 rounded-lg border" className="border-gray-200 dark:border-gray-700">
+                <div key={type} className="p-4 rounded-lg border border-gray-200 dark:border-gray-700">
                   <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium capitalize" className="text-gray-900 dark:text-gray-100">
+                    <h4 className="font-medium capitalize text-gray-900 dark:text-gray-100">
                       {type} Leave
                     </h4>
                     <div className="flex items-center space-x-2">
@@ -721,10 +721,10 @@ const EmployeeDetailPageReal: React.FC = () => {
         <div className="card-header">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-semibold" className="text-gray-900 dark:text-gray-100">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 Leave History
               </h3>
-              <p className="text-sm" className="text-gray-600 dark:text-gray-300">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 Complete record of leave requests and approvals
               </p>
             </div>
@@ -785,11 +785,10 @@ const EmployeeDetailPageReal: React.FC = () => {
             </div>
           ) : (
             <div className="text-center py-12">
-              <CalendarDaysIcon 
-                className="w-16 h-16 mx-auto mb-4" 
-                className="text-gray-400 dark:text-gray-500" 
+              <CalendarDaysIcon
+                className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-500"
               />
-              <p className="text-lg font-medium mb-2" className="text-gray-900 dark:text-gray-100">
+              <p className="text-lg font-medium mb-2 text-gray-900 dark:text-gray-100">
                 No Leave History
               </p>
               <p className="text-gray-600 dark:text-gray-300">

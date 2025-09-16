@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { leavesAPI } from "../services/api";
-import { useNotifications } from "../components/NotificationSystem";
+// import { useNotifications } from "../components/NotificationSystem"; // Removed for Socket.IO implementation
 import xlogoImage from "../assets/xlogoanimate.png";
 // Inline type definition
 interface LeaveRequest {
@@ -28,7 +28,7 @@ const LeavesPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { addNotification } = useNotifications();
+  // const { addNotification } = useNotifications(); // Removed for Socket.IO implementation
   const [searchParams] = useSearchParams();
   const [showForm, setShowForm] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
@@ -200,11 +200,12 @@ const LeavesPage: React.FC = () => {
       reset();
       
       // Show success notification
-      addNotification({
-        type: 'success',
-        title: 'Leave Request Submitted',
-        message: 'Your leave request has been submitted and is pending approval.',
-      });
+      // addNotification({
+      //   type: 'success',
+      //   title: 'Leave Request Submitted',
+      //   message: 'Your leave request has been submitted and is pending approval.',
+      // });
+      console.log('Leave request submitted successfully');
       
       // Invalidate all related queries to ensure fresh data everywhere
       queryClient.invalidateQueries({ queryKey: ['leaves'] });
@@ -213,11 +214,12 @@ const LeavesPage: React.FC = () => {
     },
     onError: (error: any) => {
       console.error('Failed to submit leave:', error);
-      addNotification({
-        type: 'error',
-        title: 'Submission Failed',
-        message: error?.response?.data?.message || 'Failed to submit leave request. Please try again.',
-      });
+      // addNotification({
+      //   type: 'error',
+      //   title: 'Submission Failed',
+      //   message: error?.response?.data?.message || 'Failed to submit leave request. Please try again.',
+      // });
+      console.error('Leave submission failed:', error?.response?.data?.message || error.message);
     },
   });
 
@@ -287,11 +289,12 @@ const LeavesPage: React.FC = () => {
       
       // Show success notification
       const employeeName = typeof updatedLeave?.employee === 'object' ? updatedLeave.employee.name : 'Employee';
-      addNotification({
-        type: newStatus === 'approved' ? 'success' : 'warning',
-        title: `Leave Request ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}`,
-        message: `${employeeName}'s leave request has been ${newStatus}.`,
-      });
+      // addNotification({
+      //   type: newStatus === 'approved' ? 'success' : 'warning',
+      //   title: `Leave Request ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}`,
+      //   message: `${employeeName}'s leave request has been ${newStatus}.`,
+      // });
+      console.log(`Leave request ${newStatus} for ${employeeName}`);
       
       // Invalidate all related queries to ensure fresh data everywhere
       queryClient.invalidateQueries({ queryKey: ['leaves'] });
@@ -300,11 +303,12 @@ const LeavesPage: React.FC = () => {
     },
     onError: (error: any) => {
       console.error('Failed to review leave:', error);
-      addNotification({
-        type: 'error',
-        title: 'Review Failed',
-        message: error?.response?.data?.message || 'Failed to review leave request. Please try again.',
-      });
+      // addNotification({
+      //   type: 'error',
+      //   title: 'Review Failed',
+      //   message: error?.response?.data?.message || 'Failed to review leave request. Please try again.',
+      // });
+      console.error('Leave review failed:', error?.response?.data?.message || error.message);
     },
   });
 
@@ -346,11 +350,12 @@ const LeavesPage: React.FC = () => {
 
   const handleRejectSubmit = async () => {
     if (!rejectionReason.trim()) {
-      addNotification({
-        type: 'error',
-        title: 'Rejection Reason Required',
-        message: 'Please provide a reason for rejecting this leave request.',
-      });
+      // addNotification({
+      //   type: 'error',
+      //   title: 'Rejection Reason Required',
+      //   message: 'Please provide a reason for rejecting this leave request.',
+      // });
+      console.warn('Rejection reason required');
       return;
     }
 

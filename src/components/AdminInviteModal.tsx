@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { useNotifications } from '../components/NotificationSystem';
+// import { useNotifications } from '../components/NotificationSystem'; // Removed for Socket.IO implementation
 import Modal from './Modal';
 import LoadingSpinner from './LoadingSpinner';
 import { UserIcon, EnvelopeIcon, BuildingOfficeIcon, BriefcaseIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
@@ -21,7 +21,7 @@ interface AdminInviteModalProps {
 
 const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) => {
   const queryClient = useQueryClient();
-  const { addNotification } = useNotifications();
+  // const { addNotification } = useNotifications(); // Removed for Socket.IO implementation
 
   const {
     register,
@@ -47,18 +47,20 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
       reset();
       onClose();
       
-      addNotification({
-        type: 'success',
-        title: 'Admin Invited',
-        message: `Admin invitation sent to ${variables.email} successfully.`,
-      });
+      // addNotification({
+      //   type: 'success',
+      //   title: 'Admin Invited',
+      //   message: `Admin invitation sent to ${variables.email} successfully.`,
+      // });
+      console.log('Admin invitation sent successfully to', variables.email);
     },
     onError: (error: any) => {
-      addNotification({
-        type: 'error',
-        title: 'Admin Invitation Failed',
-        message: error?.response?.data?.message || 'Failed to send admin invitation. Please try again.',
-      });
+      // addNotification({
+      //   type: 'error',
+      //   title: 'Admin Invitation Failed',
+      //   message: error?.response?.data?.message || 'Failed to send admin invitation. Please try again.',
+      // });
+      console.error('Admin invitation failed:', error?.response?.data?.message || error.message);
     },
   });
 

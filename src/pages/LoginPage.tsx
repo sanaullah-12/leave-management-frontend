@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 // Inline type definition
 interface LoginCredentials {
   email: string;
@@ -12,6 +13,7 @@ import PasswordInput from "../components/PasswordInput";
 
 const LoginPage: React.FC = () => {
   const { login, isAuthenticated, isLoading } = useAuth();
+  const { isDark } = useTheme();
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -53,13 +55,7 @@ const LoginPage: React.FC = () => {
           Sign in to your account
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-          Or{" "}
-          <Link
-            to="/register"
-            className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
-          >
-            register your company
-          </Link>
+          Employee login for existing companies
         </p>
       </div>
 
@@ -130,18 +126,12 @@ const LoginPage: React.FC = () => {
           </form>
 
           <div className="mt-6">
-            <div className="flex items-center justify-between">
+            <div className="text-center">
               <Link
                 to="/forgot-password"
                 className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
               >
                 Forgot your password?
-              </Link>
-              <Link
-                to="/register"
-                className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
-              >
-                Register company
               </Link>
             </div>
           </div>

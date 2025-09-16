@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { leavesAPI } from "../services/api";
 import LoadingSpinner from "../components/LoadingSpinner";
-import ParticleBackground from "../components/ParticleBackground";
+// import ParticleBackground from "../components/ParticleBackground";
 import Avatar from "../components/Avatar";
 import {
   UsersIcon,
@@ -65,7 +65,7 @@ const DashboardPage: React.FC = () => {
   return (
     <div className="relative space-y-8 fade-in">
       {/* Particle Background */}
-      <ParticleBackground />
+      {/* <ParticleBackground /> */}
       
       {/* Main Content */}
       <div className="relative" style={{ zIndex: 10 }}>
