@@ -15,12 +15,13 @@ interface LeaveRequest {
 }
 import LoadingSpinner from "../components/LoadingSpinner";
 import Avatar from "../components/Avatar";
-import { 
-  PlusIcon, 
+import {
+  PlusIcon,
   ArrowPathIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ClockIcon
+  ClockIcon,
+  EyeIcon
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 
@@ -35,6 +36,8 @@ const LeavesPage: React.FC = () => {
   const [showRejectionPopup, setShowRejectionPopup] = useState(false);
   const [selectedLeaveId, setSelectedLeaveId] = useState<string>("");
   const [rejectionReason, setRejectionReason] = useState("");
+  const [showCommentsPopup, setShowCommentsPopup] = useState(false);
+  const [popupContent, setPopupContent] = useState({ title: "", content: "", type: "" });
 
   // Initialize selectedStatus from URL parameters on mount
   useEffect(() => {
@@ -375,6 +378,29 @@ const LeavesPage: React.FC = () => {
     setRejectionReason("");
   };
 
+  const showRejectionCommentsPopup = (comments: string) => {
+    setPopupContent({
+      title: "Rejection Reason",
+      content: comments,
+      type: "rejection"
+    });
+    setShowCommentsPopup(true);
+  };
+
+  const showLeaveReasonPopup = (reason: string) => {
+    setPopupContent({
+      title: "Leave Reason",
+      content: reason,
+      type: "reason"
+    });
+    setShowCommentsPopup(true);
+  };
+
+  const closeCommentsPopup = () => {
+    setShowCommentsPopup(false);
+    setPopupContent({ title: "", content: "", type: "" });
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -687,13 +713,24 @@ const LeavesPage: React.FC = () => {
                         </td>
                         <td className="px-4 py-4">
                           <div className="max-w-xs">
-                            <div className="text-sm line-clamp-2 text-gray-900 dark:text-gray-100" title={leave.reason}>
-                              {leave.reason}
+                            <div className="flex items-center space-x-2">
+                              <div className="text-sm line-clamp-2 text-gray-900 dark:text-gray-100 flex-1" title={leave.reason}>
+                                {leave.reason}
+                              </div>
+                              {leave.reason && (
+                                <button
+                                  onClick={() => showLeaveReasonPopup(leave.reason)}
+                                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors flex-shrink-0"
+                                  title="View full reason"
+                                >
+                                  <EyeIcon className="w-4 h-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
+                                </button>
+                              )}
                             </div>
                           </div>
                         </td>
                         <td className="px-4 py-4">
-                          <div className="flex flex-col space-y-1">
+                          <div className="flex items-center space-x-2">
                             <span className={getStatusDisplay(leave.status).className}>
                               <span className="mr-2">
                                 {getStatusDisplay(leave.status).icon}
@@ -701,14 +738,13 @@ const LeavesPage: React.FC = () => {
                               {getStatusDisplay(leave.status).text}
                             </span>
                             {leave.status === "rejected" && leave.reviewComments && (
-                              <div className="text-xs p-2 rounded border-l-4 border-red-400 bg-red-50 dark:bg-red-900/20 max-w-xs">
-                                <div className="font-medium text-red-800 dark:text-red-200 mb-1">
-                                  Rejection Reason:
-                                </div>
-                                <div className="text-red-700 dark:text-red-300">
-                                  {leave.reviewComments}
-                                </div>
-                              </div>
+                              <button
+                                onClick={() => showRejectionCommentsPopup(leave.reviewComments)}
+                                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                                title="View rejection reason"
+                              >
+                                <EyeIcon className="w-4 h-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
+                              </button>
                             )}
                           </div>
                         </td>
@@ -759,7 +795,7 @@ const LeavesPage: React.FC = () => {
                       </span>
                     </div>
                     
-                    <div className="flex flex-col space-y-2">
+                    <div className="flex items-center space-x-2">
                       <span className={getStatusDisplay(leave.status).className}>
                         <span className="mr-2">
                           {getStatusDisplay(leave.status).icon}
@@ -767,14 +803,13 @@ const LeavesPage: React.FC = () => {
                         {getStatusDisplay(leave.status).text}
                       </span>
                       {leave.status === "rejected" && leave.reviewComments && (
-                        <div className="text-xs p-3 rounded-md border-l-4 border-red-400 bg-red-50 dark:bg-red-900/20">
-                          <div className="font-medium text-red-800 dark:text-red-200 mb-1">
-                            Rejection Reason:
-                          </div>
-                          <div className="text-red-700 dark:text-red-300">
-                            {leave.reviewComments}
-                          </div>
-                        </div>
+                        <button
+                          onClick={() => showRejectionCommentsPopup(leave.reviewComments)}
+                          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                          title="View rejection reason"
+                        >
+                          <EyeIcon className="w-4 h-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
+                        </button>
                       )}
                     </div>
                   </div>
@@ -830,8 +865,19 @@ const LeavesPage: React.FC = () => {
 
                   {/* Expandable Reason Section */}
                   <div className="mb-4">
-                    <div className="text-xs font-medium uppercase tracking-wider mb-2 text-gray-600 dark:text-gray-300">
-                      Reason
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                        Reason
+                      </div>
+                      {leave.reason && (
+                        <button
+                          onClick={() => showLeaveReasonPopup(leave.reason)}
+                          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                          title="View full reason"
+                        >
+                          <EyeIcon className="w-4 h-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
+                        </button>
+                      )}
                     </div>
                     <div className="text-sm line-clamp-3 bg-gray-50 dark:bg-gray-800 p-3 rounded-md text-gray-900 dark:text-gray-100">
                       {leave.reason}
@@ -920,6 +966,51 @@ const LeavesPage: React.FC = () => {
                 className="btn-danger px-4 py-2 flex-1"
               >
                 {reviewLeaveMutation.isPending ? 'Rejecting...' : 'Confirm Reject'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Comments/Reason Popup */}
+      {showCommentsPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div
+            className="rounded-lg p-6 w-full max-w-2xl mx-4 border shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                {popupContent.title}
+              </h3>
+              <button
+                onClick={closeCommentsPopup}
+                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                title="Close"
+              >
+                <XCircleIcon className="w-5 h-5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
+              </button>
+            </div>
+
+            <div className={`p-4 rounded-lg border-l-4 ${
+              popupContent.type === "rejection"
+                ? "border-red-400 bg-red-50 dark:bg-red-900/20"
+                : "border-blue-400 bg-blue-50 dark:bg-blue-900/20"
+            }`}>
+              <div className={`text-sm leading-relaxed ${
+                popupContent.type === "rejection"
+                  ? "text-red-700 dark:text-red-300"
+                  : "text-blue-700 dark:text-blue-300"
+              }`}>
+                {popupContent.content}
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={closeCommentsPopup}
+                className="btn-secondary px-4 py-2"
+              >
+                Close
               </button>
             </div>
           </div>
