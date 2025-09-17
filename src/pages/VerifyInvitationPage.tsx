@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import PasswordInput from '../components/PasswordInput';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
@@ -26,7 +25,6 @@ interface InvitationData {
 const VerifyInvitationPage: React.FC = () => {
   const { token } = useParams<{ token: string }>();
   const { isAuthenticated } = useAuth();
-  const { isDark } = useTheme();
   const [invitation, setInvitation] = useState<InvitationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
