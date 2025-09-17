@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../context/AuthContext";
-import { useTheme } from "../context/ThemeContext";
 // Inline type definition
 interface LoginCredentials {
   email: string;
@@ -13,7 +12,6 @@ import PasswordInput from "../components/PasswordInput";
 
 const LoginPage: React.FC = () => {
   const { login, isAuthenticated, isLoading } = useAuth();
-  const { isDark } = useTheme();
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 

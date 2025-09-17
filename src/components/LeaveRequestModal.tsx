@@ -155,8 +155,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
             </label>
             <select
               {...register('leaveType', { required: 'Leave type is required' })}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              className={`bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border ${
+              className={`w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                 errors.leaveType ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
               }`}
             >
@@ -202,8 +201,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
               type="date"
               {...register('startDate', { required: 'Start date is required' })}
               min={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              className={`bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border ${
+              className={`w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                 errors.startDate ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
               }`}
             />
@@ -225,8 +223,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
               type="date"
               {...register('endDate', { required: 'End date is required' })}
               min={startDate || new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              className={`bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border ${
+              className={`w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                 errors.endDate ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
               }`}
             />
@@ -247,8 +244,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
             <input
               type="text"
               {...register('emergencyContact')}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700"
+              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700"
               placeholder="Contact person name"
             />
           </div>
@@ -262,8 +258,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
             <input
               type="tel"
               {...register('emergencyPhone')}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700"
+              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700"
               placeholder="+1 (555) 123-4567"
             />
           </div>
@@ -277,8 +272,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
             <textarea
               {...register('reason', { required: 'Reason is required' })}
               rows={4}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
-              className={`bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border ${
+              className={`w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                 errors.reason ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
               }`}
               placeholder="Please provide a brief explanation for your leave request..."
@@ -301,8 +295,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
               type="file"
               multiple
               onChange={handleFileChange}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700"
+              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700"
             />
             
             {/* Display Attachments */}
@@ -311,8 +304,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
                 {attachments.map((file, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-3 rounded-lg"
-                    className="bg-gray-50 dark:bg-gray-900"
+                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-900"
                   >
                     <div className="flex items-center">
                       <PaperClipIcon className="w-4 h-4 mr-2 text-blue-500" />
@@ -357,8 +349,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
           <button
             type="button"
             onClick={handleClose}
-            className="px-6 py-3 text-sm font-medium rounded-lg transition-colors"
-            className="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
+            className="px-6 py-3 text-sm font-medium rounded-lg transition-colors bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
             disabled={submitLeaveRequestMutation.isPending}
           >
             Cancel

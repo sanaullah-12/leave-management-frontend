@@ -73,8 +73,8 @@ const EmployeesPage: React.FC = () => {
 
   // Try both with and without .data wrapper
   const currentUsers = activeTab === "employees"
-    ? (currentData?.data?.employees || currentData?.employees)
-    : (currentData?.data?.admins || currentData?.admins);
+    ? ((currentData as any)?.data?.employees || (currentData as any)?.employees)
+    : ((currentData as any)?.data?.admins || (currentData as any)?.admins);
 
   const deactivateEmployeeMutation = useMutation({
     mutationFn: usersAPI.deactivateEmployee,
@@ -264,7 +264,7 @@ const EmployeesPage: React.FC = () => {
             }`}
           >
             <UserIcon className="w-4 h-4 inline mr-2" />
-            Employees ({(employeesData?.data?.employees?.length || employeesData?.employees?.length || 0)})
+            Employees ({((employeesData as any)?.data?.employees?.length || (employeesData as any)?.employees?.length || 0)})
           </button>
           <button
             onClick={() => setActiveTab("admins")}
@@ -275,7 +275,7 @@ const EmployeesPage: React.FC = () => {
             }`}
           >
             <ShieldCheckIcon className="w-4 h-4 inline mr-2" />
-            Admins ({(adminsData?.data?.admins?.length || adminsData?.admins?.length || 0)})
+            Admins ({((adminsData as any)?.data?.admins?.length || (adminsData as any)?.admins?.length || 0)})
           </button>
         </div>
       </div>

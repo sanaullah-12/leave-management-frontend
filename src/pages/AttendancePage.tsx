@@ -1,18 +1,15 @@
 import React from 'react';
-import { useAuth } from '../context/AuthContext';
 import {
   ClockIcon,
   CalendarIcon,
   ChartBarIcon,
   UserGroupIcon,
   CheckCircleIcon,
-  XCircleIcon,
   ArrowPathIcon
 } from '@heroicons/react/24/outline';
 import '../styles/design-system.css';
 
 const AttendancePage: React.FC = () => {
-  const { user } = useAuth();
 
   return (
     <div className="space-y-6 fade-in">

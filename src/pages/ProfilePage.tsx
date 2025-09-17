@@ -15,7 +15,6 @@ import {
   EyeSlashIcon,
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
-import companyLogo from "../assets/companylogo.png";
 
 interface ProfileForm {
   name: string;
