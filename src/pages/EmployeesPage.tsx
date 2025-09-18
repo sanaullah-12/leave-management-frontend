@@ -16,6 +16,7 @@ import {
   MagnifyingGlassIcon,
   DocumentChartBarIcon,
   ShieldCheckIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 
