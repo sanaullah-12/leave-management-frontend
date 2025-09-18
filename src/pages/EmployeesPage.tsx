@@ -35,7 +35,9 @@ const EmployeesPage: React.FC = () => {
     employee: null,
   });
   const [error, setError] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<"employees" | "admins">("employees");
+  const [activeTab, setActiveTab] = useState<"employees" | "admins">(
+    "employees"
+  );
 
   // Search functionality state
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,7 +45,11 @@ const EmployeesPage: React.FC = () => {
   const [dateTo, setDateTo] = useState("");
   const [isSearchActive, setIsSearchActive] = useState(false);
 
-  const { data: employeesData, isLoading: employeesLoading, refetch: refetchEmployees } = useQuery({
+  const {
+    data: employeesData,
+    isLoading: employeesLoading,
+    refetch: refetchEmployees,
+  } = useQuery({
     queryKey: ["employees"],
     queryFn: () => usersAPI.getEmployees(),
     enabled: user?.role === "admin",
@@ -63,19 +69,21 @@ const EmployeesPage: React.FC = () => {
     staleTime: 0, // Disabled caching to ensure fresh data
   });
 
-  const isLoading = activeTab === "employees" ? employeesLoading : adminsLoading;
+  const isLoading =
+    activeTab === "employees" ? employeesLoading : adminsLoading;
   const currentData = activeTab === "employees" ? employeesData : adminsData;
 
   // Debug logging
-  console.log('activeTab:', activeTab);
-  console.log('employeesData:', employeesData);
-  console.log('adminsData:', adminsData);
-  console.log('currentData:', currentData);
+  console.log("activeTab:", activeTab);
+  console.log("employeesData:", employeesData);
+  console.log("adminsData:", adminsData);
+  console.log("currentData:", currentData);
 
   // Try both with and without .data wrapper
-  const currentUsers = activeTab === "employees"
-    ? ((currentData as any)?.data?.employees || (currentData as any)?.employees)
-    : ((currentData as any)?.data?.admins || (currentData as any)?.admins);
+  const currentUsers =
+    activeTab === "employees"
+      ? (currentData as any)?.data?.employees || (currentData as any)?.employees
+      : (currentData as any)?.data?.admins || (currentData as any)?.admins;
 
   const deactivateEmployeeMutation = useMutation({
     mutationFn: usersAPI.deactivateEmployee,
@@ -87,7 +95,7 @@ const EmployeesPage: React.FC = () => {
       //   title: "Employee Deactivated",
       //   message: "Employee has been deactivated successfully.",
       // });
-      console.log('Employee deactivated successfully');
+      console.log("Employee deactivated successfully");
     },
     onError: (error: any) => {
       console.error("Failed to deactivate employee:", error);
@@ -98,7 +106,10 @@ const EmployeesPage: React.FC = () => {
       //     error?.response?.data?.message ||
       //     "Failed to deactivate employee. Please try again.",
       // });
-      console.error('Failed to deactivate employee:', error?.response?.data?.message || error.message);
+      console.error(
+        "Failed to deactivate employee:",
+        error?.response?.data?.message || error.message
+      );
     },
   });
 
@@ -112,7 +123,7 @@ const EmployeesPage: React.FC = () => {
       //   title: "Employee Activated",
       //   message: "Employee has been activated successfully.",
       // });
-      console.log('Employee activated successfully');
+      console.log("Employee activated successfully");
     },
     onError: (error: any) => {
       console.error("Failed to activate employee:", error);
@@ -123,7 +134,10 @@ const EmployeesPage: React.FC = () => {
       //     error?.response?.data?.message ||
       //     "Failed to activate employee. Please try again.",
       // });
-      console.error('Failed to activate employee:', error?.response?.data?.message || error.message);
+      console.error(
+        "Failed to activate employee:",
+        error?.response?.data?.message || error.message
+      );
     },
   });
 
@@ -134,13 +148,15 @@ const EmployeesPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["admins"] });
       setDeleteConfirm({ show: false, employee: null });
       setError(""); // Clear any previous errors
-      console.log('Employee deleted successfully');
+      console.log("Employee deleted successfully");
     },
     onError: (error: any) => {
       console.error("Failed to delete employee:", error);
-      const errorMessage = error?.response?.data?.message || "Failed to delete employee. Please try again.";
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Failed to delete employee. Please try again.";
       setError(errorMessage);
-      console.error('Failed to delete employee:', errorMessage);
+      console.error("Failed to delete employee:", errorMessage);
     },
   });
 
@@ -231,11 +247,6 @@ const EmployeesPage: React.FC = () => {
             Manage your company team members
           </p>
           {/* Debug info */}
-          {currentUsers && (
-            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-              Debug: Showing {currentUsers.length} employees | Total in data: {((currentData as any)?.data?.pagination?.total || 'unknown')} | Active count from Dashboard should be 14
-            </p>
-          )}
         </div>
 
         <div className="flex space-x-3">
@@ -279,8 +290,11 @@ const EmployeesPage: React.FC = () => {
             }`}
           >
             <UserIcon className="w-4 h-4 inline mr-2" />
-            Employees ({((employeesData as any)?.data?.employees?.length || (employeesData as any)?.employees?.length || 0)}/
-            {((employeesData as any)?.data?.pagination?.total || 'unknown')})
+            Employees (
+            {(employeesData as any)?.data?.employees?.length ||
+              (employeesData as any)?.employees?.length ||
+              0}
+            /{(employeesData as any)?.data?.pagination?.total || "unknown"})
           </button>
           <button
             onClick={() => setActiveTab("admins")}
@@ -291,7 +305,11 @@ const EmployeesPage: React.FC = () => {
             }`}
           >
             <ShieldCheckIcon className="w-4 h-4 inline mr-2" />
-            Admins ({((adminsData as any)?.data?.admins?.length || (adminsData as any)?.admins?.length || 0)})
+            Admins (
+            {(adminsData as any)?.data?.admins?.length ||
+              (adminsData as any)?.admins?.length ||
+              0}
+            )
           </button>
         </div>
       </div>
@@ -367,7 +385,8 @@ const EmployeesPage: React.FC = () => {
         {isSearchActive && (
           <div className="mt-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-900">
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Found {filteredUsers.length} {activeTab === "employees" ? "employee" : "admin"}
+              Found {filteredUsers.length}{" "}
+              {activeTab === "employees" ? "employee" : "admin"}
               {filteredUsers.length !== 1 ? "s" : ""}
               {searchTerm && <span> matching "{searchTerm}"</span>}
               {(dateFrom || dateTo) && (
@@ -417,9 +436,7 @@ const EmployeesPage: React.FC = () => {
                   <ul className="mt-1 list-disc list-inside space-y-1">
                     <li>This action cannot be undone</li>
                     <li>Employee's account and all data will be removed</li>
-                    <li>
-                      All associated leave requests will also be deleted
-                    </li>
+                    <li>All associated leave requests will also be deleted</li>
                   </ul>
                 </div>
               </div>
@@ -476,139 +493,158 @@ const EmployeesPage: React.FC = () => {
             {/* Desktop Table */}
             <div className="hidden lg:block p-8">
               <div className="overflow-hidden rounded-xl border border-gray-200/30 dark:border-gray-700/30">
-                <div className={`${filteredUsers.length > 10 ? 'max-h-[600px] overflow-y-auto' : ''}`}>
+                <div
+                  className={`${
+                    filteredUsers.length > 10
+                      ? "max-h-[600px] overflow-y-auto"
+                      : ""
+                  }`}
+                >
                   <table className="min-w-full divide-y divide-gray-200/30 dark:divide-gray-700/30">
-                  <thead className="bg-gradient-to-r from-gray-50/80 to-gray-100/50 dark:from-gray-800/60 dark:to-gray-900/30">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
-                        Employee
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
-                        Department
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
-                        Position
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
-                        Join Date
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
-                        Status
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white/50 dark:bg-gray-800/20 divide-y divide-gray-200/20 dark:divide-gray-700/20">
-                    {filteredUsers.map((employee: any) => (
-                      <tr
-                        key={employee._id}
-                        className="group table-row-hover transition-all duration-300"
-                      >
-                        <td className="pl-2 pr-4 py-4 whitespace-nowrap">
-                          <div className="flex items-center gap-3">
-                            <Avatar
-                              src={employee.profilePicture}
-                              name={employee.name}
-                              size="md"
-                              className="flex-shrink-0"
-                              showErrorHint={true}
-                            />
-                            <div className="flex flex-col">
-                              <button
-                                onClick={() => navigate(`/employees/${employee._id}`)}
-                                className="text-left text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer underline-offset-2 hover:underline"
-                              >
-                                {employee.name}
-                              </button>
-                              <span className="text-xs text-gray-500 dark:text-gray-400">
-                                {employee.employeeId}
-                              </span>
-                            </div>
-                          </div>
-                        </td>
-
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                          {employee.department}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                          {employee.position}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                          {employee.joinDate
-                            ? new Date(employee.joinDate).toLocaleDateString()
-                            : "N/A"}
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              employee.status === "active"
-                                ? "badge-success"
-                                : employee.status === "pending"
-                                ? "badge-warning"
-                                : "badge-error"
-                            }`}
-                          >
-                            {employee.status === "active"
-                              ? "Active"
-                              : employee.status === "pending"
-                              ? "Pending"
-                              : "Inactive"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 whitespace-nowrap">
-                          <div className="flex items-center space-x-2">
-                            {activeTab === "employees" && (
-                              <button
-                                onClick={() =>
-                                  handleToggleStatus(
-                                    employee._id,
-                                    employee.isActive
-                                  )
-                                }
-                                disabled={
-                                  deactivateEmployeeMutation.isPending ||
-                                  activateEmployeeMutation.isPending
-                                }
-                                className={`px-3 py-1 text-xs rounded transition-colors ${
-                                  employee.isActive ? "btn-danger" : "btn-success"
-                                }`}
-                              >
-                                {employee.isActive ? "Deactivate" : "Activate"}
-                              </button>
-                            )}
-
-                            <button
-                              onClick={() => handleGenerateReport(employee)}
-                              className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-700"
-                            >
-                              <DocumentChartBarIcon className="h-4 w-4 mr-1" />
-                              Report
-                            </button>
-
-                            {activeTab === "employees" && (
-                              <button
-                                onClick={() => showDeleteConfirm(employee)}
-                                className="btn-danger px-3 py-1 text-xs"
-                              >
-                                Delete
-                              </button>
-                            )}
-                          </div>
-                        </td>
+                    <thead className="bg-gradient-to-r from-gray-50/80 to-gray-100/50 dark:from-gray-800/60 dark:to-gray-900/30">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                          Employee
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                          Department
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                          Position
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                          Join Date
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                          Status
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
+                          Actions
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
+                    </thead>
+                    <tbody className="bg-white/50 dark:bg-gray-800/20 divide-y divide-gray-200/20 dark:divide-gray-700/20">
+                      {filteredUsers.map((employee: any) => (
+                        <tr
+                          key={employee._id}
+                          className="group table-row-hover transition-all duration-300"
+                        >
+                          <td className="pl-2 pr-4 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-3">
+                              <Avatar
+                                src={employee.profilePicture}
+                                name={employee.name}
+                                size="md"
+                                className="flex-shrink-0"
+                                showErrorHint={true}
+                              />
+                              <div className="flex flex-col">
+                                <button
+                                  onClick={() =>
+                                    navigate(`/employees/${employee._id}`)
+                                  }
+                                  className="text-left text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer underline-offset-2 hover:underline"
+                                >
+                                  {employee.name}
+                                </button>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                  {employee.employeeId}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                            {employee.department}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                            {employee.position}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                            {employee.joinDate
+                              ? new Date(employee.joinDate).toLocaleDateString()
+                              : "N/A"}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap">
+                            <span
+                              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                employee.status === "active"
+                                  ? "badge-success"
+                                  : employee.status === "pending"
+                                  ? "badge-warning"
+                                  : "badge-error"
+                              }`}
+                            >
+                              {employee.status === "active"
+                                ? "Active"
+                                : employee.status === "pending"
+                                ? "Pending"
+                                : "Inactive"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap">
+                            <div className="flex items-center space-x-2">
+                              {activeTab === "employees" && (
+                                <button
+                                  onClick={() =>
+                                    handleToggleStatus(
+                                      employee._id,
+                                      employee.isActive
+                                    )
+                                  }
+                                  disabled={
+                                    deactivateEmployeeMutation.isPending ||
+                                    activateEmployeeMutation.isPending
+                                  }
+                                  className={`px-3 py-1 text-xs rounded transition-colors ${
+                                    employee.isActive
+                                      ? "btn-danger"
+                                      : "btn-success"
+                                  }`}
+                                >
+                                  {employee.isActive
+                                    ? "Deactivate"
+                                    : "Activate"}
+                                </button>
+                              )}
+
+                              <button
+                                onClick={() => handleGenerateReport(employee)}
+                                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-700"
+                              >
+                                <DocumentChartBarIcon className="h-4 w-4 mr-1" />
+                                Report
+                              </button>
+
+                              {activeTab === "employees" && (
+                                <button
+                                  onClick={() => showDeleteConfirm(employee)}
+                                  className="btn-danger px-3 py-1 text-xs"
+                                >
+                                  Delete
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
                   </table>
                 </div>
               </div>
             </div>
 
             {/* Mobile Cards */}
-            <div className={`lg:hidden space-y-4 p-8 ${filteredUsers.length > 10 ? 'max-h-[600px] overflow-y-auto' : ''}`}>
+            <div
+              className={`lg:hidden space-y-4 p-8 ${
+                filteredUsers.length > 10 ? "max-h-[600px] overflow-y-auto" : ""
+              }`}
+            >
               {filteredUsers.map((employee: any) => (
-                <div key={employee._id} className="rounded-xl p-6 border border-gray-200/30 dark:border-gray-700/30 bg-gradient-to-br from-white/80 to-gray-50/40 dark:from-gray-800/40 dark:to-gray-900/20 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
+                <div
+                  key={employee._id}
+                  className="rounded-xl p-6 border border-gray-200/30 dark:border-gray-700/30 bg-gradient-to-br from-white/80 to-gray-50/40 dark:from-gray-800/40 dark:to-gray-900/20 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
+                >
                   <div className="flex items-center gap-3 mb-4">
                     <Avatar
                       src={employee.profilePicture}
@@ -630,15 +666,25 @@ const EmployeesPage: React.FC = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-sm mb-4">
                     <div>
-                      <p className="text-gray-500 dark:text-gray-400">Department</p>
-                      <p className="text-gray-900 dark:text-gray-100">{employee.department}</p>
+                      <p className="text-gray-500 dark:text-gray-400">
+                        Department
+                      </p>
+                      <p className="text-gray-900 dark:text-gray-100">
+                        {employee.department}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-gray-500 dark:text-gray-400">Position</p>
-                      <p className="text-gray-900 dark:text-gray-100">{employee.position}</p>
+                      <p className="text-gray-500 dark:text-gray-400">
+                        Position
+                      </p>
+                      <p className="text-gray-900 dark:text-gray-100">
+                        {employee.position}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-gray-500 dark:text-gray-400">Join Date</p>
+                      <p className="text-gray-500 dark:text-gray-400">
+                        Join Date
+                      </p>
                       <p className="text-gray-900 dark:text-gray-100">
                         {employee.joinDate
                           ? new Date(employee.joinDate).toLocaleDateString()
