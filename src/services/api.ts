@@ -86,7 +86,7 @@ export const authAPI = {
 
 // Users API
 export const usersAPI = {
-  getEmployees: (page = 1, limit = 10) =>
+  getEmployees: (page = 1, limit = 50) =>
     api.get(`/users?page=${page}&limit=${limit}`),
 
   getAdmins: (page = 1, limit = 10) =>
@@ -113,7 +113,7 @@ export const leavesAPI = {
   submitLeave: (data: LeaveRequest) => 
     api.post('/leaves', data),
   
-  getLeaves: (page = 1, limit = 10, status?: string, employeeId?: string) => {
+  getLeaves: (page = 1, limit = 50, status?: string, employeeId?: string) => {
     let url = `/leaves?page=${page}&limit=${limit}`;
     if (status) url += `&status=${status}`;
     if (employeeId) url += `&employeeId=${employeeId}`;
