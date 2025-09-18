@@ -229,6 +229,12 @@ const EmployeesPage: React.FC = () => {
           <p className="text-gray-600 dark:text-gray-300">
             Manage your company team members
           </p>
+          {/* Debug info */}
+          {currentUsers && (
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+              Debug: Showing {currentUsers.length} employees | Total in data: {((currentData as any)?.data?.pagination?.total || 'unknown')} | Active count from Dashboard should be 14
+            </p>
+          )}
         </div>
 
         <div className="flex space-x-3">
@@ -272,7 +278,8 @@ const EmployeesPage: React.FC = () => {
             }`}
           >
             <UserIcon className="w-4 h-4 inline mr-2" />
-            Employees ({((employeesData as any)?.data?.employees?.length || (employeesData as any)?.employees?.length || 0)})
+            Employees ({((employeesData as any)?.data?.employees?.length || (employeesData as any)?.employees?.length || 0)}/
+            {((employeesData as any)?.data?.pagination?.total || 'unknown')})
           </button>
           <button
             onClick={() => setActiveTab("admins")}
