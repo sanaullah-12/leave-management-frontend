@@ -10,6 +10,7 @@ interface AvatarProps {
   showUploadIcon?: boolean;
   onClick?: () => void;
   className?: string;
+  showErrorHint?: boolean; // Show hint when image fails to load
 }
 
 const Avatar: React.FC<AvatarProps> = ({
@@ -20,7 +21,8 @@ const Avatar: React.FC<AvatarProps> = ({
   isClickable = false,
   showUploadIcon = false,
   onClick,
-  className = ''
+  className = '',
+  showErrorHint = false
 }) => {
   const sizeClasses = {
     xs: 'w-6 h-6 text-xs',
@@ -81,17 +83,37 @@ const Avatar: React.FC<AvatarProps> = ({
   };
 
   const [imageError, setImageError] = React.useState(false);
+  const [imageLoading, setImageLoading] = React.useState(false);
+
+  // Handle image loading
+  const handleImageLoad = () => {
+    setImageLoading(false);
+  };
+
+  const handleImageError = () => {
+    const imageUrl = getImageUrl(src!);
+    console.warn('Avatar image failed to load:', imageUrl);
+    console.warn('This is likely due to Railway ephemeral storage - files are lost on app restart');
+    setImageError(true);
+    setImageLoading(false);
+  };
 
   const content = src && !imageError ? (
-    <img
-      src={getImageUrl(src)}
-      alt={alt || name || 'Avatar'}
-      className="w-full h-full rounded-full object-cover"
-      onError={() => {
-        console.error('Avatar image failed to load:', getImageUrl(src));
-        setImageError(true);
-      }}
-    />
+    <div className="relative w-full h-full">
+      <img
+        src={getImageUrl(src)}
+        alt={alt || name || 'Avatar'}
+        className="w-full h-full rounded-full object-cover"
+        onLoad={handleImageLoad}
+        onError={handleImageError}
+        onLoadStart={() => setImageLoading(true)}
+      />
+      {imageLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-200 rounded-full">
+          <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+        </div>
+      )}
+    </div>
   ) : name ? (
     <div className={`w-full h-full rounded-full ${getBackgroundClass()} text-white font-semibold flex items-center justify-center`}>
       {getInitials(name)}
@@ -103,11 +125,16 @@ const Avatar: React.FC<AvatarProps> = ({
   );
 
   return (
-    <div className={baseClasses} onClick={onClick}>
+    <div className={baseClasses} onClick={onClick} title={imageError && showErrorHint ? 'Profile picture temporarily unavailable (Railway file storage issue)' : undefined}>
       {content}
       {showUploadIcon && (
         <div className="absolute -bottom-1 -right-1 profile-icon rounded-full p-1 shadow-lg">
           <CameraIcon className={`${uploadIconSizes[size]} text-white`} />
+        </div>
+      )}
+      {imageError && showErrorHint && (
+        <div className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center">
+          <span className="text-white text-xs">!</span>
         </div>
       )}
     </div>

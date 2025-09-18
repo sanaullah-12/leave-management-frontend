@@ -512,6 +512,7 @@ const EmployeesPage: React.FC = () => {
                               name={employee.name}
                               size="md"
                               className="flex-shrink-0"
+                              showErrorHint={true}
                             />
                             <div className="flex flex-col">
                               <button
@@ -612,6 +613,7 @@ const EmployeesPage: React.FC = () => {
                       src={employee.profilePicture}
                       name={employee.name}
                       size="md"
+                      showErrorHint={true}
                     />
                     <div>
                       <button
