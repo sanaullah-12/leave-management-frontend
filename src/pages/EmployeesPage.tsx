@@ -42,14 +42,14 @@ const EmployeesPage: React.FC = () => {
   const [dateTo, setDateTo] = useState("");
   const [isSearchActive, setIsSearchActive] = useState(false);
 
-  const { data: employeesData, isLoading: employeesLoading } = useQuery({
+  const { data: employeesData, isLoading: employeesLoading, refetch: refetchEmployees } = useQuery({
     queryKey: ["employees"],
     queryFn: () => usersAPI.getEmployees(),
     enabled: user?.role === "admin",
     refetchInterval: false,
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0, // Disabled caching to ensure fresh data
   });
 
   const { data: adminsData, isLoading: adminsLoading } = useQuery({
@@ -59,7 +59,7 @@ const EmployeesPage: React.FC = () => {
     refetchInterval: false,
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0, // Disabled caching to ensure fresh data
   });
 
   const isLoading = activeTab === "employees" ? employeesLoading : adminsLoading;
@@ -232,6 +232,14 @@ const EmployeesPage: React.FC = () => {
         </div>
 
         <div className="flex space-x-3">
+          <button
+            onClick={() => refetchEmployees()}
+            className="btn-secondary inline-flex items-center"
+            disabled={employeesLoading}
+          >
+            <ArrowPathIcon className="h-5 w-5 mr-2" />
+            Refresh
+          </button>
           {activeTab === "employees" ? (
             <button
               onClick={() => setShowInviteModal(true)}
@@ -460,7 +468,8 @@ const EmployeesPage: React.FC = () => {
             {/* Desktop Table */}
             <div className="hidden lg:block p-8">
               <div className="overflow-hidden rounded-xl border border-gray-200/30 dark:border-gray-700/30">
-                <table className="min-w-full divide-y divide-gray-200/30 dark:divide-gray-700/30">
+                <div className={`${filteredUsers.length > 10 ? 'max-h-[600px] overflow-y-auto' : ''}`}>
+                  <table className="min-w-full divide-y divide-gray-200/30 dark:divide-gray-700/30">
                   <thead className="bg-gradient-to-r from-gray-50/80 to-gray-100/50 dark:from-gray-800/60 dark:to-gray-900/30">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
@@ -582,12 +591,13 @@ const EmployeesPage: React.FC = () => {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                  </table>
+                </div>
               </div>
             </div>
 
             {/* Mobile Cards */}
-            <div className="lg:hidden space-y-4 p-8">
+            <div className={`lg:hidden space-y-4 p-8 ${filteredUsers.length > 10 ? 'max-h-[600px] overflow-y-auto' : ''}`}>
               {filteredUsers.map((employee: any) => (
                 <div key={employee._id} className="rounded-xl p-6 border border-gray-200/30 dark:border-gray-700/30 bg-gradient-to-br from-white/80 to-gray-50/40 dark:from-gray-800/40 dark:to-gray-900/20 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
                   <div className="flex items-center gap-3 mb-4">
