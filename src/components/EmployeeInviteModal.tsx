@@ -47,18 +47,28 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
 
   const inviteEmployeeMutation = useMutation({
     mutationFn: authAPI.inviteEmployee,
-    onSuccess: (_, variables) => {
+    onSuccess: (response, variables) => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       reset();
       setTags([]);
       onClose();
 
-      // addNotification({
-      //   type: "success",
-      //   title: "Employee Invited",
-      //   message: `Invitation sent to ${variables.email} successfully.`,
-      // });
-      console.log('Employee invitation sent successfully to', variables.email);
+      // Check if email delivery failed (status 202 = partial success)
+      if (response.warning && response.warning === 'Email delivery failed') {
+        console.warn('Employee invitation created but email failed:', response.emailError);
+        // addNotification({
+        //   type: "warning",
+        //   title: "Employee Added - Email Failed",
+        //   message: `Employee ${variables.name} added but invitation email failed. Share the link manually: ${response.manualInviteUrl}`,
+        // });
+      } else {
+        console.log('Employee invitation sent successfully to', variables.email);
+        // addNotification({
+        //   type: "success",
+        //   title: "Employee Invited",
+        //   message: `Invitation sent to ${variables.email} successfully.`,
+        // });
+      }
     },
     onError: (error: any) => {
       // addNotification({
