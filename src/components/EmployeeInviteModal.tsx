@@ -54,12 +54,12 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
       onClose();
 
       // Check if email delivery failed (status 202 = partial success)
-      if (response.warning && response.warning === 'Email delivery failed') {
-        console.warn('Employee invitation created but email failed:', response.emailError);
+      if (response.data.warning && response.data.warning === 'Email delivery failed') {
+        console.warn('Employee invitation created but email failed:', response.data.emailError);
         // addNotification({
         //   type: "warning",
         //   title: "Employee Added - Email Failed",
-        //   message: `Employee ${variables.name} added but invitation email failed. Share the link manually: ${response.manualInviteUrl}`,
+        //   message: `Employee ${variables.name} added but invitation email failed. Share the link manually: ${response.data.manualInviteUrl}`,
         // });
       } else {
         console.log('Employee invitation sent successfully to', variables.email);
