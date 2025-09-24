@@ -34,38 +34,51 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000, // 10 second timeout for all requests
+  timeout: 10000, // 10 second timeout for most requests
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor to add auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
+// Create separate instance for email operations with extended timeout
+const emailApi = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 30000, // 30 second timeout for email operations
+  headers: {
+    'Content-Type': 'application/json',
   },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+});
 
-// Response interceptor to handle auth errors
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
+// Request interceptor to add auth token (for both api instances)
+const requestInterceptor = (config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
+  return config;
+};
+
+const requestErrorInterceptor = (error) => {
+  return Promise.reject(error);
+};
+
+// Response interceptor to handle auth errors (for both api instances)
+const responseInterceptor = (response) => response;
+const responseErrorInterceptor = (error) => {
+  if (error.response?.status === 401) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  }
+  return Promise.reject(error);
+};
+
+// Apply interceptors to both API instances
+api.interceptors.request.use(requestInterceptor, requestErrorInterceptor);
+api.interceptors.response.use(responseInterceptor, responseErrorInterceptor);
+
+emailApi.interceptors.request.use(requestInterceptor, requestErrorInterceptor);
+emailApi.interceptors.response.use(responseInterceptor, responseErrorInterceptor);
 
 // Auth API
 export const authAPI = {
@@ -81,8 +94,8 @@ export const authAPI = {
   changePassword: (data: { currentPassword: string; newPassword: string }) => 
     api.put('/auth/change-password', data),
   
-  inviteEmployee: (data: InviteEmployeeData) => 
-    api.post('/auth/invite-employee', data),
+  inviteEmployee: (data: InviteEmployeeData) =>
+    emailApi.post('/auth/invite-employee', data), // Use emailApi with 30s timeout
 };
 
 // Users API

@@ -53,20 +53,30 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
       setTags([]);
       onClose();
 
-      // Check if email delivery failed (status 202 = partial success)
-      if (response.data.warning && response.data.warning === 'Email delivery failed') {
+      // Check email delivery status from updated backend response
+      if (response.data.emailSent === false) {
         console.warn('Employee invitation created but email failed:', response.data.emailError);
+        console.warn('Warning:', response.data.warning);
         // addNotification({
         //   type: "warning",
         //   title: "Employee Added - Email Failed",
-        //   message: `Employee ${variables.name} added but invitation email failed. Share the link manually: ${response.data.manualInviteUrl}`,
+        //   message: `Employee ${variables.name} added but invitation email failed: ${response.data.emailError}`,
+        // });
+      } else if (response.data.emailSent === true) {
+        console.log('Employee invitation email sent successfully to', variables.email);
+        console.log('Email Message ID:', response.data.emailMessageId);
+        // addNotification({
+        //   type: "success",
+        //   title: "Employee Invited Successfully",
+        //   message: `Invitation email sent to ${variables.email} successfully!`,
         // });
       } else {
-        console.log('Employee invitation sent successfully to', variables.email);
+        // Fallback for any other response format
+        console.log('Employee invitation processed for', variables.email);
         // addNotification({
         //   type: "success",
         //   title: "Employee Invited",
-        //   message: `Invitation sent to ${variables.email} successfully.`,
+        //   message: `Invitation processed for ${variables.email}.`,
         // });
       }
     },
@@ -295,7 +305,7 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
             {inviteEmployeeMutation.isPending ? (
               <>
                 <LoadingSpinner size="sm" />
-                <span className="ml-2">Sending...</span>
+                <span className="ml-2">Sending Invitation Email...</span>
               </>
             ) : (
               <>
