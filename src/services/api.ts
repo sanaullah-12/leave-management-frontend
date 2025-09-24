@@ -50,7 +50,7 @@ const emailApi = axios.create({
 });
 
 // Request interceptor to add auth token (for both api instances)
-const requestInterceptor = (config) => {
+const requestInterceptor = (config: any) => {
   const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -58,13 +58,13 @@ const requestInterceptor = (config) => {
   return config;
 };
 
-const requestErrorInterceptor = (error) => {
+const requestErrorInterceptor = (error: any) => {
   return Promise.reject(error);
 };
 
 // Response interceptor to handle auth errors (for both api instances)
-const responseInterceptor = (response) => response;
-const responseErrorInterceptor = (error) => {
+const responseInterceptor = (response: any) => response;
+const responseErrorInterceptor = (error: any) => {
   if (error.response?.status === 401) {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
