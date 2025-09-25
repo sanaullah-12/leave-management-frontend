@@ -2,6 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { leavesAPI } from '../services/api';
+import { showLeaveApprovalSuccess, showLeaveRejectionSuccess, showErrorToast } from '../utils/toastHelpers';
 // import { useNotifications } from '../components/NotificationSystem'; // Removed for Socket.IO implementation
 import Modal from './Modal';
 import LoadingSpinner from './LoadingSpinner';
@@ -48,25 +49,33 @@ const LeaveReviewModal: React.FC<LeaveReviewModalProps> = ({
   const reviewLeaveMutation = useMutation({
     mutationFn: ({ leaveId, status, reviewComments }: { leaveId: string; status: string; reviewComments?: string }) =>
       leavesAPI.reviewLeave(leaveId, { status, reviewComments }),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Show success toast with custom helper
+      const employeeName = leave?.employee?.name || 'Employee';
+      const days = calculateDays();
+
+      if (action === 'approve') {
+        showLeaveApprovalSuccess(employeeName, days);
+      } else {
+        showLeaveRejectionSuccess(employeeName);
+      }
+
+      // Refresh data - this ensures UI updates for both admin and employee
       queryClient.invalidateQueries({ queryKey: ['leaves'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['leave-balance'] });
+
+      // Clean up and close
       reset();
       onClose();
-      
-      // addNotification({
-      //   type: action === 'approve' ? 'success' : 'warning',
-      //   title: `Leave ${action === 'approve' ? 'Approved' : 'Rejected'}`,
-      //   message: `Leave request has been ${action === 'approve' ? 'approved' : 'rejected'} successfully.`,
-      // });
-      console.log(`Leave request ${action === 'approve' ? 'approved' : 'rejected'} successfully`);
+
+      console.log(`Leave request ${action === 'approve' ? 'approved' : 'rejected'} successfully:`, data);
     },
     onError: (error: any) => {
-      // addNotification({
-      //   type: 'error',
-      //   title: 'Review Failed',
-      //   message: error?.response?.data?.message || `Failed to ${action} leave request. Please try again.`,
-      // });
+      // Show error toast with custom helper
+      const errorMessage = error?.response?.data?.message || `Failed to ${action} leave request. Please try again.`;
+      showErrorToast(errorMessage);
+
       console.error(`Failed to ${action} leave request:`, error?.response?.data?.message || error.message);
     },
   });
