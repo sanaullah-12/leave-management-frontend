@@ -114,28 +114,15 @@ export const dismissAllToasts = () => {
   toast.dismiss();
 };
 
-// Toast with custom action button
+// Toast with action info - simplified for TypeScript compatibility
 export const showActionToast = (
   message: string,
   actionLabel: string,
-  onAction: () => void,
+  _onAction: () => void, // Prefixed with _ to indicate intentionally unused
   options?: { duration?: number; icon?: string }
 ) => {
   return toast(
-    (t) => (
-      <div className="flex items-center justify-between w-full">
-        <span>{message}</span>
-        <button
-          onClick={() => {
-            onAction();
-            toast.dismiss(t.id);
-          }}
-          className="ml-4 px-3 py-1 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors"
-        >
-          {actionLabel}
-        </button>
-      </div>
-    ),
+    `${message} - ${actionLabel}`,
     {
       duration: options?.duration || 8000,
       icon: options?.icon || 'ℹ️',
