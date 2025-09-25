@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { leavesAPI } from '../services/api';
+import { showLeaveSubmissionSuccess, showErrorToast } from '../utils/toastHelpers';
 // import { useNotifications } from '../components/NotificationSystem'; // Removed for Socket.IO implementation
 import { useAuth } from '../context/AuthContext';
 import Modal from './Modal';
@@ -60,26 +61,31 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
 
   const submitLeaveRequestMutation = useMutation({
     mutationFn: leavesAPI.submitLeave,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Get current form data to show in toast
+      const leaveTypeValue = watch('leaveType');
+      const days = calculateDays();
+
+      // Show success toast with custom helper
+      showLeaveSubmissionSuccess(days, leaveTypeValue);
+
+      // Refresh data - this ensures UI updates without page reload
       queryClient.invalidateQueries({ queryKey: ['leaves'] });
       queryClient.invalidateQueries({ queryKey: ['leave-balance'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+
+      // Clean up form and close modal
       reset();
       setAttachments([]);
       onClose();
-      
-      // addNotification({
-      //   type: 'success',
-      //   title: 'Leave Request Submitted',
-      //   message: 'Your leave request has been submitted successfully and is pending approval.',
-      // });
-      console.log('Leave request submitted successfully');
+
+      console.log('Leave request submitted successfully:', data);
     },
     onError: (error: any) => {
-      // addNotification({
-      //   type: 'error',
-      //   title: 'Submission Failed',
-      //   message: error?.response?.data?.message || 'Failed to submit leave request. Please try again.',
-      // });
+      // Show error toast with custom helper
+      const errorMessage = error?.response?.data?.message || 'Failed to submit leave request. Please try again.';
+      showErrorToast(errorMessage);
+
       console.error('Leave request submission failed:', error?.response?.data?.message || error.message);
     },
   });
@@ -149,21 +155,30 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Leave Type */}
           <div>
-            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
-              <CalendarDaysIcon className="w-4 h-4 mr-2 text-gray-400" />
+            <label className="flex items-center text-sm font-medium mb-3" style={{ color: 'var(--text-primary)' }}>
+              <CalendarDaysIcon className="w-4 h-4 mr-2 text-green-500 dark:text-green-400" />
               Leave Type
             </label>
             <select
               {...register('leaveType', { required: 'Leave type is required' })}
-              className={`w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
-                errors.leaveType ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
-              }`}
+              className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:ring-4 focus:ring-green-500/20 focus:border-green-500 hover:border-green-300 dark:hover:border-green-600 ${
+                errors.leaveType
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900/10 focus:ring-red-500/20'
+                  : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50'
+              } text-gray-900 dark:text-gray-100 shadow-sm hover:shadow-md focus:shadow-lg backdrop-blur-sm`}
+              style={{
+                background: errors.leaveType
+                  ? 'var(--surface-error)'
+                  : 'var(--surface)',
+                borderColor: errors.leaveType
+                  ? 'var(--color-error)'
+                  : 'var(--border-primary)',
+                color: 'var(--text-primary)'
+              }}
             >
               <option value="">Select leave type</option>
-              <option value="annual">🏖️ Annual Leave</option>
-              <option value="sick">🏥 Sick Leave</option>
               <option value="casual">📅 Casual Leave</option>
-              <option value="maternity">👶 Maternity Leave</option>
+              <option value="sick">🏥 Sick Leave</option>
               <option value="paternity">👨‍👶 Paternity Leave</option>
             </select>
             {errors.leaveType && (
@@ -193,17 +208,28 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
 
           {/* Start Date */}
           <div>
-            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
-              <CalendarDaysIcon className="w-4 h-4 mr-2 text-gray-400" />
+            <label className="flex items-center text-sm font-medium mb-3" style={{ color: 'var(--text-primary)' }}>
+              <CalendarDaysIcon className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" />
               Start Date
             </label>
             <input
               type="date"
               {...register('startDate', { required: 'Start date is required' })}
               min={new Date().toISOString().split('T')[0]}
-              className={`w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
-                errors.startDate ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
-              }`}
+              className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:ring-4 focus:ring-green-500/20 focus:border-green-500 hover:border-green-300 dark:hover:border-green-600 ${
+                errors.startDate
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900/10 focus:ring-red-500/20'
+                  : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50'
+              } text-gray-900 dark:text-gray-100 shadow-sm hover:shadow-md focus:shadow-lg backdrop-blur-sm`}
+              style={{
+                background: errors.startDate
+                  ? 'var(--surface-error)'
+                  : 'var(--surface)',
+                borderColor: errors.startDate
+                  ? 'var(--color-error)'
+                  : 'var(--border-primary)',
+                color: 'var(--text-primary)'
+              }}
             />
             {errors.startDate && (
               <p className="mt-2 text-sm text-red-600 flex items-center">
@@ -215,17 +241,28 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
 
           {/* End Date */}
           <div>
-            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
-              <CalendarDaysIcon className="w-4 h-4 mr-2 text-gray-400" />
+            <label className="flex items-center text-sm font-medium mb-3" style={{ color: 'var(--text-primary)' }}>
+              <CalendarDaysIcon className="w-4 h-4 mr-2 text-purple-500 dark:text-purple-400" />
               End Date
             </label>
             <input
               type="date"
               {...register('endDate', { required: 'End date is required' })}
               min={startDate || new Date().toISOString().split('T')[0]}
-              className={`w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
-                errors.endDate ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
-              }`}
+              className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:ring-4 focus:ring-green-500/20 focus:border-green-500 hover:border-green-300 dark:hover:border-green-600 ${
+                errors.endDate
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900/10 focus:ring-red-500/20'
+                  : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50'
+              } text-gray-900 dark:text-gray-100 shadow-sm hover:shadow-md focus:shadow-lg backdrop-blur-sm`}
+              style={{
+                background: errors.endDate
+                  ? 'var(--surface-error)'
+                  : 'var(--surface)',
+                borderColor: errors.endDate
+                  ? 'var(--color-error)'
+                  : 'var(--border-primary)',
+                color: 'var(--text-primary)'
+              }}
             />
             {errors.endDate && (
               <p className="mt-2 text-sm text-red-600 flex items-center">
@@ -237,44 +274,65 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
 
           {/* Emergency Contact */}
           <div>
-            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
-              <UserIcon className="w-4 h-4 mr-2 text-gray-400" />
+            <label className="flex items-center text-sm font-medium mb-3" style={{ color: 'var(--text-primary)' }}>
+              <UserIcon className="w-4 h-4 mr-2 text-orange-500 dark:text-orange-400" />
               Emergency Contact
             </label>
             <input
               type="text"
               {...register('emergencyContact')}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700"
+              className="w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:ring-4 focus:ring-green-500/20 focus:border-green-500 hover:border-green-300 dark:hover:border-green-600 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 shadow-sm hover:shadow-md focus:shadow-lg backdrop-blur-sm"
+              style={{
+                background: 'var(--surface)',
+                borderColor: 'var(--border-primary)',
+                color: 'var(--text-primary)'
+              }}
               placeholder="Contact person name"
             />
           </div>
 
           {/* Emergency Phone */}
           <div>
-            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
-              <ClockIcon className="w-4 h-4 mr-2 text-gray-400" />
+            <label className="flex items-center text-sm font-medium mb-3" style={{ color: 'var(--text-primary)' }}>
+              <ClockIcon className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-400" />
               Emergency Phone
             </label>
             <input
               type="tel"
               {...register('emergencyPhone')}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700"
+              className="w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:ring-4 focus:ring-green-500/20 focus:border-green-500 hover:border-green-300 dark:hover:border-green-600 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 shadow-sm hover:shadow-md focus:shadow-lg backdrop-blur-sm"
+              style={{
+                background: 'var(--surface)',
+                borderColor: 'var(--border-primary)',
+                color: 'var(--text-primary)'
+              }}
               placeholder="+1 (555) 123-4567"
             />
           </div>
 
           {/* Reason */}
           <div className="md:col-span-2">
-            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
-              <DocumentTextIcon className="w-4 h-4 mr-2 text-gray-400" />
+            <label className="flex items-center text-sm font-medium mb-3" style={{ color: 'var(--text-primary)' }}>
+              <DocumentTextIcon className="w-4 h-4 mr-2 text-pink-500 dark:text-pink-400" />
               Reason for Leave
             </label>
             <textarea
               {...register('reason', { required: 'Reason is required' })}
               rows={4}
-              className={`w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
-                errors.reason ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'
-              }`}
+              className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:ring-4 focus:ring-green-500/20 focus:border-green-500 hover:border-green-300 dark:hover:border-green-600 resize-none ${
+                errors.reason
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900/10 focus:ring-red-500/20'
+                  : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50'
+              } text-gray-900 dark:text-gray-100 shadow-sm hover:shadow-md focus:shadow-lg backdrop-blur-sm`}
+              style={{
+                background: errors.reason
+                  ? 'var(--surface-error)'
+                  : 'var(--surface)',
+                borderColor: errors.reason
+                  ? 'var(--color-error)'
+                  : 'var(--border-primary)',
+                color: 'var(--text-primary)'
+              }}
               placeholder="Please provide a brief explanation for your leave request..."
             />
             {errors.reason && (
@@ -287,15 +345,20 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
 
           {/* File Attachments */}
           <div className="md:col-span-2">
-            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
-              <PaperClipIcon className="w-4 h-4 mr-2 text-gray-400" />
+            <label className="flex items-center text-sm font-medium mb-3" style={{ color: 'var(--text-primary)' }}>
+              <PaperClipIcon className="w-4 h-4 mr-2 text-teal-500 dark:text-teal-400" />
               Attachments (Optional)
             </label>
             <input
               type="file"
               multiple
               onChange={handleFileChange}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-700"
+              className="w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:ring-4 focus:ring-green-500/20 focus:border-green-500 hover:border-green-300 dark:hover:border-green-600 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50 text-gray-900 dark:text-gray-100 shadow-sm hover:shadow-md focus:shadow-lg backdrop-blur-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 dark:file:bg-green-900/20 dark:file:text-green-300"
+              style={{
+                background: 'var(--surface)',
+                borderColor: 'var(--border-primary)',
+                color: 'var(--text-primary)'
+              }}
             />
             
             {/* Display Attachments */}

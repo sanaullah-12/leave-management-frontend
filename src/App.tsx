@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 // import { NotificationProvider } from './components/NotificationSystem'; // Removed for Socket.IO implementation
@@ -40,6 +41,41 @@ const App: React.FC = () => {
           <AuthProvider>
             <Router>
               <div className="App">
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
+                    duration: 4000,
+                    className: '',
+                    style: {
+                      background: 'var(--surface)',
+                      color: 'var(--text-primary)',
+                      border: '1px solid var(--border-primary)',
+                      borderRadius: '12px',
+                      padding: '16px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    },
+                    success: {
+                      iconTheme: {
+                        primary: '#10b981',
+                        secondary: '#ffffff',
+                      },
+                      style: {
+                        borderLeft: '4px solid #10b981',
+                      },
+                    },
+                    error: {
+                      iconTheme: {
+                        primary: '#ef4444',
+                        secondary: '#ffffff',
+                      },
+                      style: {
+                        borderLeft: '4px solid #ef4444',
+                      },
+                    },
+                  }}
+                />
                 <Routes>
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
