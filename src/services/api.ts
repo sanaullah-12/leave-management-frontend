@@ -40,10 +40,10 @@ const api = axios.create({
   },
 });
 
-// Create separate instance for email operations with extended timeout
-const emailApi = axios.create({
+// Create separate instance for invite operations with shorter timeout (since email is now async)
+const inviteApi = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000, // 30 second timeout for email operations
+  timeout: 15000, // 15 second timeout - faster since email is async
   headers: {
     'Content-Type': 'application/json',
   },
@@ -77,8 +77,8 @@ const responseErrorInterceptor = (error: any) => {
 api.interceptors.request.use(requestInterceptor, requestErrorInterceptor);
 api.interceptors.response.use(responseInterceptor, responseErrorInterceptor);
 
-emailApi.interceptors.request.use(requestInterceptor, requestErrorInterceptor);
-emailApi.interceptors.response.use(responseInterceptor, responseErrorInterceptor);
+inviteApi.interceptors.request.use(requestInterceptor, requestErrorInterceptor);
+inviteApi.interceptors.response.use(responseInterceptor, responseErrorInterceptor);
 
 // Auth API
 export const authAPI = {
@@ -95,7 +95,14 @@ export const authAPI = {
     api.put('/auth/change-password', data),
   
   inviteEmployee: (data: InviteEmployeeData) =>
-    emailApi.post('/auth/invite-employee', data), // Use emailApi with 30s timeout
+    inviteApi.post('/auth/invite-employee', data), // Use inviteApi with 15s timeout (email is now async)
+
+  // Email queue status endpoints
+  getEmailQueueStatus: () =>
+    api.get('/auth/email-queue/status'),
+
+  getEmailJobStatus: (jobId: string) =>
+    api.get(`/auth/email-queue/job/${jobId}`);
 };
 
 // Users API
