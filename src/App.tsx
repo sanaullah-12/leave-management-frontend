@@ -18,6 +18,7 @@ import EmployeeDetailPageReal from './pages/EmployeeDetailPageReal';
 import MyLeaveActivityPage from './pages/MyLeaveActivityPage';
 import ProfilePage from './pages/ProfilePage';
 import VerifyInvitationPage from './pages/VerifyInvitationPage';
+import AcceptInvitePage from './pages/AcceptInvitePage';
 import ReportsPage from './pages/ReportsPage';
 import ThemePage from './pages/ThemePage';
 
@@ -44,6 +45,7 @@ const App: React.FC = () => {
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                   <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+                  <Route path="/invite/:token" element={<AcceptInvitePage />} />
                   <Route path="/verify-invitation/:token" element={<VerifyInvitationPage />} />
                   <Route path="/" element={<Layout />}>
                     <Route index element={<DashboardPage />} />
