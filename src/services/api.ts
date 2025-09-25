@@ -102,7 +102,7 @@ export const authAPI = {
     api.get('/auth/email-queue/status'),
 
   getEmailJobStatus: (jobId: string) =>
-    api.get(`/auth/email-queue/job/${jobId}`);
+    api.get(`/auth/email-queue/job/${jobId}`)
 };
 
 // Users API
