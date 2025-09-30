@@ -49,6 +49,15 @@ const inviteApi = axios.create({
   },
 });
 
+// Create separate instance for attendance operations with longer timeout (ZKTeco operations can be slow)
+const attendanceApi = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 120000, // 2 minute timeout for ZKTeco biometric machine operations (increased due to large datasets)
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
 // Request interceptor to add auth token (for both api instances)
 const requestInterceptor = (config: any) => {
   const token = localStorage.getItem('token');
@@ -73,12 +82,15 @@ const responseErrorInterceptor = (error: any) => {
   return Promise.reject(error);
 };
 
-// Apply interceptors to both API instances
+// Apply interceptors to all API instances
 api.interceptors.request.use(requestInterceptor, requestErrorInterceptor);
 api.interceptors.response.use(responseInterceptor, responseErrorInterceptor);
 
 inviteApi.interceptors.request.use(requestInterceptor, requestErrorInterceptor);
 inviteApi.interceptors.response.use(responseInterceptor, responseErrorInterceptor);
+
+attendanceApi.interceptors.request.use(requestInterceptor, requestErrorInterceptor);
+attendanceApi.interceptors.response.use(responseInterceptor, responseErrorInterceptor);
 
 // Auth API
 export const authAPI = {
@@ -168,8 +180,78 @@ export const leavesAPI = {
   updateLeavePolicy: (policy: any) => 
     api.put('/leaves/policy', policy),
   
-  updateEmployeeLeaveAllocation: (employeeId: string, allocations: any) => 
+  updateEmployeeLeaveAllocation: (employeeId: string, allocations: any) =>
     api.put(`/leaves/allocation/${employeeId}`, { allocations }),
+};
+
+// Attendance API (Biometric Machine Integration)
+export const attendanceAPI = {
+  connectToMachine: (ip: string, port = 4370) =>
+    attendanceApi.post('/attendance/connect', { ip, port }),
+
+  getMachineStatus: (ip: string) =>
+    api.get(`/attendance/status/${ip}`),
+
+  getAllMachines: () =>
+    api.get('/attendance/machines'),
+
+  disconnectFromMachine: (ip: string) =>
+    attendanceApi.post('/attendance/disconnect', { ip }),
+
+  // Employee data from biometric machine (use longer timeout)
+  getEmployeesFromMachine: (ip: string) =>
+    attendanceApi.get(`/attendance/employees/${ip}`),
+
+  getEmployeeAttendance: (ip: string, employeeId: string, startDate?: string, endDate?: string, days = 7, forceSync = false) => {
+    let url = `/attendance/attendance/${ip}/${employeeId}`;
+    const params = new URLSearchParams();
+
+    if (startDate && endDate) {
+      params.append('startDate', startDate);
+      params.append('endDate', endDate);
+    } else {
+      params.append('days', days.toString());
+    }
+
+    if (forceSync) {
+      params.append('forceSync', 'true');
+    }
+
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+
+    return attendanceApi.get(url);
+  },
+
+  // Get real-time attendance data (forces sync)
+  getRealTimeAttendance: (ip: string, employeeId: string, days = 30) =>
+    attendanceApi.get(`/attendance/realtime/${ip}/${employeeId}?days=${days}`),
+
+  // Force fetch real data from machine (batch processing)
+  fetchRealAttendanceData: (ip: string, startDate: string, endDate: string) =>
+    attendanceApi.post(`/attendance/fetch-real/${ip}`, { startDate, endDate }),
+
+  // On-demand attendance fetch with date range (DEFAULT: last 2 months)
+  fetchAttendanceRange: (ip: string, startDate?: string, endDate?: string) =>
+    attendanceApi.post(`/attendance/fetch-attendance-range/${ip}`, { startDate, endDate }),
+
+  // Late time settings
+  getLateTimeSettings: () =>
+    attendanceApi.get('/attendance/settings/late-time'),
+
+  updateLateTimeSettings: (settings: { cutoffTime?: string; useCustomCutoff: boolean }) =>
+    attendanceApi.put('/attendance/settings/late-time', settings),
+
+  // Sync management endpoints
+  triggerManualSync: (ip: string) =>
+    attendanceApi.post('/attendance/sync/manual', { ip }),
+
+  getSyncStatus: () =>
+    attendanceApi.get('/attendance/sync/status'),
+
+  triggerSyncAllMachines: () =>
+    attendanceApi.post('/attendance/sync/all'),
 };
 
 // Notification API - Removed for Socket.IO implementation
