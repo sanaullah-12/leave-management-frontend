@@ -1,9 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   ClockIcon,
-  CalendarIcon,
-  ChartBarIcon,
-  UserGroupIcon,
   CheckCircleIcon,
   ArrowPathIcon,
   ServerIcon,
@@ -13,16 +10,15 @@ import {
   UsersIcon,
   EyeIcon,
   ClockIcon as TimeIcon,
-  ExclamationTriangleIcon,
-  Cog6ToothIcon
-} from '@heroicons/react/24/outline';
-import { attendanceAPI } from '../services/api';
-import '../styles/design-system.css';
+  Cog6ToothIcon,
+} from "@heroicons/react/24/outline";
+import { attendanceAPI } from "../services/api";
+import "../styles/design-system.css";
 
 interface MachineConnection {
   ip: string;
   port: number;
-  status: 'connected' | 'failed' | 'not_attempted';
+  status: "connected" | "failed" | "not_attempted";
   connectedAt?: Date;
   lastPing?: Date;
   error?: string;
@@ -39,14 +35,18 @@ interface Employee {
 }
 
 interface AttendanceRecord {
+  id: string;
+  employeeId: string;
   date: string;
-  status: 'present' | 'absent';
-  checkIn?: string;
-  checkOut?: string;
-  isLate: boolean;
-  lateMinutes: number;
-  workingHours: number;
-  machineId: string;
+  time: string;
+  type: string;
+  status: string;
+  timestamp: string;
+  fullTimestamp?: string;
+  dateDisplay?: string;
+  timeDisplay?: string;
+  rawState?: number;
+  machineData?: any;
   recordId: string;
 }
 
@@ -67,6 +67,10 @@ interface AttendanceData {
     avgWorkingHours: number;
   };
   records: AttendanceRecord[];
+  source?: string;
+  realTime?: boolean;
+  fetchedAt?: string;
+  totalRecords?: number;
 }
 
 interface LateTimeSettings {
@@ -77,24 +81,30 @@ interface LateTimeSettings {
 }
 
 const AttendancePage: React.FC = () => {
-  const [selectedIP, setSelectedIP] = useState('192.168.1.201');
-  const [customIP, setCustomIP] = useState('');
+  const [selectedIP, setSelectedIP] = useState("192.168.1.201");
+  const [customIP, setCustomIP] = useState("");
   const [isConnecting, setIsConnecting] = useState(false);
-  const [machineStatus, setMachineStatus] = useState<MachineConnection | null>(null);
-  const [error, setError] = useState<string>('');
-  const [success, setSuccess] = useState<string>('');
+  const [machineStatus, setMachineStatus] = useState<MachineConnection | null>(
+    null
+  );
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
 
   // Employee-related state
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isFetchingEmployees, setIsFetchingEmployees] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-  const [attendanceData, setAttendanceData] = useState<AttendanceData | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null
+  );
+  const [attendanceData, setAttendanceData] = useState<AttendanceData | null>(
+    null
+  );
   const [isFetchingAttendance, setIsFetchingAttendance] = useState(false);
 
   // Settings state
   const [lateTimeSettings, setLateTimeSettings] = useState<LateTimeSettings>({
     useCustomCutoff: false,
-    cutoffTime: '09:00'
+    cutoffTime: "09:00",
   });
   const [showSettings, setShowSettings] = useState(false);
 
@@ -103,18 +113,18 @@ const AttendancePage: React.FC = () => {
     // Default to 2 months ago
     const date = new Date();
     date.setMonth(date.getMonth() - 2);
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
   });
   const [endDate, setEndDate] = useState(() => {
     // Default to today
-    return new Date().toISOString().split('T')[0];
+    return new Date().toISOString().split("T")[0];
   });
 
   // Predefined machine IPs based on your configuration
   const predefinedIPs = [
-    '192.168.1.201', // Your biometric machine
-    '192.168.1.202',
-    '192.168.1.203'
+    "192.168.1.201", // Your biometric machine
+    "192.168.1.202",
+    "192.168.1.203",
   ];
 
   // Load machine status on component mount
@@ -135,11 +145,11 @@ const AttendancePage: React.FC = () => {
       setMachineStatus(response.data.machine);
 
       // If machine is connected, automatically fetch employees
-      if (response.data.machine?.status === 'connected') {
+      if (response.data.machine?.status === "connected") {
         fetchEmployees(ip);
       }
     } catch (err) {
-      console.error('Failed to load machine status:', err);
+      console.error("Failed to load machine status:", err);
     }
   };
 
@@ -148,40 +158,43 @@ const AttendancePage: React.FC = () => {
       const response = await attendanceAPI.getLateTimeSettings();
       setLateTimeSettings(response.data.settings);
     } catch (err) {
-      console.error('Failed to load late time settings:', err);
+      console.error("Failed to load late time settings:", err);
     }
   };
 
   const handleConnect = async () => {
-    const ipToConnect = selectedIP === 'custom' ? customIP : selectedIP;
+    const ipToConnect = selectedIP === "custom" ? customIP : selectedIP;
 
     if (!ipToConnect) {
-      setError('Please enter an IP address');
+      setError("Please enter an IP address");
       return;
     }
 
     // Validate IP format
     const ipRegex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
     if (!ipRegex.test(ipToConnect)) {
-      setError('Please enter a valid IP address');
+      setError("Please enter a valid IP address");
       return;
     }
 
     setIsConnecting(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
       const response = await attendanceAPI.connectToMachine(ipToConnect, 4370);
 
       if (response.data.success) {
-        setSuccess(`Successfully connected to biometric machine at ${ipToConnect}:4370`);
+        setSuccess(
+          `Successfully connected to biometric machine at ${ipToConnect}:4370`
+        );
         await loadMachineStatus(ipToConnect);
       } else {
-        setError(response.data.message || 'Connection failed');
+        setError(response.data.message || "Connection failed");
       }
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'Connection failed';
+      const errorMessage =
+        err.response?.data?.message || err.message || "Connection failed";
       setError(errorMessage);
     } finally {
       setIsConnecting(false);
@@ -189,29 +202,32 @@ const AttendancePage: React.FC = () => {
   };
 
   const handleDisconnect = async () => {
-    const ipToDisconnect = selectedIP === 'custom' ? customIP : selectedIP;
+    const ipToDisconnect = selectedIP === "custom" ? customIP : selectedIP;
 
     try {
-      const response = await attendanceAPI.disconnectFromMachine(ipToDisconnect);
+      const response = await attendanceAPI.disconnectFromMachine(
+        ipToDisconnect
+      );
 
       if (response.data.success) {
-        setSuccess('Successfully disconnected from biometric machine');
+        setSuccess("Successfully disconnected from biometric machine");
         setMachineStatus(null);
         setEmployees([]);
         setSelectedEmployee(null);
         setAttendanceData(null);
       } else {
-        setError(response.data.message || 'Disconnect failed');
+        setError(response.data.message || "Disconnect failed");
       }
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'Disconnect failed';
+      const errorMessage =
+        err.response?.data?.message || err.message || "Disconnect failed";
       setError(errorMessage);
     }
   };
 
   const fetchEmployees = async (ip: string) => {
     setIsFetchingEmployees(true);
-    setError('');
+    setError("");
 
     try {
       const response = await attendanceAPI.getEmployeesFromMachine(ip);
@@ -220,10 +236,13 @@ const AttendancePage: React.FC = () => {
         setEmployees(response.data.employees);
         setSuccess(`Fetched ${response.data.count} employees from machine`);
       } else {
-        setError('Failed to fetch employees from machine');
+        setError("Failed to fetch employees from machine");
       }
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch employees';
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to fetch employees";
       setError(errorMessage);
     } finally {
       setIsFetchingEmployees(false);
@@ -232,14 +251,17 @@ const AttendancePage: React.FC = () => {
 
   const handleEmployeeClick = async (employee: Employee) => {
     setSelectedEmployee(employee);
-    setError('');
+    setError("");
   };
 
-  const fetchAttendanceRecords = async (employee: Employee, forceSync = false) => {
+  const fetchAttendanceRecords = async (
+    employee: Employee,
+    forceSync = false
+  ) => {
     setIsFetchingAttendance(true);
-    setError('');
+    setError("");
 
-    const currentIP = selectedIP === 'custom' ? customIP : selectedIP;
+    const currentIP = selectedIP === "custom" ? customIP : selectedIP;
 
     try {
       const response = await attendanceAPI.getEmployeeAttendance(
@@ -254,13 +276,16 @@ const AttendancePage: React.FC = () => {
       if (response.data.success) {
         setAttendanceData(response.data);
         if (forceSync) {
-          setSuccess('Attendance data synchronized from machine successfully');
+          setSuccess("Attendance data synchronized from machine successfully");
         }
       } else {
-        setError('Failed to fetch attendance records');
+        setError("Failed to fetch attendance records");
       }
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch attendance records';
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to fetch attendance records";
       setError(errorMessage);
     } finally {
       setIsFetchingAttendance(false);
@@ -269,9 +294,9 @@ const AttendancePage: React.FC = () => {
 
   const fetchRealTimeAttendance = async (employee: Employee) => {
     setIsFetchingAttendance(true);
-    setError('');
+    setError("");
 
-    const currentIP = selectedIP === 'custom' ? customIP : selectedIP;
+    const currentIP = selectedIP === "custom" ? customIP : selectedIP;
 
     try {
       const response = await attendanceAPI.getRealTimeAttendance(
@@ -282,12 +307,17 @@ const AttendancePage: React.FC = () => {
 
       if (response.data.success) {
         setAttendanceData(response.data);
-        setSuccess('✅ REAL attendance data fetched from ZKTeco machine successfully');
+        setSuccess(
+          "✅ REAL attendance data fetched from ZKTeco machine successfully"
+        );
       } else {
-        setError('Failed to fetch real-time attendance records');
+        setError("Failed to fetch real-time attendance records");
       }
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch real-time attendance records';
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to fetch real-time attendance records";
       setError(errorMessage);
     } finally {
       setIsFetchingAttendance(false);
@@ -296,7 +326,7 @@ const AttendancePage: React.FC = () => {
 
   const fetchRealMachineData = async () => {
     if (!startDate || !endDate) {
-      setError('Please select start and end dates');
+      setError("Please select start and end dates");
       return;
     }
 
@@ -305,20 +335,22 @@ const AttendancePage: React.FC = () => {
     const endDateObj = new Date(endDate);
 
     if (startDateObj > endDateObj) {
-      setError('Start date cannot be after end date');
+      setError("Start date cannot be after end date");
       return;
     }
 
-    const diffDays = Math.ceil((endDateObj.getTime() - startDateObj.getTime()) / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil(
+      (endDateObj.getTime() - startDateObj.getTime()) / (1000 * 60 * 60 * 24)
+    );
     if (diffDays > 365) {
-      setError('Date range cannot exceed 1 year');
+      setError("Date range cannot exceed 1 year");
       return;
     }
 
     setIsFetchingAttendance(true);
-    setError('');
+    setError("");
 
-    const currentIP = selectedIP === 'custom' ? customIP : selectedIP;
+    const currentIP = selectedIP === "custom" ? customIP : selectedIP;
 
     try {
       const response = await attendanceAPI.fetchAttendanceRange(
@@ -329,20 +361,26 @@ const AttendancePage: React.FC = () => {
 
       if (response.data.success) {
         const result = response.data.result;
-        const method = result.method || 'batch_fetch';
-        const batchInfo = result.batches ? ` (${result.batches.successful}/${result.batches.total} batches successful)` : '';
+        const batchInfo = result.batches
+          ? ` (${result.batches.successful}/${result.batches.total} batches successful)`
+          : "";
 
-        setSuccess(`✅ Successfully fetched REAL attendance logs from machine: ${result.totalFetched} logs fetched, ${result.saved} saved to database${batchInfo}`);
+        setSuccess(
+          `✅ Successfully fetched REAL attendance logs from machine: ${result.totalFetched} logs fetched, ${result.saved} saved to database${batchInfo}`
+        );
 
         // Refresh the selected employee's data if one is selected
         if (selectedEmployee) {
           fetchAttendanceRecords(selectedEmployee, false);
         }
       } else {
-        setError('Failed to fetch real machine data');
+        setError("Failed to fetch real machine data");
       }
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch real machine data';
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to fetch real machine data";
       setError(errorMessage);
     } finally {
       setIsFetchingAttendance(false);
@@ -355,43 +393,55 @@ const AttendancePage: React.FC = () => {
 
       if (response.data.success) {
         setLateTimeSettings(newSettings);
-        setSuccess('Late time settings updated successfully');
+        setSuccess("Late time settings updated successfully");
         setShowSettings(false);
       } else {
-        setError('Failed to update settings');
+        setError("Failed to update settings");
       }
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to update settings';
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to update settings";
       setError(errorMessage);
     }
   };
 
   const getStatusColor = (status?: string) => {
     switch (status) {
-      case 'connected': return 'text-green-600 dark:text-green-400';
-      case 'failed': return 'text-red-600 dark:text-red-400';
-      default: return 'text-gray-500 dark:text-gray-400';
+      case "connected":
+        return "text-green-600 dark:text-green-400";
+      case "failed":
+        return "text-red-600 dark:text-red-400";
+      default:
+        return "text-gray-500 dark:text-gray-400";
     }
   };
 
   const getStatusIcon = (status?: string) => {
     switch (status) {
-      case 'connected': return <CheckCircleIcon className="w-5 h-5 text-green-600" />;
-      case 'failed': return <XCircleIcon className="w-5 h-5 text-red-600" />;
-      default: return <InformationCircleIcon className="w-5 h-5 text-gray-500" />;
+      case "connected":
+        return <CheckCircleIcon className="w-5 h-5 text-green-600" />;
+      case "failed":
+        return <XCircleIcon className="w-5 h-5 text-red-600" />;
+      default:
+        return <InformationCircleIcon className="w-5 h-5 text-gray-500" />;
     }
   };
 
   const formatTime = (isoString?: string) => {
-    if (!isoString) return '-';
-    return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (!isoString) return "-";
+    return new Date(isoString).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString([], {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric'
+      weekday: "short",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -427,7 +477,7 @@ const AttendancePage: React.FC = () => {
               </div>
             </div>
 
-            {machineStatus?.status === 'connected' && (
+            {machineStatus?.status === "connected" && (
               <button
                 onClick={() => setShowSettings(!showSettings)}
                 className="flex items-center space-x-2 px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
@@ -450,10 +500,18 @@ const AttendancePage: React.FC = () => {
                     type="radio"
                     id="machine-default"
                     checked={!lateTimeSettings.useCustomCutoff}
-                    onChange={() => setLateTimeSettings(prev => ({ ...prev, useCustomCutoff: false }))}
+                    onChange={() =>
+                      setLateTimeSettings((prev) => ({
+                        ...prev,
+                        useCustomCutoff: false,
+                      }))
+                    }
                     className="text-blue-600"
                   />
-                  <label htmlFor="machine-default" className="text-sm text-blue-800 dark:text-blue-200">
+                  <label
+                    htmlFor="machine-default"
+                    className="text-sm text-blue-800 dark:text-blue-200"
+                  >
                     Use machine configured time rules (Default)
                   </label>
                 </div>
@@ -462,16 +520,29 @@ const AttendancePage: React.FC = () => {
                     type="radio"
                     id="custom-cutoff"
                     checked={lateTimeSettings.useCustomCutoff}
-                    onChange={() => setLateTimeSettings(prev => ({ ...prev, useCustomCutoff: true }))}
+                    onChange={() =>
+                      setLateTimeSettings((prev) => ({
+                        ...prev,
+                        useCustomCutoff: true,
+                      }))
+                    }
                     className="text-blue-600"
                   />
-                  <label htmlFor="custom-cutoff" className="text-sm text-blue-800 dark:text-blue-200">
+                  <label
+                    htmlFor="custom-cutoff"
+                    className="text-sm text-blue-800 dark:text-blue-200"
+                  >
                     Use custom cutoff time:
                   </label>
                   <input
                     type="time"
                     value={lateTimeSettings.cutoffTime}
-                    onChange={(e) => setLateTimeSettings(prev => ({ ...prev, cutoffTime: e.target.value }))}
+                    onChange={(e) =>
+                      setLateTimeSettings((prev) => ({
+                        ...prev,
+                        cutoffTime: e.target.value,
+                      }))
+                    }
                     disabled={!lateTimeSettings.useCustomCutoff}
                     className="px-2 py-1 text-xs border border-blue-300 dark:border-blue-600 rounded dark:bg-blue-800 dark:text-blue-100 disabled:opacity-50"
                   />
@@ -505,16 +576,16 @@ const AttendancePage: React.FC = () => {
                 onChange={(e) => setSelectedIP(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-gray-100"
               >
-                {predefinedIPs.map(ip => (
+                {predefinedIPs.map((ip) => (
                   <option key={ip} value={ip}>
-                    {ip} {ip === '192.168.1.201' ? '(Default Machine)' : ''}
+                    {ip} {ip === "192.168.1.201" ? "(Default Machine)" : ""}
                   </option>
                 ))}
                 <option value="custom">Custom IP Address</option>
               </select>
             </div>
 
-            {selectedIP === 'custom' && (
+            {selectedIP === "custom" && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Custom IP Address
@@ -539,14 +610,22 @@ const AttendancePage: React.FC = () => {
                       <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         {machineStatus.ip}:4370
                       </span>
-                      <span className={`text-sm font-medium ${getStatusColor(machineStatus.status)}`}>
-                        {machineStatus.status === 'connected' ? 'Connected' :
-                         machineStatus.status === 'failed' ? 'Failed' : 'Not Attempted'}
+                      <span
+                        className={`text-sm font-medium ${getStatusColor(
+                          machineStatus.status
+                        )}`}
+                      >
+                        {machineStatus.status === "connected"
+                          ? "Connected"
+                          : machineStatus.status === "failed"
+                          ? "Failed"
+                          : "Not Attempted"}
                       </span>
                     </div>
                     {machineStatus.connectedAt && (
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Connected at: {new Date(machineStatus.connectedAt).toLocaleString()}
+                        Connected at:{" "}
+                        {new Date(machineStatus.connectedAt).toLocaleString()}
                       </p>
                     )}
                     {machineStatus.error && (
@@ -560,7 +639,7 @@ const AttendancePage: React.FC = () => {
             )}
 
             {/* Fetch Real Data Section */}
-            {machineStatus?.status === 'connected' && (
+            {machineStatus?.status === "connected" && (
               <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-700">
                 <h3 className="text-sm font-medium text-green-900 dark:text-green-100 mb-3">
                   📅 Fetch Attendance Records On-Demand
@@ -593,12 +672,18 @@ const AttendancePage: React.FC = () => {
                     disabled={isFetchingAttendance || !startDate || !endDate}
                     className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded transition-colors flex items-center space-x-2"
                   >
-                    <ServerIcon className={`w-4 h-4 ${isFetchingAttendance ? 'animate-spin' : ''}`} />
+                    <ServerIcon
+                      className={`w-4 h-4 ${
+                        isFetchingAttendance ? "animate-spin" : ""
+                      }`}
+                    />
                     <span>Fetch Records</span>
                   </button>
                 </div>
                 <p className="text-xs text-green-700 dark:text-green-300 mt-2">
-                  Fetch attendance records for the selected date range. Default: last 2 months. Large ranges (&gt;60 days) use 7-day batches automatically.
+                  Fetch attendance records for the selected date range. Default:
+                  last 2 months. Large ranges (&gt;60 days) use 7-day batches
+                  automatically.
                 </p>
               </div>
             )}
@@ -607,7 +692,7 @@ const AttendancePage: React.FC = () => {
             <div className="flex space-x-3">
               <button
                 onClick={handleConnect}
-                disabled={isConnecting || machineStatus?.status === 'connected'}
+                disabled={isConnecting || machineStatus?.status === "connected"}
                 className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors"
               >
                 {isConnecting ? (
@@ -623,7 +708,7 @@ const AttendancePage: React.FC = () => {
                 )}
               </button>
 
-              {machineStatus?.status === 'connected' && (
+              {machineStatus?.status === "connected" && (
                 <button
                   onClick={handleDisconnect}
                   className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
@@ -636,13 +721,17 @@ const AttendancePage: React.FC = () => {
             {/* Success/Error Messages */}
             {success && (
               <div className="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg p-3">
-                <p className="text-sm text-green-800 dark:text-green-200">{success}</p>
+                <p className="text-sm text-green-800 dark:text-green-200">
+                  {success}
+                </p>
               </div>
             )}
 
             {error && (
               <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-lg p-3">
-                <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+                <p className="text-sm text-red-800 dark:text-red-200">
+                  {error}
+                </p>
               </div>
             )}
           </div>
@@ -650,7 +739,7 @@ const AttendancePage: React.FC = () => {
       </div>
 
       {/* Employee List */}
-      {machineStatus?.status === 'connected' && (
+      {machineStatus?.status === "connected" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Employees from Machine */}
           <div className="card">
@@ -672,11 +761,15 @@ const AttendancePage: React.FC = () => {
 
                 {employees.length > 0 && (
                   <button
-                    onClick={() => fetchEmployees(selectedIP === 'custom' ? customIP : selectedIP)}
+                    onClick={() =>
+                      fetchEmployees(
+                        selectedIP === "custom" ? customIP : selectedIP
+                      )
+                    }
                     disabled={isFetchingEmployees}
                     className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded transition-colors"
                   >
-                    {isFetchingEmployees ? 'Refreshing...' : 'Refresh'}
+                    {isFetchingEmployees ? "Refreshing..." : "Refresh"}
                   </button>
                 )}
               </div>
@@ -684,7 +777,9 @@ const AttendancePage: React.FC = () => {
               {isFetchingEmployees ? (
                 <div className="flex items-center justify-center py-8">
                   <ArrowPathIcon className="w-6 h-6 animate-spin text-blue-600" />
-                  <span className="ml-2 text-gray-600 dark:text-gray-300">Fetching employees...</span>
+                  <span className="ml-2 text-gray-600 dark:text-gray-300">
+                    Fetching employees...
+                  </span>
                 </div>
               ) : employees.length > 0 ? (
                 <div className="space-y-2">
@@ -692,10 +787,11 @@ const AttendancePage: React.FC = () => {
                     <div
                       key={employee.machineId}
                       onClick={() => handleEmployeeClick(employee)}
-                      className={`p-3 rounded-lg border cursor-pointer transition-colors hover:bg-blue-50 dark:hover:bg-blue-900 ${selectedEmployee?.machineId === employee.machineId
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900'
-                          : 'border-gray-200 dark:border-gray-700'
-                        }`}
+                      className={`p-3 rounded-lg border cursor-pointer transition-colors hover:bg-blue-50 dark:hover:bg-blue-900 ${
+                        selectedEmployee?.machineId === employee.machineId
+                          ? "border-blue-500 bg-blue-50 dark:bg-blue-900"
+                          : "border-gray-200 dark:border-gray-700"
+                      }`}
                     >
                       <div className="flex items-center justify-between">
                         <div>
@@ -703,11 +799,14 @@ const AttendancePage: React.FC = () => {
                             <h4 className="font-medium text-gray-900 dark:text-gray-100">
                               {employee.name}
                             </h4>
-                            <span className={`px-2 py-1 text-xs rounded-full ${employee.isActive
-                                ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
-                                : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
-                              }`}>
-                              {employee.isActive ? 'Active' : 'Inactive'}
+                            <span
+                              className={`px-2 py-1 text-xs rounded-full ${
+                                employee.isActive
+                                  ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
+                                  : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"
+                              }`}
+                            >
+                              {employee.isActive ? "Active" : "Inactive"}
                             </span>
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-300">
@@ -727,7 +826,11 @@ const AttendancePage: React.FC = () => {
                   <UsersIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
                   <p>No employees found on machine</p>
                   <button
-                    onClick={() => fetchEmployees(selectedIP === 'custom' ? customIP : selectedIP)}
+                    onClick={() =>
+                      fetchEmployees(
+                        selectedIP === "custom" ? customIP : selectedIP
+                      )
+                    }
                     className="mt-2 text-blue-600 hover:text-blue-700 text-sm"
                   >
                     Try fetching again
@@ -749,7 +852,9 @@ const AttendancePage: React.FC = () => {
                     Attendance Records
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {selectedEmployee ? `${selectedEmployee.name}` : 'Select an employee'}
+                    {selectedEmployee
+                      ? `${selectedEmployee.name}`
+                      : "Select an employee"}
                   </p>
                 </div>
               </div>
@@ -782,19 +887,33 @@ const AttendancePage: React.FC = () => {
                     </div>
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => fetchAttendanceRecords(selectedEmployee, false)}
-                        disabled={isFetchingAttendance || !startDate || !endDate}
+                        onClick={() =>
+                          fetchAttendanceRecords(selectedEmployee, false)
+                        }
+                        disabled={
+                          isFetchingAttendance || !startDate || !endDate
+                        }
                         className="px-3 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-md transition-colors flex items-center space-x-2"
                       >
-                        <ArrowPathIcon className={`w-4 h-4 ${isFetchingAttendance ? 'animate-spin' : ''}`} />
+                        <ArrowPathIcon
+                          className={`w-4 h-4 ${
+                            isFetchingAttendance ? "animate-spin" : ""
+                          }`}
+                        />
                         <span>View Records</span>
                       </button>
                       <button
-                        onClick={() => fetchRealTimeAttendance(selectedEmployee)}
+                        onClick={() =>
+                          fetchRealTimeAttendance(selectedEmployee)
+                        }
                         disabled={isFetchingAttendance}
                         className="px-3 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-md transition-colors flex items-center space-x-2"
                       >
-                        <ServerIcon className={`w-4 h-4 ${isFetchingAttendance ? 'animate-spin' : ''}`} />
+                        <ServerIcon
+                          className={`w-4 h-4 ${
+                            isFetchingAttendance ? "animate-spin" : ""
+                          }`}
+                        />
                         <span>🔧 Real Machine Data (3M)</span>
                       </button>
                     </div>
@@ -810,7 +929,9 @@ const AttendancePage: React.FC = () => {
               ) : isFetchingAttendance ? (
                 <div className="flex items-center justify-center py-8">
                   <ArrowPathIcon className="w-6 h-6 animate-spin text-purple-600" />
-                  <span className="ml-2 text-gray-600 dark:text-gray-300">Loading attendance...</span>
+                  <span className="ml-2 text-gray-600 dark:text-gray-300">
+                    Loading attendance...
+                  </span>
                 </div>
               ) : attendanceData ? (
                 <div className="space-y-4">
@@ -820,25 +941,34 @@ const AttendancePage: React.FC = () => {
                       <div className="text-lg font-semibold text-green-600">
                         {attendanceData.summary.attendanceRate}%
                       </div>
-                      <div className="text-xs text-gray-600 dark:text-gray-400">Attendance Rate</div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400">
+                        Attendance Rate
+                      </div>
                     </div>
                     <div className="text-center">
                       <div className="text-lg font-semibold text-blue-600">
                         {attendanceData.summary.avgWorkingHours}h
                       </div>
-                      <div className="text-xs text-gray-600 dark:text-gray-400">Avg Daily Hours</div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400">
+                        Avg Daily Hours
+                      </div>
                     </div>
                     <div className="text-center">
                       <div className="text-lg font-semibold text-orange-600">
                         {attendanceData.summary.lateDays}
                       </div>
-                      <div className="text-xs text-gray-600 dark:text-gray-400">Late Days</div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400">
+                        Late Days
+                      </div>
                     </div>
                     <div className="text-center">
                       <div className="text-lg font-semibold text-purple-600">
-                        {attendanceData.summary.presentDays}/{attendanceData.summary.totalDays}
+                        {attendanceData.summary.presentDays}/
+                        {attendanceData.summary.totalDays}
                       </div>
-                      <div className="text-xs text-gray-600 dark:text-gray-400">Present/Total</div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400">
+                        Present/Total
+                      </div>
                     </div>
                   </div>
 
@@ -847,57 +977,74 @@ const AttendancePage: React.FC = () => {
                     <div className="flex items-center space-x-2">
                       <InformationCircleIcon className="w-4 h-4" />
                       <span className="font-medium text-green-800 dark:text-green-200">
-                        ✅ Data source: {attendanceData.source === 'real_machine_data' ? 'REAL ZKTeco Machine Data' :
-                                        attendanceData.source === 'database_cache' ? 'Database Cache' : 'Real-Time Machine'}
-                        {attendanceData.realTime && ' (Live Fetch)'}
+                        ✅ Data source:{" "}
+                        {attendanceData.source === "real_machine_data"
+                          ? "REAL ZKTeco Machine Data"
+                          : attendanceData.source === "database_cache"
+                          ? "Database Cache"
+                          : "Real-Time Machine"}
+                        {attendanceData.realTime && " (Live Fetch)"}
                       </span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <ClockIcon className="w-4 h-4" />
-                      <span>Last updated: {new Date(attendanceData.fetchedAt).toLocaleString()}</span>
+                      <span>
+                        Last updated:{" "}
+                        {attendanceData.fetchedAt
+                          ? new Date(attendanceData.fetchedAt).toLocaleString()
+                          : "Just now"}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Records */}
+                  {/* Records - Raw Timestamp Data */}
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {attendanceData.records.map((record) => (
                       <div
                         key={record.recordId}
                         className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg"
                       >
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <span className="font-medium text-gray-900 dark:text-gray-100">
-                              {formatDate(record.date)}
-                            </span>
-                            {record.status === 'present' ? (
-                              <CheckCircleIcon className="w-4 h-4 text-green-600" />
-                            ) : (
-                              <XCircleIcon className="w-4 h-4 text-red-600" />
-                            )}
-                            {record.isLate && (
-                              <ExclamationTriangleIcon className="w-4 h-4 text-orange-600" />
-                            )}
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3">
+                            <div className="flex flex-col">
+                              <span className="font-medium text-gray-900 dark:text-gray-100">
+                                {record.dateDisplay || formatDate(record.date)}
+                              </span>
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                {record.timeDisplay ||
+                                  formatTime(record.timestamp)}
+                              </span>
+                            </div>
+                            <div
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                record.type === "check-in"
+                                  ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
+                                  : record.type === "check-out"
+                                  ? "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                                  : record.type === "break-in"
+                                  ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200"
+                                  : record.type === "break-out"
+                                  ? "bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200"
+                                  : "bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200"
+                              }`}
+                            >
+                              {record.status}
+                            </div>
                           </div>
-                          {record.status === 'present' && (
-                            <div className="text-sm text-gray-600 dark:text-gray-400">
-                              {formatTime(record.checkIn)} - {formatTime(record.checkOut)}
-                              {record.isLate && (
-                                <span className="text-orange-600 ml-2">
-                                  ({record.lateMinutes}min late)
-                                </span>
-                              )}
+                          {record.fullTimestamp && (
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              Full timestamp:{" "}
+                              {new Date(record.fullTimestamp).toLocaleString()}
                             </div>
                           )}
                         </div>
                         <div className="text-right">
-                          <div className={`text-sm font-medium ${record.status === 'present' ? 'text-green-600' : 'text-red-600'
-                            }`}>
-                            {record.status === 'present' ? 'Present' : 'Absent'}
+                          <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                            UID: {record.id}
                           </div>
-                          {record.status === 'present' && (
+                          {record.rawState !== undefined && (
                             <div className="text-xs text-gray-500 dark:text-gray-400">
-                              {record.workingHours}h
+                              State: {record.rawState}
                             </div>
                           )}
                         </div>
@@ -912,17 +1059,27 @@ const AttendancePage: React.FC = () => {
       )}
 
       {/* Connection Details */}
-      {machineStatus?.status !== 'connected' && (
+      {machineStatus?.status !== "connected" && (
         <div className="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
           <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
             Machine Configuration
           </h3>
           <div className="text-xs text-blue-800 dark:text-blue-200 space-y-1">
-            <p><strong>Default IP:</strong> 192.168.1.201</p>
-            <p><strong>TCP Port:</strong> 4370</p>
-            <p><strong>Subnet Mask:</strong> 255.255.255.0</p>
-            <p><strong>Gateway:</strong> 0.0.0.0</p>
-            <p><strong>DNS:</strong> 0.0.0.0</p>
+            <p>
+              <strong>Default IP:</strong> 192.168.1.201
+            </p>
+            <p>
+              <strong>TCP Port:</strong> 4370
+            </p>
+            <p>
+              <strong>Subnet Mask:</strong> 255.255.255.0
+            </p>
+            <p>
+              <strong>Gateway:</strong> 0.0.0.0
+            </p>
+            <p>
+              <strong>DNS:</strong> 0.0.0.0
+            </p>
           </div>
         </div>
       )}
