@@ -28,10 +28,17 @@ interface MachineConnection {
 interface Employee {
   machineId: string;
   name: string;
-  employeeId: string;
+  employeeId: string; // Now uses UserID for accurate attendance correlation
+  cardNumber?: string | null; // Separate card number field
   department: string;
   enrolledAt: Date;
   isActive: boolean;
+  idMapping?: {
+    uid: string | number;
+    userId?: string | number; // Added UserID field
+    cardno?: string | number | null;
+    source: string;
+  };
 }
 
 interface AttendanceRecord {
@@ -48,6 +55,11 @@ interface AttendanceRecord {
   rawState?: number;
   machineData?: any;
   recordId: string;
+  // Late time detection properties
+  isLate?: boolean;
+  lateMinutes?: number;
+  lateDisplay?: string;
+  cutoffTime?: string;
 }
 
 interface AttendanceData {
@@ -233,8 +245,15 @@ const AttendancePage: React.FC = () => {
       const response = await attendanceAPI.getEmployeesFromMachine(ip);
 
       if (response.data.success) {
-        setEmployees(response.data.employees);
-        setSuccess(`Fetched ${response.data.count} employees from machine`);
+        // Sort employees by UserID (employeeId) in ascending order
+        const sortedEmployees = response.data.employees.sort((a: Employee, b: Employee) => {
+          const userIdA = parseInt(a.employeeId) || 0;
+          const userIdB = parseInt(b.employeeId) || 0;
+          return userIdA - userIdB;
+        });
+        
+        setEmployees(sortedEmployees);
+        setSuccess(`Fetched ${response.data.count} employees from machine (sorted by UserID)`);
       } else {
         setError("Failed to fetch employees from machine");
       }
@@ -266,7 +285,7 @@ const AttendancePage: React.FC = () => {
     try {
       const response = await attendanceAPI.getEmployeeAttendance(
         currentIP,
-        employee.machineId,
+        employee.employeeId, // FIXED: Use employeeId (UserID) instead of machineId (UID)
         startDate,
         endDate,
         7,
@@ -318,69 +337,6 @@ const AttendancePage: React.FC = () => {
         err.response?.data?.message ||
         err.message ||
         "Failed to fetch real-time attendance records";
-      setError(errorMessage);
-    } finally {
-      setIsFetchingAttendance(false);
-    }
-  };
-
-  const fetchRealMachineData = async () => {
-    if (!startDate || !endDate) {
-      setError("Please select start and end dates");
-      return;
-    }
-
-    // Validate date range
-    const startDateObj = new Date(startDate);
-    const endDateObj = new Date(endDate);
-
-    if (startDateObj > endDateObj) {
-      setError("Start date cannot be after end date");
-      return;
-    }
-
-    const diffDays = Math.ceil(
-      (endDateObj.getTime() - startDateObj.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    if (diffDays > 365) {
-      setError("Date range cannot exceed 1 year");
-      return;
-    }
-
-    setIsFetchingAttendance(true);
-    setError("");
-
-    const currentIP = selectedIP === "custom" ? customIP : selectedIP;
-
-    try {
-      const response = await attendanceAPI.fetchAttendanceRange(
-        currentIP,
-        startDate,
-        endDate
-      );
-
-      if (response.data.success) {
-        const result = response.data.result;
-        const batchInfo = result.batches
-          ? ` (${result.batches.successful}/${result.batches.total} batches successful)`
-          : "";
-
-        setSuccess(
-          `✅ Successfully fetched REAL attendance logs from machine: ${result.totalFetched} logs fetched, ${result.saved} saved to database${batchInfo}`
-        );
-
-        // Refresh the selected employee's data if one is selected
-        if (selectedEmployee) {
-          fetchAttendanceRecords(selectedEmployee, false);
-        }
-      } else {
-        setError("Failed to fetch real machine data");
-      }
-    } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.message ||
-        err.message ||
-        "Failed to fetch real machine data";
       setError(errorMessage);
     } finally {
       setIsFetchingAttendance(false);
@@ -638,56 +594,6 @@ const AttendancePage: React.FC = () => {
               </div>
             )}
 
-            {/* Fetch Real Data Section */}
-            {machineStatus?.status === "connected" && (
-              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-700">
-                <h3 className="text-sm font-medium text-green-900 dark:text-green-100 mb-3">
-                  📅 Fetch Attendance Records On-Demand
-                </h3>
-                <div className="flex items-end space-x-3">
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-green-800 dark:text-green-200 mb-1">
-                      Start Date
-                    </label>
-                    <input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full px-2 py-1 text-sm border border-green-300 dark:border-green-600 rounded dark:bg-green-800 dark:text-green-100"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-green-800 dark:text-green-200 mb-1">
-                      End Date
-                    </label>
-                    <input
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full px-2 py-1 text-sm border border-green-300 dark:border-green-600 rounded dark:bg-green-800 dark:text-green-100"
-                    />
-                  </div>
-                  <button
-                    onClick={fetchRealMachineData}
-                    disabled={isFetchingAttendance || !startDate || !endDate}
-                    className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded transition-colors flex items-center space-x-2"
-                  >
-                    <ServerIcon
-                      className={`w-4 h-4 ${
-                        isFetchingAttendance ? "animate-spin" : ""
-                      }`}
-                    />
-                    <span>Fetch Records</span>
-                  </button>
-                </div>
-                <p className="text-xs text-green-700 dark:text-green-300 mt-2">
-                  Fetch attendance records for the selected date range. Default:
-                  last 2 months. Large ranges (&gt;60 days) use 7-day batches
-                  automatically.
-                </p>
-              </div>
-            )}
-
             {/* Action Buttons */}
             <div className="flex space-x-3">
               <button
@@ -787,33 +693,19 @@ const AttendancePage: React.FC = () => {
                     <div
                       key={employee.machineId}
                       onClick={() => handleEmployeeClick(employee)}
-                      className={`p-3 rounded-lg border cursor-pointer transition-colors hover:bg-blue-50 dark:hover:bg-blue-900 ${
+                      className={`p-4 rounded-lg border cursor-pointer transition-colors hover:bg-blue-50 dark:hover:bg-blue-900 ${
                         selectedEmployee?.machineId === employee.machineId
                           ? "border-blue-500 bg-blue-50 dark:bg-blue-900"
                           : "border-gray-200 dark:border-gray-700"
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <h4 className="font-medium text-gray-900 dark:text-gray-100">
-                              {employee.name}
-                            </h4>
-                            <span
-                              className={`px-2 py-1 text-xs rounded-full ${
-                                employee.isActive
-                                  ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
-                                  : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"
-                              }`}
-                            >
-                              {employee.isActive ? "Active" : "Inactive"}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-300">
-                            {employee.employeeId} • {employee.department}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            Machine ID: {employee.machineId}
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900 dark:text-gray-100 text-lg">
+                            {employee.name}
+                          </h4>
+                          <p className="text-sm text-blue-600 dark:text-blue-400 font-medium mt-1">
+                            UserID: {employee.employeeId}
                           </p>
                         </div>
                         <EyeIcon className="w-5 h-5 text-gray-400" />
@@ -1010,10 +902,21 @@ const AttendancePage: React.FC = () => {
                               <span className="font-medium text-gray-900 dark:text-gray-100">
                                 {record.dateDisplay || formatDate(record.date)}
                               </span>
-                              <span className="text-sm text-gray-600 dark:text-gray-400">
-                                {record.timeDisplay ||
-                                  formatTime(record.timestamp)}
-                              </span>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm text-gray-600 dark:text-gray-400">
+                                  {record.timeDisplay ||
+                                    formatTime(record.timestamp)}
+                                </span>
+                                {/* Late indicator */}
+                                {record.isLate && (
+                                  <div className="flex items-center space-x-1">
+                                    <ClockIcon className="w-3 h-3 text-red-500" />
+                                    <span className="text-xs text-red-600 dark:text-red-400 font-medium">
+                                      Late {record.lateDisplay}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                             <div
                               className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -1030,11 +933,22 @@ const AttendancePage: React.FC = () => {
                             >
                               {record.status}
                             </div>
+                            {/* Late badge */}
+                            {record.isLate && (
+                              <div className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">
+                                LATE
+                              </div>
+                            )}
                           </div>
                           {record.fullTimestamp && (
                             <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                               Full timestamp:{" "}
                               {new Date(record.fullTimestamp).toLocaleString()}
+                              {record.cutoffTime && (
+                                <span className="ml-2">
+                                  (Cutoff: {record.cutoffTime})
+                                </span>
+                              )}
                             </div>
                           )}
                         </div>
@@ -1045,6 +959,12 @@ const AttendancePage: React.FC = () => {
                           {record.rawState !== undefined && (
                             <div className="text-xs text-gray-500 dark:text-gray-400">
                               State: {record.rawState}
+                            </div>
+                          )}
+                          {/* Late details */}
+                          {record.isLate && record.lateMinutes && (
+                            <div className="text-xs text-red-500 dark:text-red-400 mt-1">
+                              {record.lateMinutes} min late
                             </div>
                           )}
                         </div>
