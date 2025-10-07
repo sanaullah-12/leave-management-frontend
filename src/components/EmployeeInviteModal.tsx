@@ -1,7 +1,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { authAPI } from "../services/api";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { authAPI, attendanceAPI } from "../services/api";
 // import { useNotifications } from "../components/NotificationSystem"; // Removed for Socket.IO implementation
 import Modal from "./Modal";
 import LoadingSpinner from "./LoadingSpinner";
@@ -13,6 +13,7 @@ import {
   CalendarIcon,
   TagIcon,
   XMarkIcon,
+  HashtagIcon,
 } from "@heroicons/react/24/outline";
 
 type InviteEmployeeData = {
@@ -21,6 +22,7 @@ type InviteEmployeeData = {
   department: string;
   position: string;
   joinDate: string;
+  employeeId?: string; // Optional custom employee ID
   tags?: string[];
 };
 
@@ -37,13 +39,51 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
   // const { addNotification } = useNotifications(); // Removed for Socket.IO implementation
   const [tags, setTags] = React.useState<string[]>([]);
   const [tagInput, setTagInput] = React.useState("");
+  const [selectedEmployee, setSelectedEmployee] = React.useState<any>(null);
+  const [useCustomName, setUseCustomName] = React.useState(false);
+
+  // Fetch machine employees
+  const { data: machineEmployees, isLoading: machineLoading } = useQuery({
+    queryKey: ["machineEmployees"],
+    queryFn: () => attendanceAPI.getEmployeesFromMachine("192.168.1.201"),
+    enabled: isOpen, // Only fetch when modal is open
+    refetchOnWindowFocus: false,
+    staleTime: 300000, // 5 minutes
+  });
+
+  const machineEmployeesList = machineEmployees?.data?.employees || [];
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<InviteEmployeeData>();
+
+  // Handle machine employee selection
+  const handleEmployeeSelect = (employeeId: string) => {
+    const employee = machineEmployeesList.find(
+      (emp: any) => emp.employeeId === employeeId
+    );
+    if (employee) {
+      setSelectedEmployee(employee);
+      setValue("name", employee.name);
+      setValue("employeeId", employee.employeeId);
+      setUseCustomName(false);
+    }
+  };
+
+  // Handle custom name toggle
+  const handleCustomNameToggle = () => {
+    setUseCustomName(!useCustomName);
+    if (!useCustomName) {
+      // Switching to custom name
+      setSelectedEmployee(null);
+      setValue("name", "");
+      setValue("employeeId", "");
+    }
+  };
 
   const inviteEmployeeMutation = useMutation({
     mutationFn: authAPI.inviteEmployee,
@@ -55,16 +95,22 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
 
       // Check email delivery status from updated backend response
       if (response.data.emailSent === false) {
-        console.warn('Employee invitation created but email failed:', response.data.emailError);
-        console.warn('Warning:', response.data.warning);
+        console.warn(
+          "Employee invitation created but email failed:",
+          response.data.emailError
+        );
+        console.warn("Warning:", response.data.warning);
         // addNotification({
         //   type: "warning",
         //   title: "Employee Added - Email Failed",
         //   message: `Employee ${variables.name} added but invitation email failed: ${response.data.emailError}`,
         // });
       } else if (response.data.emailSent === true) {
-        console.log('Employee invitation email sent successfully to', variables.email);
-        console.log('Email Message ID:', response.data.emailMessageId);
+        console.log(
+          "Employee invitation email sent successfully to",
+          variables.email
+        );
+        console.log("Email Message ID:", response.data.emailMessageId);
         // addNotification({
         //   type: "success",
         //   title: "Employee Invited Successfully",
@@ -72,7 +118,7 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
         // });
       } else {
         // Fallback for any other response format
-        console.log('Employee invitation processed for', variables.email);
+        console.log("Employee invitation processed for", variables.email);
         // addNotification({
         //   type: "success",
         //   title: "Employee Invited",
@@ -88,11 +134,22 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
       //     error?.response?.data?.message ||
       //     "Failed to send employee invitation. Please try again.",
       // });
-      console.error('Employee invitation failed:', error?.response?.data?.message || error.message);
+      console.error(
+        "Employee invitation failed:",
+        error?.response?.data?.message || error.message
+      );
     },
   });
 
   const onSubmit = async (data: InviteEmployeeData) => {
+    // Validate name is selected when using machine dropdown
+    if (!useCustomName && !selectedEmployee) {
+      alert(
+        "Please select an employee from the machine list or switch to custom name input."
+      );
+      return;
+    }
+
     const formData = { ...data, tags };
     await inviteEmployeeMutation.mutateAsync(formData);
   };
@@ -115,6 +172,8 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
     reset();
     setTags([]);
     setTagInput("");
+    setSelectedEmployee(null);
+    setUseCustomName(false);
     onClose();
   };
 
@@ -127,23 +186,86 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Full Name */}
+          {/* Employee Selection */}
           <div className="md:col-span-2">
-            <label className="flex items-center text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
-              <UserIcon className="w-4 h-4 mr-2 text-gray-400" />
-              Full Name
-            </label>
-            <input
-              type="text"
-              {...register("name", { required: "Full name is required" })}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
-              placeholder="Enter full name"
-            />
+            <div className="flex items-center justify-between mb-2">
+              <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-200">
+                <UserIcon className="w-4 h-4 mr-2 text-gray-400" />
+                Employee Name
+              </label>
+              <button
+                type="button"
+                onClick={handleCustomNameToggle}
+                className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                {useCustomName ? "Select from Machine" : "Enter Custom Name"}
+              </button>
+            </div>
+
+            {!useCustomName && machineEmployeesList.length > 0 ? (
+              // Machine Employee Dropdown
+              <select
+                value={selectedEmployee?.employeeId || ""}
+                onChange={(e) => handleEmployeeSelect(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+              >
+                <option value="">Select employee from machine</option>
+                {machineEmployeesList.map((employee: any) => (
+                  <option key={employee.employeeId} value={employee.employeeId}>
+                    {employee.name} (ID: {employee.employeeId})
+                  </option>
+                ))}
+              </select>
+            ) : (
+              // Custom Name Input
+              <input
+                type="text"
+                {...register("name", { required: "Full name is required" })}
+                className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+                placeholder="Enter full name"
+              />
+            )}
+
+            {machineLoading && (
+              <p className="mt-2 text-sm text-blue-600 flex items-center">
+                <LoadingSpinner size="sm" />
+                <span className="ml-2">Loading machine employees...</span>
+              </p>
+            )}
+
+            {!machineLoading &&
+              machineEmployeesList.length === 0 &&
+              !useCustomName && (
+                <p className="mt-2 text-sm text-yellow-600 flex items-center">
+                  ⚠ No machine employees found. Using custom name input.
+                </p>
+              )}
+
             {errors.name && (
               <p className="mt-2 text-sm text-red-600 flex items-center">
                 ⚠ {errors.name.message}
               </p>
             )}
+          </div>
+
+          {/* Employee ID */}
+          <div className="md:col-span-2">
+            <label className="flex items-center text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
+              <HashtagIcon className="w-4 h-4 mr-2 text-gray-400" />
+              Employee ID
+            </label>
+            <input
+              type="text"
+              {...register("employeeId")}
+              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+              placeholder="Auto-generated or from machine selection"
+              readOnly={!useCustomName && selectedEmployee}
+            />
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {!useCustomName && selectedEmployee
+                ? "Auto-filled from machine employee selection"
+                : "Leave empty for auto-generation (EMP0001, EMP0002, etc.)"}
+            </p>
           </div>
 
           {/* Email */}

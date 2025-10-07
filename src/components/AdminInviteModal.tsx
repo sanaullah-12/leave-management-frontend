@@ -1,17 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { attendanceAPI } from '../services/api';
 // import { useNotifications } from '../components/NotificationSystem'; // Removed for Socket.IO implementation
 import Modal from './Modal';
 import LoadingSpinner from './LoadingSpinner';
-import { UserIcon, EnvelopeIcon, BuildingOfficeIcon, BriefcaseIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { UserIcon, EnvelopeIcon, BuildingOfficeIcon, BriefcaseIcon, ShieldCheckIcon, HashtagIcon } from '@heroicons/react/24/outline';
 
 type InviteAdminData = {
   name: string;
   email: string;
   department?: string;
   position?: string;
+  employeeId?: string;
 };
 
 interface AdminInviteModalProps {
@@ -22,11 +24,25 @@ interface AdminInviteModalProps {
 const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) => {
   const queryClient = useQueryClient();
   // const { addNotification } = useNotifications(); // Removed for Socket.IO implementation
+  const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [useCustomName, setUseCustomName] = useState(false);
+
+  // Fetch machine employees
+  const { data: machineEmployees, isLoading: machineLoading } = useQuery({
+    queryKey: ["machineEmployees"],
+    queryFn: () => attendanceAPI.getEmployeesFromMachine("192.168.1.201"),
+    enabled: isOpen, // Only fetch when modal is open
+    refetchOnWindowFocus: false,
+    staleTime: 300000, // 5 minutes
+  });
+
+  const machineEmployeesList = machineEmployees?.data?.employees || [];
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<InviteAdminData>({
     defaultValues: {
@@ -34,6 +50,30 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
       position: 'Administrator'
     }
   });
+
+  // Handle machine employee selection
+  const handleEmployeeSelect = (employeeId: string) => {
+    const employee = machineEmployeesList.find(
+      (emp: any) => emp.employeeId === employeeId
+    );
+    if (employee) {
+      setSelectedEmployee(employee);
+      setValue("name", employee.name);
+      setValue("employeeId", employee.employeeId);
+      setUseCustomName(false);
+    }
+  };
+
+  // Handle custom name toggle
+  const handleCustomNameToggle = () => {
+    setUseCustomName(!useCustomName);
+    if (!useCustomName) {
+      // Switching to custom name
+      setSelectedEmployee(null);
+      setValue("name", "");
+      setValue("employeeId", "");
+    }
+  };
 
   const inviteAdminMutation = useMutation({
     mutationFn: (data: InviteAdminData) =>
@@ -70,6 +110,8 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
 
   const handleClose = () => {
     reset();
+    setSelectedEmployee(null);
+    setUseCustomName(false);
     onClose();
   };
 
@@ -93,18 +135,61 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
 
         {/* Form Fields */}
         <div className="space-y-6">
-          {/* Full Name */}
+          {/* Admin Name */}
           <div>
-            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
-              <UserIcon className="w-4 h-4 mr-2 text-gray-400" />
-              Full Name
-            </label>
-            <input
-              type="text"
-              {...register('name', { required: 'Full name is required' })}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
-              placeholder="Enter administrator name"
-            />
+            <div className="flex items-center justify-between mb-2">
+              <label className="flex items-center text-sm font-medium text-gray-900 dark:text-gray-100">
+                <UserIcon className="w-4 h-4 mr-2 text-gray-400" />
+                Administrator Name
+              </label>
+              <button
+                type="button"
+                onClick={handleCustomNameToggle}
+                className="text-xs text-purple-600 dark:text-purple-400 hover:underline"
+              >
+                {useCustomName ? "Select from Machine" : "Enter Custom Name"}
+              </button>
+            </div>
+
+            {!useCustomName && machineEmployeesList.length > 0 ? (
+              // Machine Employee Dropdown
+              <select
+                value={selectedEmployee?.employeeId || ""}
+                onChange={(e) => handleEmployeeSelect(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+              >
+                <option value="">Select admin from machine</option>
+                {machineEmployeesList.map((employee: any) => (
+                  <option key={employee.employeeId} value={employee.employeeId}>
+                    {employee.name} (ID: {employee.employeeId})
+                  </option>
+                ))}
+              </select>
+            ) : (
+              // Custom Name Input
+              <input
+                type="text"
+                {...register('name', { required: 'Administrator name is required' })}
+                className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+                placeholder="Enter administrator name"
+              />
+            )}
+
+            {machineLoading && (
+              <p className="mt-2 text-sm text-purple-600 flex items-center">
+                <LoadingSpinner size="sm" />
+                <span className="ml-2">Loading machine employees...</span>
+              </p>
+            )}
+
+            {!machineLoading &&
+              machineEmployeesList.length === 0 &&
+              !useCustomName && (
+                <p className="mt-2 text-sm text-yellow-600 flex items-center">
+                  ⚠ No machine employees found. Using custom name input.
+                </p>
+              )}
+
             {errors.name && (
               <p className="mt-2 text-sm text-red-600 flex items-center">
                 <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -113,6 +198,26 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
                 {errors.name.message}
               </p>
             )}
+          </div>
+
+          {/* Employee ID */}
+          <div>
+            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
+              <HashtagIcon className="w-4 h-4 mr-2 text-gray-400" />
+              Employee ID
+            </label>
+            <input
+              type="text"
+              {...register("employeeId")}
+              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+              placeholder="Auto-generated or from machine selection"
+              readOnly={!useCustomName && selectedEmployee}
+            />
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              {!useCustomName && selectedEmployee
+                ? "Auto-filled from machine employee selection"
+                : "Leave empty for auto-generation (ADM0001, ADM0002, etc.)"}
+            </p>
           </div>
 
           {/* Email */}

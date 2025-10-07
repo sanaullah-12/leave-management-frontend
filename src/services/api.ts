@@ -28,6 +28,7 @@ interface InviteEmployeeData {
   department: string;
   position: string;
   joinDate: string;
+  employeeId?: string; // Optional custom employee ID
 }
 
 const API_BASE_URL =
@@ -300,6 +301,182 @@ export const attendanceAPI = {
   getSyncStatus: () => attendanceApi.get("/attendance/sync/status"),
 
   triggerSyncAllMachines: () => attendanceApi.post("/attendance/sync/all"),
+
+  // Employee-specific: Get my own attendance data (JWT secured)
+  getMyAttendance: (startDate?: string, endDate?: string, days = 7) => {
+    let url = "/attendance/my-attendance";
+    const params = new URLSearchParams();
+
+    if (startDate && endDate) {
+      params.append("startDate", startDate);
+      params.append("endDate", endDate);
+    } else {
+      params.append("days", days.toString());
+    }
+
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+
+    console.log(`👤 Employee fetching own attendance: ${url}`);
+    return attendanceApi.get(url);
+  },
+};
+
+// Employee Performance API
+export const employeePerformanceAPI = {
+  // Get employee leaderboard with rankings
+  getLeaderboard: (params?: {
+    startDate?: string;
+    endDate?: string;
+    limit?: number;
+    department?: string;
+  }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.startDate) queryParams.append("startDate", params.startDate);
+    if (params?.endDate) queryParams.append("endDate", params.endDate);
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.department) queryParams.append("department", params.department);
+
+    const url = `/employee-performance/leaderboard${
+      queryParams.toString() ? `?${queryParams.toString()}` : ""
+    }`;
+    console.log(`🏆 Fetching employee leaderboard: ${url}`);
+    return api.get(url);
+  },
+
+  // Get department performance comparison
+  getDepartmentPerformance: (params?: {
+    startDate?: string;
+    endDate?: string;
+  }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.startDate) queryParams.append("startDate", params.startDate);
+    if (params?.endDate) queryParams.append("endDate", params.endDate);
+
+    const url = `/employee-performance/department-performance${
+      queryParams.toString() ? `?${queryParams.toString()}` : ""
+    }`;
+    console.log(`📊 Fetching department performance: ${url}`);
+    return api.get(url);
+  },
+
+  // Get employee achievements and badges
+  getAchievements: (params?: { startDate?: string; endDate?: string }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.startDate) queryParams.append("startDate", params.startDate);
+    if (params?.endDate) queryParams.append("endDate", params.endDate);
+
+    const url = `/employee-performance/achievements${
+      queryParams.toString() ? `?${queryParams.toString()}` : ""
+    }`;
+    console.log(`🎖️ Fetching employee achievements: ${url}`);
+    return api.get(url);
+  },
+
+  // Get performance overview stats
+  getOverview: (params?: { startDate?: string; endDate?: string }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.startDate) queryParams.append("startDate", params.startDate);
+    if (params?.endDate) queryParams.append("endDate", params.endDate);
+
+    const url = `/employee-performance/overview${
+      queryParams.toString() ? `?${queryParams.toString()}` : ""
+    }`;
+    console.log(`📈 Fetching performance overview: ${url}`);
+    return api.get(url);
+  },
+};
+
+// Machine Performance API - For Biometric Machine Employees
+export const machinePerformanceAPI = {
+  // Get machine employee leaderboard with rankings
+  getMachineLeaderboard: (
+    ip: string,
+    params?: {
+      startDate?: string;
+      endDate?: string;
+      limit?: number;
+    }
+  ) => {
+    const queryParams = new URLSearchParams();
+    if (params?.startDate) queryParams.append("startDate", params.startDate);
+    if (params?.endDate) queryParams.append("endDate", params.endDate);
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+
+    const url = `/machine-performance/machine-leaderboard/${ip}${
+      queryParams.toString() ? `?${queryParams.toString()}` : ""
+    }`;
+    console.log(`🏆 Fetching machine employee leaderboard: ${url}`);
+    return api.get(url);
+  },
+
+  // Get machine analytics and statistics
+  getMachineAnalytics: (
+    ip: string,
+    params?: {
+      startDate?: string;
+      endDate?: string;
+    }
+  ) => {
+    const queryParams = new URLSearchParams();
+    if (params?.startDate) queryParams.append("startDate", params.startDate);
+    if (params?.endDate) queryParams.append("endDate", params.endDate);
+
+    const url = `/machine-performance/machine-analytics/${ip}${
+      queryParams.toString() ? `?${queryParams.toString()}` : ""
+    }`;
+    console.log(`📊 Fetching machine analytics: ${url}`);
+    return api.get(url);
+  },
+
+  // Get complete machine dashboard
+  getMachineDashboard: (
+    ip: string,
+    params?: {
+      startDate?: string;
+      endDate?: string;
+    }
+  ) => {
+    const queryParams = new URLSearchParams();
+    if (params?.startDate) queryParams.append("startDate", params.startDate);
+    if (params?.endDate) queryParams.append("endDate", params.endDate);
+
+    const url = `/machine-performance/machine-dashboard/${ip}${
+      queryParams.toString() ? `?${queryParams.toString()}` : ""
+    }`;
+    console.log(`🎯 Fetching machine dashboard: ${url}`);
+    return api.get(url);
+  },
+};
+
+// Real Machine Performance API (uses actual machine users + attendance correlation)
+export const realMachinePerformanceAPI = {
+  getMachineUsersPerformance: (
+    machineIP: string,
+    params?: {
+      startDate?: string;
+      endDate?: string;
+      limit?: number;
+    }
+  ) => {
+    const queryParams = new URLSearchParams();
+    if (params?.startDate) queryParams.append("startDate", params.startDate);
+    if (params?.endDate) queryParams.append("endDate", params.endDate);
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+
+    const url = `/real-machine-performance/machine-users-performance/${machineIP}${
+      queryParams.toString() ? `?${queryParams.toString()}` : ""
+    }`;
+    console.log(`🎯 Fetching real machine users performance: ${url}`);
+    return api.get(url);
+  },
+
+  getMachineSummary: (machineIP: string) => {
+    const url = `/real-machine-performance/machine-summary/${machineIP}`;
+    console.log(`📊 Fetching machine summary: ${url}`);
+    return api.get(url);
+  },
 };
 
 // Notification API - Removed for Socket.IO implementation

@@ -73,10 +73,12 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
   
   // Get company leave policy (only 3 main types - excluding maternity/paternity)
   const companyPolicy = leavePolicyData?.data?.policy || {
-    annualLeave: 10,    // 10 annual leave days
-    sickLeave: 8,       // 8 sick leave days  
-    casualLeave: 10,    // 10 casual leave days
+    annual: 10,    // 10 annual leave days
+    sick: 8,       // 8 sick leave days  
+    casual: 10,    // 10 casual leave days
   };
+  
+  console.log("🏢 EmployeeLeaveActivity - Company Policy:", companyPolicy);
   
   // Filter out unwanted leave types (maternity, paternity)
   const allowedLeaveTypes = ['annual', 'sick', 'casual'];
@@ -101,10 +103,12 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
     
     // Map company policy to leave balance structure (only 3 main types)
     const policyMapping: any = {
-      annual: companyPolicy.annualLeave,
-      sick: companyPolicy.sickLeave,
-      casual: companyPolicy.casualLeave,
+      annual: companyPolicy.annual,
+      sick: companyPolicy.sick,
+      casual: companyPolicy.casual,
     };
+    
+    console.log("📊 EmployeeLeaveActivity - Policy Mapping:", policyMapping);
     
     leaveBalance = {};
     Object.entries(policyMapping).forEach(([type, total]) => {
@@ -115,6 +119,8 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
         remaining: Math.max(0, (total as number) - used)
       };
     });
+    
+    console.log("✅ EmployeeLeaveActivity - Final Leave Balance:", leaveBalance);
   } else {
     // Filter existing balance data to only include allowed leave types
     const filteredBalance: any = {};
@@ -357,51 +363,6 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
                   </div>
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Leave Balance Cards */}
-      {Object.keys(leaveBalance).length > 0 && (
-        <div className="card">
-          <div className="card-header">
-            <h4 className="font-semibold text-gray-900 dark:text-gray-100">
-              💼 Leave Balance {dateFilter && (dateFilter.dateFrom || dateFilter.dateTo) ? '(Filtered Period)' : ''}
-            </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Current allocation status
-            </p>
-          </div>
-          <div className="card-body">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {Object.entries(leaveBalance).map(([type, data]: [string, any]) => (
-                <div key={type} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-900">
-                  <div className="flex items-center justify-between mb-2">
-                    <h5 className="font-medium capitalize text-gray-900 dark:text-gray-100">
-                      {type} Leave
-                    </h5>
-                    <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                      {data.remaining}/{data.total}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full ${
-                        type === 'annual' ? 'bg-blue-500' :
-                        type === 'sick' ? 'bg-red-500' :
-                        type === 'casual' ? 'bg-green-500' :
-                        'bg-gray-500'
-                      }`}
-                      style={{ width: `${(data.used / data.total) * 100}%` }}
-                    ></div>
-                  </div>
-                  <div className="flex justify-between text-xs mt-1 text-gray-400 dark:text-gray-500">
-                    <span>Used: {data.used}</span>
-                    <span>Available: {data.remaining}</span>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </div>

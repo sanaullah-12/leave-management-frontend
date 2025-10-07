@@ -4,6 +4,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { leavesAPI } from "../services/api";
+import {
+  showLeaveSubmissionSuccess,
+  showErrorToast,
+  showWarningToast,
+  showLeaveApprovalSuccess,
+  showLeaveRejectionSuccess,
+} from "../utils/toastHelpers";
 // import { useNotifications } from "../components/NotificationSystem"; // Removed for Socket.IO implementation
 import xlogoImage from "../assets/xlogoanimate.png";
 // Inline type definition
@@ -21,7 +28,7 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ClockIcon,
-  EyeIcon
+  EyeIcon,
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 
@@ -34,14 +41,18 @@ const LeavesPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [showRejectionPopup, setShowRejectionPopup] = useState(false);
-  const [selectedLeaveId, setSelectedLeaveId] = useState<string>("");
+  const [selectedLeaveId, setSelectedLeaveId] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
   const [showCommentsPopup, setShowCommentsPopup] = useState(false);
-  const [popupContent, setPopupContent] = useState({ title: "", content: "", type: "" });
+  const [popupContent, setPopupContent] = useState({
+    title: "",
+    content: "",
+    type: "",
+  });
 
   // Initialize selectedStatus from URL parameters on mount
   useEffect(() => {
-    const statusFromUrl = searchParams.get('status');
+    const statusFromUrl = searchParams.get("status");
     if (statusFromUrl) {
       setSelectedStatus(statusFromUrl);
     }
@@ -50,54 +61,62 @@ const LeavesPage: React.FC = () => {
   // Function to get badge colors for leave types
   const getLeaveTypeBadge = (leaveType: string) => {
     switch (leaveType.toLowerCase()) {
-      case 'annual':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200';
-      case 'sick':
-        return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200';
-      case 'casual':
-        return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200';
-      case 'maternity':
-        return 'bg-pink-100 text-pink-800 dark:bg-pink-800 dark:text-pink-200';
-      case 'paternity':
-        return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-800 dark:text-indigo-200';
-      case 'emergency':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-200';
+      case "annual":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200";
+      case "sick":
+        return "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200";
+      case "casual":
+        return "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200";
+      case "maternity":
+        return "bg-pink-100 text-pink-800 dark:bg-pink-800 dark:text-pink-200";
+      case "paternity":
+        return "bg-indigo-100 text-indigo-800 dark:bg-indigo-800 dark:text-indigo-200";
+      case "emergency":
+        return "bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-200";
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
     }
   };
 
   // Function to get status icons and colors
   const getStatusDisplay = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'approved':
+      case "approved":
         return {
           icon: <CheckCircleIcon className="w-4 h-4" />,
-          className: 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200',
-          text: 'Approved'
+          className:
+            "inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200",
+          text: "Approved",
         };
-      case 'rejected':
+      case "rejected":
         return {
           icon: <XCircleIcon className="w-4 h-4" />,
-          className: 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200',
-          text: 'Rejected'
+          className:
+            "inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200",
+          text: "Rejected",
         };
-      case 'pending':
+      case "pending":
         return {
           icon: <ClockIcon className="w-4 h-4" />,
-          className: 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-200',
-          text: 'Pending'
+          className:
+            "inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-200",
+          text: "Pending",
         };
       default:
         return {
           icon: <ClockIcon className="w-4 h-4" />,
-          className: 'inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-          text: status
+          className:
+            "inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
+          text: status,
         };
     }
   };
 
-  const { data: leavesData, isLoading, refetch } = useQuery({
+  const {
+    data: leavesData,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["leaves", selectedStatus],
     queryFn: () => leavesAPI.getLeaves(1, 20, selectedStatus),
     refetchInterval: false, // Disabled auto-refresh - only manual refresh
@@ -114,7 +133,7 @@ const LeavesPage: React.FC = () => {
     mutationFn: leavesAPI.submitLeave,
     onSuccess: (response) => {
       const newLeave = response.data.leave;
-      
+
       // Update all relevant leave queries for both admin and employee views
       const updateAllLeaveQueries = () => {
         // Update main leaves query (current view)
@@ -125,13 +144,13 @@ const LeavesPage: React.FC = () => {
               data: {
                 ...oldData.data,
                 leaves: [newLeave, ...oldData.data.leaves],
-                totalCount: oldData.data.totalCount + 1
-              }
+                totalCount: oldData.data.totalCount + 1,
+              },
             };
           }
           return oldData;
         });
-        
+
         // Update "all" status query if we're not already on it
         if (selectedStatus !== "") {
           queryClient.setQueryData(["leaves", ""], (oldData: any) => {
@@ -141,14 +160,14 @@ const LeavesPage: React.FC = () => {
                 data: {
                   ...oldData.data,
                   leaves: [newLeave, ...oldData.data.leaves],
-                  totalCount: oldData.data.totalCount + 1
-                }
+                  totalCount: oldData.data.totalCount + 1,
+                },
               };
             }
             return oldData;
           });
         }
-        
+
         // Update pending status query (new requests are always pending)
         queryClient.setQueryData(["leaves", "pending"], (oldData: any) => {
           if (oldData?.data?.leaves) {
@@ -157,8 +176,8 @@ const LeavesPage: React.FC = () => {
               data: {
                 ...oldData.data,
                 leaves: [newLeave, ...oldData.data.leaves],
-                totalCount: oldData.data.totalCount + 1
-              }
+                totalCount: oldData.data.totalCount + 1,
+              },
             };
           }
           return oldData;
@@ -167,62 +186,98 @@ const LeavesPage: React.FC = () => {
         // Update employee-specific queries if we have user info
         if (user?.id) {
           // Update employee leave requests query
-          queryClient.setQueryData(['employee-leave-requests', user.id, '', new Date().getFullYear()], (oldData: any) => {
-            if (oldData?.data?.leaves) {
-              return {
-                ...oldData,
-                data: {
-                  ...oldData.data,
-                  leaves: [newLeave, ...oldData.data.leaves],
-                  totalCount: oldData.data.totalCount + 1
-                }
-              };
+          queryClient.setQueryData(
+            ["employee-leave-requests", user.id, "", new Date().getFullYear()],
+            (oldData: any) => {
+              if (oldData?.data?.leaves) {
+                return {
+                  ...oldData,
+                  data: {
+                    ...oldData.data,
+                    leaves: [newLeave, ...oldData.data.leaves],
+                    totalCount: oldData.data.totalCount + 1,
+                  },
+                };
+              }
+              return oldData;
             }
-            return oldData;
-          });
+          );
 
           // Update employee pending requests query
-          queryClient.setQueryData(['employee-leave-requests', user.id, 'pending', new Date().getFullYear()], (oldData: any) => {
-            if (oldData?.data?.leaves) {
-              return {
-                ...oldData,
-                data: {
-                  ...oldData.data,
-                  leaves: [newLeave, ...oldData.data.leaves],
-                  totalCount: oldData.data.totalCount + 1
-                }
-              };
+          queryClient.setQueryData(
+            [
+              "employee-leave-requests",
+              user.id,
+              "pending",
+              new Date().getFullYear(),
+            ],
+            (oldData: any) => {
+              if (oldData?.data?.leaves) {
+                return {
+                  ...oldData,
+                  data: {
+                    ...oldData.data,
+                    leaves: [newLeave, ...oldData.data.leaves],
+                    totalCount: oldData.data.totalCount + 1,
+                  },
+                };
+              }
+              return oldData;
             }
-            return oldData;
-          });
+          );
         }
       };
 
       updateAllLeaveQueries();
       setShowForm(false);
       reset();
-      
-      // Show success notification
-      // addNotification({
-      //   type: 'success',
-      //   title: 'Leave Request Submitted',
-      //   message: 'Your leave request has been submitted and is pending approval.',
-      // });
-      console.log('Leave request submitted successfully');
-      
+
+      // Calculate days for toast message
+      const startDate = new Date(newLeave.startDate);
+      const endDate = new Date(newLeave.endDate);
+      const days =
+        Math.ceil(
+          Math.abs(endDate.getTime() - startDate.getTime()) /
+            (1000 * 60 * 60 * 24)
+        ) + 1;
+
+      // Check if there are any warnings from the backend
+      const hasWarnings =
+        response.data.warnings && response.data.warnings.length > 0;
+
+      if (hasWarnings) {
+        // Show warning toast if there were notification issues
+        const warningMessage = `Leave request submitted successfully! ${days} ${
+          days === 1 ? "day" : "days"
+        } pending approval. Note: ${response.data.warnings.join(", ")}.`;
+        showWarningToast(warningMessage);
+      } else {
+        // Show normal success toast
+        showLeaveSubmissionSuccess(days, newLeave.leaveType);
+      }
+
+      console.log(
+        "Leave request submitted successfully",
+        hasWarnings ? "with warnings:" : "",
+        hasWarnings ? response.data.warnings : ""
+      );
+
       // Invalidate all related queries to ensure fresh data everywhere
-      queryClient.invalidateQueries({ queryKey: ['leaves'] });
-      queryClient.invalidateQueries({ queryKey: ['recent-leaves'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ["leaves"] });
+      queryClient.invalidateQueries({ queryKey: ["recent-leaves"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
     },
     onError: (error: any) => {
-      console.error('Failed to submit leave:', error);
-      // addNotification({
-      //   type: 'error',
-      //   title: 'Submission Failed',
-      //   message: error?.response?.data?.message || 'Failed to submit leave request. Please try again.',
-      // });
-      console.error('Leave submission failed:', error?.response?.data?.message || error.message);
+      // Show error toast with custom helper
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Failed to submit leave request. Please try again.";
+      showErrorToast(errorMessage);
+
+      console.error(
+        "Leave submission failed:",
+        error?.response?.data?.message || error.message
+      );
     },
   });
 
@@ -234,6 +289,15 @@ const LeavesPage: React.FC = () => {
       const updatedLeave = response?.data?.leave;
       const newStatus = data.status;
       const reviewComments = data.reviewComments;
+      const empName = updatedLeave?.employee?.name || "Employee";
+
+      // Show success toast with custom helper
+      if (newStatus === "approved") {
+        const days = updatedLeave?.totalDays || 1;
+        showLeaveApprovalSuccess(empName, days);
+      } else {
+        showLeaveRejectionSuccess(empName);
+      }
 
       // Optimistically update the cache without refetching
       const updateLeaveInQuery = (queryKey: string) => {
@@ -244,9 +308,15 @@ const LeavesPage: React.FC = () => {
               data: {
                 ...oldData.data,
                 leaves: oldData.data.leaves.map((leave: any) =>
-                  leave._id === id ? { ...leave, status: newStatus, reviewComments: reviewComments } : leave
-                )
-              }
+                  leave._id === id
+                    ? {
+                        ...leave,
+                        status: newStatus,
+                        reviewComments: reviewComments,
+                      }
+                    : leave
+                ),
+              },
             };
           }
           return oldData;
@@ -256,23 +326,32 @@ const LeavesPage: React.FC = () => {
       // Update employee-specific queries
       const updateEmployeeLeaveQueries = (employeeId: string) => {
         const currentYear = new Date().getFullYear();
-        
+
         // Update all employee status queries
-        ['', 'pending', 'approved', 'rejected'].forEach(status => {
-          queryClient.setQueryData(['employee-leave-requests', employeeId, status, currentYear], (oldData: any) => {
-            if (oldData?.data?.leaves) {
-              return {
-                ...oldData,
-                data: {
-                  ...oldData.data,
-                  leaves: oldData.data.leaves.map((leave: any) =>
-                    leave._id === id ? { ...leave, status: newStatus, reviewComments: reviewComments } : leave
-                  )
-                }
-              };
+        ["", "pending", "approved", "rejected"].forEach((status) => {
+          queryClient.setQueryData(
+            ["employee-leave-requests", employeeId, status, currentYear],
+            (oldData: any) => {
+              if (oldData?.data?.leaves) {
+                return {
+                  ...oldData,
+                  data: {
+                    ...oldData.data,
+                    leaves: oldData.data.leaves.map((leave: any) =>
+                      leave._id === id
+                        ? {
+                            ...leave,
+                            status: newStatus,
+                            reviewComments: reviewComments,
+                          }
+                        : leave
+                    ),
+                  },
+                };
+              }
+              return oldData;
             }
-            return oldData;
-          });
+          );
         });
       };
 
@@ -284,34 +363,46 @@ const LeavesPage: React.FC = () => {
       updateLeaveInQuery("rejected");
 
       // If we have employee ID from the updated leave, update their queries too
-      if (updatedLeave && updatedLeave.employee && typeof updatedLeave.employee === 'object') {
-        updateEmployeeLeaveQueries(updatedLeave.employee._id || updatedLeave.employee.id);
-      } else if (updatedLeave && typeof updatedLeave.employee === 'string') {
+      if (
+        updatedLeave &&
+        updatedLeave.employee &&
+        typeof updatedLeave.employee === "object"
+      ) {
+        updateEmployeeLeaveQueries(
+          updatedLeave.employee._id || updatedLeave.employee.id
+        );
+      } else if (updatedLeave && typeof updatedLeave.employee === "string") {
         updateEmployeeLeaveQueries(updatedLeave.employee);
       }
-      
+
       // Show success notification
-      const employeeName = typeof updatedLeave?.employee === 'object' ? updatedLeave.employee.name : 'Employee';
+      const employeeName =
+        typeof updatedLeave?.employee === "object"
+          ? updatedLeave.employee.name
+          : "Employee";
       // addNotification({
       //   type: newStatus === 'approved' ? 'success' : 'warning',
       //   title: `Leave Request ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}`,
       //   message: `${employeeName}'s leave request has been ${newStatus}.`,
       // });
       console.log(`Leave request ${newStatus} for ${employeeName}`);
-      
+
       // Invalidate all related queries to ensure fresh data everywhere
-      queryClient.invalidateQueries({ queryKey: ['leaves'] });
-      queryClient.invalidateQueries({ queryKey: ['recent-leaves'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ["leaves"] });
+      queryClient.invalidateQueries({ queryKey: ["recent-leaves"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
     },
     onError: (error: any) => {
-      console.error('Failed to review leave:', error);
+      console.error("Failed to review leave:", error);
       // addNotification({
       //   type: 'error',
       //   title: 'Review Failed',
       //   message: error?.response?.data?.message || 'Failed to review leave request. Please try again.',
       // });
-      console.error('Leave review failed:', error?.response?.data?.message || error.message);
+      console.error(
+        "Leave review failed:",
+        error?.response?.data?.message || error.message
+      );
     },
   });
 
@@ -353,12 +444,7 @@ const LeavesPage: React.FC = () => {
 
   const handleRejectSubmit = async () => {
     if (!rejectionReason.trim()) {
-      // addNotification({
-      //   type: 'error',
-      //   title: 'Rejection Reason Required',
-      //   message: 'Please provide a reason for rejecting this leave request.',
-      // });
-      console.warn('Rejection reason required');
+      showErrorToast("Please provide a reason for rejection");
       return;
     }
 
@@ -382,7 +468,7 @@ const LeavesPage: React.FC = () => {
     setPopupContent({
       title: "Rejection Reason",
       content: comments,
-      type: "rejection"
+      type: "rejection",
     });
     setShowCommentsPopup(true);
   };
@@ -391,7 +477,7 @@ const LeavesPage: React.FC = () => {
     setPopupContent({
       title: "Leave Reason",
       content: reason,
-      type: "reason"
+      type: "reason",
     });
     setShowCommentsPopup(true);
   };
@@ -415,9 +501,7 @@ const LeavesPage: React.FC = () => {
     <div className="space-y-6 fade-in">
       <div className="flex justify-between items-center">
         <div>
-          <h1
-            className="text-2xl font-bold text-gray-900 dark:text-gray-100"
-          >
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             Leave Requests
           </h1>
           <p className="text-gray-600 dark:text-gray-300">
@@ -434,18 +518,18 @@ const LeavesPage: React.FC = () => {
             className="btn-secondary inline-flex items-center"
           >
             {isLoading ? (
-              <img 
-                src={xlogoImage} 
-                alt="Loading..." 
+              <img
+                src={xlogoImage}
+                alt="Loading..."
                 className="h-5 w-5 mr-2 animate-pulse object-contain"
-                style={{ animation: 'pulse 1s ease-in-out infinite' }}
+                style={{ animation: "pulse 1s ease-in-out infinite" }}
               />
             ) : (
               <ArrowPathIcon className="h-5 w-5 mr-2" />
             )}
             Refresh
           </button>
-          
+
           {user?.role === "employee" && (
             <button
               onClick={() => setShowForm(true)}
@@ -498,17 +582,13 @@ const LeavesPage: React.FC = () => {
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="card-elevated rounded-lg p-6 w-full max-w-md mx-4">
-            <h2
-              className="text-lg font-medium mb-4 text-gray-900 dark:text-gray-100"
-            >
+            <h2 className="text-lg font-medium mb-4 text-gray-900 dark:text-gray-100">
               Request Leave
             </h2>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
-                <label
-                  className="block text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
+                <label className="block text-sm font-medium text-gray-900 dark:text-gray-100">
                   Leave Type
                 </label>
                 <select
@@ -533,9 +613,7 @@ const LeavesPage: React.FC = () => {
               </div>
 
               <div>
-                <label
-                  className="block text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
+                <label className="block text-sm font-medium text-gray-900 dark:text-gray-100">
                   Start Date
                 </label>
                 <input
@@ -554,9 +632,7 @@ const LeavesPage: React.FC = () => {
               </div>
 
               <div>
-                <label
-                  className="block text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
+                <label className="block text-sm font-medium text-gray-900 dark:text-gray-100">
                   End Date
                 </label>
                 <input
@@ -573,9 +649,7 @@ const LeavesPage: React.FC = () => {
               </div>
 
               <div>
-                <label
-                  className="block text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
+                <label className="block text-sm font-medium text-gray-900 dark:text-gray-100">
                   Reason
                 </label>
                 <textarea
@@ -658,21 +732,38 @@ const LeavesPage: React.FC = () => {
                   </thead>
                   <tbody className="bg-white/50 dark:bg-gray-800/20 divide-y divide-gray-200/20 dark:divide-gray-700/20">
                     {leaves.map((leave: any) => (
-                      <tr key={leave._id} className="group table-row-hover transition-all duration-300 ease-in-out hover:shadow-md rounded-lg cursor-pointer">
+                      <tr
+                        key={leave._id}
+                        className="group table-row-hover transition-all duration-300 ease-in-out hover:shadow-md rounded-lg cursor-pointer"
+                      >
                         {user?.role === "admin" && (
                           <td className="pl-2 pr-4 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
                               <Avatar
-                                src={typeof leave.employee === "object" ? leave.employee?.profilePicture : null}
-                                name={typeof leave.employee === "object" && leave.employee?.name ? leave.employee.name : "Unknown"}
+                                src={
+                                  typeof leave.employee === "object"
+                                    ? leave.employee?.profilePicture
+                                    : null
+                                }
+                                name={
+                                  typeof leave.employee === "object" &&
+                                  leave.employee?.name
+                                    ? leave.employee.name
+                                    : "Unknown"
+                                }
                                 size="md"
                                 className="flex-shrink-0"
                               />
                               <div className="flex flex-col">
                                 <button
                                   onClick={() => {
-                                    if (typeof leave.employee === "object" && leave.employee?._id) {
-                                      navigate(`/employees/${leave.employee._id}`);
+                                    if (
+                                      typeof leave.employee === "object" &&
+                                      leave.employee?._id
+                                    ) {
+                                      navigate(
+                                        `/employees/${leave.employee._id}`
+                                      );
                                     }
                                   }}
                                   className="text-left text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer underline-offset-2 hover:underline"
@@ -693,33 +784,51 @@ const LeavesPage: React.FC = () => {
                           </td>
                         )}
                         <td className="px-4 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium capitalize ${getLeaveTypeBadge(leave.leaveType)}`}>
+                          <span
+                            className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium capitalize ${getLeaveTypeBadge(
+                              leave.leaveType
+                            )}`}
+                          >
                             {leave.leaveType}
                           </span>
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                           <div>
-                            <span className="text-xs text-gray-600 dark:text-gray-300">From: </span>
-                            <span>{new Date(leave.startDate).toLocaleDateString()}</span>
+                            <span className="text-xs text-gray-600 dark:text-gray-300">
+                              From:{" "}
+                            </span>
+                            <span>
+                              {new Date(leave.startDate).toLocaleDateString()}
+                            </span>
                             <span className="mx-2">-</span>
-                            <span className="text-xs text-gray-600 dark:text-gray-300">To: </span>
-                            <span>{new Date(leave.endDate).toLocaleDateString()}</span>
+                            <span className="text-xs text-gray-600 dark:text-gray-300">
+                              To:{" "}
+                            </span>
+                            <span>
+                              {new Date(leave.endDate).toLocaleDateString()}
+                            </span>
                           </div>
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
-                            {leave.totalDays} {leave.totalDays === 1 ? 'day' : 'days'}
+                            {leave.totalDays}{" "}
+                            {leave.totalDays === 1 ? "day" : "days"}
                           </span>
                         </td>
                         <td className="px-4 py-4">
                           <div className="max-w-xs">
                             <div className="flex items-center space-x-2">
-                              <div className="text-sm line-clamp-2 text-gray-900 dark:text-gray-100 flex-1" title={leave.reason}>
+                              <div
+                                className="text-sm line-clamp-2 text-gray-900 dark:text-gray-100 flex-1"
+                                title={leave.reason}
+                              >
                                 {leave.reason}
                               </div>
                               {leave.reason && (
                                 <button
-                                  onClick={() => showLeaveReasonPopup(leave.reason)}
+                                  onClick={() =>
+                                    showLeaveReasonPopup(leave.reason)
+                                  }
                                   className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors flex-shrink-0"
                                   title="View full reason"
                                 >
@@ -731,21 +840,30 @@ const LeavesPage: React.FC = () => {
                         </td>
                         <td className="px-4 py-4">
                           <div className="flex items-center space-x-2">
-                            <span className={getStatusDisplay(leave.status).className}>
+                            <span
+                              className={
+                                getStatusDisplay(leave.status).className
+                              }
+                            >
                               <span className="mr-2">
                                 {getStatusDisplay(leave.status).icon}
                               </span>
                               {getStatusDisplay(leave.status).text}
                             </span>
-                            {leave.status === "rejected" && leave.reviewComments && (
-                              <button
-                                onClick={() => showRejectionCommentsPopup(leave.reviewComments)}
-                                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                                title="View rejection reason"
-                              >
-                                <EyeIcon className="w-4 h-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
-                              </button>
-                            )}
+                            {leave.status === "rejected" &&
+                              leave.reviewComments && (
+                                <button
+                                  onClick={() =>
+                                    showRejectionCommentsPopup(
+                                      leave.reviewComments
+                                    )
+                                  }
+                                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                                  title="View rejection reason"
+                                >
+                                  <EyeIcon className="w-4 h-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
+                                </button>
+                              )}
                           </div>
                         </td>
                         {user?.role === "admin" && (
@@ -753,7 +871,9 @@ const LeavesPage: React.FC = () => {
                             {leave.status === "pending" ? (
                               <div className="flex space-x-2">
                                 <button
-                                  onClick={() => handleReview(leave._id, "approved")}
+                                  onClick={() =>
+                                    handleReview(leave._id, "approved")
+                                  }
                                   disabled={reviewLeaveMutation.isPending}
                                   className="btn-success px-3 py-1 text-xs"
                                 >
@@ -768,7 +888,9 @@ const LeavesPage: React.FC = () => {
                                 </button>
                               </div>
                             ) : (
-                              <span className="text-sm text-gray-400">Reviewed</span>
+                              <span className="text-sm text-gray-400">
+                                Reviewed
+                              </span>
                             )}
                           </td>
                         )}
@@ -782,21 +904,30 @@ const LeavesPage: React.FC = () => {
             {/* Mobile Card View - Shown on mobile and tablet */}
             <div className="lg:hidden space-y-4 p-8">
               {leaves.map((leave: any) => (
-                <div key={leave._id} className="rounded-xl p-6 border border-gray-200/30 dark:border-gray-700/30 bg-gradient-to-br from-white/80 to-gray-50/40 dark:from-gray-800/40 dark:to-gray-900/20 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02] cursor-pointer">
-                  
+                <div
+                  key={leave._id}
+                  className="rounded-xl p-6 border border-gray-200/30 dark:border-gray-700/30 bg-gradient-to-br from-white/80 to-gray-50/40 dark:from-gray-800/40 dark:to-gray-900/20 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02] cursor-pointer"
+                >
                   {/* Header with Type and Status */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3">
-                      <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium capitalize ${getLeaveTypeBadge(leave.leaveType)}`}>
+                      <span
+                        className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium capitalize ${getLeaveTypeBadge(
+                          leave.leaveType
+                        )}`}
+                      >
                         {leave.leaveType}
                       </span>
                       <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
-                        {leave.totalDays} {leave.totalDays === 1 ? 'day' : 'days'}
+                        {leave.totalDays}{" "}
+                        {leave.totalDays === 1 ? "day" : "days"}
                       </span>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
-                      <span className={getStatusDisplay(leave.status).className}>
+                      <span
+                        className={getStatusDisplay(leave.status).className}
+                      >
                         <span className="mr-2">
                           {getStatusDisplay(leave.status).icon}
                         </span>
@@ -804,7 +935,9 @@ const LeavesPage: React.FC = () => {
                       </span>
                       {leave.status === "rejected" && leave.reviewComments && (
                         <button
-                          onClick={() => showRejectionCommentsPopup(leave.reviewComments)}
+                          onClick={() =>
+                            showRejectionCommentsPopup(leave.reviewComments)
+                          }
                           className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
                           title="View rejection reason"
                         >
@@ -819,25 +952,39 @@ const LeavesPage: React.FC = () => {
                     <div className="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
                       <div className="flex items-center gap-3">
                         <Avatar
-                          src={typeof leave.employee === "object" ? leave.employee?.profilePicture : null}
-                          name={typeof leave.employee === "object" && leave.employee?.name ? leave.employee.name : "Unknown"}
+                          src={
+                            typeof leave.employee === "object"
+                              ? leave.employee?.profilePicture
+                              : null
+                          }
+                          name={
+                            typeof leave.employee === "object" &&
+                            leave.employee?.name
+                              ? leave.employee.name
+                              : "Unknown"
+                          }
                           size="sm"
                         />
                         <div>
                           <button
                             onClick={() => {
-                              if (typeof leave.employee === "object" && leave.employee?._id) {
+                              if (
+                                typeof leave.employee === "object" &&
+                                leave.employee?._id
+                              ) {
                                 navigate(`/employees/${leave.employee._id}`);
                               }
                             }}
                             className="text-left text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer underline-offset-2 hover:underline"
                           >
-                            {typeof leave.employee === "object" && leave.employee?.name
+                            {typeof leave.employee === "object" &&
+                            leave.employee?.name
                               ? leave.employee.name
                               : "Unknown"}
                           </button>
                           <div className="text-xs text-gray-600 dark:text-gray-300">
-                            {typeof leave.employee === "object" && leave.employee?.employeeId
+                            {typeof leave.employee === "object" &&
+                            leave.employee?.employeeId
                               ? leave.employee.employeeId
                               : "N/A"}
                           </div>
@@ -853,11 +1000,15 @@ const LeavesPage: React.FC = () => {
                     </div>
                     <div className="flex justify-between text-sm text-gray-900 dark:text-gray-100">
                       <div>
-                        <span className="text-xs text-gray-600 dark:text-gray-300">From: </span>
+                        <span className="text-xs text-gray-600 dark:text-gray-300">
+                          From:{" "}
+                        </span>
                         {new Date(leave.startDate).toLocaleDateString()}
                       </div>
                       <div>
-                        <span className="text-xs text-gray-600 dark:text-gray-300">To: </span>
+                        <span className="text-xs text-gray-600 dark:text-gray-300">
+                          To:{" "}
+                        </span>
                         {new Date(leave.endDate).toLocaleDateString()}
                       </div>
                     </div>
@@ -903,10 +1054,12 @@ const LeavesPage: React.FC = () => {
                       </button>
                     </div>
                   )}
-                  
+
                   {user?.role === "admin" && leave.status !== "pending" && (
                     <div className="pt-3 border-t text-center border-gray-200 dark:border-gray-700">
-                      <span className="text-sm text-gray-400">Request Reviewed</span>
+                      <span className="text-sm text-gray-400">
+                        Request Reviewed
+                      </span>
                     </div>
                   )}
                 </div>
@@ -916,15 +1069,15 @@ const LeavesPage: React.FC = () => {
         ) : (
           <div className="text-center py-16 px-8">
             <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-2xl flex items-center justify-center">
-              <ClockIcon
-                className="w-10 h-10 text-gray-400 dark:text-gray-500"
-              />
+              <ClockIcon className="w-10 h-10 text-gray-400 dark:text-gray-500" />
             </div>
             <p className="text-lg font-medium mb-2 text-gray-600 dark:text-gray-300">
               No leave requests found
             </p>
             <p className="text-sm max-w-md mx-auto text-gray-400 dark:text-gray-500">
-              {selectedStatus ? `No ${selectedStatus} leave requests found` : 'Submit your first leave request to see it here'}
+              {selectedStatus
+                ? `No ${selectedStatus} leave requests found`
+                : "Submit your first leave request to see it here"}
             </p>
           </div>
         )}
@@ -933,9 +1086,7 @@ const LeavesPage: React.FC = () => {
       {/* Rejection Reason Popup */}
       {showRejectionPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div 
-            className="rounded-lg p-6 w-full max-w-md mx-4 border shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-          >
+          <div className="rounded-lg p-6 w-full max-w-md mx-4 border shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
               Rejection Reason
             </h3>
@@ -965,7 +1116,9 @@ const LeavesPage: React.FC = () => {
                 disabled={reviewLeaveMutation.isPending}
                 className="btn-danger px-4 py-2 flex-1"
               >
-                {reviewLeaveMutation.isPending ? 'Rejecting...' : 'Confirm Reject'}
+                {reviewLeaveMutation.isPending
+                  ? "Rejecting..."
+                  : "Confirm Reject"}
               </button>
             </div>
           </div>
@@ -975,9 +1128,7 @@ const LeavesPage: React.FC = () => {
       {/* Comments/Reason Popup */}
       {showCommentsPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div
-            className="rounded-lg p-6 w-full max-w-2xl mx-4 border shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-          >
+          <div className="rounded-lg p-6 w-full max-w-2xl mx-4 border shadow-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 {popupContent.title}
@@ -991,16 +1142,20 @@ const LeavesPage: React.FC = () => {
               </button>
             </div>
 
-            <div className={`p-4 rounded-lg border-l-4 ${
-              popupContent.type === "rejection"
-                ? "border-red-400 bg-red-50 dark:bg-red-900/20"
-                : "border-blue-400 bg-blue-50 dark:bg-blue-900/20"
-            }`}>
-              <div className={`text-sm leading-relaxed ${
+            <div
+              className={`p-4 rounded-lg border-l-4 ${
                 popupContent.type === "rejection"
-                  ? "text-red-700 dark:text-red-300"
-                  : "text-blue-700 dark:text-blue-300"
-              }`}>
+                  ? "border-red-400 bg-red-50 dark:bg-red-900/20"
+                  : "border-blue-400 bg-blue-50 dark:bg-blue-900/20"
+              }`}
+            >
+              <div
+                className={`text-sm leading-relaxed ${
+                  popupContent.type === "rejection"
+                    ? "text-red-700 dark:text-red-300"
+                    : "text-blue-700 dark:text-blue-300"
+                }`}
+              >
                 {popupContent.content}
               </div>
             </div>

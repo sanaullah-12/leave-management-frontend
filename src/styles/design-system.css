@@ -38,11 +38,96 @@ body {
 }
 
 /* ============================= */
+/* 📌 Card Hover Animations */
+/* ============================= */
+
+.card-hover-interactive {
+  @apply transform transition-all duration-300 ease-in-out cursor-pointer;
+  @apply hover:scale-105 hover:shadow-xl;
+  @apply relative overflow-hidden;
+}
+
+.card-hover-interactive::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.6s ease-in-out;
+}
+
+.card-hover-interactive:hover::before {
+  left: 100%;
+}
+
+.card-hover-excellent {
+  @apply hover:ring-2 hover:ring-green-300 hover:ring-opacity-50;
+  @apply hover:shadow-green-200/50;
+}
+
+.card-hover-good {
+  @apply hover:ring-2 hover:ring-yellow-300 hover:ring-opacity-50;
+  @apply hover:shadow-yellow-200/50;
+}
+
+.card-hover-poor {
+  @apply hover:ring-2 hover:ring-red-300 hover:ring-opacity-50;
+  @apply hover:shadow-red-200/50;
+}
+
+/* Tooltip Animations */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease-out;
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.8) translateY(4px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05) translateY(-2px);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.4s ease-out;
+}
+
+/* ============================= */
 /* 📌 Avatar Classes */
 /* ============================= */
 
 .user-initials-circle {
   @apply bg-gradient-to-br from-blue-100 to-blue-200 dark:bg-blue-600 text-blue-600 dark:text-white;
+}
+
+/* Employee Avatar Colors - Single Theme Color */
+.avatar-primary {
+  @apply bg-gradient-to-br from-blue-500 to-blue-600 text-white;
 }
 
 /* ============================= */
@@ -236,17 +321,33 @@ html.theme-purple .user-initials-circle {
   @apply bg-gradient-to-br from-purple-100 to-purple-200 dark:bg-purple-600 text-purple-600 dark:text-white;
 }
 
+html.theme-purple .avatar-primary {
+  @apply bg-gradient-to-br from-purple-500 to-purple-600 text-white;
+}
+
 html.theme-purple .badge-primary {
   @apply bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-700;
 }
 
 /* Employee page avatar overrides */
-html.theme-purple .from-blue-100 { @apply from-purple-100; }
-html.theme-purple .to-blue-200 { @apply to-purple-200; }
-html.theme-purple .from-blue-900 { @apply from-purple-900; }
-html.theme-purple .to-blue-800 { @apply to-purple-800; }
-html.theme-purple .text-blue-600 { @apply text-purple-600; }
-html.theme-purple .text-blue-400 { @apply text-purple-400; }
+html.theme-purple .from-blue-100 {
+  @apply from-purple-100;
+}
+html.theme-purple .to-blue-200 {
+  @apply to-purple-200;
+}
+html.theme-purple .from-blue-900 {
+  @apply from-purple-900;
+}
+html.theme-purple .to-blue-800 {
+  @apply to-purple-800;
+}
+html.theme-purple .text-blue-600 {
+  @apply text-purple-600;
+}
+html.theme-purple .text-blue-400 {
+  @apply text-purple-400;
+}
 
 /* Green Theme Overrides */
 html.theme-green .btn-primary {
@@ -286,17 +387,33 @@ html.theme-green .user-initials-circle {
   @apply bg-gradient-to-br from-green-100 to-green-200 dark:bg-green-600 text-green-600 dark:text-white;
 }
 
+html.theme-green .avatar-primary {
+  @apply bg-gradient-to-br from-green-500 to-green-600 text-white;
+}
+
 html.theme-green .badge-primary {
   @apply bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 border-green-200 dark:border-green-700;
 }
 
 /* Employee page avatar overrides */
-html.theme-green .from-blue-100 { @apply from-green-100; }
-html.theme-green .to-blue-200 { @apply to-green-200; }
-html.theme-green .from-blue-900 { @apply from-green-900; }
-html.theme-green .to-blue-800 { @apply to-green-800; }
-html.theme-green .text-blue-600 { @apply text-green-600; }
-html.theme-green .text-blue-400 { @apply text-green-400; }
+html.theme-green .from-blue-100 {
+  @apply from-green-100;
+}
+html.theme-green .to-blue-200 {
+  @apply to-green-200;
+}
+html.theme-green .from-blue-900 {
+  @apply from-green-900;
+}
+html.theme-green .to-blue-800 {
+  @apply to-green-800;
+}
+html.theme-green .text-blue-600 {
+  @apply text-green-600;
+}
+html.theme-green .text-blue-400 {
+  @apply text-green-400;
+}
 
 /* Custom Theme Overrides */
 html.theme-custom .btn-primary {
@@ -337,43 +454,107 @@ html.theme-custom .table-row-hover:hover {
 /* ============================= */
 
 /* Purple theme admin privileges */
-html.theme-purple .bg-blue-50 { @apply bg-purple-50; }
-html.theme-purple .dark\:bg-blue-900\/20 { @apply dark:bg-purple-900/20; }
-html.theme-purple .border-blue-200 { @apply border-purple-200; }
-html.theme-purple .dark\:border-blue-800 { @apply dark:border-purple-800; }
-html.theme-purple .text-blue-600 { @apply text-purple-600; }
-html.theme-purple .dark\:text-blue-400 { @apply dark:text-purple-400; }
-html.theme-purple .text-blue-800 { @apply text-purple-800; }
-html.theme-purple .dark\:text-blue-200 { @apply dark:text-purple-200; }
-html.theme-purple .text-blue-700 { @apply text-purple-700; }
-html.theme-purple .dark\:text-blue-300 { @apply dark:text-purple-300; }
+html.theme-purple .bg-blue-50 {
+  @apply bg-purple-50;
+}
+html.theme-purple .dark\:bg-blue-900\/20 {
+  @apply dark:bg-purple-900/20;
+}
+html.theme-purple .border-blue-200 {
+  @apply border-purple-200;
+}
+html.theme-purple .dark\:border-blue-800 {
+  @apply dark:border-purple-800;
+}
+html.theme-purple .text-blue-600 {
+  @apply text-purple-600;
+}
+html.theme-purple .dark\:text-blue-400 {
+  @apply dark:text-purple-400;
+}
+html.theme-purple .text-blue-800 {
+  @apply text-purple-800;
+}
+html.theme-purple .dark\:text-blue-200 {
+  @apply dark:text-purple-200;
+}
+html.theme-purple .text-blue-700 {
+  @apply text-purple-700;
+}
+html.theme-purple .dark\:text-blue-300 {
+  @apply dark:text-purple-300;
+}
 
 /* Green theme admin privileges */
-html.theme-green .bg-blue-50 { @apply bg-green-50; }
-html.theme-green .dark\:bg-blue-900\/20 { @apply dark:bg-green-900/20; }
-html.theme-green .border-blue-200 { @apply border-green-200; }
-html.theme-green .dark\:border-blue-800 { @apply dark:border-green-800; }
-html.theme-green .text-blue-600 { @apply text-green-600; }
-html.theme-green .dark\:text-blue-400 { @apply dark:text-green-400; }
-html.theme-green .text-blue-800 { @apply text-green-800; }
-html.theme-green .dark\:text-blue-200 { @apply dark:text-green-200; }
-html.theme-green .text-blue-700 { @apply text-green-700; }
-html.theme-green .dark\:text-blue-300 { @apply dark:text-green-300; }
+html.theme-green .bg-blue-50 {
+  @apply bg-green-50;
+}
+html.theme-green .dark\:bg-blue-900\/20 {
+  @apply dark:bg-green-900/20;
+}
+html.theme-green .border-blue-200 {
+  @apply border-green-200;
+}
+html.theme-green .dark\:border-blue-800 {
+  @apply dark:border-green-800;
+}
+html.theme-green .text-blue-600 {
+  @apply text-green-600;
+}
+html.theme-green .dark\:text-blue-400 {
+  @apply dark:text-green-400;
+}
+html.theme-green .text-blue-800 {
+  @apply text-green-800;
+}
+html.theme-green .dark\:text-blue-200 {
+  @apply dark:text-green-200;
+}
+html.theme-green .text-blue-700 {
+  @apply text-green-700;
+}
+html.theme-green .dark\:text-blue-300 {
+  @apply dark:text-green-300;
+}
 
 /* Custom theme admin privileges */
-html.theme-custom .bg-blue-50 { @apply bg-custom-50; }
-html.theme-custom .dark\:bg-blue-900\/20 { @apply dark:bg-custom-900/20; }
-html.theme-custom .border-blue-200 { @apply border-custom-200; }
-html.theme-custom .dark\:border-blue-800 { @apply dark:border-custom-800; }
-html.theme-custom .text-blue-600 { @apply text-custom-600; }
-html.theme-custom .dark\:text-blue-400 { @apply dark:text-custom-400; }
-html.theme-custom .text-blue-800 { @apply text-custom-800; }
-html.theme-custom .dark\:text-blue-200 { @apply dark:text-custom-200; }
-html.theme-custom .text-blue-700 { @apply text-custom-700; }
-html.theme-custom .dark\:text-blue-300 { @apply dark:text-custom-300; }
+html.theme-custom .bg-blue-50 {
+  @apply bg-custom-50;
+}
+html.theme-custom .dark\:bg-blue-900\/20 {
+  @apply dark:bg-custom-900/20;
+}
+html.theme-custom .border-blue-200 {
+  @apply border-custom-200;
+}
+html.theme-custom .dark\:border-blue-800 {
+  @apply dark:border-custom-800;
+}
+html.theme-custom .text-blue-600 {
+  @apply text-custom-600;
+}
+html.theme-custom .dark\:text-blue-400 {
+  @apply dark:text-custom-400;
+}
+html.theme-custom .text-blue-800 {
+  @apply text-custom-800;
+}
+html.theme-custom .dark\:text-blue-200 {
+  @apply dark:text-custom-200;
+}
+html.theme-custom .text-blue-700 {
+  @apply text-custom-700;
+}
+html.theme-custom .dark\:text-blue-300 {
+  @apply dark:text-custom-300;
+}
 
 html.theme-custom .user-initials-circle {
   @apply bg-gradient-to-br from-custom-100 to-custom-200 dark:bg-custom-600 text-custom-600 dark:text-white;
+}
+
+html.theme-custom .avatar-primary {
+  @apply bg-gradient-to-br from-custom-500 to-custom-600 text-white;
 }
 
 html.theme-custom .badge-primary {
@@ -381,12 +562,24 @@ html.theme-custom .badge-primary {
 }
 
 /* Employee page avatar overrides */
-html.theme-custom .from-blue-100 { @apply from-custom-100; }
-html.theme-custom .to-blue-200 { @apply to-custom-200; }
-html.theme-custom .from-blue-900 { @apply from-custom-900; }
-html.theme-custom .to-blue-800 { @apply to-custom-800; }
-html.theme-custom .text-blue-600 { @apply text-custom-600; }
-html.theme-custom .text-blue-400 { @apply text-custom-400; }
+html.theme-custom .from-blue-100 {
+  @apply from-custom-100;
+}
+html.theme-custom .to-blue-200 {
+  @apply to-custom-200;
+}
+html.theme-custom .from-blue-900 {
+  @apply from-custom-900;
+}
+html.theme-custom .to-blue-800 {
+  @apply to-custom-800;
+}
+html.theme-custom .text-blue-600 {
+  @apply text-custom-600;
+}
+html.theme-custom .text-blue-400 {
+  @apply text-custom-400;
+}
 
 /* ============================= */
 /* 📌 Profile Container Gradients */
@@ -517,7 +710,8 @@ html.theme-custom .dark\\:border-primary-800 {
 
 /* Floating animation */
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -531,7 +725,8 @@ html.theme-custom .dark\\:border-primary-800 {
 
 /* Glow animation */
 @keyframes glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
   }
   50% {
@@ -545,7 +740,8 @@ html.theme-custom .dark\\:border-primary-800 {
 
 /* Pulse text animation */
 @keyframes pulseText {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -568,7 +764,331 @@ html.theme-custom .dark\\:border-primary-800 {
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
   background-size: 200% 100%;
   animation: shimmer 2s ease-in-out infinite;
+}
+
+/* ============================= */
+/* 📌 Complete Primary Color Theme Overrides */
+/* ============================= */
+
+/* Purple theme primary color overrides */
+html.theme-purple .bg-primary-50 {
+  @apply bg-purple-50;
+}
+html.theme-purple .dark\:bg-primary-900\/20 {
+  @apply dark:bg-purple-900/20;
+}
+html.theme-purple .border-primary-300 {
+  @apply border-purple-300;
+}
+html.theme-purple .dark\:border-primary-600 {
+  @apply dark:border-purple-600;
+}
+html.theme-purple .text-primary-600 {
+  @apply text-purple-600;
+}
+html.theme-purple .text-primary-800 {
+  @apply text-purple-800;
+}
+html.theme-purple .text-primary-900 {
+  @apply text-purple-900;
+}
+html.theme-purple .dark\:text-primary-100 {
+  @apply dark:text-purple-100;
+}
+html.theme-purple .dark\:text-primary-200 {
+  @apply dark:text-purple-200;
+}
+html.theme-purple .dark\:text-primary-400 {
+  @apply dark:text-purple-400;
+}
+html.theme-purple .focus\:ring-primary-500:focus {
+  @apply ring-purple-500;
+}
+html.theme-purple .focus\:border-primary-500:focus {
+  @apply border-purple-500;
+}
+
+/* Green theme primary color overrides */
+html.theme-green .bg-primary-50 {
+  @apply bg-green-50;
+}
+html.theme-green .dark\:bg-primary-900\/20 {
+  @apply dark:bg-green-900/20;
+}
+html.theme-green .border-primary-300 {
+  @apply border-green-300;
+}
+html.theme-green .dark\:border-primary-600 {
+  @apply dark:border-green-600;
+}
+html.theme-green .text-primary-600 {
+  @apply text-green-600;
+}
+html.theme-green .text-primary-800 {
+  @apply text-green-800;
+}
+html.theme-green .text-primary-900 {
+  @apply text-green-900;
+}
+html.theme-green .dark\:text-primary-100 {
+  @apply dark:text-green-100;
+}
+html.theme-green .dark\:text-primary-200 {
+  @apply dark:text-green-200;
+}
+html.theme-green .dark\:text-primary-400 {
+  @apply dark:text-green-400;
+}
+html.theme-green .focus\:ring-primary-500:focus {
+  @apply ring-green-500;
+}
+html.theme-green .focus\:border-primary-500:focus {
+  @apply border-green-500;
+}
+
+/* Custom theme primary color overrides */
+html.theme-custom .bg-primary-50 {
+  @apply bg-custom-50;
+}
+html.theme-custom .dark\:bg-primary-900\/20 {
+  @apply dark:bg-custom-900/20;
+}
+html.theme-custom .border-primary-300 {
+  @apply border-custom-300;
+}
+html.theme-custom .dark\:border-primary-600 {
+  @apply dark:border-custom-600;
+}
+html.theme-custom .text-primary-600 {
+  @apply text-custom-600;
+}
+html.theme-custom .text-primary-800 {
+  @apply text-custom-800;
+}
+html.theme-custom .text-primary-900 {
+  @apply text-custom-900;
+}
+html.theme-custom .dark\:text-primary-100 {
+  @apply dark:text-custom-100;
+}
+html.theme-custom .dark\:text-primary-200 {
+  @apply dark:text-custom-200;
+}
+html.theme-custom .dark\:text-primary-400 {
+  @apply dark:text-custom-400;
+}
+html.theme-custom .focus\:ring-primary-500:focus {
+  @apply ring-custom-500;
+}
+html.theme-custom .focus\:border-primary-500:focus {
+  @apply border-custom-500;
+}
+
+/* ============================= */
+/* 📌 Gradient Theme Overrides */
+/* ============================= */
+
+/* Purple theme gradient overrides */
+html.theme-purple .from-primary-400 {
+  @apply from-purple-400;
+}
+html.theme-purple .to-primary-600 {
+  @apply to-purple-600;
+}
+html.theme-purple .from-primary-500 {
+  @apply from-purple-500;
+}
+
+/* Green theme gradient overrides */
+html.theme-green .from-primary-400 {
+  @apply from-green-400;
+}
+html.theme-green .to-primary-600 {
+  @apply to-green-600;
+}
+html.theme-green .from-primary-500 {
+  @apply from-green-500;
+}
+
+/* Custom theme gradient overrides */
+html.theme-custom .from-primary-400 {
+  @apply from-custom-400;
+}
+html.theme-custom .to-primary-600 {
+  @apply to-custom-600;
+}
+html.theme-custom .from-primary-500 {
+  @apply from-custom-500;
+}
+
+/* ============================= */
+/* 📌 Background Primary Color Overrides */
+/* ============================= */
+
+/* Purple theme bg-primary overrides */
+html.theme-purple .bg-primary-500 {
+  @apply bg-purple-500;
+}
+html.theme-purple .from-primary-50 {
+  @apply from-purple-50;
+}
+html.theme-purple .to-primary-50 {
+  @apply to-purple-50;
+}
+html.theme-purple .dark\:from-primary-900\/20 {
+  @apply dark:from-purple-900/20;
+}
+html.theme-purple .dark\:to-primary-900\/20 {
+  @apply dark:to-purple-900/20;
+}
+html.theme-purple .border-primary-200 {
+  @apply border-purple-200;
+}
+html.theme-purple .dark\:border-primary-700 {
+  @apply dark:border-purple-700;
+}
+
+/* Green theme bg-primary overrides */
+html.theme-green .bg-primary-500 {
+  @apply bg-green-500;
+}
+html.theme-green .from-primary-50 {
+  @apply from-green-50;
+}
+html.theme-green .to-primary-50 {
+  @apply to-green-50;
+}
+html.theme-green .dark\:from-primary-900\/20 {
+  @apply dark:from-green-900/20;
+}
+html.theme-green .dark\:to-primary-900\/20 {
+  @apply dark:to-green-900/20;
+}
+html.theme-green .border-primary-200 {
+  @apply border-green-200;
+}
+html.theme-green .dark\:border-primary-700 {
+  @apply dark:border-green-700;
+}
+
+/* Custom theme bg-primary overrides */
+html.theme-custom .bg-primary-500 {
+  @apply bg-custom-500;
+}
+html.theme-custom .from-primary-50 {
+  @apply from-custom-50;
+}
+html.theme-custom .to-primary-50 {
+  @apply to-custom-50;
+}
+html.theme-custom .dark\:from-primary-900\/20 {
+  @apply dark:from-custom-900/20;
+}
+html.theme-custom .dark\:to-primary-900\/20 {
+  @apply dark:to-custom-900/20;
+}
+html.theme-custom .border-primary-200 {
+  @apply border-custom-200;
+}
+html.theme-custom .dark\:border-primary-700 {
+  @apply dark:border-custom-700;
+}
+
+/* ============================= */
+/* 📌 Total Late Minutes Card Theme Overrides */
+/* ============================= */
+
+/* Purple theme - use purple instead of orange for consistency */
+html.theme-purple .bg-orange-50 {
+  @apply bg-purple-50;
+}
+html.theme-purple .dark\:bg-orange-900\/20 {
+  @apply dark:bg-purple-900/20;
+}
+html.theme-purple .border-orange-200 {
+  @apply border-purple-200;
+}
+html.theme-purple .dark\:border-orange-700 {
+  @apply dark:border-purple-700;
+}
+html.theme-purple .text-orange-800 {
+  @apply text-purple-800;
+}
+html.theme-purple .dark\:text-orange-300 {
+  @apply dark:text-purple-300;
+}
+html.theme-purple .text-orange-900 {
+  @apply text-purple-900;
+}
+html.theme-purple .dark\:text-orange-100 {
+  @apply dark:text-purple-100;
+}
+html.theme-purple .text-orange-500 {
+  @apply text-purple-500;
+}
+
+/* Green theme - use green instead of orange for consistency */
+html.theme-green .bg-orange-50 {
+  @apply bg-green-50;
+}
+html.theme-green .dark\:bg-orange-900\/20 {
+  @apply dark:bg-green-900/20;
+}
+html.theme-green .border-orange-200 {
+  @apply border-green-200;
+}
+html.theme-green .dark\:border-orange-700 {
+  @apply dark:border-green-700;
+}
+html.theme-green .text-orange-800 {
+  @apply text-green-800;
+}
+html.theme-green .dark\:text-orange-300 {
+  @apply dark:text-green-300;
+}
+html.theme-green .text-orange-900 {
+  @apply text-green-900;
+}
+html.theme-green .dark\:text-orange-100 {
+  @apply dark:text-green-100;
+}
+html.theme-green .text-orange-500 {
+  @apply text-green-500;
+}
+
+/* Custom theme - use custom colors instead of orange */
+html.theme-custom .bg-orange-50 {
+  @apply bg-custom-50;
+}
+html.theme-custom .dark\:bg-orange-900\/20 {
+  @apply dark:bg-custom-900/20;
+}
+html.theme-custom .border-orange-200 {
+  @apply border-custom-200;
+}
+html.theme-custom .dark\:border-orange-700 {
+  @apply dark:border-custom-700;
+}
+html.theme-custom .text-orange-800 {
+  @apply text-custom-800;
+}
+html.theme-custom .dark\:text-orange-300 {
+  @apply dark:text-custom-300;
+}
+html.theme-custom .text-orange-900 {
+  @apply text-custom-900;
+}
+html.theme-custom .dark\:text-orange-100 {
+  @apply dark:text-custom-100;
+}
+html.theme-custom .text-orange-500 {
+  @apply text-custom-500;
 }

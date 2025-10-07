@@ -102,13 +102,9 @@ const AttendancePage: React.FC = () => {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalEmployee, setModalEmployee] = useState<Employee | null>(null);
-  const [_isLoadingModalData, setIsLoadingModalData] = useState(false);
-  const [_modalAttendanceData, setModalAttendanceData] = useState<any>(null);
 
   // Employee inline attendance state
   const [showEmployeeAttendance, setShowEmployeeAttendance] = useState(false);
-  const [isLoadingEmployeeData, _setIsLoadingEmployeeData] = useState(false);
-  const [employeeAttendanceData, _setEmployeeAttendanceData] = useState<any>(null);
 
   // Predefined machine IPs based on your configuration
   const predefinedIPs = [
@@ -387,6 +383,17 @@ const AttendancePage: React.FC = () => {
     setModalEmployee(null);
     setModalAttendanceData(null);
     setIsLoadingModalData(false);
+  };
+
+  const handleModalDateRangeChange = (
+    newStartDate: string,
+    newEndDate: string
+  ) => {
+    setStartDate(newStartDate);
+    setEndDate(newEndDate);
+
+    // Note: Removed automatic fetch - user needs to manually click "Fetch Records" button
+    // This prevents unwanted API calls on every date change
   };
 
   const getStatusColor = (status?: string) => {
@@ -938,11 +945,11 @@ const AttendancePage: React.FC = () => {
                           {employeeAttendanceData?.records
                             ? employeeAttendanceData.records
                                 .filter(
-                                  (record: any) =>
+                                  (record) =>
                                     record.isLate && record.lateMinutes
                                 )
                                 .reduce(
-                                  (total: number, record: any) =>
+                                  (total, record) =>
                                     total + (record.lateMinutes || 0),
                                   0
                                 )
@@ -955,11 +962,11 @@ const AttendancePage: React.FC = () => {
                                 const totalLateMinutes =
                                   employeeAttendanceData.records
                                     .filter(
-                                      (record: any) =>
+                                      (record) =>
                                         record.isLate && record.lateMinutes
                                     )
                                     .reduce(
-                                      (total: number, record: any) =>
+                                      (total, record) =>
                                         total + (record.lateMinutes || 0),
                                       0
                                     );
@@ -1019,7 +1026,7 @@ const AttendancePage: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                      {employeeAttendanceData.records?.map((record: any, index: number) => (
+                      {employeeAttendanceData.records?.map((record, index) => (
                         <tr
                           key={index}
                           className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 cursor-pointer transform hover:scale-[1.02]"
