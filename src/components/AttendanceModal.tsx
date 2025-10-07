@@ -94,15 +94,21 @@ const AttendanceModal: React.FC<AttendanceModalProps> = ({
                       </div>
                       <div>
                         <span className="text-gray-500">Employee ID:</span>{" "}
-                        <span className="font-medium">{employee.employeeId}</span>
+                        <span className="font-medium">
+                          {employee.employeeId}
+                        </span>
                       </div>
                       <div>
                         <span className="text-gray-500">Machine ID:</span>{" "}
-                        <span className="font-medium">{employee.machineId}</span>
+                        <span className="font-medium">
+                          {employee.machineId}
+                        </span>
                       </div>
                       <div>
                         <span className="text-gray-500">Department:</span>{" "}
-                        <span className="font-medium">{employee.department}</span>
+                        <span className="font-medium">
+                          {employee.department}
+                        </span>
                       </div>
                     </div>
                   </div>

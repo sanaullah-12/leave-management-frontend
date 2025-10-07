@@ -108,7 +108,8 @@ const AttendancePage: React.FC = () => {
   // Employee inline attendance state
   const [showEmployeeAttendance, setShowEmployeeAttendance] = useState(false);
   const [isLoadingEmployeeData, _setIsLoadingEmployeeData] = useState(false);
-  const [employeeAttendanceData, _setEmployeeAttendanceData] = useState<any>(null);
+  const [employeeAttendanceData, _setEmployeeAttendanceData] =
+    useState<any>(null);
 
   // Predefined machine IPs based on your configuration
   const predefinedIPs = [
@@ -1019,43 +1020,45 @@ const AttendancePage: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                      {employeeAttendanceData.records?.map((record: any, index: number) => (
-                        <tr
-                          key={index}
-                          className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 cursor-pointer transform hover:scale-[1.02]"
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 font-medium">
-                            {record.dateDisplay || record.date}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                            {record.timeDisplay || record.time}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                            <span
-                              className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
-                                record.type === "Check In"
-                                  ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/40"
-                                  : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/40"
-                              }`}
-                            >
-                              {record.type}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <span
-                              className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
-                                record.isLate
-                                  ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/40"
-                                  : "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/40"
-                              }`}
-                            >
-                              {record.isLate
-                                ? `Late (${record.lateDisplay})`
-                                : "On Time"}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
+                      {employeeAttendanceData.records?.map(
+                        (record: any, index: number) => (
+                          <tr
+                            key={index}
+                            className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 cursor-pointer transform hover:scale-[1.02]"
+                          >
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 font-medium">
+                              {record.dateDisplay || record.date}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                              {record.timeDisplay || record.time}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                              <span
+                                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
+                                  record.type === "Check In"
+                                    ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/40"
+                                    : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/40"
+                                }`}
+                              >
+                                {record.type}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                              <span
+                                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
+                                  record.isLate
+                                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/40"
+                                    : "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/40"
+                                }`}
+                              >
+                                {record.isLate
+                                  ? `Late (${record.lateDisplay})`
+                                  : "On Time"}
+                              </span>
+                            </td>
+                          </tr>
+                        )
+                      )}
                     </tbody>
                   </table>
 
