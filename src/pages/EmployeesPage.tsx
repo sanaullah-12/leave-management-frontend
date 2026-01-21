@@ -45,50 +45,88 @@ const EmployeesPage: React.FC = () => {
   const [dateTo, setDateTo] = useState("");
   const [isSearchActive, setIsSearchActive] = useState(false);
 
+  // Fetch all users once and filter in the component
   const {
-    data: employeesData,
-    isLoading: employeesLoading,
-    refetch: refetchEmployees,
+    data: allUsersData,
+    isLoading: usersLoading,
+    error: usersError,
+    refetch: refetchUsers,
   } = useQuery({
-    queryKey: ["employees"],
-    queryFn: () => usersAPI.getEmployees(),
+    queryKey: ["users"],
+    queryFn: async () => {
+      try {
+        const response = await usersAPI.getUsers();
+        console.log("✅ Raw API Response:", response);
+        console.log("✅ Response data:", response?.data);
+        console.log(
+          "✅ Users array:",
+          response?.data?.users || response?.data?.data?.users || response?.data
+        );
+        return response;
+      } catch (error: any) {
+        console.error("❌ Failed to fetch users:", error);
+        console.error("❌ Error response:", error?.response?.data);
+        throw error;
+      }
+    },
     enabled: user?.role === "admin",
+    retry: 1,
     refetchInterval: false,
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: false,
-    staleTime: 0, // Disabled caching to ensure fresh data
+    staleTime: 0,
   });
 
-  const { data: adminsData, isLoading: adminsLoading } = useQuery({
-    queryKey: ["admins"],
-    queryFn: () => usersAPI.getAdmins(),
-    enabled: user?.role === "admin",
-    refetchInterval: false,
-    refetchIntervalInBackground: false,
-    refetchOnWindowFocus: false,
-    staleTime: 0, // Disabled caching to ensure fresh data
-  });
+  // Extract and filter users
+  const allUsers =
+    (allUsersData as any)?.data?.employees || // API returns 'employees', not 'users'!
+    (allUsersData as any)?.data?.data?.employees ||
+    (allUsersData as any)?.data?.users ||
+    (allUsersData as any)?.data?.data?.users ||
+    (allUsersData as any)?.users ||
+    [];
 
-  const isLoading =
-    activeTab === "employees" ? employeesLoading : adminsLoading;
-  const currentData = activeTab === "employees" ? employeesData : adminsData;
+  console.log("📊 All users fetched:", allUsers);
+  console.log("📊 Total users count:", allUsers?.length);
+
+  // Filter employees (role: 'employee') - INCLUDE ALL STATUSES
+  const employees = allUsers.filter((u: any) => u.role === "employee");
+
+  console.log("📊 All employees (including pending):", employees);
+  console.log(
+    "📊 Employee statuses:",
+    employees.map((e: any) => ({
+      name: e.name,
+      status: e.status,
+      email: e.email,
+    }))
+  );
+
+  // Filter admins (role: 'admin')
+  const admins = allUsers.filter((u: any) => u.role === "admin");
+
+  console.log("📊 Employees:", employees);
+  console.log("📊 Employees count:", employees?.length);
+  console.log("📊 Admins:", admins);
+  console.log("📊 Admins count:", admins?.length);
+
+  const isLoading = usersLoading;
 
   // Debug logging
   console.log("activeTab:", activeTab);
-  console.log("employeesData:", employeesData);
-  console.log("adminsData:", adminsData);
-  console.log("currentData:", currentData);
+  console.log("allUsersData:", allUsersData);
 
-  // Try both with and without .data wrapper
-  const currentUsers =
-    activeTab === "employees"
-      ? (currentData as any)?.data?.employees || (currentData as any)?.employees
-      : (currentData as any)?.data?.admins || (currentData as any)?.admins;
+  // Use filtered data based on active tab
+  const currentUsers = activeTab === "employees" ? employees : admins;
+
+  console.log("📊 Current users:", currentUsers);
+  console.log("📊 Users count:", currentUsers?.length);
+  console.log("📊 First user:", currentUsers?.[0]);
 
   const deactivateEmployeeMutation = useMutation({
     mutationFn: usersAPI.deactivateEmployee,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] }); // Changed from ["employees"]
       queryClient.invalidateQueries({ queryKey: ["admins"] });
       // addNotification({
       //   type: "warning",
@@ -116,7 +154,7 @@ const EmployeesPage: React.FC = () => {
   const activateEmployeeMutation = useMutation({
     mutationFn: usersAPI.activateEmployee,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] }); // Changed from ["employees"]
       queryClient.invalidateQueries({ queryKey: ["admins"] });
       // addNotification({
       //   type: "success",
@@ -144,8 +182,8 @@ const EmployeesPage: React.FC = () => {
   const deleteEmployeeMutation = useMutation({
     mutationFn: usersAPI.deleteEmployee,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employees"] });
-      queryClient.invalidateQueries({ queryKey: ["admins"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] }); // Changed from ["employees"]
+      queryClient.invalidateQueries({ queryKey: ["users"] }); // Changed from ["admins"]
       setDeleteConfirm({ show: false, employee: null });
       setError(""); // Clear any previous errors
       console.log("Employee deleted successfully");
@@ -251,9 +289,9 @@ const EmployeesPage: React.FC = () => {
 
         <div className="flex space-x-3">
           <button
-            onClick={() => refetchEmployees()}
+            onClick={() => refetchUsers()}
             className="btn-secondary inline-flex items-center"
-            disabled={employeesLoading}
+            disabled={usersLoading}
           >
             <ArrowPathIcon className="h-5 w-5 mr-2" />
             Refresh
@@ -290,11 +328,7 @@ const EmployeesPage: React.FC = () => {
             }`}
           >
             <UserIcon className="w-4 h-4 inline mr-2" />
-            Employees (
-            {(employeesData as any)?.data?.employees?.length ||
-              (employeesData as any)?.employees?.length ||
-              0}
-            /{(employeesData as any)?.data?.pagination?.total || "unknown"})
+            Employees ({employees?.length || 0})
           </button>
           <button
             onClick={() => setActiveTab("admins")}
@@ -305,11 +339,7 @@ const EmployeesPage: React.FC = () => {
             }`}
           >
             <ShieldCheckIcon className="w-4 h-4 inline mr-2" />
-            Admins (
-            {(adminsData as any)?.data?.admins?.length ||
-              (adminsData as any)?.admins?.length ||
-              0}
-            )
+            Admins ({admins?.length || 0})
           </button>
         </div>
       </div>

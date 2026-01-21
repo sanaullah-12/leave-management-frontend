@@ -1,19 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
+import {
+  XMarkIcon,
+  EnvelopeIcon,
+  UserPlusIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { authAPI, attendanceAPI } from "../services/api";
+import { authAPI, attendanceAPI, usersAPI } from "../services/api";
 // import { useNotifications } from "../components/NotificationSystem"; // Removed for Socket.IO implementation
 import Modal from "./Modal";
 import LoadingSpinner from "./LoadingSpinner";
 import {
   UserIcon,
-  EnvelopeIcon,
+  HashtagIcon,
   BuildingOfficeIcon,
   BriefcaseIcon,
   CalendarIcon,
   TagIcon,
-  XMarkIcon,
-  HashtagIcon,
 } from "@heroicons/react/24/outline";
 
 type InviteEmployeeData = {
@@ -85,14 +90,17 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
     }
   };
 
-  const inviteEmployeeMutation = useMutation({
-    mutationFn: authAPI.inviteEmployee,
+  // Fix: Add mutationFn to the mutation
+  const inviteMutation = useMutation({
+    mutationFn: usersAPI.inviteEmployee,
     onSuccess: (response, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      // Invalidate the users query to refresh the employee list
+      queryClient.invalidateQueries({ queryKey: ["users"] }); // Changed from ["employees"]
       reset();
       setTags([]);
       onClose();
 
+      console.log("✅ Employee invited successfully:", response.data);
       // Check email delivery status from updated backend response
       if (response.data.emailSent === false) {
         console.warn(
@@ -151,7 +159,7 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
     }
 
     const formData = { ...data, tags };
-    await inviteEmployeeMutation.mutateAsync(formData);
+    await inviteMutation.mutateAsync(formData);
   };
 
   const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -378,34 +386,50 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
               <TagIcon className="w-4 h-4 mr-2 text-gray-400" />
               Tags (Optional)
             </label>
-            <input
-              type="text"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={handleAddTag}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
-              placeholder="Add tags and press Enter"
-            />
-
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200"
+            <div className="mt-1 flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/20 dark:text-primary-400"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full hover:bg-primary-200 dark:hover:bg-primary-800/50"
                   >
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tag)}
-                      className="ml-2 hover:text-blue-600 dark:hover:text-blue-400"
-                    >
-                      <XMarkIcon className="w-3 h-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
+                    <XMarkIcon className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+              <input
+                type="text"
+                id="tags"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    setTags((prev) => [...prev, tagInput]);
+                    setTagInput("");
+                  }
+                }}
+                className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+                placeholder="Add tags..."
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+                    setTags((prev) => [...prev, tagInput.trim()]);
+                    setTagInput("");
+                  }
+                }}
+                className="px-3 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              >
+                Add
+              </button>
+            </div>
           </div>
         </div>
 
@@ -415,16 +439,16 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
             type="button"
             onClick={handleClose}
             className="btn-secondary px-6 py-3"
-            disabled={inviteEmployeeMutation.isPending}
+            disabled={inviteMutation.isPending}
           >
             Cancel
           </button>
           <button
             type="submit"
-            disabled={inviteEmployeeMutation.isPending}
+            disabled={inviteMutation.isPending}
             className="btn-primary px-8 py-3 inline-flex items-center"
           >
-            {inviteEmployeeMutation.isPending ? (
+            {inviteMutation.isPending ? (
               <>
                 <LoadingSpinner size="sm" />
                 <span className="ml-2">Sending Invitation Email...</span>

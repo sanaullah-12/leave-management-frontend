@@ -128,11 +128,13 @@ export const authAPI = {
 
 // Users API
 export const usersAPI = {
+  // ✅ FIX: Add role filter to get only employees
   getEmployees: (page = 1, limit = 50) =>
-    api.get(`/users?page=${page}&limit=${limit}`),
+    api.get(`/users?role=employee&page=${page}&limit=${limit}`),
 
+  // ✅ FIX: Add role filter to get only admins
   getAdmins: (page = 1, limit = 10) =>
-    api.get(`/users/admins/list?page=${page}&limit=${limit}`),
+    api.get(`/users?role=admin&page=${page}&limit=${limit}`),
 
   getEmployee: (id: string) => api.get(`/users/${id}`),
 

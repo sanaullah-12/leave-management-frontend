@@ -36,8 +36,8 @@ const LeavesPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  // const { addNotification } = useNotifications(); // Removed for Socket.IO implementation
-  const [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams(); // ✅ ADD THIS LINE - was missing declaration
+  // const { addNotification } = useNotifications();
   const [showForm, setShowForm] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [showRejectionPopup, setShowRejectionPopup] = useState(false);
@@ -112,17 +112,18 @@ const LeavesPage: React.FC = () => {
     }
   };
 
+  // ✅ FIXED: Fetch ALL leaves once, then filter locally for better performance
   const {
     data: leavesData,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["leaves", selectedStatus],
-    queryFn: () => leavesAPI.getLeaves(1, 20, selectedStatus),
-    refetchInterval: false, // Disabled auto-refresh - only manual refresh
-    refetchIntervalInBackground: false, // Disabled background refresh
-    refetchOnWindowFocus: false, // Only refetch on manual action
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    queryKey: ["leaves"], // Removed selectedStatus from query key
+    queryFn: () => leavesAPI.getLeaves(1, 100), // Fetch more leaves at once
+    refetchInterval: false,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
   });
 
   const handleRefresh = () => {
@@ -497,6 +498,19 @@ const LeavesPage: React.FC = () => {
 
   const leaves = leavesData?.data?.leaves || [];
 
+  // ✅ NEW: Filter leaves locally based on selected status
+  const filteredLeaves = selectedStatus
+    ? leaves.filter((leave: any) => leave.status === selectedStatus)
+    : leaves;
+
+  // ✅ NEW: Calculate counts for each status
+  const statusCounts = {
+    all: leaves.length,
+    pending: leaves.filter((l: any) => l.status === "pending").length,
+    approved: leaves.filter((l: any) => l.status === "approved").length,
+    rejected: leaves.filter((l: any) => l.status === "rejected").length,
+  };
+
   return (
     <div className="space-y-6 fade-in">
       <div className="flex justify-between items-center">
@@ -542,40 +556,83 @@ const LeavesPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Status Filter */}
-      <div className="flex space-x-4">
-        <button
-          onClick={() => setSelectedStatus("")}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-            selectedStatus === "" ? "badge-primary" : "btn-secondary"
-          }`}
-        >
-          All
-        </button>
-        <button
-          onClick={() => setSelectedStatus("pending")}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-            selectedStatus === "pending" ? "badge-warning" : "btn-secondary"
-          }`}
-        >
-          Pending
-        </button>
-        <button
-          onClick={() => setSelectedStatus("approved")}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-            selectedStatus === "approved" ? "badge-success" : "btn-secondary"
-          }`}
-        >
-          Approved
-        </button>
-        <button
-          onClick={() => setSelectedStatus("rejected")}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-            selectedStatus === "rejected" ? "badge-error" : "btn-secondary"
-          }`}
-        >
-          Rejected
-        </button>
+      {/* ✅ IMPROVED: Status Filter with Counts */}
+      <div className="card">
+        <div className="flex flex-wrap gap-3 p-1">
+          <button
+            onClick={() => setSelectedStatus("")}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              selectedStatus === ""
+                ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 shadow"
+                : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+            }`}
+          >
+            All
+            <span className="ml-2 px-2 py-0.5 bg-white dark:bg-gray-800 rounded-full text-xs">
+              {statusCounts.all}
+            </span>
+          </button>
+          <button
+            onClick={() => setSelectedStatus("pending")}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              selectedStatus === "pending"
+                ? "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300 shadow"
+                : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+            }`}
+          >
+            <ClockIcon className="w-4 h-4 inline mr-1" />
+            Pending
+            <span className="ml-2 px-2 py-0.5 bg-white dark:bg-gray-800 rounded-full text-xs">
+              {statusCounts.pending}
+            </span>
+          </button>
+          <button
+            onClick={() => setSelectedStatus("approved")}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              selectedStatus === "approved"
+                ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 shadow"
+                : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+            }`}
+          >
+            <CheckCircleIcon className="w-4 h-4 inline mr-1" />
+            Approved
+            <span className="ml-2 px-2 py-0.5 bg-white dark:bg-gray-800 rounded-full text-xs">
+              {statusCounts.approved}
+            </span>
+          </button>
+          <button
+            onClick={() => setSelectedStatus("rejected")}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              selectedStatus === "rejected"
+                ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 shadow"
+                : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+            }`}
+          >
+            <XCircleIcon className="w-4 h-4 inline mr-1" />
+            Rejected
+            <span className="ml-2 px-2 py-0.5 bg-white dark:bg-gray-800 rounded-full text-xs">
+              {statusCounts.rejected}
+            </span>
+          </button>
+        </div>
+
+        {/* ✅ NEW: Active filter indicator */}
+        {selectedStatus && (
+          <div className="mt-3 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Showing {filteredLeaves.length} {selectedStatus} leave request
+                {filteredLeaves.length !== 1 ? "s" : ""}
+              </p>
+              <button
+                onClick={() => setSelectedStatus("")}
+                className="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-800 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors"
+              >
+                ✕ Clear Filter
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Leave Request Form */}
@@ -693,11 +750,11 @@ const LeavesPage: React.FC = () => {
         </div>
       )}
 
-      {/* Leave Requests Section */}
+      {/* ✅ UPDATED: Leave Requests Section - Use filteredLeaves instead of leaves */}
       <div className="mt-10 bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
-        {leaves.length > 0 ? (
+        {filteredLeaves.length > 0 ? (
           <>
-            {/* Desktop Table View - Hidden on mobile */}
+            {/* Desktop Table View */}
             <div className="hidden lg:block p-8">
               <div className="overflow-hidden rounded-xl border border-gray-200/30 dark:border-gray-700/30">
                 <table className="min-w-full divide-y divide-gray-200/30 dark:divide-gray-700/30">
@@ -731,7 +788,7 @@ const LeavesPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white/50 dark:bg-gray-800/20 divide-y divide-gray-200/20 dark:divide-gray-700/20">
-                    {leaves.map((leave: any) => (
+                    {filteredLeaves.map((leave: any) => (
                       <tr
                         key={leave._id}
                         className="group table-row-hover transition-all duration-300 ease-in-out hover:shadow-md rounded-lg cursor-pointer"
@@ -901,9 +958,9 @@ const LeavesPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Mobile Card View - Shown on mobile and tablet */}
+            {/* Mobile Card View */}
             <div className="lg:hidden space-y-4 p-8">
-              {leaves.map((leave: any) => (
+              {filteredLeaves.map((leave: any) => (
                 <div
                   key={leave._id}
                   className="rounded-xl p-6 border border-gray-200/30 dark:border-gray-700/30 bg-gradient-to-br from-white/80 to-gray-50/40 dark:from-gray-800/40 dark:to-gray-900/20 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02] cursor-pointer"
