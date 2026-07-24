@@ -1,19 +1,28 @@
 import React, { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-// Inline type definition
+import PasswordInput from "../components/PasswordInput";
+import BrandedLoader from "../components/BrandedLoader";
+import AuthLayout from "../components/AuthLayout";
+import InlineLoader from "../components/InlineLoader";
+import { showInfoToast } from "../utils/toastHelpers";
+import { GoogleIcon, MicrosoftIcon } from "../components/BrandIcons";
+
 interface LoginCredentials {
   email: string;
   password: string;
 }
-import LoadingSpinner from "../components/LoadingSpinner";
-import PasswordInput from "../components/PasswordInput";
+
+const inputClass =
+  "w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/40 px-4 py-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:ring-4 focus:ring-blue-500/10";
 
 const LoginPage: React.FC = () => {
   const { login, isAuthenticated, isLoading } = useAuth();
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [remember, setRemember] = useState(true);
 
   const {
     register,
@@ -21,22 +30,12 @@ const LoginPage: React.FC = () => {
     formState: { errors },
   } = useForm<LoginCredentials>();
 
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
+  if (isAuthenticated) return <Navigate to="/" replace />;
+  if (isLoading) return <BrandedLoader message="Preparing your workspace..." />;
 
   const onSubmit = async (data: LoginCredentials) => {
     setIsSubmitting(true);
     setError("");
-
     try {
       await login(data);
     } catch (err: any) {
@@ -46,96 +45,123 @@ const LoginPage: React.FC = () => {
     }
   };
 
+  const handleSSO = (provider: string) =>
+    showInfoToast(`${provider} sign-in isn't set up yet — use your email below.`);
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100">
-          Sign in to your account
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-          Employee login for existing companies
-        </p>
+    <AuthLayout activeTab="login">
+      <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+        Welcome back
+      </h1>
+      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        New to LeaveFlow?{" "}
+        <Link
+          to="/register"
+          className="font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400"
+        >
+          Create an account
+        </Link>
+      </p>
+
+      {/* Social */}
+      <div className="mt-7 grid grid-cols-2 gap-3">
+        {[
+          { name: "Google", Icon: GoogleIcon },
+          { name: "Microsoft", Icon: MicrosoftIcon },
+        ].map(({ name, Icon }) => (
+          <motion.button
+            key={name}
+            type="button"
+            whileTap={{ scale: 0.97 }}
+            onClick={() => handleSSO(name)}
+            className="inline-flex items-center justify-center gap-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-gray-800"
+          >
+            <Icon className="h-5 w-5" />
+            {name}
+          </motion.button>
+        ))}
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow-lg border border-gray-200 dark:border-gray-700 sm:rounded-lg sm:px-10">
-          {error && (
-            <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-md">
-              {error}
-            </div>
+      {/* Divider */}
+      <div className="my-6 flex items-center gap-4">
+        <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+          Or continue with email
+        </span>
+        <div className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+      </div>
+
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-600 dark:text-red-400"
+        >
+          {error}
+        </motion.div>
+      )}
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div>
+          <input
+            {...register("email", {
+              required: "Email is required",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Invalid email address",
+              },
+            })}
+            type="email"
+            autoComplete="email"
+            placeholder="Work email"
+            className={inputClass}
+          />
+          {errors.email && (
+            <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
+              {errors.email.message}
+            </p>
           )}
-
-          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
-                Email address
-              </label>
-              <div className="mt-1">
-                <input
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Invalid email address",
-                    },
-                  })}
-                  type="email"
-                  autoComplete="email"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors"
-                  placeholder="Enter your email"
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <PasswordInput
-                {...register("password", {
-                  required: "Password is required",
-                  minLength: {
-                    value: 6,
-                    message: "Password must be at least 6 characters",
-                  },
-                })}
-                label="Password"
-                autoComplete="current-password"
-                placeholder="Enter your password"
-                error={errors.password?.message}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors"
-              />
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="btn-primary w-full"
-              >
-                {isSubmitting ? <LoadingSpinner size="sm" /> : "Sign in"}
-              </button>
-            </div>
-          </form>
-
-          <div className="mt-6">
-            <div className="text-center">
-              <Link
-                to="/forgot-password"
-                className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
-              >
-                Forgot your password?
-              </Link>
-            </div>
-          </div>
         </div>
-      </div>
-    </div>
+
+        <PasswordInput
+          {...register("password", {
+            required: "Password is required",
+            minLength: { value: 6, message: "Password must be at least 6 characters" },
+          })}
+          autoComplete="current-password"
+          placeholder="Password"
+          error={errors.password?.message}
+          className={inputClass}
+        />
+
+        <div className="flex items-center justify-between pt-1">
+          <label className="flex cursor-pointer select-none items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            Remember me
+          </label>
+          <Link
+            to="/forgot-password"
+            className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+          >
+            Forgot password?
+          </Link>
+        </div>
+
+        <motion.button
+          type="submit"
+          disabled={isSubmitting}
+          whileTap={{ scale: 0.99 }}
+          className="mt-2 flex w-full items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl disabled:opacity-70"
+        >
+          {isSubmitting ? <InlineLoader label="Signing in..." /> : "Sign in"}
+        </motion.button>
+      </form>
+    </AuthLayout>
   );
 };
 

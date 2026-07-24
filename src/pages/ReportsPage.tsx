@@ -4,6 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { leavesAPI } from "../services/api";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { ReportSkeleton } from "../components/Skeletons";
+import StepProgress, { type ProgressStep } from "../components/StepProgress";
 import EmployeeLeaveActivity from "../components/EmployeeLeaveActivity";
 import {
   DocumentChartBarIcon,
@@ -32,6 +34,24 @@ const ReportsPage: React.FC = () => {
   const navigate = useNavigate();
   const [reportData, setReportData] = useState<EmployeeReportData | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [pdfStep, setPdfStep] = useState(0); // 1..4 active, 5 = complete
+
+  const PDF_STEP_LABELS = [
+    "Preparing report layout",
+    "Rendering content",
+    "Building PDF pages",
+    "Saving your file",
+  ];
+  const pdfSteps: ProgressStep[] = PDF_STEP_LABELS.map((label, i) => {
+    const stepNum = i + 1;
+    return {
+      label,
+      status:
+        pdfStep > stepNum ? "done" : pdfStep === stepNum ? "active" : "pending",
+    };
+  });
+  // Let React paint between phases so progress is actually visible.
+  const yieldFrame = () => new Promise((r) => setTimeout(r, 350));
 
   useEffect(() => {
     const storedData = localStorage.getItem("selectedEmployeeReport");
@@ -56,6 +76,8 @@ const ReportsPage: React.FC = () => {
 
   const handleDownloadPDF = async () => {
     setIsGeneratingPDF(true);
+    setPdfStep(1); // Preparing report layout
+    await yieldFrame();
 
     try {
       const jsPDF = (await import("jspdf")).default;
@@ -69,7 +91,7 @@ const ReportsPage: React.FC = () => {
         ${originalStyles}
         background: white !important;
         color: #000000 !important;
-        font-family: Arial, sans-serif !important;
+        font-family: 'Geist', Arial, sans-serif !important;
         width: 800px !important;
         max-width: none !important;
         padding: 20px !important;
@@ -86,10 +108,13 @@ const ReportsPage: React.FC = () => {
             color: #000000 !important;
             background: transparent !important;
             border-color: #cccccc !important;
-            font-family: Arial, sans-serif !important;
+            font-family: 'Geist', Arial, sans-serif !important;
           `;
         }
       });
+
+      setPdfStep(2); // Rendering content
+      await yieldFrame();
 
       const canvas = await html2canvas(element, {
         scale: 3,
@@ -109,6 +134,9 @@ const ReportsPage: React.FC = () => {
         const htmlEl = el as HTMLElement;
         htmlEl.style.cssText = originalElementStyles[index];
       });
+
+      setPdfStep(3); // Building PDF pages
+      await yieldFrame();
 
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
@@ -133,12 +161,19 @@ const ReportsPage: React.FC = () => {
         /\s+/g,
         "-"
       )}-${new Date().toISOString().split("T")[0]}.pdf`;
+
+      setPdfStep(4); // Saving your file
+      await yieldFrame();
       pdf.save(fileName);
+
+      setPdfStep(5); // Completed — all steps ticked
+      await new Promise((r) => setTimeout(r, 700));
     } catch (error) {
       console.error("Failed to generate PDF:", error);
       alert("Failed to generate PDF. Please try again.");
     } finally {
       setIsGeneratingPDF(false);
+      setPdfStep(0);
     }
   };
 
@@ -148,11 +183,7 @@ const ReportsPage: React.FC = () => {
   };
 
   if (!reportData) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+    return <ReportSkeleton />;
   }
 
   const { employee, searchCriteria, generatedAt } = reportData;
@@ -160,6 +191,20 @@ const ReportsPage: React.FC = () => {
 
   return (
     <div className="space-y-6 fade-in">
+      {/* PDF export progress overlay */}
+      {isGeneratingPDF && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4">
+          <div className="animate-pop-in">
+            <StepProgress
+              title={pdfStep >= 5 ? "Report ready 🎉" : "Generating your report…"}
+              steps={pdfSteps}
+              progress={(pdfStep / PDF_STEP_LABELS.length) * 100}
+              eta={pdfStep >= 5 ? "Completed" : "This usually takes a few seconds"}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-4">

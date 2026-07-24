@@ -6,6 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MotionConfig } from "framer-motion";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -27,6 +28,12 @@ import VerifyInvitationPage from "./pages/VerifyInvitationPage";
 import AcceptInvitePage from "./pages/AcceptInvitePage";
 import ReportsPage from "./pages/ReportsPage";
 import ThemePage from "./pages/ThemePage";
+import ApplyLeavePage from "./pages/ApplyLeavePage";
+import LeaveCalendarPage from "./pages/LeaveCalendarPage";
+import MyTeamPage from "./pages/MyTeamPage";
+import DepartmentsPage from "./pages/DepartmentsPage";
+import LeavePolicyPage from "./pages/LeavePolicyPage";
+import NotificationsPage from "./pages/NotificationsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,7 +51,8 @@ const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <Router>
+          <MotionConfig reducedMotion="user">
+            <Router>
             <div className="App">
               <Toaster
                 position="top-right"
@@ -92,6 +100,8 @@ const App: React.FC = () => {
                 <Route path="/" element={<Layout />}>
                   <Route index element={<DashboardPage />} />
                   <Route path="leaves" element={<LeavesPage />} />
+                  <Route path="apply-leave" element={<ApplyLeavePage />} />
+                  <Route path="leave-calendar" element={<LeaveCalendarPage />} />
                   <Route path="attendance" element={<AttendancePage />} />
                   <Route path="employees" element={<EmployeesPage />} />
                   <Route
@@ -102,14 +112,19 @@ const App: React.FC = () => {
                     path="my-leave-activity"
                     element={<MyLeaveActivityPage />}
                   />
+                  <Route path="team" element={<MyTeamPage />} />
+                  <Route path="departments" element={<DepartmentsPage />} />
+                  <Route path="leave-policies" element={<LeavePolicyPage />} />
                   <Route path="reports" element={<ReportsPage />} />
+                  <Route path="notifications" element={<NotificationsPage />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="theme" element={<ThemePage />} />
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </div>
-          </Router>
+            </Router>
+          </MotionConfig>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

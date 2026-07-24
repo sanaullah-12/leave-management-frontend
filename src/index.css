@@ -6,17 +6,70 @@
 
 @layer base {
   html {
-    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
-      "Segoe UI", Roboto, sans-serif;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system,
+      BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    /* Contextual alternates + tabular figures make numbers/tables align cleanly */
+    font-feature-settings: "cv01", "ss01";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-synthesis: none;
   }
 
   body {
     background-color: var(--surface);
     color: var(--text-primary);
     min-height: 100vh;
+    /* Body Text — Geist Regular 15px */
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    letter-spacing: -0.006em;
+  }
+
+  /* ============================= */
+  /* 📌 Heading hierarchy defaults */
+  /* Unstyled headings inherit a premium, tightened scale */
+  /* ============================= */
+  h1 {
+    font-size: 2rem; /* Page Heading — 32px Bold */
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+
+  h2 {
+    font-size: 1.375rem; /* Section Heading — 22px SemiBold */
+    line-height: 1.25;
+    letter-spacing: -0.017em;
+    font-weight: 600;
+  }
+
+  h3 {
+    font-size: 1.125rem; /* Card Title — 18px SemiBold */
+    line-height: 1.4;
+    letter-spacing: -0.011em;
+    font-weight: 600;
+  }
+
+  h4 {
+    font-size: 1rem;
+    line-height: 1.45;
+    letter-spacing: -0.009em;
+    font-weight: 600;
+  }
+
+  h5,
+  h6 {
+    font-size: 0.875rem;
+    line-height: 1.45;
+    letter-spacing: -0.003em;
+    font-weight: 600;
+  }
+
+  /* Numeric-heavy contexts (tables, stats, calendar) get tabular figures */
+  table,
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 
   * {
@@ -43,9 +96,79 @@
 }
 
 @layer components {
-  /* Legacy button compatibility */
+  /* ============================= */
+  /* 📌 Typography Scale — Geist   */
+  /* Semantic, reusable text roles */
+  /* ============================= */
+  .text-display {
+    font-size: 2.25rem; /* 36px */
+    line-height: 2.5rem;
+    letter-spacing: -0.022em;
+    font-weight: 700;
+  }
+
+  .text-page-heading {
+    font-size: 2rem; /* 32px */
+    line-height: 2.375rem;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+
+  .text-section-heading {
+    font-size: 1.375rem; /* 22px */
+    line-height: 1.75rem;
+    letter-spacing: -0.017em;
+    font-weight: 600;
+  }
+
+  .text-card-title {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.5rem;
+    letter-spacing: -0.011em;
+    font-weight: 600;
+  }
+
+  .text-nav {
+    font-size: 0.9375rem; /* 15px */
+    line-height: 1.25rem;
+    letter-spacing: -0.006em;
+    font-weight: 500;
+  }
+
+  .text-body {
+    font-size: 0.9375rem; /* 15px */
+    line-height: 1.6;
+    letter-spacing: -0.006em;
+    font-weight: 400;
+  }
+
+  .text-secondary {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.375rem;
+    letter-spacing: -0.003em;
+    font-weight: 400;
+  }
+
+  .text-caption {
+    font-size: 0.75rem; /* 12px */
+    line-height: 1rem;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+
+  .text-overline {
+    font-size: 0.6875rem; /* 11px — section labels / eyebrows */
+    line-height: 1rem;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  /* Legacy button compatibility — Buttons: Geist SemiBold 15px */
   .btn-primary {
-    @apply text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:shadow-md;
+    @apply text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:shadow-md;
+    font-size: 0.9375rem;
+    letter-spacing: -0.006em;
     background-color: var(--color-primary-600);
     border-color: var(--color-primary-600);
   }
@@ -60,7 +183,9 @@
   }
 
   .btn-secondary {
-    @apply font-medium py-2 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+    font-size: 0.9375rem;
+    letter-spacing: -0.006em;
     background-color: var(--surface-elevated);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
@@ -77,12 +202,16 @@
   }
 
   .btn-danger {
-    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 hover:shadow-md;
+    @apply bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 hover:shadow-md;
+    font-size: 0.9375rem;
+    letter-spacing: -0.006em;
   }
 
-  /* Enhanced input field */
+  /* Enhanced input field — Inputs: Geist Regular 15px */
   .input-field {
-    @apply block w-full px-3 py-2.5 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:border-transparent shadow-sm;
+    @apply block w-full px-3.5 py-2.5 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:border-transparent shadow-sm;
+    font-size: 0.9375rem;
+    letter-spacing: -0.006em;
     background-color: var(--surface-elevated);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
@@ -108,16 +237,22 @@
   }
 
   .form-label {
-    @apply block text-sm font-medium;
+    @apply block font-medium mb-1.5;
+    font-size: 0.875rem;
+    letter-spacing: -0.003em;
     color: var(--color-primary-700);
   }
 
   .form-error {
-    @apply text-sm text-red-600 mt-1;
+    @apply text-red-600 mt-1.5;
+    font-size: 0.8125rem;
+    letter-spacing: -0.003em;
   }
 
   .form-help {
-    @apply text-sm text-gray-500 mt-1;
+    @apply text-gray-500 mt-1.5;
+    font-size: 0.8125rem;
+    letter-spacing: -0.003em;
   }
 
   /* Professional table styling */
@@ -129,16 +264,22 @@
     @apply bg-gray-50 dark:bg-gray-800;
   }
 
+  /* Table Header — Geist SemiBold, 13px, subtle tracking (no shouty uppercase) */
   .table-header-cell {
-    @apply px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider;
+    @apply px-6 py-3.5 text-left font-semibold text-gray-500 dark:text-gray-400;
+    font-size: 0.8125rem;
+    letter-spacing: -0.001em;
   }
 
   .table-row {
     @apply bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors;
   }
 
+  /* Table Cell — Geist Regular 14px */
   .table-cell {
-    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100;
+    @apply px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100;
+    font-size: 0.875rem;
+    letter-spacing: -0.003em;
   }
 
   /* Loading states */
@@ -146,9 +287,28 @@
     @apply absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center;
   }
 
-  /* Skeleton loader */
+  /* Shimmer skeleton loader (Linear/Stripe style light sweep) */
   .skeleton {
-    @apply animate-pulse bg-gray-200 rounded;
+    @apply relative overflow-hidden rounded-md bg-gray-200/80 dark:bg-gray-700/50;
+  }
+  .skeleton::after {
+    content: "";
+    @apply absolute inset-0 -translate-x-full;
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.6),
+      transparent
+    );
+    animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  }
+  .dark .skeleton::after {
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.08),
+      transparent
+    );
   }
 
   .skeleton-text {

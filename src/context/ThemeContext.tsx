@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type ColorScheme = 'blue' | 'purple' | 'green' | 'custom';
+type ColorScheme = 'blue' | 'purple' | 'green' | 'custom' | 'indigo';
 type ThemeMode = 'light' | 'dark';
 
 export type { ColorScheme, ThemeMode };
@@ -29,7 +29,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [colorScheme, setColorSchemeState] = useState<ColorScheme>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('colorScheme');
-      if (saved && ['blue', 'purple', 'green', 'custom'].includes(saved)) {
+      if (saved && ['blue', 'purple', 'green', 'custom', 'indigo'].includes(saved)) {
         return saved as ColorScheme;
       }
     }
@@ -51,7 +51,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     
     // Apply color scheme classes
-    root.classList.remove('theme-blue', 'theme-purple', 'theme-green', 'theme-custom');
+    root.classList.remove('theme-blue', 'theme-purple', 'theme-green', 'theme-custom', 'theme-indigo');
     root.classList.add(`theme-${colorScheme}`);
     
     console.log('ThemeContext: Applied classes', {
