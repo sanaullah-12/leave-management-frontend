@@ -92,7 +92,7 @@ const PDFAttendanceReport: React.FC<PDFAttendanceReportProps> = ({
     <div
       id="pdf-attendance-report"
       style={{
-        fontFamily: "Arial, sans-serif",
+        fontFamily: "'Geist', Arial, sans-serif",
         color: "#000000",
         backgroundColor: "#ffffff",
         padding: "20px",
@@ -432,7 +432,7 @@ const PDFAttendanceReport: React.FC<PDFAttendanceReportProps> = ({
           })}
         </p>
         <p style={{ margin: "5px 0 0 0" }}>
-          Leave Management System • Attendance Report
+          LeaveFlow • Attendance Report
         </p>
       </div>
     </div>

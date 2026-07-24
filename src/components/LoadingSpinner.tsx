@@ -1,5 +1,4 @@
 import React from 'react';
-import xlogoImage from '../assets/xlogoanimate.png';
 
 const LoadingSpinner: React.FC<{ size?: 'sm' | 'md' | 'lg' }> = ({ size = 'md' }) => {
   const sizeClasses = {
@@ -13,18 +12,18 @@ const LoadingSpinner: React.FC<{ size?: 'sm' | 'md' | 'lg' }> = ({ size = 'md' }
       <div className={`relative ${sizeClasses[size]}`}>
         {/* Spinning circle */}
         <div className={`absolute inset-0 rounded-full border-2 border-gray-200 border-t-primary-500 animate-spin ${sizeClasses[size]}`}></div>
-        {/* Centered xlogo */}
-        <img
-          src={xlogoImage}
-          alt="Loading..."
-          className={`absolute inset-0 m-auto animate-pulse object-contain`}
+        {/* Centered LeaveFlow monogram */}
+        <span
+          aria-label="Loading..."
+          className="absolute inset-0 flex items-center justify-center font-semibold text-primary-500 animate-pulse select-none"
           style={{
-            width: '60%',
-            height: '60%',
-            filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))',
+            fontSize: '55%',
+            letterSpacing: '-0.02em',
             animation: 'pulse 2s ease-in-out infinite'
           }}
-        />
+        >
+          LF
+        </span>
       </div>
     </div>
   );

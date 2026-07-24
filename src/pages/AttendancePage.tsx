@@ -10,6 +10,8 @@ import {
   Cog6ToothIcon,
   ExclamationTriangleIcon,
   ClockIcon,
+  LockOpenIcon,
+  LockClosedIcon,
 } from "@heroicons/react/24/outline";
 import { attendanceAPI } from "../services/api";
 import AttendanceModal from "../components/AttendanceModal";
@@ -62,6 +64,15 @@ const AttendancePage: React.FC = () => {
   const [machineStatus, setMachineStatus] = useState<MachineConnection | null>(
     null
   );
+
+  // Remote door unlock state
+  const [isUnlockingDoor, setIsUnlockingDoor] = useState(false);
+  const [doorMessage, setDoorMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+  // Countdown (seconds) shown while the door is held open.
+  const [doorCountdown, setDoorCountdown] = useState(0);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
 
@@ -191,6 +202,59 @@ const AttendancePage: React.FC = () => {
     } catch (err) {
       console.error("Failed to save employee time preference:", err);
       setError("Failed to save time preference");
+    }
+  };
+
+  // Remotely unlock the access-control door via the connected ZKTeco device.
+  // Guarded against double-clicks by the isUnlockingDoor flag.
+  const handleUnlockDoor = async () => {
+    if (isUnlockingDoor) return; // prevent rapid repeat clicks
+
+    const ipInUse = selectedIP === "custom" ? customIP : selectedIP;
+
+    setIsUnlockingDoor(true);
+    setDoorMessage(null);
+    setDoorCountdown(0);
+
+    try {
+      const response = await attendanceAPI.unlockDoor(ipInUse || undefined);
+      const data = (response as any)?.data || {};
+      const seconds = data.durationSeconds || 10;
+
+      setDoorMessage({
+        type: "success",
+        text:
+          data.message ||
+          `Door unlocked for ${seconds} seconds. It will lock automatically.`,
+      });
+
+      // Visual countdown while the relay holds the door open.
+      setDoorCountdown(seconds);
+      const interval = setInterval(() => {
+        setDoorCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      // Re-enable the button only after the door has re-locked.
+      setTimeout(() => {
+        setIsUnlockingDoor(false);
+        setDoorMessage(null);
+      }, seconds * 1000);
+    } catch (err: any) {
+      setDoorMessage({
+        type: "error",
+        text:
+          err?.response?.data?.message ||
+          err?.message ||
+          "Failed to unlock the door. Please try again.",
+      });
+      setIsUnlockingDoor(false);
+      setDoorCountdown(0);
     }
   };
 
@@ -421,7 +485,7 @@ const AttendancePage: React.FC = () => {
   return (
     <div className="space-y-6 fade-in">
       {/* Header */}
-      <div className="flex flex-col space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
             Attendance Management
@@ -430,6 +494,60 @@ const AttendancePage: React.FC = () => {
             Connect to biometric machines and manage employee attendance
           </p>
         </div>
+
+        {/* Remote Door Unlock — Admin only */}
+        {(!currentUser || currentUser.role === "admin") && (
+          <div className="flex flex-col items-stretch sm:items-end gap-2">
+            <button
+              onClick={handleUnlockDoor}
+              disabled={isUnlockingDoor}
+              title="Unlock the access-control door for 10 seconds"
+              className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm ${
+                isUnlockingDoor
+                  ? "bg-blue-400 text-white cursor-not-allowed opacity-90"
+                  : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-600/20 hover:-translate-y-0.5"
+              }`}
+            >
+              {isUnlockingDoor ? (
+                <>
+                  <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                  {doorCountdown > 0
+                    ? `Door open — ${doorCountdown}s`
+                    : "Unlocking…"}
+                </>
+              ) : (
+                <>
+                  <LockOpenIcon className="w-5 h-5" />
+                  Open Door
+                </>
+              )}
+            </button>
+
+            {/* Success / error feedback */}
+            {doorMessage && (
+              <div
+                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium ring-1 ring-inset ${
+                  doorMessage.type === "success"
+                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 ring-emerald-200/60 dark:ring-emerald-500/20"
+                    : "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 ring-red-200/60 dark:ring-red-500/20"
+                }`}
+              >
+                {doorMessage.type === "success" ? (
+                  <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
+                ) : (
+                  <XCircleIcon className="w-4 h-4 flex-shrink-0" />
+                )}
+                <span>{doorMessage.text}</span>
+              </div>
+            )}
+            {!doorMessage && !isUnlockingDoor && (
+              <span className="inline-flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500">
+                <LockClosedIcon className="w-3.5 h-3.5" />
+                Door secured
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Biometric Machine Connection - Admin Only */}

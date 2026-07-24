@@ -1,26 +1,194 @@
-import React from "react";
+import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { leavesAPI } from "../services/api";
 import LoadingSpinner from "../components/LoadingSpinner";
-// import ParticleBackground from "../components/ParticleBackground";
 import Avatar from "../components/Avatar";
+import { getUpcomingHolidays } from "../data/holidays";
+import AnimatedNumber from "../components/AnimatedNumber";
+import { DashboardSkeleton, StatCardsSkeleton } from "../components/Skeletons";
+import ApplyLeaveModal from "../components/ApplyLeaveModal";
+import { motion } from "framer-motion";
+import MeshBackground from "../components/MeshBackground";
+import { staggerContainer, staggerItem } from "../lib/motion";
 import {
   UsersIcon,
   CalendarDaysIcon,
   ClockIcon,
   CheckCircleIcon,
-  ArrowTrendingUpIcon,
-  EyeIcon,
-  PencilIcon,
-  TrashIcon,
+  UserIcon,
+  GlobeAltIcon,
+  PlusIcon,
+  BoltIcon,
+  ArrowUpRightIcon,
 } from "@heroicons/react/24/outline";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 import "../styles/design-system.css";
+
+/* ------------------------------------------------------------------ */
+/*  Presentational helpers — visual only, data is passed in            */
+/* ------------------------------------------------------------------ */
+
+type RingColor = "blue" | "amber" | "slate";
+
+// Primary accent hex per color theme — used for the parts that can't be
+// styled with CSS classes (SVG chart stroke/gradient, progress-ring stroke).
+// Keep these in sync with tailwind.config.js *-600 values.
+const THEME_ACCENT: Record<string, string> = {
+  blue: "#2563eb",
+  indigo: "#4f46e5",
+  purple: "#9c5fd1",
+  green: "#16a34a",
+  custom: "#0284c7",
+};
+
+const RING_STYLES: Record<
+  RingColor,
+  { stroke: string; text: string; iconBg: string; iconText: string }
+> = {
+  blue: {
+    // stroke is overridden at runtime with the active theme accent
+    stroke: "#2563eb",
+    text: "text-blue-600 dark:text-blue-400",
+    iconBg: "bg-blue-50 dark:bg-blue-500/10",
+    iconText: "text-blue-600 dark:text-blue-400",
+  },
+  amber: {
+    stroke: "#ea580c",
+    text: "text-orange-600 dark:text-orange-400",
+    iconBg: "bg-orange-50 dark:bg-orange-500/10",
+    iconText: "text-orange-600 dark:text-orange-400",
+  },
+  slate: {
+    stroke: "#64748b",
+    text: "text-slate-600 dark:text-slate-300",
+    iconBg: "bg-slate-100 dark:bg-slate-500/10",
+    iconText: "text-slate-500 dark:text-slate-300",
+  },
+};
+
+// A leave-balance / stat card with a progress ring, matching the design.
+const RingStatCard: React.FC<{
+  label: string;
+  value: number | string;
+  total?: number | string;
+  caption: string;
+  percent: number; // 0..100 filled portion of the ring
+  color: RingColor;
+  icon: React.ReactNode;
+  onClick?: () => void;
+  strokeOverride?: string; // theme accent, used only for the "blue" ring
+}> = ({
+  label,
+  value,
+  total,
+  caption,
+  percent,
+  color,
+  icon,
+  onClick,
+  strokeOverride,
+}) => {
+  const s = RING_STYLES[color];
+  const strokeColor =
+    color === "blue" && strokeOverride ? strokeOverride : s.stroke;
+  const dash = Math.max(0, Math.min(100, percent));
+  return (
+    <div
+      onClick={onClick}
+      className={`bg-gradient-to-br from-white to-slate-50/80 dark:from-gray-800/90 dark:to-gray-800/50 rounded-2xl p-5 shadow-[0_2px_8px_-2px_rgba(16,24,40,0.06),0_4px_16px_-4px_rgba(16,24,40,0.05)] ring-1 ring-gray-200/70 dark:ring-gray-700/60 transition-all duration-300 hover:shadow-[0_8px_24px_-6px_rgba(16,24,40,0.12)] ${
+        onClick ? "cursor-pointer hover:-translate-y-0.5" : ""
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+            {label}
+          </p>
+          <p className="mt-2 flex items-baseline gap-1">
+            <span className={`text-3xl font-bold tabular-nums ${s.text}`}>
+              {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
+            </span>
+            {total !== undefined && (
+              <span className="text-sm font-medium text-gray-400 dark:text-gray-500">
+                / {total}
+              </span>
+            )}
+          </p>
+          <p className="mt-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
+            {caption}
+          </p>
+        </div>
+
+        {/* Progress ring with centered icon */}
+        <div className="relative flex-shrink-0 w-16 h-16">
+          <svg className="w-16 h-16 -rotate-90" viewBox="0 0 36 36">
+            <path
+              className="stroke-gray-100 dark:stroke-gray-700"
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              fill="none"
+              strokeWidth="3"
+            />
+            <path
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              fill="none"
+              stroke={strokeColor}
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeDasharray={`${dash}, 100`}
+              style={{ transition: "stroke-dasharray 0.6s ease" }}
+            />
+          </svg>
+          <div
+            className={`absolute inset-0 flex items-center justify-center ${s.iconText}`}
+          >
+            {icon}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Small card shell used by the right-column widgets.
+const PanelCard: React.FC<{
+  title: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}> = ({ title, action, children, className = "" }) => (
+  <div
+    className={`bg-gradient-to-br from-white to-slate-50/80 dark:from-gray-800/90 dark:to-gray-800/50 rounded-2xl shadow-[0_2px_8px_-2px_rgba(16,24,40,0.06),0_4px_16px_-4px_rgba(16,24,40,0.05)] ring-1 ring-gray-200/70 dark:ring-gray-700/60 ${className}`}
+  >
+    <div className="flex items-center justify-between px-5 pt-5 pb-3">
+      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+        {title}
+      </h3>
+      {action}
+    </div>
+    <div className="px-5 pb-5">{children}</div>
+  </div>
+);
 
 const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { colorScheme } = useTheme();
+  const accent = THEME_ACCENT[colorScheme] || THEME_ACCENT.blue;
+  const [applyOpen, setApplyOpen] = useState(false);
+
+  /* ------------------------------------------------------------------ */
+  /*  DATA WIRING — unchanged from the original dashboard                */
+  /*  Same three queries, same role gating, same response shapes.        */
+  /* ------------------------------------------------------------------ */
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["dashboard-stats"],
@@ -52,457 +220,458 @@ const DashboardPage: React.FC = () => {
   });
 
   if (statsLoading && user?.role === "admin") {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
-  const adminStats = stats?.data || {};
-  const balance = leaveBalance?.data?.balance || {};
+  const adminStats: any = stats?.data || {};
+  const balance: any = leaveBalance?.data?.balance || {};
+  const recent: any[] = recentLeaves?.data?.leaves || [];
+  const isAdmin = user?.role === "admin";
+
+  /* ------------------------------------------------------------------ */
+  /*  DERIVED VIEW DATA — computed only from the data already fetched.   */
+  /*  No new network calls, no backend changes.                          */
+  /* ------------------------------------------------------------------ */
+
+  // Greeting based on local time (presentational only).
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const today = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  // Leave-trend line, derived from the recent leaves we already have.
+  // Buckets recent leaves by month so the chart reflects real data.
+  const MONTHS = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  ];
+  const monthlyCounts = new Array(12).fill(0);
+  recent.forEach((l) => {
+    const d = l?.startDate ? new Date(l.startDate) : null;
+    if (d && !isNaN(d.getTime())) monthlyCounts[d.getMonth()] += 1;
+  });
+  const trendData = MONTHS.map((m, i) => ({ month: m, value: monthlyCounts[i] }));
+
+  // Team members for the availability widget — reuse the employees found in
+  // the recent leaves payload (admin view has employee objects populated).
+  const teamFromLeaves = Array.from(
+    new Map(
+      recent
+        .filter((l) => l && typeof l.employee === "object" && l.employee?._id)
+        .map((l) => [l.employee._id, l.employee])
+    ).values()
+  ).slice(0, 4);
+
+  // Real upcoming public holidays, sourced from the shared holidays config.
+  const publicHolidays = getUpcomingHolidays(new Date(), 4).map(
+    ({ date, holiday }) => ({
+      mon: date.toLocaleString("en-US", { month: "short" }).toUpperCase(),
+      day: String(date.getDate()).padStart(2, "0"),
+      name: holiday.name,
+      sub: `${date.toLocaleString("en-US", { weekday: "long" })} • ${date.getFullYear()}`,
+    })
+  );
+
+  // The three top ring cards — role aware.
+  const ringCards = isAdmin
+    ? [
+        {
+          label: "Total Employees",
+          value: adminStats.totalEmployees || 0,
+          caption: "Active workforce",
+          percent: 100,
+          color: "blue" as RingColor,
+          icon: <UsersIcon className="w-5 h-5" />,
+          onClick: () => navigate("/employees"),
+        },
+        {
+          label: "Pending Requests",
+          value: adminStats.pendingLeaves || 0,
+          caption: "Awaiting review",
+          percent: Math.min(
+            ((adminStats.pendingLeaves || 0) /
+              Math.max(adminStats.thisMonthLeaves || 1, 1)) *
+              100,
+            100
+          ),
+          color: "amber" as RingColor,
+          icon: <ClockIcon className="w-5 h-5" />,
+          onClick: () => navigate("/leaves?status=pending"),
+        },
+        {
+          label: "This Month",
+          value: adminStats.thisMonthLeaves || 0,
+          caption: "Leave requests",
+          percent: 100,
+          color: "slate" as RingColor,
+          icon: <CalendarDaysIcon className="w-5 h-5" />,
+          onClick: () => navigate("/leaves"),
+        },
+      ]
+    : [
+        {
+          label: "Annual Leave",
+          value: balance.annual?.remaining ?? 0,
+          total: balance.annual?.total ?? 0,
+          caption: "Days remaining",
+          percent: balance.annual?.total
+            ? (balance.annual.remaining / balance.annual.total) * 100
+            : 0,
+          color: "blue" as RingColor,
+          icon: <ArrowUpRightIcon className="w-5 h-5" />,
+          onClick: () => navigate("/my-leave-activity"),
+        },
+        {
+          label: "Sick Leave",
+          value: balance.sick?.used ?? 0,
+          total: balance.sick?.total ?? 0,
+          caption: "Days used",
+          percent: balance.sick?.total
+            ? (balance.sick.used / balance.sick.total) * 100
+            : 0,
+          color: "amber" as RingColor,
+          icon: <PlusIcon className="w-5 h-5" />,
+          onClick: () => navigate("/my-leave-activity"),
+        },
+        {
+          label: "Casual Leave",
+          value: balance.casual?.remaining ?? 0,
+          total: balance.casual?.total ?? 0,
+          caption: "Days remaining",
+          percent: balance.casual?.total
+            ? (balance.casual.remaining / balance.casual.total) * 100
+            : 0,
+          color: "slate" as RingColor,
+          icon: <UserIcon className="w-5 h-5" />,
+          onClick: () => navigate("/my-leave-activity"),
+        },
+      ];
+
+  const showCardsLoading = !isAdmin && balanceLoading;
 
   return (
-    <div className="relative space-y-8 fade-in">
-      {/* Particle Background */}
-      {/* <ParticleBackground /> */}
-      
-      {/* Main Content */}
-      <div className="relative" style={{ zIndex: 10 }}>
-      {/* Welcome Header */}
-      <div
-        className="-mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-8 mb-8 bg-white dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700"
+    <motion.div
+      className="space-y-6"
+      variants={staggerContainer}
+      initial="initial"
+      animate="animate"
+    >
+      {/* ---------------- Hero ---------------- */}
+      <motion.div
+        variants={staggerItem}
+        className="relative overflow-hidden rounded-2xl border border-gray-200/70 dark:border-gray-700/60 bg-gradient-to-br from-white to-slate-50/80 dark:from-gray-800/90 dark:to-gray-800/40 p-6 sm:p-7 shadow-[0_2px_8px_-2px_rgba(16,24,40,0.06),0_4px_16px_-4px_rgba(16,24,40,0.05)]"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+        <MeshBackground />
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
           <div>
-            <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">
-              Welcome back, {user?.name}! 👋
-            </h1>
-            <p className="text-sm text-gray-400">
-              {user?.role === "admin"
-                ? "Here's what's happening in your organization today"
-                : "Here's your leave overview and recent activity"}
+            <motion.h1
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white"
+            >
+              {greeting}, {user?.name?.split(" ")[0] || "there"}
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.13, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="mt-1.5 text-sm text-gray-600 dark:text-gray-300"
+            >
+              {isAdmin
+                ? "Ready to manage your team's leave today?"
+                : "Ready to plan your time off?"}
+            </motion.p>
+            <p className="mt-3 inline-flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+              <CalendarDaysIcon className="w-4 h-4" />
+              {today}
             </p>
           </div>
-          <div className="mt-4 sm:mt-0">
-            <div className="flex items-center space-x-3">
-              <span className="badge badge-primary rounded-full p-1 text-sm">
-                {user?.role === "admin" ? "👑 Administrator" : "👤 Employee"}
-              </span>
-              <span
-                className="text-sm text-gray-400 dark:text-gray-500"
+
+          <div className="flex items-center gap-3">
+            {user?.role === "employee" && (
+              <motion.button
+                whileTap={{ scale: 0.96 }}
+                onClick={() => setApplyOpen(true)}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/60 transition-colors"
               >
-                {typeof user?.department === "object" &&
-                (user?.department as any)?.name
-                  ? (user.department as any).name
-                  : user?.department}
-              </span>
-            </div>
+                <BoltIcon className="w-4 h-4" />
+                Quick Apply
+              </motion.button>
+            )}
+            <motion.button
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={() => (isAdmin ? navigate("/leaves") : setApplyOpen(true))}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-600/20 transition-colors"
+            >
+              <PlusIcon className="w-4 h-4" />
+              {isAdmin ? "View Requests" : "Request Leave"}
+            </motion.button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {user?.role === "admin" ? (
-        // ✅ Admin Dashboard Cards
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Total Employees */}
-          <div
-            onClick={() => navigate("/employees")}
-            className="dashboard-card bg-gray-800/50 dark:bg-gray-800/50 border border-gray-700/50 hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group"
-          >
-            <div className="flex flex-col items-center text-center p-6">
-              <div className="mb-4">
-                <h3 className="text-sm font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide mb-2">
-                  Total Employees
-                </h3>
-                <div className="text-4xl font-bold text-blue-900 dark:text-blue-100 mb-2">
-                  {adminStats.totalEmployees || 0}
-                </div>
-                <p className="text-xs text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                  <ArrowTrendingUpIcon className="w-3 h-3 mr-1" />
-                  Active workforce
-                </p>
-              </div>
-              <div className="p-4 bg-blue-500 dark:bg-blue-600 rounded-2xl group-hover:bg-blue-600 dark:group-hover:bg-blue-500 transition-colors">
-                <UsersIcon className="h-8 w-8 text-white" />
-              </div>
-            </div>
-          </div>
-
-          {/* This Month Leave Requests */}
-          <div
-            onClick={() => navigate("/leaves")}
-            className="dashboard-card bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border border-emerald-200 dark:border-emerald-700/50 hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group"
-          >
-            <div className="flex flex-col items-center text-center p-6">
-              <div className="mb-4">
-                <h3 className="text-sm font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wide mb-2">
-                  This Month
-                </h3>
-                <div className="text-4xl font-bold text-emerald-900 dark:text-emerald-100 mb-2">
-                  {adminStats.thisMonthLeaves || 0}
-                </div>
-                <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                  <CalendarDaysIcon className="w-3 h-3 mr-1" />
-                  Leave requests
-                </p>
-              </div>
-              <div className="p-4 bg-emerald-500 dark:bg-emerald-600 rounded-2xl group-hover:bg-emerald-600 dark:group-hover:bg-emerald-500 transition-colors">
-                <CalendarDaysIcon className="h-8 w-8 text-white" />
-              </div>
-            </div>
-          </div>
-
-          {/* Pending Requests */}
-          <div
-            onClick={() => navigate("/leaves?status=pending")}
-            className="dashboard-card bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 border border-amber-200 dark:border-amber-700/50 hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group"
-          >
-            <div className="flex flex-col items-center text-center p-6">
-              <div className="mb-4">
-                <h3 className="text-sm font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide mb-2">
-                  Pending
-                </h3>
-                <div className="text-4xl font-bold text-amber-900 dark:text-amber-100 mb-2">
-                  {adminStats.pendingLeaves || 0}
-                </div>
-                <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                  <ClockIcon className="w-3 h-3 mr-1" />
-                  Awaiting review
-                </p>
-              </div>
-              <div className="p-4 bg-amber-500 dark:bg-amber-600 rounded-2xl group-hover:bg-amber-600 dark:group-hover:bg-amber-500 transition-colors">
-                <ClockIcon className="h-8 w-8 text-white" />
-              </div>
-            </div>
-          </div>
-
-          {/* Approved Today */}
-          <div
-            onClick={() => navigate("/leaves?status=approved")}
-            className="dashboard-card bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border border-purple-200 dark:border-purple-700/50 hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group"
-          >
-            <div className="flex flex-col items-center text-center p-6">
-              <div className="mb-4">
-                <h3 className="text-sm font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wide mb-2">
-                  Approved Today
-                </h3>
-                <div className="text-4xl font-bold text-purple-900 dark:text-purple-100 mb-2">
-                  {adminStats.leavesByStatus?.find(
-                    (s: any) => s._id === "approved"
-                  )?.count || 0}
-                </div>
-                <p className="text-xs text-purple-600 dark:text-purple-400 flex items-center justify-center">
-                  <CheckCircleIcon className="w-3 h-3 mr-1" />
-                  Processed
-                </p>
-              </div>
-              <div className="p-4 bg-purple-500 dark:bg-purple-600 rounded-2xl group-hover:bg-purple-600 dark:group-hover:bg-purple-500 transition-colors">
-                <CheckCircleIcon className="h-8 w-8 text-white" />
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* ---------------- Top ring cards ---------------- */}
+      {showCardsLoading ? (
+        <StatCardsSkeleton count={3} />
       ) : (
-        // ✅ Employee Dashboard Cards
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {!balanceLoading &&
-            Object.entries(balance).map(([type, data]: [string, any]) => (
-              <div key={type} className="stats-card hover-lift">
-                <div className="text-center">
-                  <h3 className="text-lg font-semibold capitalize mb-4">
-                    {type} Leave
-                  </h3>
-
-                  {/* Progress Circle */}
-                  <div className="relative w-24 h-24 mx-auto mb-4">
-                    <svg
-                      className="w-24 h-24 transform -rotate-90"
-                      viewBox="0 0 36 36"
-                    >
-                      <path
-                        d="M18 2.0845
-                        a 15.9155 15.9155 0 0 1 0 31.831
-                        a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="#e5e7eb"
-                        strokeWidth="2"
-                      />
-                      <path
-                        d="M18 2.0845
-                        a 15.9155 15.9155 0 0 1 0 31.831
-                        a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke={
-                          type === "annual"
-                            ? "#3b82f6"
-                            : type === "sick"
-                            ? "#10b981"
-                            : "#f59e0b"
-                        }
-                        strokeWidth="2"
-                        strokeDasharray={`${
-                          (data.used / data.total) * 100
-                        }, 100`}
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center">
-                        <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{data.remaining}</p>
-                        <p className="text-gray-400 dark:text-gray-500">left</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Leave Info */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-sm text-gray-400">Total:</span>
-                      <span className="font-semibold text-gray-900 dark:text-gray-100">{data.total}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-sm text-gray-400">Used:</span>
-                      <span className="font-semibold text-red-600">
-                        {data.used}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-sm text-gray-400">Available:</span>
-                      <span className="font-semibold text-green-600">
-                        {data.remaining}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-        </div>
+        <motion.div
+          variants={staggerItem}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+        >
+          {ringCards.map((c, i) => (
+            <RingStatCard key={i} {...c} strokeOverride={accent} />
+          ))}
+        </motion.div>
       )}
 
-      {/* ✅ Recent Leave Requests */}
-      <div className="mt-12 bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
-        <div className="px-8 py-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/80 dark:to-gray-900/40 border-b border-gray-200/50 dark:border-gray-700/50">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">📅 Recent Leave Requests</h2>
-            <span
-              className="text-sm px-3 py-1 rounded-full bg-white/60 dark:bg-gray-700/60 backdrop-blur-sm text-gray-400 dark:text-gray-500"
-            >
-              Last {recentLeaves?.data?.leaves?.length || 0} requests
-            </span>
+      {/* ---------------- Main two-column grid ---------------- */}
+      <motion.div
+        variants={staggerItem}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-5"
+      >
+        {/* Left column (spans 2) */}
+        <div className="lg:col-span-2 space-y-5">
+          {/* Leave Trends chart */}
+          <div className="bg-gradient-to-br from-white to-slate-50/80 dark:from-gray-800/90 dark:to-gray-800/50 rounded-2xl shadow-[0_2px_8px_-2px_rgba(16,24,40,0.06),0_4px_16px_-4px_rgba(16,24,40,0.05)] ring-1 ring-gray-200/70 dark:ring-gray-700/60 p-5">
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                  Leave Trends
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  {isAdmin
+                    ? "Company leave activity across recent requests"
+                    : "Your leave activity across recent requests"}
+                </p>
+              </div>
+              <span className="text-xs font-medium px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300">
+                {new Date().getFullYear()} (Current)
+              </span>
+            </div>
+            <div className="h-56 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={trendData}
+                  margin={{ top: 10, right: 8, left: 8, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="leaveTrend" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={accent} stopOpacity={0.25} />
+                      <stop offset="100%" stopColor={accent} stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis
+                    dataKey="month"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 11, fill: "#9ca3af" }}
+                    interval={1}
+                  />
+                  <Tooltip
+                    cursor={{ stroke: "#c7d2fe", strokeWidth: 1 }}
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: "1px solid #e5e7eb",
+                      fontSize: 12,
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    }}
+                    labelStyle={{ fontWeight: 600 }}
+                    formatter={(v: any) => [`${v} requests`, "Leaves"]}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke={accent}
+                    strokeWidth={3}
+                    fill="url(#leaveTrend)"
+                    dot={false}
+                    activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
+
+          {/* Recent Activity */}
+          <PanelCard
+            title="Recent Activity"
+            action={
+              <button
+                onClick={() => navigate("/leaves")}
+                className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                View All
+              </button>
+            }
+          >
+            {leavesLoading ? (
+              <div className="flex justify-center py-8">
+                <LoadingSpinner size="md" />
+              </div>
+            ) : recent.length > 0 ? (
+              <ul className="space-y-4">
+                {recent.map((leave: any) => {
+                  const dotColor =
+                    leave.status === "approved"
+                      ? "bg-emerald-500"
+                      : leave.status === "rejected"
+                      ? "bg-red-500"
+                      : leave.status === "pending"
+                      ? "bg-amber-500"
+                      : "bg-blue-500";
+                  const empName =
+                    typeof leave.employee === "object" && leave.employee?.name
+                      ? leave.employee.name
+                      : null;
+                  return (
+                    <li key={leave._id} className="flex gap-3">
+                      <span
+                        className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${dotColor}`}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 capitalize">
+                            {leave.leaveType} Leave
+                          </p>
+                          <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                            {leave.startDate
+                              ? new Date(leave.startDate).toLocaleDateString()
+                              : ""}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          {isAdmin && empName ? `${empName} • ` : ""}
+                          {leave.totalDays}{" "}
+                          {leave.totalDays === 1 ? "day" : "days"}
+                          {" • "}
+                          <span className="capitalize">{leave.status}</span>
+                        </p>
+                        {leave.status === "approved" && (
+                          <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 ring-1 ring-inset ring-emerald-200/60 dark:ring-emerald-500/20">
+                            <CheckCircleIcon className="w-3 h-3" />
+                            Approved
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <div className="p-3 rounded-full bg-gray-100 dark:bg-gray-700/60 mb-3">
+                  <CalendarDaysIcon className="w-6 h-6 text-gray-400 dark:text-gray-500" />
+                </div>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-200">
+                  No recent activity
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Requests will appear here as they come in.
+                </p>
+              </div>
+            )}
+          </PanelCard>
         </div>
 
-        <div className="p-8">
-          {leavesLoading ? (
-            <div className="flex justify-center py-8">
-              <LoadingSpinner size="lg" />
-            </div>
-          ) : (recentLeaves?.data?.leaves?.length || 0) > 0 ? (
-            <>
-              {/* ✅ Desktop Table */}
-              <div className="hidden lg:block">
-                <div className="overflow-hidden rounded-xl border border-gray-200/30 dark:border-gray-700/30">
-                  <table className="min-w-full divide-y divide-gray-200/30 dark:divide-gray-700/30">
-                    <thead className="bg-gradient-to-r from-gray-50/80 to-gray-100/50 dark:from-gray-800/60 dark:to-gray-900/30">
-                      <tr>
-                        {user?.role === "admin" && (
-                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                            Employee
-                          </th>
-                        )}
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                          Leave Type
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                          Duration
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                          Status
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-400">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white/50 dark:bg-gray-800/20 divide-y divide-gray-200/20 dark:divide-gray-700/20">
-                      {recentLeaves!.data.leaves.map((leave: any) => (
-                        <tr
-                          key={leave._id}
-                          className="group table-row-hover transition-all duration-300"
-                        >
-                          {/* ✅ Employee Column Fixed */}
-                          {user?.role === "admin" && (
-                            <td className="pl-2 pr-4 py-4 whitespace-nowrap">
-                              <div className="flex items-center gap-3">
-                                <Avatar
-                                  src={typeof leave.employee === "object" ? leave.employee?.profilePicture : null}
-                                  name={typeof leave.employee === "object" && leave.employee?.name ? leave.employee.name : "Unknown"}
-                                  size="md"
-                                  className="flex-shrink-0"
-                                />
-                                <div className="flex flex-col">
-                                  <button
-                                    onClick={() => {
-                                      if (typeof leave.employee === "object" && leave.employee?._id) {
-                                        navigate(`/employees/${leave.employee._id}`);
-                                      }
-                                    }}
-                                    className="text-left text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer underline-offset-2 hover:underline"
-                                  >
-                                    {typeof leave.employee === "object" &&
-                                    leave.employee?.name
-                                      ? leave.employee.name
-                                      : "Unknown"}
-                                  </button>
-                                  <span className="text-xs text-gray-400">
-                                    {typeof leave.employee === "object" &&
-                                    leave.employee?.employeeId
-                                      ? leave.employee.employeeId
-                                      : "N/A"}
-                                  </span>
-                                </div>
-                              </div>
-                            </td>
-                          )}
+        {/* Right column */}
+        <div className="space-y-5">
+          {/* Public Holidays */}
+          <PanelCard
+            title="Public Holidays"
+            action={
+              <GlobeAltIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+            }
+          >
+            <ul className="space-y-2.5">
+              {publicHolidays.map((h) => (
+                <li
+                  key={h.name}
+                  className="flex items-center gap-3 rounded-xl p-2 -mx-1 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                >
+                  <div className="avatar-primary flex flex-col items-center justify-center w-12 h-12 rounded-xl flex-shrink-0 shadow-sm">
+                    <span className="text-[9px] font-bold uppercase text-white/80 leading-none tracking-wide">
+                      {h.mon}
+                    </span>
+                    <span className="text-base font-bold text-white leading-tight">
+                      {h.day}
+                    </span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight">
+                      {h.name}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      {h.sub}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={() => navigate("/leave-calendar")}
+              className="mt-4 w-full py-2 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700/40 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors"
+            >
+              View Company Calendar
+            </button>
+          </PanelCard>
 
-                          {/* Leave Type */}
-                          <td className="px-4 py-4 whitespace-nowrap">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200 capitalize">
-                              {leave.leaveType}
-                            </span>
-                          </td>
-
-                          {/* Duration */}
-                          <td className="px-4 py-4 whitespace-nowrap text-sm">
-                            <div>
-                              <span className="font-medium text-gray-900 dark:text-gray-100">
-                                {new Date(leave.startDate).toLocaleDateString()}
-                              </span>{" "}
-                              -{" "}
-                              <span className="font-medium text-gray-900 dark:text-gray-100">
-                                {new Date(leave.endDate).toLocaleDateString()}
-                              </span>
-                            </div>
-                            <div className="text-xs text-gray-400">
-                              {leave.totalDays} days
-                            </div>
-                          </td>
-
-                          {/* Status */}
-                          <td className="px-4 py-4 whitespace-nowrap">
-                            <span
-                              className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
-                                ${
-                                  leave.status === "approved"
-                                    ? "bg-green-100 text-green-800 dark:bg-green-800/40 dark:text-green-300"
-                                    : leave.status === "pending"
-                                    ? "bg-amber-100 text-amber-800 dark:bg-amber-800/40 dark:text-amber-300"
-                                    : "bg-red-100 text-red-800 dark:bg-red-800/40 dark:text-red-300"
-                                }`}
-                            >
-                              {leave.status}
-                            </span>
-                          </td>
-
-                          {/* Actions */}
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-400 flex gap-3">
-                            <button className="hover:text-blue-500">
-                              <EyeIcon className="h-5 w-5" />
-                            </button>
-                            <button className="hover:text-green-500">
-                              <PencilIcon className="h-5 w-5" />
-                            </button>
-                            <button className="hover:text-red-500">
-                              <TrashIcon className="h-5 w-5" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* ✅ Mobile Cards */}
-              <div className="lg:hidden space-y-4">
-                {recentLeaves!.data.leaves.map((leave: any) => (
-                  <div
-                    key={leave._id}
-                    className="bg-white/50 dark:bg-gray-800/50 rounded-xl shadow p-4 space-y-4"
+          {/* Team Availability */}
+          <PanelCard title="Team Availability">
+            {teamFromLeaves.length > 0 ? (
+              <ul className="space-y-1">
+                {teamFromLeaves.map((emp: any) => (
+                  <li
+                    key={emp._id}
+                    className="flex items-center justify-between gap-3 rounded-xl p-2 -mx-1 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
                   >
-                    <div className="flex items-center gap-3">
-                      <Avatar
-                        src={typeof leave.employee === "object" ? leave.employee?.profilePicture : null}
-                        name={typeof leave.employee === "object" && leave.employee?.name ? leave.employee.name : "Unknown"}
-                        size="md"
-                        className="flex-shrink-0"
-                      />
-                      <div>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="relative flex-shrink-0">
+                        <Avatar
+                          src={emp.profilePicture}
+                          name={emp.name || "Unknown"}
+                          size="md"
+                          className="ring-2 ring-white dark:ring-gray-800 shadow-sm"
+                        />
+                        <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-gray-800" />
+                      </span>
+                      <div className="min-w-0">
                         <button
-                          onClick={() => {
-                            if (typeof leave.employee === "object" && leave.employee?._id) {
-                              navigate(`/employees/${leave.employee._id}`);
-                            }
-                          }}
-                          className="text-left font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer underline-offset-2 hover:underline"
+                          onClick={() =>
+                            emp._id && navigate(`/employees/${emp._id}`)
+                          }
+                          className="block text-left text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate"
                         >
-                          {typeof leave.employee === "object" &&
-                          leave.employee?.name
-                            ? leave.employee.name
-                            : "Unknown"}
+                          {emp.name || "Unknown"}
                         </button>
-                        <p className="text-xs text-gray-400">
-                          {leave.leaveType}
+                        <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium truncate">
+                          Available Today
                         </p>
                       </div>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-900 dark:text-gray-100">
-                        {new Date(leave.startDate).toLocaleDateString()} -{" "}
-                        {new Date(leave.endDate).toLocaleDateString()}
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        {leave.totalDays} days
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full
-                          ${
-                            leave.status === "approved"
-                              ? "bg-green-100 text-green-800"
-                              : leave.status === "pending"
-                              ? "bg-amber-100 text-amber-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                      >
-                        {leave.status}
-                      </span>
-                      <div className="flex gap-2">
-                        <button className="text-gray-400 hover:text-blue-500">
-                          <EyeIcon className="h-4 w-4" />
-                        </button>
-                        <button className="text-gray-400 hover:text-green-500">
-                          <PencilIcon className="h-4 w-4" />
-                        </button>
-                        <button className="text-gray-400 hover:text-red-500">
-                          <TrashIcon className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                    <span className="text-xs text-gray-400 dark:text-gray-500 truncate max-w-[80px] text-right">
+                      {emp.department || emp.position || "Team"}
+                    </span>
+                  </li>
                 ))}
-              </div>
-            </>
-          ) : (
-            <div className="text-center py-12 text-gray-400">
-              No recent leave requests
-            </div>
-          )}
+              </ul>
+            ) : (
+              <p className="text-sm text-gray-500 dark:text-gray-400 py-4 text-center">
+                No team activity to show yet.
+              </p>
+            )}
+          </PanelCard>
         </div>
-      </div>
-      </div>
-    </div>
+      </motion.div>
+
+      <ApplyLeaveModal open={applyOpen} onClose={() => setApplyOpen(false)} />
+    </motion.div>
   );
 };
 

@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersAPI } from "../services/api";
 // import { useNotifications } from "../components/NotificationSystem"; // Removed for Socket.IO implementation
 import LoadingSpinner from "../components/LoadingSpinner";
+import { HeaderSkeleton, TableSkeleton } from "../components/Skeletons";
 import EmployeeInviteModal from "../components/EmployeeInviteModal";
 import AdminInviteModal from "../components/AdminInviteModal";
 import Avatar from "../components/Avatar";
@@ -220,8 +221,9 @@ const EmployeesPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <LoadingSpinner size="lg" />
+      <div className="space-y-6 fade-in">
+        <HeaderSkeleton />
+        <TableSkeleton rows={7} cols={5} />
       </div>
     );
   }
@@ -238,12 +240,12 @@ const EmployeesPage: React.FC = () => {
 
   return (
     <div className="space-y-6 fade-in">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
             Team Management
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Manage your company team members
           </p>
           {/* Debug info */}
@@ -279,39 +281,37 @@ const EmployeesPage: React.FC = () => {
       </div>
 
       {/* Tabs Section */}
-      <div className="card">
-        <div className="flex space-x-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
-          <button
-            onClick={() => setActiveTab("employees")}
-            className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-              activeTab === "employees"
-                ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow"
-                : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-            }`}
-          >
-            <UserIcon className="w-4 h-4 inline mr-2" />
-            Employees (
-            {(employeesData as any)?.data?.employees?.length ||
-              (employeesData as any)?.employees?.length ||
-              0}
-            /{(employeesData as any)?.data?.pagination?.total || "unknown"})
-          </button>
-          <button
-            onClick={() => setActiveTab("admins")}
-            className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-              activeTab === "admins"
-                ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow"
-                : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-            }`}
-          >
-            <ShieldCheckIcon className="w-4 h-4 inline mr-2" />
-            Admins (
-            {(adminsData as any)?.data?.admins?.length ||
-              (adminsData as any)?.admins?.length ||
-              0}
-            )
-          </button>
-        </div>
+      <div className="flex space-x-1 p-1 bg-gray-100 dark:bg-gray-800/80 rounded-xl border border-gray-200/60 dark:border-gray-700/60">
+        <button
+          onClick={() => setActiveTab("employees")}
+          className={`flex-1 inline-flex items-center justify-center py-2 px-4 text-sm font-medium rounded-lg transition-all ${
+            activeTab === "employees"
+              ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
+              : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+          }`}
+        >
+          <UserIcon className="w-4 h-4 mr-2" />
+          Employees (
+          {(employeesData as any)?.data?.employees?.length ||
+            (employeesData as any)?.employees?.length ||
+            0}
+          /{(employeesData as any)?.data?.pagination?.total || "unknown"})
+        </button>
+        <button
+          onClick={() => setActiveTab("admins")}
+          className={`flex-1 inline-flex items-center justify-center py-2 px-4 text-sm font-medium rounded-lg transition-all ${
+            activeTab === "admins"
+              ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
+              : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+          }`}
+        >
+          <ShieldCheckIcon className="w-4 h-4 mr-2" />
+          Admins (
+          {(adminsData as any)?.data?.admins?.length ||
+            (adminsData as any)?.admins?.length ||
+            0}
+          )
+        </button>
       </div>
 
       {/* Search & Report Section */}
@@ -487,49 +487,48 @@ const EmployeesPage: React.FC = () => {
       )}
 
       {/* Employees Section */}
-      <div className="mt-10 bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+      <div className="mt-8 bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/60 overflow-hidden">
         {filteredUsers.length > 0 ? (
           <>
             {/* Desktop Table */}
-            <div className="hidden lg:block p-8">
-              <div className="overflow-hidden rounded-xl border border-gray-200/30 dark:border-gray-700/30">
-                <div
-                  className={`${
-                    filteredUsers.length > 10
-                      ? "max-h-[600px] overflow-y-auto"
-                      : ""
-                  }`}
-                >
-                  <table className="min-w-full divide-y divide-gray-200/30 dark:divide-gray-700/30">
-                    <thead className="bg-gradient-to-r from-gray-50/80 to-gray-100/50 dark:from-gray-800/60 dark:to-gray-900/30">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
-                          Employee
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
-                          Department
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
-                          Position
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
-                          Join Date
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
-                          Status
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white/50 dark:bg-gray-800/20 divide-y divide-gray-200/20 dark:divide-gray-700/20">
-                      {filteredUsers.map((employee: any) => (
-                        <tr
-                          key={employee._id}
-                          className="group table-row-hover transition-all duration-300"
-                        >
-                          <td className="pl-2 pr-4 py-4 whitespace-nowrap">
+            <div className="hidden lg:block">
+              <div
+                className={`overflow-x-auto ${
+                  filteredUsers.length > 10
+                    ? "max-h-[600px] overflow-y-auto"
+                    : ""
+                }`}
+              >
+                <table className="min-w-full divide-y divide-gray-100 dark:divide-gray-700/60">
+                  <thead className="bg-gray-50/80 dark:bg-gray-800/60 sticky top-0 z-10">
+                    <tr>
+                      <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        Employee
+                      </th>
+                      <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        Department
+                      </th>
+                      <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        Position
+                      </th>
+                      <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        Join Date
+                      </th>
+                      <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        Status
+                      </th>
+                      <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
+                    {filteredUsers.map((employee: any) => (
+                      <tr
+                        key={employee._id}
+                        className="group transition-colors duration-200 hover:bg-gray-50/80 dark:hover:bg-gray-700/30"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
                               <Avatar
                                 src={employee.profilePicture}
@@ -554,27 +553,36 @@ const EmployeesPage: React.FC = () => {
                             </div>
                           </td>
 
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                             {employee.department}
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                             {employee.position}
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                             {employee.joinDate
                               ? new Date(employee.joinDate).toLocaleDateString()
                               : "N/A"}
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap">
+                          <td className="px-6 py-4 whitespace-nowrap">
                             <span
-                              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full ring-1 ring-inset ${
                                 employee.status === "active"
-                                  ? "badge-success"
+                                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 ring-emerald-200/60 dark:ring-emerald-500/20"
                                   : employee.status === "pending"
-                                  ? "badge-warning"
-                                  : "badge-error"
+                                  ? "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 ring-amber-200/60 dark:ring-amber-500/20"
+                                  : "bg-gray-100 text-gray-600 dark:bg-gray-500/10 dark:text-gray-400 ring-gray-200/60 dark:ring-gray-500/20"
                               }`}
                             >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  employee.status === "active"
+                                    ? "bg-emerald-500"
+                                    : employee.status === "pending"
+                                    ? "bg-amber-500"
+                                    : "bg-gray-400"
+                                }`}
+                              />
                               {employee.status === "active"
                                 ? "Active"
                                 : employee.status === "pending"
@@ -582,8 +590,8 @@ const EmployeesPage: React.FC = () => {
                                 : "Inactive"}
                             </span>
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap">
-                            <div className="flex items-center space-x-2">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-2">
                               {activeTab === "employees" && (
                                 <button
                                   onClick={() =>
@@ -596,10 +604,10 @@ const EmployeesPage: React.FC = () => {
                                     deactivateEmployeeMutation.isPending ||
                                     activateEmployeeMutation.isPending
                                   }
-                                  className={`px-3 py-1 text-xs rounded transition-colors ${
+                                  className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-lg ring-1 ring-inset transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                                     employee.isActive
-                                      ? "btn-danger"
-                                      : "btn-success"
+                                      ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 ring-red-200/70 dark:ring-red-500/30 hover:bg-red-100 dark:hover:bg-red-500/20"
+                                      : "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 ring-emerald-200/70 dark:ring-emerald-500/30 hover:bg-emerald-100 dark:hover:bg-emerald-500/20"
                                   }`}
                                 >
                                   {employee.isActive
@@ -610,7 +618,7 @@ const EmployeesPage: React.FC = () => {
 
                               <button
                                 onClick={() => handleGenerateReport(employee)}
-                                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-700"
+                                className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 ring-1 ring-inset ring-blue-200/70 dark:ring-blue-500/30 hover:bg-blue-100 dark:hover:bg-blue-500/20"
                               >
                                 <DocumentChartBarIcon className="h-4 w-4 mr-1" />
                                 Report
@@ -619,8 +627,9 @@ const EmployeesPage: React.FC = () => {
                               {activeTab === "employees" && (
                                 <button
                                   onClick={() => showDeleteConfirm(employee)}
-                                  className="btn-danger px-3 py-1 text-xs"
+                                  className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/40 ring-1 ring-inset ring-gray-200/70 dark:ring-gray-600/40 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:ring-red-200/70 dark:hover:ring-red-500/30"
                                 >
+                                  <TrashIcon className="h-4 w-4 mr-1" />
                                   Delete
                                 </button>
                               )}
@@ -628,15 +637,14 @@ const EmployeesPage: React.FC = () => {
                           </td>
                         </tr>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
+                  </tbody>
+                </table>
               </div>
             </div>
 
             {/* Mobile Cards */}
             <div
-              className={`lg:hidden space-y-4 p-8 ${
+              className={`lg:hidden space-y-4 p-4 sm:p-6 ${
                 filteredUsers.length > 10 ? "max-h-[600px] overflow-y-auto" : ""
               }`}
             >
@@ -716,8 +724,10 @@ const EmployeesPage: React.FC = () => {
                         onClick={() =>
                           handleToggleStatus(employee._id, employee.isActive)
                         }
-                        className={`px-3 py-1 text-xs rounded ${
-                          employee.isActive ? "btn-danger" : "btn-success"
+                        className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-lg ring-1 ring-inset transition-colors ${
+                          employee.isActive
+                            ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 ring-red-200/70 dark:ring-red-500/30 hover:bg-red-100 dark:hover:bg-red-500/20"
+                            : "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 ring-emerald-200/70 dark:ring-emerald-500/30 hover:bg-emerald-100 dark:hover:bg-emerald-500/20"
                         }`}
                       >
                         {employee.isActive ? "Deactivate" : "Activate"}
@@ -725,7 +735,7 @@ const EmployeesPage: React.FC = () => {
                     )}
                     <button
                       onClick={() => handleGenerateReport(employee)}
-                      className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-700"
+                      className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 ring-1 ring-inset ring-blue-200/70 dark:ring-blue-500/30 hover:bg-blue-100 dark:hover:bg-blue-500/20"
                     >
                       <DocumentChartBarIcon className="h-4 w-4 mr-1" />
                       Report
@@ -733,8 +743,9 @@ const EmployeesPage: React.FC = () => {
                     {activeTab === "employees" && (
                       <button
                         onClick={() => showDeleteConfirm(employee)}
-                        className="btn-danger px-3 py-1 text-xs"
+                        className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/40 ring-1 ring-inset ring-gray-200/70 dark:ring-gray-600/40 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:ring-red-200/70 dark:hover:ring-red-500/30"
                       >
+                        <TrashIcon className="h-4 w-4 mr-1" />
                         Delete
                       </button>
                     )}
@@ -744,8 +755,20 @@ const EmployeesPage: React.FC = () => {
             </div>
           </>
         ) : (
-          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-            No employees found
+          <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-100 dark:bg-gray-700/60 flex items-center justify-center">
+              <UserIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+            </div>
+            <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+              No {activeTab === "employees" ? "employees" : "admins"} found
+            </p>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-sm">
+              {searchTerm
+                ? `No results matching "${searchTerm}".`
+                : `Invite your first ${
+                    activeTab === "employees" ? "employee" : "admin"
+                  } to get started.`}
+            </p>
           </div>
         )}
       </div>

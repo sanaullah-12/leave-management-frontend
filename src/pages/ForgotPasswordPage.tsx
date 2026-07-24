@@ -1,18 +1,28 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import LoadingSpinner from '../components/LoadingSpinner';
-import { EnvelopeIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { motion } from "framer-motion";
+import axios from "axios";
+import {
+  EnvelopeIcon,
+  ArrowLeftIcon,
+  CheckCircleIcon,
+  ClockIcon,
+} from "@heroicons/react/24/outline";
+import AuthLayout from "../components/AuthLayout";
+import InlineLoader from "../components/InlineLoader";
 
 interface ForgotPasswordForm {
   email: string;
 }
 
+const inputClass =
+  "w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/40 px-4 py-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:ring-4 focus:ring-blue-500/10";
+
 const ForgotPasswordPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
 
   const {
     register,
@@ -22,13 +32,15 @@ const ForgotPasswordPage: React.FC = () => {
 
   const onSubmit = async (data: ForgotPasswordForm) => {
     setIsSubmitting(true);
-    setError('');
-
+    setError("");
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/auth/forgot-password`, data);
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/forgot-password`,
+        data
+      );
       setSuccess(true);
-    } catch (error: any) {
-      setError(error.response?.data?.message || 'Failed to send reset email');
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to send reset email");
     } finally {
       setIsSubmitting(false);
     }
@@ -36,123 +48,122 @@ const ForgotPasswordPage: React.FC = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="text-center">
-            <CheckCircleIcon className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100">Check Your Email</h2>
-            <p className="mt-4 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-              If an account exists with that email address, we've sent you a password reset link.
-              <br />
-              <br />
-              Please check your email and click the reset link to create a new password.
-              <br />
-              <br />
-              <strong>Note:</strong> The reset link will expire in 15 minutes for security reasons.
-            </p>
-          </div>
+      <AuthLayout activeTab="login">
+        <div className="text-center">
+          <motion.div
+            initial={{ scale: 0.4, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 320, damping: 20 }}
+            className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-500/10"
+          >
+            <CheckCircleIcon className="h-9 w-9 text-emerald-500" />
+          </motion.div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+            Check your email
+          </h1>
+          <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+            If an account exists with that email, we've sent a password reset
+            link. Click it to create a new password.
+          </p>
         </div>
 
-        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow-lg border border-gray-200 dark:border-gray-700 sm:rounded-lg sm:px-10">
-            <div className="text-center">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Didn't receive the email? Check your spam folder.
-              </p>
-              <div className="flex flex-col space-y-3">
-                <button
-                  onClick={() => {
-                    setSuccess(false);
-                    setError('');
-                  }}
-                  className="btn-primary"
-                >
-                  Try Different Email
-                </button>
-                <Link
-                  to="/login"
-                  className="btn-secondary text-center"
-                >
-                  Back to Login
-                </Link>
-              </div>
-            </div>
-          </div>
+        <div className="mt-6 flex items-start gap-3 rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 px-4 py-3">
+          <ClockIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-500" />
+          <p className="text-sm text-amber-800 dark:text-amber-300">
+            The reset link expires in <strong>15 minutes</strong>. Don't see it?
+            Check your spam folder.
+          </p>
         </div>
-      </div>
+
+        <div className="mt-6 space-y-3">
+          <button
+            onClick={() => {
+              setSuccess(false);
+              setError("");
+            }}
+            className="w-full rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 hover:shadow-xl"
+          >
+            Try a different email
+          </button>
+          <Link
+            to="/login"
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-700 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+          >
+            <ArrowLeftIcon className="h-4 w-4" />
+            Back to login
+          </Link>
+        </div>
+      </AuthLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="text-center">
-          <EnvelopeIcon className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100">Forgot Password?</h2>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Enter your email address and we'll send you a link to reset your password.
-          </p>
-        </div>
+    <AuthLayout activeTab="login">
+      <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-500/10">
+        <EnvelopeIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow-lg border border-gray-200 dark:border-gray-700 sm:rounded-lg sm:px-10">
-          {error && (
-            <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-md">
-              {error}
-            </div>
+      <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+        Forgot password?
+      </h1>
+      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        Enter your email and we'll send you a link to reset your password.
+      </p>
+
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-6 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-600 dark:text-red-400"
+        >
+          {error}
+        </motion.div>
+      )}
+
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+        <div>
+          <input
+            {...register("email", {
+              required: "Email is required",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Please enter a valid email address",
+              },
+            })}
+            type="email"
+            autoComplete="email"
+            placeholder="Work email"
+            className={inputClass}
+          />
+          {errors.email && (
+            <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
+              {errors.email.message}
+            </p>
           )}
-
-          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Email Address
-              </label>
-              <div className="mt-1">
-                <input
-                  {...register('email', {
-                    required: 'Email is required',
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Please enter a valid email address',
-                    },
-                  })}
-                  type="email"
-                  autoComplete="email"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors"
-                  placeholder="Enter your email address"
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="btn-primary w-full"
-              >
-                {isSubmitting ? <LoadingSpinner size="sm" /> : 'Send Reset Link'}
-              </button>
-            </div>
-          </form>
-
-          <div className="mt-6">
-            <div className="text-center">
-              <Link
-                to="/login"
-                className="inline-flex items-center text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
-              >
-                <ArrowLeftIcon className="h-4 w-4 mr-1" />
-                Back to Login
-              </Link>
-            </div>
-          </div>
         </div>
-      </div>
-    </div>
+
+        <motion.button
+          type="submit"
+          disabled={isSubmitting}
+          whileTap={{ scale: 0.99 }}
+          className="flex w-full items-center justify-center rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 hover:shadow-xl disabled:opacity-70"
+        >
+          {isSubmitting ? (
+            <InlineLoader label="Sending link..." />
+          ) : (
+            "Send reset link"
+          )}
+        </motion.button>
+      </form>
+
+      <Link
+        to="/login"
+        className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+      >
+        <ArrowLeftIcon className="h-4 w-4" />
+        Back to login
+      </Link>
+    </AuthLayout>
   );
 };
 

@@ -76,10 +76,24 @@ const requestErrorInterceptor = (error: any) => {
 // Response interceptor to handle auth errors (for both api instances)
 const responseInterceptor = (response: any) => response;
 const responseErrorInterceptor = (error: any) => {
-  if (error.response?.status === 401) {
+  const status = error.response?.status;
+  const url: string = error.config?.url || "";
+
+  // Auth "probe" calls handle their own 401s:
+  //  - /auth/login  → LoginPage shows "invalid credentials" (must NOT reload the page)
+  //  - /auth/profile → AuthContext validates the session on startup and logs out cleanly
+  const isAuthProbe =
+    url.includes("/auth/login") || url.includes("/auth/profile");
+
+  // A real 401 from a data endpoint means the session is dead → sign out.
+  // 403 (authorization) is NOT a session problem and must never log the user out.
+  if (status === 401 && !isAuthProbe) {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    window.location.href = "/login";
+    // Guard against redirect loops when we're already on the login screen.
+    if (!window.location.pathname.startsWith("/login")) {
+      window.location.href = "/login";
+    }
   }
   return Promise.reject(error);
 };
@@ -192,6 +206,11 @@ export const leavesAPI = {
 export const attendanceAPI = {
   connectToMachine: (ip: string, port = 4370) =>
     attendanceApi.post("/attendance/connect", { ip, port }),
+
+  // Remote door unlock via the same ZKTeco access-control device.
+  // Uses the attendance axios instance (longer timeout for device ops).
+  unlockDoor: (ip?: string) =>
+    attendanceApi.post("/attendance/door/unlock", ip ? { ip } : {}),
 
   getMachineStatus: (ip: string) => api.get(`/attendance/status/${ip}`),
 

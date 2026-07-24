@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { leavesAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { HeaderSkeleton, StatCardsSkeleton } from "../components/Skeletons";
 import {
   CogIcon,
   CheckCircleIcon,
@@ -63,8 +64,9 @@ const LeavePolicyPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <LoadingSpinner size="lg" />
+      <div className="space-y-6 fade-in">
+        <HeaderSkeleton />
+        <StatCardsSkeleton count={6} />
       </div>
     );
   }

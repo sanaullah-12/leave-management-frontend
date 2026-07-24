@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from "react";
-import xlogoImage from "../assets/xlogoanimate.png";
 
 interface Particle {
   id: number;
@@ -178,16 +177,23 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ className = "" 
             willChange: 'transform, opacity',
           }}
         >
-          <img
-            src={xlogoImage}
-            alt=""
-            className="w-full h-full object-contain"
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+            className="w-full h-full"
             style={{
-              filter: `drop-shadow(0 2px 8px rgba(255,255,255,0.15)) brightness(1.1)`,
-              imageRendering: 'crisp-edges',
+              filter: `drop-shadow(0 2px 8px rgba(255,255,255,0.15))`,
             }}
-            draggable={false}
-          />
+          >
+            <path
+              d="M8 4l8 8-8 8"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </div>
       ))}
     </div>

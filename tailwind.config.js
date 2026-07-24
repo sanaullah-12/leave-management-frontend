@@ -7,6 +7,31 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      fontFamily: {
+        sans: [
+          'Geist',
+          'ui-sans-serif',
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'Helvetica',
+          'Arial',
+          'sans-serif',
+        ],
+        mono: [
+          'Geist Mono',
+          'ui-monospace',
+          'SFMono-Regular',
+          'Menlo',
+          'Consolas',
+          'monospace',
+        ],
+      },
+      // Modern SaaS type scale is defined as semantic classes in index.css
+      // (.text-display, .text-page-heading, .text-section-heading, .text-card-title,
+      //  .text-nav, .text-body, .text-secondary, .text-caption, .text-overline).
       colors: {
         // Blue theme colors (default)
         blue: {
@@ -67,6 +92,21 @@ export default {
           800: '#075985',
           900: '#0c4a6e',
           950: '#082f49',
+        },
+        // Indigo theme colors (matches the Sign in / Sign up button)
+        indigo: {
+          25: '#f5f7ff',
+          50: '#eef2ff',
+          100: '#e0e7ff',
+          200: '#c7d2fe',
+          300: '#a5b4fc',
+          400: '#818cf8',
+          500: '#6366f1',
+          600: '#4f46e5', // primary
+          700: '#4338ca',
+          800: '#3730a3',
+          900: '#312e81',
+          950: '#1e1b4b',
         },
         // Status colors
         success: {

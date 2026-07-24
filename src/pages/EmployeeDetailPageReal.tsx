@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersAPI, leavesAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { ProfileSkeleton } from "../components/Skeletons";
 import Avatar from "../components/Avatar";
 import EmployeeLeaveActivity from "../components/EmployeeLeaveActivity";
 import {
@@ -229,11 +230,7 @@ const EmployeeDetailPageReal: React.FC = () => {
 
   // Loading state
   if (employeesLoading || historyLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+    return <ProfileSkeleton />;
   }
 
   // Error state

@@ -95,27 +95,55 @@ const initialState: AuthState = {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Check for existing auth on app start
+  // Validate the stored session against the backend on app start.
+  // Trusting localStorage blindly makes the app *look* logged in with a stale/expired
+  // token, then kicks the user out on their first API call. Verifying up-front means we
+  // either start fully authenticated (with fresh user data) or land cleanly on /login.
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    
-    if (token && userData) {
-      try {
-        const user = JSON.parse(userData);
-        dispatch({
-          type: 'LOGIN_SUCCESS',
-          payload: { user, token }
-        });
-      } catch (error) {
-        console.error('Error parsing stored user data:', error);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        dispatch({ type: 'SET_LOADING', payload: false });
-      }
-    } else {
+
+    if (!token) {
       dispatch({ type: 'SET_LOADING', payload: false });
+      return;
     }
+
+    // Optimistically read any cached user so we can keep the session on a transient
+    // (non-401) backend hiccup rather than logging the user out unnecessarily.
+    let cachedUser: User | null = null;
+    try {
+      const raw = localStorage.getItem('user');
+      cachedUser = raw ? (JSON.parse(raw) as User) : null;
+    } catch {
+      cachedUser = null;
+    }
+
+    authAPI
+      .getProfile()
+      .then((response) => {
+        const freshUser: User = response.data?.user || cachedUser;
+        if (freshUser) {
+          localStorage.setItem('user', JSON.stringify(freshUser));
+          dispatch({ type: 'LOGIN_SUCCESS', payload: { user: freshUser, token } });
+        } else {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          dispatch({ type: 'LOGOUT' });
+        }
+      })
+      .catch((error) => {
+        if (error?.response?.status === 401) {
+          // Token is genuinely invalid/expired → clean logout to the login screen.
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          dispatch({ type: 'LOGOUT' });
+        } else if (cachedUser) {
+          // Backend unreachable (network/CORS/5xx) but we have a cached session —
+          // keep the user signed in instead of punishing a server blip.
+          dispatch({ type: 'LOGIN_SUCCESS', payload: { user: cachedUser, token } });
+        } else {
+          dispatch({ type: 'SET_LOADING', payload: false });
+        }
+      });
   }, []);
 
   const login = async (credentials: LoginCredentials) => {

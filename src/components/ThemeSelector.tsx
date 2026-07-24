@@ -2,7 +2,7 @@ import React from "react";
 import { useTheme } from "../context/ThemeContext";
 import { SunIcon, MoonIcon, SwatchIcon } from "@heroicons/react/24/outline";
 
-type ColorScheme = "blue" | "purple" | "green" | "custom";
+type ColorScheme = "blue" | "purple" | "green" | "custom" | "indigo";
 type ThemeMode = "light" | "dark";
 
 interface ThemeSelectorProps {
@@ -22,6 +22,14 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({
       color: "#3b82f6",
       borderClass: "border-blue-500",
       bgClass: "bg-blue-50 dark:bg-blue-900",
+    },
+    {
+      id: "indigo" as ColorScheme,
+      name: "Indigo",
+      description: "Bold & Premium",
+      color: "#4f46e5",
+      borderClass: "border-indigo-500",
+      bgClass: "bg-indigo-50 dark:bg-indigo-900",
     },
     {
       id: "purple" as ColorScheme,
