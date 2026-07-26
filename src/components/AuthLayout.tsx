@@ -128,7 +128,7 @@ const BrandPanel: React.FC = () => {
 
       {/* Logo */}
       <div className="absolute left-8 top-7 z-20 flex items-center gap-3">
-        <AppLogo size={40} />
+        <AppLogo size={52} />
         <span className="text-lg font-bold text-white">LeaveFlow</span>
       </div>
 

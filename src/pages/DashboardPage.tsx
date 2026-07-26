@@ -12,6 +12,7 @@ import { DashboardSkeleton, StatCardsSkeleton } from "../components/Skeletons";
 import ApplyLeaveModal from "../components/ApplyLeaveModal";
 import { motion } from "framer-motion";
 import MeshBackground from "../components/MeshBackground";
+import EmployeeVoiceWidget from "../components/voice/EmployeeVoiceWidget";
 import { staggerContainer, staggerItem } from "../lib/motion";
 import {
   UsersIcon,
@@ -43,11 +44,16 @@ type RingColor = "blue" | "amber" | "slate";
 // styled with CSS classes (SVG chart stroke/gradient, progress-ring stroke).
 // Keep these in sync with tailwind.config.js *-600 values.
 const THEME_ACCENT: Record<string, string> = {
-  blue: "#2563eb",
-  indigo: "#4f46e5",
+  black: "#374151",
   purple: "#9c5fd1",
-  green: "#16a34a",
-  custom: "#0284c7",
+  blue: "#2563eb",
+  pink: "#db2777",
+  violet: "#7c3aed",
+  indigo: "#4f46e5",
+  orange: "#ea580c",
+  teal: "#0d9488",
+  bronze: "#b45309",
+  mint: "#10b981",
 };
 
 const RING_STYLES: Record<
@@ -430,6 +436,11 @@ const DashboardPage: React.FC = () => {
           ))}
         </motion.div>
       )}
+
+      {/* ---------------- Employee Voice widget ---------------- */}
+      <motion.div variants={staggerItem}>
+        <EmployeeVoiceWidget />
+      </motion.div>
 
       {/* ---------------- Main two-column grid ---------------- */}
       <motion.div
