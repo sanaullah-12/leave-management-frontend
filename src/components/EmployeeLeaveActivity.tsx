@@ -4,6 +4,7 @@ import { leavesAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
 import Avatar from './Avatar';
+import Select from './ui/Select';
 import {
   CalendarDaysIcon,
   ClockIcon,
@@ -481,16 +482,15 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
             <FunnelIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              className="input-field text-sm"
-              style={{ minWidth: '100px' }}
-            >
-              {yearOptions.map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
+            <Select
+              value={String(selectedYear)}
+              onChange={(v) => setSelectedYear(Number(v))}
+              options={yearOptions.map((year) => ({
+                value: String(year),
+                label: String(year),
+              }))}
+              className="min-w-[100px]"
+            />
           </div>
         </div>
       </div>

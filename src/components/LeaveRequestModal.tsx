@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { leavesAPI } from '../services/api';
+import Select from './ui/Select';
+import DatePicker from './ui/DatePicker';
 import { showLeaveSubmissionSuccess, showErrorToast } from '../utils/toastHelpers';
 // import { useNotifications } from '../components/NotificationSystem'; // Removed for Socket.IO implementation
 import { useAuth } from '../context/AuthContext';
@@ -31,6 +33,12 @@ interface LeaveRequestModalProps {
   onClose: () => void;
 }
 
+const LEAVE_TYPE_OPTIONS = [
+  { value: 'casual', label: '📅 Casual Leave' },
+  { value: 'sick', label: '🏥 Sick Leave' },
+  { value: 'paternity', label: '👨‍👶 Paternity Leave' },
+];
+
 const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -39,6 +47,7 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     watch,
@@ -159,28 +168,19 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
               <CalendarDaysIcon className="w-4 h-4 mr-2 text-green-500 dark:text-green-400" />
               Leave Type
             </label>
-            <select
-              {...register('leaveType', { required: 'Leave type is required' })}
-              className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:ring-4 focus:ring-green-500/20 focus:border-green-500 hover:border-green-300 dark:hover:border-green-600 ${
-                errors.leaveType
-                  ? 'border-red-500 bg-red-50 dark:bg-red-900/10 focus:ring-red-500/20'
-                  : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50'
-              } text-gray-900 dark:text-gray-100 shadow-sm hover:shadow-md focus:shadow-lg backdrop-blur-sm`}
-              style={{
-                background: errors.leaveType
-                  ? 'var(--surface-error)'
-                  : 'var(--surface)',
-                borderColor: errors.leaveType
-                  ? 'var(--color-error)'
-                  : 'var(--border-primary)',
-                color: 'var(--text-primary)'
-              }}
-            >
-              <option value="">Select leave type</option>
-              <option value="casual">📅 Casual Leave</option>
-              <option value="sick">🏥 Sick Leave</option>
-              <option value="paternity">👨‍👶 Paternity Leave</option>
-            </select>
+            <Controller
+              name="leaveType"
+              control={control}
+              rules={{ required: 'Leave type is required' }}
+              render={({ field }) => (
+                <Select
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  placeholder="Select leave type"
+                  options={LEAVE_TYPE_OPTIONS}
+                />
+              )}
+            />
             {errors.leaveType && (
               <p className="mt-2 text-sm text-red-600 flex items-center">
                 <ExclamationTriangleIcon className="w-4 h-4 mr-1" />
@@ -212,24 +212,18 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
               <CalendarDaysIcon className="w-4 h-4 mr-2 text-blue-500 dark:text-blue-400" />
               Start Date
             </label>
-            <input
-              type="date"
-              {...register('startDate', { required: 'Start date is required' })}
-              min={new Date().toISOString().split('T')[0]}
-              className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:ring-4 focus:ring-green-500/20 focus:border-green-500 hover:border-green-300 dark:hover:border-green-600 ${
-                errors.startDate
-                  ? 'border-red-500 bg-red-50 dark:bg-red-900/10 focus:ring-red-500/20'
-                  : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50'
-              } text-gray-900 dark:text-gray-100 shadow-sm hover:shadow-md focus:shadow-lg backdrop-blur-sm`}
-              style={{
-                background: errors.startDate
-                  ? 'var(--surface-error)'
-                  : 'var(--surface)',
-                borderColor: errors.startDate
-                  ? 'var(--color-error)'
-                  : 'var(--border-primary)',
-                color: 'var(--text-primary)'
-              }}
+            <Controller
+              name="startDate"
+              control={control}
+              rules={{ required: 'Start date is required' }}
+              render={({ field }) => (
+                <DatePicker
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  min={new Date().toISOString().split('T')[0]}
+                  placeholder="Select date"
+                />
+              )}
             />
             {errors.startDate && (
               <p className="mt-2 text-sm text-red-600 flex items-center">
@@ -245,24 +239,18 @@ const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({ isOpen, onClose }
               <CalendarDaysIcon className="w-4 h-4 mr-2 text-purple-500 dark:text-purple-400" />
               End Date
             </label>
-            <input
-              type="date"
-              {...register('endDate', { required: 'End date is required' })}
-              min={startDate || new Date().toISOString().split('T')[0]}
-              className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:ring-4 focus:ring-green-500/20 focus:border-green-500 hover:border-green-300 dark:hover:border-green-600 ${
-                errors.endDate
-                  ? 'border-red-500 bg-red-50 dark:bg-red-900/10 focus:ring-red-500/20'
-                  : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50'
-              } text-gray-900 dark:text-gray-100 shadow-sm hover:shadow-md focus:shadow-lg backdrop-blur-sm`}
-              style={{
-                background: errors.endDate
-                  ? 'var(--surface-error)'
-                  : 'var(--surface)',
-                borderColor: errors.endDate
-                  ? 'var(--color-error)'
-                  : 'var(--border-primary)',
-                color: 'var(--text-primary)'
-              }}
+            <Controller
+              name="endDate"
+              control={control}
+              rules={{ required: 'End date is required' }}
+              render={({ field }) => (
+                <DatePicker
+                  value={field.value || ''}
+                  onChange={field.onChange}
+                  min={startDate || new Date().toISOString().split('T')[0]}
+                  placeholder="Select date"
+                />
+              )}
             />
             {errors.endDate && (
               <p className="mt-2 text-sm text-red-600 flex items-center">

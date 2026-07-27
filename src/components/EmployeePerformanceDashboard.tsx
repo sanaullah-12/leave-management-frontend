@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { employeePerformanceAPI } from "../services/api";
 import LoadingSpinner from "./LoadingSpinner";
 import Avatar from "./Avatar";
+import Select from "./ui/Select";
+import DatePicker from "./ui/DatePicker";
 import {
   TrophyIcon,
   ChartBarIcon,
@@ -18,6 +20,13 @@ import {
   FireIcon as FireSolidIcon,
 } from "@heroicons/react/24/solid";
 import "../styles/design-system.css";
+
+const LEADERBOARD_LIMIT_OPTIONS = [
+  { value: "5", label: "Top 5" },
+  { value: "10", label: "Top 10" },
+  { value: "20", label: "Top 20" },
+  { value: "50", label: "Top 50" },
+];
 
 interface Employee {
   _id: string;
@@ -310,34 +319,27 @@ const EmployeePerformanceDashboard: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
           {/* Date Range */}
           <div className="flex items-center space-x-2">
-            <input
-              type="date"
+            <DatePicker
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
+              onChange={setStartDate}
+              className="w-40"
             />
             <span className="text-gray-500">to</span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
-            />
+            <DatePicker value={endDate} onChange={setEndDate} className="w-40" />
           </div>
 
           {/* Department Filter */}
-          <select
+          <Select
             value={selectedDepartment}
-            onChange={(e) => setSelectedDepartment(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
-          >
-            <option value="">All Departments</option>
-            {departments.map((dept: Department) => (
-              <option key={dept.name} value={dept.name}>
-                {dept.name} ({dept.employeeCount})
-              </option>
-            ))}
-          </select>
+            onChange={setSelectedDepartment}
+            options={[
+              { value: "", label: "All Departments" },
+              ...departments.map((dept: Department) => ({
+                value: dept.name,
+                label: `${dept.name} (${dept.employeeCount})`,
+              })),
+            ]}
+          />
 
           {/* View Toggle */}
           <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
@@ -439,18 +441,11 @@ const EmployeePerformanceDashboard: React.FC = () => {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <select
-                    value={leaderboardLimit}
-                    onChange={(e) =>
-                      setLeaderboardLimit(Number(e.target.value))
-                    }
-                    className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                  >
-                    <option value={5}>Top 5</option>
-                    <option value={10}>Top 10</option>
-                    <option value={20}>Top 20</option>
-                    <option value={50}>Top 50</option>
-                  </select>
+                  <Select
+                    value={String(leaderboardLimit)}
+                    onChange={(v) => setLeaderboardLimit(Number(v))}
+                    options={LEADERBOARD_LIMIT_OPTIONS}
+                  />
                 </div>
               </div>
             </div>

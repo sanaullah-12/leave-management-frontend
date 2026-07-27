@@ -16,8 +16,16 @@ import AnimatedNumber from "../AnimatedNumber";
 import SubmitVoiceModal from "./SubmitVoiceModal";
 import { STATUS_META } from "../../lib/voiceMeta";
 
+// Neumorphic (soft-UI) card surface — matches the dashboard cards. Dual
+// shadows extrude the card from the page; hover deepens them (the lift itself
+// is driven by framer-motion's whileHover below).
 const cardShell =
-  "bg-gradient-to-br from-white to-slate-50/80 dark:from-gray-800/90 dark:to-gray-800/50 rounded-2xl shadow-[0_2px_8px_-2px_rgba(16,24,40,0.06),0_4px_16px_-4px_rgba(16,24,40,0.05)] ring-1 ring-gray-200/70 dark:ring-gray-700/60";
+  "group rounded-2xl bg-[var(--card-surface)] " +
+  "shadow-[7px_7px_16px_rgba(174,186,204,0.5),-7px_-7px_16px_rgba(255,255,255,0.95)] " +
+  "dark:shadow-[7px_7px_18px_rgba(0,0,0,0.55),-6px_-6px_16px_rgba(255,255,255,0.045)] " +
+  "transition-shadow duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] " +
+  "hover:shadow-[12px_12px_24px_rgba(174,186,204,0.6),-12px_-12px_24px_rgba(255,255,255,1)] " +
+  "dark:hover:shadow-[12px_12px_28px_rgba(0,0,0,0.7),-10px_-10px_24px_rgba(255,255,255,0.06)]";
 
 const MiniStat: React.FC<{
   label: string;
@@ -25,7 +33,7 @@ const MiniStat: React.FC<{
   icon: React.ReactNode;
   tile: string;
 }> = ({ label, value, icon, tile }) => (
-  <div className="flex items-center gap-2.5 rounded-xl border border-gray-100 bg-white/60 p-3 dark:border-gray-700/50 dark:bg-gray-800/40">
+  <div className="flex items-center gap-2.5 rounded-xl bg-[var(--card-surface)] p-3 shadow-[inset_2px_2px_5px_rgba(174,186,204,0.55),inset_-2px_-2px_5px_rgba(255,255,255,0.9)] dark:shadow-[inset_2px_2px_5px_rgba(0,0,0,0.55),inset_-2px_-2px_5px_rgba(255,255,255,0.05)]">
     <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${tile}`}>
       {icon}
     </span>
@@ -51,7 +59,7 @@ const EmployeeVoiceWidget: React.FC = () => {
   const header = (
     <div className="flex items-center justify-between px-5 pt-5 pb-3">
       <div className="flex items-center gap-2.5">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:-rotate-6">
           <MegaphoneIcon className="h-5 w-5" />
         </span>
         <div>
@@ -74,7 +82,11 @@ const EmployeeVoiceWidget: React.FC = () => {
 
   if (isAdmin) {
     return (
-      <motion.div whileHover={{ y: -2 }} className={cardShell}>
+      <motion.div
+        whileHover={{ y: -4 }}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        className={cardShell}
+      >
         {header}
         <div className="grid grid-cols-2 gap-2.5 px-5 pb-5 sm:grid-cols-4">
           <MiniStat
@@ -113,7 +125,11 @@ const EmployeeVoiceWidget: React.FC = () => {
 
   return (
     <>
-      <motion.div whileHover={{ y: -2 }} className={cardShell}>
+      <motion.div
+        whileHover={{ y: -4 }}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        className={cardShell}
+      >
         {header}
         <div className="flex items-center justify-between gap-4 px-5 pb-5">
           <div>

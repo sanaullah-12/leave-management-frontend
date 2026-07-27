@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { showSuccessToast, showErrorToast } from "../../utils/toastHelpers";
+import Select from "../ui/Select";
 import {
   BuildingOffice2Icon,
   GlobeAltIcon,
@@ -54,6 +55,10 @@ const TIMEZONES = [
   "(GMT+05:00) Pakistan Standard Time",
   "(GMT+05:30) India Standard Time",
 ];
+const INDUSTRY_OPTIONS = INDUSTRIES.map((i) => ({ value: i, label: i }));
+const TEAM_SIZE_OPTIONS = TEAM_SIZES.map((t) => ({ value: t, label: t }));
+const COUNTRY_OPTIONS = COUNTRIES.map((c) => ({ value: c, label: c }));
+const TIMEZONE_OPTIONS = TIMEZONES.map((t) => ({ value: t, label: t }));
 // Mon-first order for the day chips
 const DAYS = [
   { i: 1, label: "M" },
@@ -70,7 +75,7 @@ const inputClass =
 const labelClass =
   "mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400";
 const cardClass =
-  "rounded-2xl border border-gray-100 dark:border-gray-700/60 bg-white dark:bg-gray-800/50 shadow-sm";
+  "surface-card";
 
 const OrganizationProfile: React.FC = () => {
   const { user } = useAuth();
@@ -164,27 +169,21 @@ const OrganizationProfile: React.FC = () => {
             </div>
             <div>
               <label className={labelClass}>Industry</label>
-              <select
+              <Select
                 value={org.industry}
-                onChange={(e) => set("industry", e.target.value)}
-                className={inputClass}
-              >
-                {INDUSTRIES.map((i) => (
-                  <option key={i}>{i}</option>
-                ))}
-              </select>
+                onChange={(v) => set("industry", v)}
+                options={INDUSTRY_OPTIONS}
+                className="w-full"
+              />
             </div>
             <div>
               <label className={labelClass}>Team Size</label>
-              <select
+              <Select
                 value={org.teamSize}
-                onChange={(e) => set("teamSize", e.target.value)}
-                className={inputClass}
-              >
-                {TEAM_SIZES.map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
+                onChange={(v) => set("teamSize", v)}
+                options={TEAM_SIZE_OPTIONS}
+                className="w-full"
+              />
             </div>
           </div>
         </div>
@@ -200,27 +199,21 @@ const OrganizationProfile: React.FC = () => {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className={labelClass}>Country</label>
-              <select
+              <Select
                 value={org.country}
-                onChange={(e) => set("country", e.target.value)}
-                className={inputClass}
-              >
-                {COUNTRIES.map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </select>
+                onChange={(v) => set("country", v)}
+                options={COUNTRY_OPTIONS}
+                className="w-full"
+              />
             </div>
             <div>
               <label className={labelClass}>Timezone</label>
-              <select
+              <Select
                 value={org.timezone}
-                onChange={(e) => set("timezone", e.target.value)}
-                className={inputClass}
-              >
-                {TIMEZONES.map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
+                onChange={(v) => set("timezone", v)}
+                options={TIMEZONE_OPTIONS}
+                className="w-full"
+              />
             </div>
           </div>
 

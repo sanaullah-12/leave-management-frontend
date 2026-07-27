@@ -67,7 +67,7 @@ const DepartmentsPage: React.FC = () => {
           {departments.map((dept) => (
             <div
               key={dept.name}
-              className="hover-lift-card rounded-2xl border border-gray-100 dark:border-gray-700/60 bg-white dark:bg-gray-800/50 p-5 shadow-sm hover:shadow-md"
+              className="surface-card surface-card-interactive p-5"
             >
               <div className="flex items-start justify-between">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400">
@@ -113,7 +113,7 @@ const DepartmentsPage: React.FC = () => {
 };
 
 const EmptyState: React.FC<{ subtitle: string }> = ({ subtitle }) => (
-  <div className="rounded-2xl border border-gray-100 dark:border-gray-700/60 bg-white dark:bg-gray-800/50 py-16 text-center">
+  <div className="surface-card py-16 text-center">
     <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-700/60">
       <BuildingOffice2Icon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
     </div>

@@ -26,7 +26,7 @@ const ThemePage: React.FC = () => {
       {/* Settings card */}
       <motion.div
         variants={staggerItem}
-        className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-700/60 dark:bg-gray-800/50 sm:p-8"
+        className="surface-card p-6 sm:p-8"
       >
         <ThemeSelector />
       </motion.div>
@@ -34,7 +34,7 @@ const ThemePage: React.FC = () => {
       {/* Live preview */}
       <motion.div
         variants={staggerItem}
-        className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm dark:border-gray-700/60 dark:bg-gray-800/50 sm:flex-row sm:items-center sm:justify-between"
+        className="surface-card flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"
       >
         <div className="flex items-center gap-4">
           <AppLogo size={44} />

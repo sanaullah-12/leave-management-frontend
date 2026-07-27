@@ -6,6 +6,8 @@ import Avatar from "./Avatar";
 import NotificationBell from "./NotificationBell";
 import BrandedLoader from "./BrandedLoader";
 import AppLogo from "./AppLogo";
+import Dropdown from "./ui/Dropdown";
+import ThemeModal from "./ThemeModal";
 import VoiceNotificationToaster from "./voice/VoiceNotificationToaster";
 import { useNotifications } from "../hooks/useNotifications";
 import { pageVariants } from "../lib/motion";
@@ -58,6 +60,7 @@ const Layout: React.FC = () => {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const { unreadCount } = useNotifications({ limit: 12 });
@@ -306,7 +309,7 @@ const Layout: React.FC = () => {
   // ---- The icon rail ----
   const renderRail = () => (
     <div
-      className="flex h-full w-16 flex-col items-center bg-white dark:bg-gray-900"
+      className="flex h-full w-16 flex-col items-center bg-white/70 backdrop-blur-xl dark:bg-gray-900/50"
       style={{ backgroundImage: "linear-gradient(var(--accent-wash), var(--accent-wash))" }}
     >
       <Link
@@ -388,8 +391,9 @@ const Layout: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen">
       <VoiceNotificationToaster />
+      <ThemeModal open={themeOpen} onClose={() => setThemeOpen(false)} />
 
       {/* ============ Desktop two-pane sidebar ============ */}
       <div
@@ -399,7 +403,7 @@ const Layout: React.FC = () => {
       >
         {renderRail()}
         {!collapsed && (
-          <div className="w-60 border-r border-black/5 bg-white dark:border-white/5 dark:bg-gray-900">
+          <div className="w-60 border-r border-black/5 bg-white/70 backdrop-blur-xl dark:border-white/5 dark:bg-gray-900/50">
             {renderPanelBody(undefined, true)}
           </div>
         )}
@@ -434,7 +438,12 @@ const Layout: React.FC = () => {
         <button onClick={() => setMobileOpen(true)} className="text-gray-600 dark:text-gray-300" aria-label="Open menu">
           <Bars3Icon className="h-6 w-6" />
         </button>
-        <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">LeaveFlow</h1>
+        <h1 className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
+          LeaveFlow
+          <span className="rounded-md bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+            HRMS
+          </span>
+        </h1>
         <div className="flex items-center space-x-3">
           <NotificationBell />
           <button onClick={logout} className="text-gray-600 dark:text-gray-300" aria-label="Logout">
@@ -461,20 +470,50 @@ const Layout: React.FC = () => {
         <div className="flex items-center space-x-4">
           <NotificationBell />
           <div className="h-8 w-px bg-gray-200 dark:bg-gray-700" />
-          <Link to="/profile" className="group flex items-center space-x-3 rounded-lg p-2 transition-all hover-theme">
+          <Dropdown
+            align="right"
+            widthClass="w-64"
+            showChevron
+            bareButton
+            buttonClassName="group flex items-center gap-2.5 rounded-xl p-1.5 pr-2.5 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+            header={
+              <div className="flex items-center gap-3">
+                <Avatar src={user?.profilePicture} name={user?.name} size="sm" />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {user?.name}
+                  </p>
+                  <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+                    {user?.email}
+                  </p>
+                </div>
+              </div>
+            }
+            sections={[
+              {
+                items: [
+                  { label: "Manage Account", icon: Cog6ToothIcon, onClick: () => navigate("/profile") },
+                  { label: "Theme", icon: SwatchIcon, onClick: () => setThemeOpen(true) },
+                  { label: "Notifications", icon: BellIcon, onClick: () => navigate("/notifications") },
+                ],
+              },
+              {
+                items: [
+                  { label: "Logout", icon: ArrowRightOnRectangleIcon, danger: true, onClick: logout },
+                ],
+              },
+            ]}
+          >
             <Avatar src={user?.profilePicture} name={user?.name} size="sm" />
-            <span className="text-sm font-medium text-gray-900 group-hover:opacity-80 dark:text-gray-100">
+            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
               {user?.name}
             </span>
-          </Link>
-          <button onClick={logout} className="rounded-lg p-2 text-gray-600 transition-all hover-theme dark:text-gray-300" title="Logout">
-            <ArrowRightOnRectangleIcon className="h-5 w-5" />
-          </button>
+          </Dropdown>
         </div>
       </header>
 
       {/* ============ Main content ============ */}
-      <main className={`min-h-screen overflow-y-auto bg-gray-50 pt-16 transition-[margin] duration-300 dark:bg-gray-900 ${mainOffset}`}>
+      <main className={`min-h-screen overflow-y-auto pt-16 transition-[margin] duration-300 ${mainOffset}`}>
         <div className="p-4 lg:p-8">
           <div className="mx-auto max-w-7xl">
             <motion.div key={location.pathname} variants={pageVariants} initial="initial" animate="animate">

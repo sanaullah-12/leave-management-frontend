@@ -196,7 +196,7 @@ export const leavesAPI = {
   // Leave Policy Management
   getLeavePolicy: () => api.get("/leaves/policy"),
 
-  updateLeavePolicy: (policy: any) => api.put("/leaves/policy", policy),
+  updateLeavePolicy: (policy: any) => api.put("/leaves/policy", { policy }),
 
   updateEmployeeLeaveAllocation: (employeeId: string, allocations: any) =>
     api.put(`/leaves/allocation/${employeeId}`, { allocations }),

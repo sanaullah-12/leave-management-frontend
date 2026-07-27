@@ -37,7 +37,7 @@ const StatChip: React.FC<{
   icon: React.ReactNode;
   tile: string;
 }> = ({ label, value, icon, tile }) => (
-  <div className="flex items-center gap-3 rounded-2xl bg-gradient-to-br from-white to-slate-50/80 p-4 shadow-[0_2px_8px_-2px_rgba(16,24,40,0.06),0_4px_16px_-4px_rgba(16,24,40,0.05)] ring-1 ring-gray-200/70 dark:from-gray-800/90 dark:to-gray-800/50 dark:ring-gray-700/60">
+  <div className="flex items-center gap-3 surface-card p-4">
     <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${tile}`}>
       {icon}
     </span>
@@ -63,7 +63,7 @@ const VoiceCard: React.FC<{
       variants={staggerItem}
       onClick={onOpen}
       whileHover={{ y: -2 }}
-      className="flex w-full items-start gap-4 rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm transition-shadow hover:shadow-md dark:border-gray-700/60 dark:bg-gray-800/50"
+      className="flex w-full items-start gap-4 surface-card surface-card-interactive p-4 text-left"
     >
       <span
         className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl ${cat.tile}`}
@@ -257,7 +257,7 @@ const EmployeeVoicePage: React.FC = () => {
       ) : voices.length === 0 ? (
         <motion.div
           variants={staggerItem}
-          className="rounded-2xl border border-gray-100 bg-white py-16 text-center dark:border-gray-700/60 dark:bg-gray-800/50"
+          className="surface-card py-16 text-center"
         >
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-blue-500 dark:bg-blue-500/10">
             <MegaphoneIcon className="h-8 w-8" />

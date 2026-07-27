@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { getHoliday } from "../data/holidays";
 import { showLeaveSubmissionSuccess, showErrorToast } from "../utils/toastHelpers";
 import Modal from "./ui/Modal";
+import DatePicker from "./ui/DatePicker";
 import {
   CalendarDaysIcon,
   SunIcon,
@@ -385,25 +386,23 @@ const ApplyLeaveModal: React.FC<ApplyLeaveModalProps> = ({ open, onClose }) => {
                   <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">
                     Start Date
                   </label>
-                  <input
-                    type="date"
-                    min={today}
+                  <DatePicker
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className={inputClass}
+                    onChange={setStartDate}
+                    min={today}
+                    placeholder="Select date"
                   />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs text-gray-500 dark:text-gray-400">
                     End Date
                   </label>
-                  <input
-                    type="date"
-                    min={startDate || today}
+                  <DatePicker
                     value={halfDay ? startDate : endDate}
+                    onChange={setEndDate}
+                    min={startDate || today}
                     disabled={halfDay}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className={`${inputClass} disabled:opacity-50`}
+                    placeholder="Select date"
                   />
                 </div>
               </div>

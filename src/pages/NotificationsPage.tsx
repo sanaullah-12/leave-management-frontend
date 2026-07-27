@@ -60,7 +60,7 @@ const NotificationsPage: React.FC = () => {
       {notifications.length === 0 ? (
         <motion.div
           variants={staggerItem}
-          className="rounded-2xl border border-gray-100 bg-white py-16 text-center dark:border-gray-700/60 dark:bg-gray-800/50"
+          className="surface-card py-16 text-center"
         >
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-700/60">
             <BellIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
@@ -75,7 +75,7 @@ const NotificationsPage: React.FC = () => {
       ) : (
         <motion.div
           variants={staggerItem}
-          className="divide-y divide-gray-100 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:divide-gray-700/50 dark:border-gray-700/60 dark:bg-gray-800/50"
+          className="surface-card divide-y divide-gray-100 overflow-hidden dark:divide-gray-700/50"
         >
           {notifications.map((n) => {
             const meta = NOTIFICATION_META[n.type];

@@ -26,6 +26,95 @@
     letter-spacing: -0.006em;
   }
 
+  /* ============================================================ */
+  /* 📌 Theme-aware ambient app background                         */
+  /* A fixed layer behind all content. Soft radial "glows" use the */
+  /* active theme's accent scale (--blue-* is remapped per theme), */
+  /* so the background turns blue/green/purple/… with the theme.   */
+  /* Content surfaces above it are left transparent to reveal it.  */
+  /* ============================================================ */
+  /* Coordinated surface palette — background and cards share ONE blue-gray
+     tonal family. The card surface is exactly one gentle elevation step above
+     the app background, so cards read as extruded from the same sheet (soft-UI)
+     and sit harmoniously on the accent-tinted ambient background. */
+  :root {
+    --app-bg: #e9edf5;
+    --card-surface: #ffffff;
+    /* Legacy surface tokens now alias the coordinated palette so any element
+       using them recolors with the scheme. */
+    --surface: var(--app-bg);
+    --surface-elevated: var(--card-surface);
+  }
+  html.dark {
+    --app-bg: #0f1420;
+    --card-surface: #1a2130;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--app-bg);
+    background-image:
+      radial-gradient(58rem 48rem at 92% -8%, rgb(var(--blue-400) / 0.16), transparent 62%),
+      radial-gradient(48rem 42rem at -8% 108%, rgb(var(--blue-500) / 0.11), transparent 58%);
+    transition: background-color 0.4s ease;
+  }
+
+  html.dark body::before {
+    background-image:
+      radial-gradient(58rem 50rem at 90% -8%, rgb(var(--blue-500) / 0.16), transparent 62%),
+      radial-gradient(50rem 44rem at -8% 108%, rgb(var(--blue-600) / 0.13), transparent 60%),
+      radial-gradient(72rem 72rem at 50% 124%, rgb(var(--blue-400) / 0.05), transparent 72%);
+  }
+
+  /* ============================================================ */
+  /* 📌 App-wide dark surface unification                          */
+  /* Remap every dark gray-800/900 surface utility to the          */
+  /* coordinated blue-gray palette (card = 26 33 48, base = 15 20  */
+  /* 32), so all pages/panels/modals match the dashboard + ambient */
+  /* background. Higher specificity (html.dark) beats Tailwind's    */
+  /* (.dark) rules; per-element opacity is preserved.              */
+  /* Light mode already matches (white cards on the light base).   */
+  /* ============================================================ */
+  html.dark .dark\:bg-gray-800        { background-color: rgb(26 33 48 / var(--tw-bg-opacity, 1)); }
+  html.dark .dark\:bg-gray-800\/40    { background-color: rgb(26 33 48 / 0.4); }
+  html.dark .dark\:bg-gray-800\/50    { background-color: rgb(26 33 48 / 0.5); }
+  html.dark .dark\:bg-gray-800\/60    { background-color: rgb(26 33 48 / 0.6); }
+  html.dark .dark\:bg-gray-800\/70    { background-color: rgb(26 33 48 / 0.7); }
+  html.dark .dark\:bg-gray-800\/80    { background-color: rgb(26 33 48 / 0.8); }
+  html.dark .dark\:bg-gray-800\/90    { background-color: rgb(26 33 48 / 0.9); }
+
+  html.dark .dark\:bg-gray-900        { background-color: rgb(15 20 32 / var(--tw-bg-opacity, 1)); }
+  html.dark .dark\:bg-gray-900\/20    { background-color: rgb(15 20 32 / 0.2); }
+  html.dark .dark\:bg-gray-900\/30    { background-color: rgb(15 20 32 / 0.3); }
+  html.dark .dark\:bg-gray-900\/40    { background-color: rgb(15 20 32 / 0.4); }
+  html.dark .dark\:bg-gray-900\/50    { background-color: rgb(15 20 32 / 0.5); }
+  html.dark .dark\:bg-gray-900\/55    { background-color: rgb(15 20 32 / 0.55); }
+  html.dark .dark\:bg-gray-900\/60    { background-color: rgb(15 20 32 / 0.6); }
+  html.dark .dark\:bg-gray-900\/70    { background-color: rgb(15 20 32 / 0.7); }
+  html.dark .dark\:bg-gray-900\/80    { background-color: rgb(15 20 32 / 0.8); }
+  html.dark .dark\:bg-gray-900\/95    { background-color: rgb(15 20 32 / 0.95); }
+
+  /* Gradient card shells — remap the gray-800/900 colour stops to the same
+     palette (opacity + gradient positions preserved). */
+  html.dark .dark\:from-gray-800      { --tw-gradient-from: #1a2130 var(--tw-gradient-from-position); }
+  html.dark .dark\:from-gray-800\/40  { --tw-gradient-from: rgb(26 33 48 / 0.4) var(--tw-gradient-from-position); }
+  html.dark .dark\:from-gray-800\/90  { --tw-gradient-from: rgb(26 33 48 / 0.9) var(--tw-gradient-from-position); }
+  html.dark .dark\:from-gray-900      { --tw-gradient-from: #0f1420 var(--tw-gradient-from-position); }
+  html.dark .dark\:from-gray-900\/20  { --tw-gradient-from: rgb(15 20 32 / 0.2) var(--tw-gradient-from-position); }
+  html.dark .dark\:to-gray-800        { --tw-gradient-to: #1a2130 var(--tw-gradient-to-position); }
+  html.dark .dark\:to-gray-800\/50    { --tw-gradient-to: rgb(26 33 48 / 0.5) var(--tw-gradient-to-position); }
+  html.dark .dark\:to-gray-900\/20    { --tw-gradient-to: rgb(15 20 32 / 0.2) var(--tw-gradient-to-position); }
+
+  /* Shared component card classes (use @apply'd dark:bg-gray-800/900 which the
+     utility remap above can't reach) — recolor them explicitly. */
+  html.dark .card,
+  html.dark .card-elevated,
+  html.dark .dashboard-card { background-color: var(--card-surface); }
+
   /* ============================= */
   /* 📌 Heading hierarchy defaults */
   /* Unstyled headings inherit a premium, tightened scale */
@@ -317,5 +406,77 @@
 
   .skeleton-avatar {
     @apply skeleton w-10 h-10 rounded-full;
+  }
+
+  /* ============================================================ */
+  /* 📌 Unified neumorphic card system (app-wide)                  */
+  /* One soft-UI surface shared by the dashboard, reports, team,   */
+  /* and every legacy .card/.card-elevated/.dashboard-card. Use    */
+  /* .surface-card on any container to get the dashboard card look;*/
+  /* add .surface-card-interactive for the hover lift.             */
+  /* ============================================================ */
+  .surface-card,
+  .card,
+  .card-elevated,
+  .dashboard-card {
+    background-color: var(--card-surface);
+    border: none;
+    border-radius: 1rem; /* rounded-2xl */
+    box-shadow: 7px 7px 16px rgba(174, 186, 204, 0.5),
+      -7px -7px 16px rgba(255, 255, 255, 0.95);
+  }
+  .dark .surface-card,
+  .dark .card,
+  .dark .card-elevated,
+  .dark .dashboard-card {
+    box-shadow: 7px 7px 18px rgba(0, 0, 0, 0.55),
+      -6px -6px 16px rgba(255, 255, 255, 0.045);
+  }
+
+  /* Opt-in hover lift for clickable cards */
+  .surface-card-interactive {
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+  .surface-card-interactive:hover {
+    transform: translateY(-4px);
+    box-shadow: 12px 12px 24px rgba(174, 186, 204, 0.6),
+      -12px -12px 24px rgba(255, 255, 255, 1);
+  }
+  .dark .surface-card-interactive:hover {
+    box-shadow: 12px 12px 28px rgba(0, 0, 0, 0.7),
+      -10px -10px 24px rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* ============================================================ */
+/* 📌 Animated "HRMS" brand gradient text                        */
+/* A continuously flowing gradient sheen for the HRMS wordmark.  */
+/* ============================================================ */
+@keyframes hrms-sheen {
+  to {
+    background-position: 200% center;
+  }
+}
+.hrms-gradient {
+  background-image: linear-gradient(
+    90deg,
+    #60a5fa,
+    #34d399,
+    #a78bfa,
+    #60a5fa
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: hrms-sheen 5s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hrms-gradient {
+    animation: none;
   }
 }
