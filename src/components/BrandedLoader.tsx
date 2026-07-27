@@ -85,7 +85,7 @@ const BrandedLoader: React.FC<BrandedLoaderProps> = ({
       {/* Logo mark */}
       <div className="relative z-10 flex flex-col items-center">
         <div className="animate-breathe">
-          <AppLogo size={80} />
+          <AppLogo size={104} />
         </div>
 
         {/* Wordmark */}

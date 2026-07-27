@@ -9,6 +9,7 @@ import { HeaderSkeleton, TableSkeleton } from "../components/Skeletons";
 import EmployeeInviteModal from "../components/EmployeeInviteModal";
 import AdminInviteModal from "../components/AdminInviteModal";
 import Avatar from "../components/Avatar";
+import DatePicker from "../components/ui/DatePicker";
 import {
   PlusIcon,
   UserIcon,
@@ -44,7 +45,6 @@ const EmployeesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [isSearchActive, setIsSearchActive] = useState(false);
 
   const {
     data: employeesData,
@@ -196,17 +196,6 @@ const EmployeesPage: React.FC = () => {
     setError(""); // Clear any previous errors when opening modal
   };
 
-  const handleSearch = () => {
-    setIsSearchActive(true);
-  };
-
-  const handleClearSearch = () => {
-    setSearchTerm("");
-    setDateFrom("");
-    setDateTo("");
-    setIsSearchActive(false);
-  };
-
   const handleGenerateReport = (employee: any) => {
     localStorage.setItem(
       "selectedEmployeeReport",
@@ -327,13 +316,16 @@ const EmployeesPage: React.FC = () => {
             <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
               Search Employee
             </label>
-            <input
-              type="text"
-              placeholder="Name, email, or ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-field w-full"
-            />
+            <div className="relative">
+              <MagnifyingGlassIcon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Name, email, or ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full rounded-xl bg-[var(--card-surface)] py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none ring-1 ring-inset ring-gray-200/70 transition-shadow focus:ring-2 focus:ring-blue-500/50 dark:text-gray-100 dark:ring-white/10"
+              />
+            </div>
           </div>
 
           {/* Start Date */}
@@ -341,11 +333,10 @@ const EmployeesPage: React.FC = () => {
             <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
               Start Date (for reports)
             </label>
-            <input
-              type="date"
+            <DatePicker
               value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              className="input-field w-full"
+              onChange={setDateFrom}
+              className="w-full"
             />
           </div>
 
@@ -354,35 +345,36 @@ const EmployeesPage: React.FC = () => {
             <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
               End Date (for reports)
             </label>
-            <input
-              type="date"
+            <DatePicker
               value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              className="input-field w-full"
+              onChange={setDateTo}
+              className="w-full"
             />
           </div>
 
-          {/* Buttons */}
-          <div className="flex flex-col justify-end space-y-2">
+          {/* Report button */}
+          <div className="flex flex-col justify-end">
+            <label className="mb-2 block text-sm font-medium text-transparent select-none">
+              Report
+            </label>
             <button
-              onClick={handleSearch}
-              className="btn-primary inline-flex items-center justify-center"
+              onClick={() => {
+                const emp = filteredUsers[0];
+                if (!emp) {
+                  alert("No matching employee found to generate a report.");
+                  return;
+                }
+                handleGenerateReport(emp);
+              }}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-md"
             >
-              <MagnifyingGlassIcon className="h-4 w-4 mr-2" />
-              Search
+              <DocumentChartBarIcon className="h-4 w-4" />
+              Generate Report
             </button>
-            {(searchTerm || dateFrom || dateTo) && (
-              <button
-                onClick={handleClearSearch}
-                className="btn-secondary text-sm"
-              >
-                Clear Filters
-              </button>
-            )}
           </div>
         </div>
 
-        {isSearchActive && (
+        {(searchTerm || dateFrom || dateTo) && (
           <div className="mt-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-900">
             <p className="text-sm text-gray-600 dark:text-gray-300">
               Found {filteredUsers.length}{" "}
@@ -487,7 +479,7 @@ const EmployeesPage: React.FC = () => {
       )}
 
       {/* Employees Section */}
-      <div className="mt-8 bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/60 overflow-hidden">
+      <div className="mt-8 surface-card backdrop-blur-sm overflow-hidden">
         {filteredUsers.length > 0 ? (
           <>
             {/* Desktop Table */}

@@ -16,6 +16,8 @@ import {
 import { attendanceAPI } from "../services/api";
 import AttendanceModal from "../components/AttendanceModal";
 import EmployeeRow from "../components/EmployeeRow";
+import Select from "../components/ui/Select";
+import DatePicker from "../components/ui/DatePicker";
 import "../styles/design-system.css";
 
 interface MachineConnection {
@@ -663,18 +665,21 @@ const AttendancePage: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Select Machine IP Address
                 </label>
-                <select
+                <Select
                   value={selectedIP}
-                  onChange={(e) => setSelectedIP(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-gray-100"
-                >
-                  {predefinedIPs.map((ip) => (
-                    <option key={ip} value={ip}>
-                      {ip} {ip === "192.168.1.201" ? "(Default Machine)" : ""}
-                    </option>
-                  ))}
-                  <option value="custom">Custom IP Address</option>
-                </select>
+                  onChange={setSelectedIP}
+                  className="w-full"
+                  options={[
+                    ...predefinedIPs.map((ip) => ({
+                      value: ip,
+                      label:
+                        ip === "192.168.1.201"
+                          ? `${ip} (Default Machine)`
+                          : ip,
+                    })),
+                    { value: "custom", label: "Custom IP Address" },
+                  ]}
+                />
               </div>
 
               {selectedIP === "custom" && (
@@ -808,22 +813,20 @@ const AttendancePage: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Start Date
                   </label>
-                  <input
-                    type="date"
+                  <DatePicker
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    onChange={setStartDate}
+                    className="w-full"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     End Date
                   </label>
-                  <input
-                    type="date"
+                  <DatePicker
                     value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    onChange={setEndDate}
+                    className="w-full"
                   />
                 </div>
                 <div className="flex items-end">
@@ -869,7 +872,7 @@ const AttendancePage: React.FC = () => {
             </div>
 
             {/* Employee Time Settings */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 mt-6">
+            <div className="surface-card rounded-lg p-4 mt-6">
               <div className="flex items-center space-x-3 mb-4">
                 <ClockIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 <div>

@@ -9,7 +9,6 @@ import {
   showLeaveRejectionSuccess,
 } from "../utils/toastHelpers";
 import Avatar from "../components/Avatar";
-import ApplyLeaveModal from "../components/ApplyLeaveModal";
 import Modal from "../components/ui/Modal";
 import InlineLoader from "../components/InlineLoader";
 import { HeaderSkeleton, TableSkeleton } from "../components/Skeletons";
@@ -29,7 +28,6 @@ const LeavesPage: React.FC = () => {
   const queryClient = useQueryClient();
   // const { addNotification } = useNotifications(); // Removed for Socket.IO implementation
   const [searchParams] = useSearchParams();
-  const [showForm, setShowForm] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [showRejectionPopup, setShowRejectionPopup] = useState(false);
   const [selectedLeaveId, setSelectedLeaveId] = useState("");
@@ -352,7 +350,7 @@ const LeavesPage: React.FC = () => {
 
           {user?.role === "employee" && (
             <button
-              onClick={() => setShowForm(true)}
+              onClick={() => navigate("/apply-leave")}
               className="btn-primary inline-flex items-center"
             >
               <PlusIcon className="h-5 w-5 mr-2" />
@@ -386,7 +384,7 @@ const LeavesPage: React.FC = () => {
 
 
       {/* Leave Requests Section */}
-      <div className="mt-8 bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/60 overflow-hidden">
+      <div className="mt-8 backdrop-blur-sm surface-card overflow-hidden">
         {leaves.length > 0 ? (
           <>
             {/* Desktop Table View - Hidden on mobile */}
@@ -855,9 +853,6 @@ const LeavesPage: React.FC = () => {
           </div>
         </div>
       </Modal>
-
-      {/* Premium Apply Leave modal */}
-      <ApplyLeaveModal open={showForm} onClose={() => setShowForm(false)} />
     </div>
   );
 };

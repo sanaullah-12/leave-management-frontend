@@ -139,7 +139,7 @@ const LeaveCalendarPage: React.FC = () => {
       </div>
 
       {/* Calendar grid */}
-      <div className="rounded-2xl border border-gray-100 dark:border-gray-700/60 bg-white dark:bg-gray-800/50 shadow-sm overflow-hidden">
+      <div className="surface-card overflow-hidden">
         <div className="grid grid-cols-7 border-b border-gray-100 dark:border-gray-700/60">
           {WEEKDAYS.map((d) => (
             <div
@@ -226,7 +226,7 @@ const LeaveCalendarPage: React.FC = () => {
 
       {/* Public holidays this month */}
       {monthHolidays.length > 0 && (
-        <div className="rounded-2xl border border-gray-100 dark:border-gray-700/60 bg-white dark:bg-gray-800/50 p-5 shadow-sm">
+        <div className="surface-card p-5">
           <h2 className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
             <SparklesIcon className="h-4 w-4 text-rose-500" />
             Public holidays in {format(cursor, "MMMM yyyy")}

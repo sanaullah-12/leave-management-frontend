@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useQuery } from "@tanstack/react-query";
@@ -9,9 +9,9 @@ import Avatar from "../components/Avatar";
 import { getUpcomingHolidays } from "../data/holidays";
 import AnimatedNumber from "../components/AnimatedNumber";
 import { DashboardSkeleton, StatCardsSkeleton } from "../components/Skeletons";
-import ApplyLeaveModal from "../components/ApplyLeaveModal";
 import { motion } from "framer-motion";
 import MeshBackground from "../components/MeshBackground";
+import EmployeeVoiceWidget from "../components/voice/EmployeeVoiceWidget";
 import { staggerContainer, staggerItem } from "../lib/motion";
 import {
   UsersIcon,
@@ -23,10 +23,15 @@ import {
   PlusIcon,
   BoltIcon,
   ArrowUpRightIcon,
+  ChartBarIcon,
+  SunIcon,
 } from "@heroicons/react/24/outline";
 import {
   AreaChart,
   Area,
+  BarChart,
+  Bar,
+  Cell,
   XAxis,
   ResponsiveContainer,
   Tooltip,
@@ -34,144 +39,176 @@ import {
 import "../styles/design-system.css";
 
 /* ------------------------------------------------------------------ */
+/*  The layout/UX below adopts the structure of a modern analytics     */
+/*  dashboard (4-up KPI row → hero + gauges → chart + breakdown →       */
+/*  activity + timeline). Colours follow the app's theme system via     */
+/*  blue-* utilities (which recolour per theme) + the accent hex; the   */
+/*  Geist type scale comes from the semantic .text-* classes.           */
+/* ------------------------------------------------------------------ */
+
+// Primary accent hex per color theme — used for the parts that can't be
+// styled with CSS classes (SVG chart stroke/gradient, gauge/ring stroke).
+// Keep these in sync with tailwind.config.js *-600 values.
+const THEME_ACCENT: Record<string, string> = {
+  black: "#374151",
+  purple: "#9c5fd1",
+  blue: "#2563eb",
+  pink: "#db2777",
+  violet: "#7c3aed",
+  indigo: "#4f46e5",
+  orange: "#ea580c",
+  teal: "#0d9488",
+  bronze: "#b45309",
+  mint: "#10b981",
+};
+
+// Shared neumorphic (soft-UI) card surface. Dual shadows — a dark shadow
+// bottom-right + a light highlight top-left — make the card read as extruded
+// from the page surface. Tuned separately for light and dark mode.
+const CARD =
+  "rounded-2xl bg-[var(--card-surface)] " +
+  "shadow-[7px_7px_16px_rgba(174,186,204,0.5),-7px_-7px_16px_rgba(255,255,255,0.95)] " +
+  "dark:shadow-[7px_7px_18px_rgba(0,0,0,0.55),-6px_-6px_16px_rgba(255,255,255,0.045)]";
+
+// Hover: lift + the shadows spread/deepen so the card appears to rise off the
+// surface. Smooth easing matches the app's motion tokens.
+const CARD_HOVER =
+  "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 " +
+  "hover:shadow-[12px_12px_24px_rgba(174,186,204,0.6),-12px_-12px_24px_rgba(255,255,255,1)] " +
+  "dark:hover:shadow-[12px_12px_28px_rgba(0,0,0,0.7),-10px_-10px_24px_rgba(255,255,255,0.06)]";
+
+/* ------------------------------------------------------------------ */
 /*  Presentational helpers — visual only, data is passed in            */
 /* ------------------------------------------------------------------ */
 
-type RingColor = "blue" | "amber" | "slate";
-
-// Primary accent hex per color theme — used for the parts that can't be
-// styled with CSS classes (SVG chart stroke/gradient, progress-ring stroke).
-// Keep these in sync with tailwind.config.js *-600 values.
-const THEME_ACCENT: Record<string, string> = {
-  blue: "#2563eb",
-  indigo: "#4f46e5",
-  purple: "#9c5fd1",
-  green: "#16a34a",
-  custom: "#0284c7",
-};
-
-const RING_STYLES: Record<
-  RingColor,
-  { stroke: string; text: string; iconBg: string; iconText: string }
-> = {
-  blue: {
-    // stroke is overridden at runtime with the active theme accent
-    stroke: "#2563eb",
-    text: "text-blue-600 dark:text-blue-400",
-    iconBg: "bg-blue-50 dark:bg-blue-500/10",
-    iconText: "text-blue-600 dark:text-blue-400",
-  },
-  amber: {
-    stroke: "#ea580c",
-    text: "text-orange-600 dark:text-orange-400",
-    iconBg: "bg-orange-50 dark:bg-orange-500/10",
-    iconText: "text-orange-600 dark:text-orange-400",
-  },
-  slate: {
-    stroke: "#64748b",
-    text: "text-slate-600 dark:text-slate-300",
-    iconBg: "bg-slate-100 dark:bg-slate-500/10",
-    iconText: "text-slate-500 dark:text-slate-300",
-  },
-};
-
-// A leave-balance / stat card with a progress ring, matching the design.
-const RingStatCard: React.FC<{
+// Compact KPI tile: label + big value on the left, accent icon chip on
+// the right, supporting caption below. Mirrors the reference top row.
+const KpiCard: React.FC<{
   label: string;
   value: number | string;
-  total?: number | string;
+  suffix?: string;
   caption: string;
-  percent: number; // 0..100 filled portion of the ring
-  color: RingColor;
   icon: React.ReactNode;
   onClick?: () => void;
-  strokeOverride?: string; // theme accent, used only for the "blue" ring
-}> = ({
-  label,
-  value,
-  total,
-  caption,
-  percent,
-  color,
-  icon,
-  onClick,
-  strokeOverride,
-}) => {
-  const s = RING_STYLES[color];
-  const strokeColor =
-    color === "blue" && strokeOverride ? strokeOverride : s.stroke;
-  const dash = Math.max(0, Math.min(100, percent));
-  return (
-    <div
-      onClick={onClick}
-      className={`bg-gradient-to-br from-white to-slate-50/80 dark:from-gray-800/90 dark:to-gray-800/50 rounded-2xl p-5 shadow-[0_2px_8px_-2px_rgba(16,24,40,0.06),0_4px_16px_-4px_rgba(16,24,40,0.05)] ring-1 ring-gray-200/70 dark:ring-gray-700/60 transition-all duration-300 hover:shadow-[0_8px_24px_-6px_rgba(16,24,40,0.12)] ${
-        onClick ? "cursor-pointer hover:-translate-y-0.5" : ""
-      }`}
-    >
-      <div className="flex items-center justify-between">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-            {label}
-          </p>
-          <p className="mt-2 flex items-baseline gap-1">
-            <span className={`text-3xl font-bold tabular-nums ${s.text}`}>
-              {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
+}> = ({ label, value, suffix, caption, icon, onClick }) => (
+  <div
+    onClick={onClick}
+    className={`group ${CARD} ${CARD_HOVER} p-5 ${
+      onClick ? "cursor-pointer" : ""
+    }`}
+  >
+    <div className="flex items-start justify-between gap-3">
+      <div className="min-w-0">
+        <p className="text-overline text-gray-400 dark:text-gray-500">{label}</p>
+        <p className="mt-2 flex items-baseline gap-1">
+          <span className="text-2xl sm:text-3xl font-bold tabular-nums text-gray-900 dark:text-white">
+            {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
+          </span>
+          {suffix && (
+            <span className="text-sm font-medium text-gray-400 dark:text-gray-500">
+              {suffix}
             </span>
-            {total !== undefined && (
-              <span className="text-sm font-medium text-gray-400 dark:text-gray-500">
-                / {total}
-              </span>
-            )}
-          </p>
-          <p className="mt-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-            {caption}
-          </p>
-        </div>
+          )}
+        </p>
+      </div>
+      <div className="flex-shrink-0 grid place-items-center w-11 h-11 rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-600/20 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:-rotate-3">
+        {icon}
+      </div>
+    </div>
+    <p className="mt-3 text-xs font-medium text-gray-500 dark:text-gray-400">
+      {caption}
+    </p>
+  </div>
+);
 
-        {/* Progress ring with centered icon */}
-        <div className="relative flex-shrink-0 w-16 h-16">
-          <svg className="w-16 h-16 -rotate-90" viewBox="0 0 36 36">
-            <path
-              className="stroke-gray-100 dark:stroke-gray-700"
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-              fill="none"
-              strokeWidth="3"
-            />
-            <path
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-              fill="none"
-              stroke={strokeColor}
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeDasharray={`${dash}, 100`}
-              style={{ transition: "stroke-dasharray 0.6s ease" }}
-            />
-          </svg>
-          <div
-            className={`absolute inset-0 flex items-center justify-center ${s.iconText}`}
-          >
-            {icon}
-          </div>
+// Semicircle gauge card — replaces the reference "Satisfaction / Referral"
+// gauges with a real leave metric. pathLength normalises the arc to 0..100.
+const SemiGauge: React.FC<{
+  label: string;
+  percent: number;
+  big: React.ReactNode;
+  small?: string;
+  accent: string;
+}> = ({ label, percent, big, small, accent }) => {
+  const p = Math.max(0, Math.min(100, percent));
+  const ARC = "M8 52 A 42 42 0 0 1 92 52";
+  return (
+    <div className={`${CARD} ${CARD_HOVER} p-5 flex flex-col`}>
+      <p className="text-overline text-gray-500 dark:text-gray-400">{label}</p>
+      <div className="relative mt-3 flex-1">
+        <svg viewBox="0 0 100 58" className="w-full">
+          <path
+            className="stroke-gray-100 dark:stroke-gray-700"
+            d={ARC}
+            fill="none"
+            strokeWidth="9"
+            strokeLinecap="round"
+            pathLength={100}
+          />
+          <path
+            d={ARC}
+            fill="none"
+            stroke={accent}
+            strokeWidth="9"
+            strokeLinecap="round"
+            pathLength={100}
+            strokeDasharray={`${p} 100`}
+            style={{ transition: "stroke-dasharray 0.7s ease" }}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-end pb-1">
+          <span className="text-2xl font-bold tabular-nums text-gray-900 dark:text-white leading-none">
+            {big}
+          </span>
+          {small && (
+            <span className="mt-1 text-[11px] font-medium text-gray-500 dark:text-gray-400">
+              {small}
+            </span>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-// Small card shell used by the right-column widgets.
+// Small mini-stat tile used in the "Leave by Type" panel footer — mirrors
+// the reference "Active Users" stat row.
+const MiniStat: React.FC<{
+  label: string;
+  value: number;
+  icon: React.ReactNode;
+  accent: string;
+}> = ({ label, value, icon, accent }) => (
+  <div>
+    <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
+      <span style={{ color: accent }}>{icon}</span>
+      <span className="text-[11px] font-medium">{label}</span>
+    </div>
+    <p className="mt-1 text-lg font-bold tabular-nums text-gray-900 dark:text-white">
+      <AnimatedNumber value={value} />
+    </p>
+    <div className="mt-1.5 h-1.5 rounded-full bg-gray-200/70 dark:bg-gray-900/60 overflow-hidden shadow-[inset_1px_1px_2px_rgba(0,0,0,0.12),inset_-1px_-1px_2px_rgba(255,255,255,0.7)] dark:shadow-[inset_1px_1px_2px_rgba(0,0,0,0.5)]">
+      <div
+        className="h-full rounded-full"
+        style={{
+          width: `${Math.min(100, value === 0 ? 6 : 40 + (value % 60))}%`,
+          backgroundColor: accent,
+        }}
+      />
+    </div>
+  </div>
+);
+
+// Small card shell used by the widget panels.
 const PanelCard: React.FC<{
   title: string;
   action?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
 }> = ({ title, action, children, className = "" }) => (
-  <div
-    className={`bg-gradient-to-br from-white to-slate-50/80 dark:from-gray-800/90 dark:to-gray-800/50 rounded-2xl shadow-[0_2px_8px_-2px_rgba(16,24,40,0.06),0_4px_16px_-4px_rgba(16,24,40,0.05)] ring-1 ring-gray-200/70 dark:ring-gray-700/60 ${className}`}
-  >
+  <div className={`${CARD} ${CARD_HOVER} ${className}`}>
     <div className="flex items-center justify-between px-5 pt-5 pb-3">
-      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-        {title}
-      </h3>
+      <h3 className="text-card-title text-gray-900 dark:text-gray-100">{title}</h3>
       {action}
     </div>
     <div className="px-5 pb-5">{children}</div>
@@ -183,7 +220,6 @@ const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { colorScheme } = useTheme();
   const accent = THEME_ACCENT[colorScheme] || THEME_ACCENT.blue;
-  const [applyOpen, setApplyOpen] = useState(false);
 
   /* ------------------------------------------------------------------ */
   /*  DATA WIRING — unchanged from the original dashboard                */
@@ -245,7 +281,6 @@ const DashboardPage: React.FC = () => {
   });
 
   // Leave-trend line, derived from the recent leaves we already have.
-  // Buckets recent leaves by month so the chart reflects real data.
   const MONTHS = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
@@ -256,6 +291,88 @@ const DashboardPage: React.FC = () => {
     if (d && !isNaN(d.getTime())) monthlyCounts[d.getMonth()] += 1;
   });
   const trendData = MONTHS.map((m, i) => ({ month: m, value: monthlyCounts[i] }));
+
+  // Status breakdown (admin) from leavesByStatus aggregate.
+  const statusMap: Record<string, number> = {};
+  (adminStats.leavesByStatus || []).forEach((s: any) => {
+    if (s?._id) statusMap[s._id] = s.count || 0;
+  });
+  const approved = statusMap.approved || 0;
+  const pending = statusMap.pending || adminStats.pendingLeaves || 0;
+  const rejected = statusMap.rejected || 0;
+  const decided = approved + rejected;
+  const totalReq = approved + pending + rejected;
+
+  // Employee balance totals.
+  const balTypes = ["annual", "sick", "casual"] as const;
+  const usedTotal = balTypes.reduce(
+    (a, t) => a + (balance[t]?.used || 0),
+    0
+  );
+  const quotaTotal = balTypes.reduce(
+    (a, t) => a + (balance[t]?.total || 0),
+    0
+  );
+  const remainingTotal = Math.max(0, quotaTotal - usedTotal);
+
+  // Two gauge metrics — role aware.
+  const gauges = isAdmin
+    ? [
+        {
+          label: "Approval Rate",
+          percent: decided ? (approved / decided) * 100 : 0,
+          big: `${decided ? Math.round((approved / decided) * 100) : 0}%`,
+          small: "of decided requests",
+        },
+        {
+          label: "Pending Load",
+          percent: totalReq ? (pending / totalReq) * 100 : 0,
+          big: pending,
+          small: "awaiting review",
+        },
+      ]
+    : [
+        {
+          label: "Leave Utilization",
+          percent: quotaTotal ? (usedTotal / quotaTotal) * 100 : 0,
+          big: `${quotaTotal ? Math.round((usedTotal / quotaTotal) * 100) : 0}%`,
+          small: `${usedTotal} of ${quotaTotal} days used`,
+        },
+        {
+          label: "Annual Balance",
+          percent: balance.annual?.total
+            ? (balance.annual.remaining / balance.annual.total) * 100
+            : 0,
+          big: balance.annual?.remaining ?? 0,
+          small: "days remaining",
+        },
+      ];
+
+  // "Leave by Type" bar chart data — role aware.
+  const typeData = isAdmin
+    ? (adminStats.leavesByType || []).map((t: any) => ({
+        name: (t?._id || "other").replace(/^\w/, (c: string) => c.toUpperCase()),
+        value: t?.count || 0,
+      }))
+    : balTypes.map((t) => ({
+        name: t.replace(/^\w/, (c) => c.toUpperCase()),
+        value: balance[t]?.used || 0,
+      }));
+
+  // Mini-stat tiles under the bar chart.
+  const miniStats = isAdmin
+    ? [
+        { label: "Approved", value: approved, icon: <CheckCircleIcon className="w-4 h-4" /> },
+        { label: "Pending", value: pending, icon: <ClockIcon className="w-4 h-4" /> },
+        { label: "This Month", value: adminStats.thisMonthLeaves || 0, icon: <CalendarDaysIcon className="w-4 h-4" /> },
+        { label: "Employees", value: adminStats.totalEmployees || 0, icon: <UsersIcon className="w-4 h-4" /> },
+      ]
+    : [
+        { label: "Days Used", value: usedTotal, icon: <ChartBarIcon className="w-4 h-4" /> },
+        { label: "Remaining", value: remainingTotal, icon: <CheckCircleIcon className="w-4 h-4" /> },
+        { label: "Requests", value: recent.length, icon: <CalendarDaysIcon className="w-4 h-4" /> },
+        { label: "Pending", value: recent.filter((l) => l?.status === "pending").length, icon: <ClockIcon className="w-4 h-4" /> },
+      ];
 
   // Team members for the availability widget — reuse the employees found in
   // the recent leaves payload (admin view has employee objects populated).
@@ -277,77 +394,68 @@ const DashboardPage: React.FC = () => {
     })
   );
 
-  // The three top ring cards — role aware.
-  const ringCards = isAdmin
+  // The four top KPI tiles — role aware.
+  const kpis = isAdmin
     ? [
         {
           label: "Total Employees",
           value: adminStats.totalEmployees || 0,
           caption: "Active workforce",
-          percent: 100,
-          color: "blue" as RingColor,
           icon: <UsersIcon className="w-5 h-5" />,
           onClick: () => navigate("/employees"),
         },
         {
           label: "Pending Requests",
           value: adminStats.pendingLeaves || 0,
-          caption: "Awaiting review",
-          percent: Math.min(
-            ((adminStats.pendingLeaves || 0) /
-              Math.max(adminStats.thisMonthLeaves || 1, 1)) *
-              100,
-            100
-          ),
-          color: "amber" as RingColor,
+          caption: "Awaiting your review",
           icon: <ClockIcon className="w-5 h-5" />,
           onClick: () => navigate("/leaves?status=pending"),
         },
         {
           label: "This Month",
           value: adminStats.thisMonthLeaves || 0,
-          caption: "Leave requests",
-          percent: 100,
-          color: "slate" as RingColor,
+          caption: "Leave requests logged",
           icon: <CalendarDaysIcon className="w-5 h-5" />,
           onClick: () => navigate("/leaves"),
+        },
+        {
+          label: "Approved",
+          value: approved,
+          caption: "Requests granted",
+          icon: <CheckCircleIcon className="w-5 h-5" />,
+          onClick: () => navigate("/leaves?status=approved"),
         },
       ]
     : [
         {
           label: "Annual Leave",
           value: balance.annual?.remaining ?? 0,
-          total: balance.annual?.total ?? 0,
+          suffix: `/ ${balance.annual?.total ?? 0}`,
           caption: "Days remaining",
-          percent: balance.annual?.total
-            ? (balance.annual.remaining / balance.annual.total) * 100
-            : 0,
-          color: "blue" as RingColor,
           icon: <ArrowUpRightIcon className="w-5 h-5" />,
           onClick: () => navigate("/my-leave-activity"),
         },
         {
           label: "Sick Leave",
           value: balance.sick?.used ?? 0,
-          total: balance.sick?.total ?? 0,
+          suffix: `/ ${balance.sick?.total ?? 0}`,
           caption: "Days used",
-          percent: balance.sick?.total
-            ? (balance.sick.used / balance.sick.total) * 100
-            : 0,
-          color: "amber" as RingColor,
           icon: <PlusIcon className="w-5 h-5" />,
           onClick: () => navigate("/my-leave-activity"),
         },
         {
           label: "Casual Leave",
           value: balance.casual?.remaining ?? 0,
-          total: balance.casual?.total ?? 0,
+          suffix: `/ ${balance.casual?.total ?? 0}`,
           caption: "Days remaining",
-          percent: balance.casual?.total
-            ? (balance.casual.remaining / balance.casual.total) * 100
-            : 0,
-          color: "slate" as RingColor,
           icon: <UserIcon className="w-5 h-5" />,
+          onClick: () => navigate("/my-leave-activity"),
+        },
+        {
+          label: "Days Taken",
+          value: usedTotal,
+          caption: "Across all leave types",
+          icon: <ChartBarIcon className="w-5 h-5" />,
           onClick: () => navigate("/my-leave-activity"),
         },
       ];
@@ -356,231 +464,301 @@ const DashboardPage: React.FC = () => {
 
   return (
     <motion.div
-      className="space-y-6"
+      className="space-y-5"
       variants={staggerContainer}
       initial="initial"
       animate="animate"
     >
-      {/* ---------------- Hero ---------------- */}
-      <motion.div
-        variants={staggerItem}
-        className="relative overflow-hidden rounded-2xl border border-gray-200/70 dark:border-gray-700/60 bg-gradient-to-br from-white to-slate-50/80 dark:from-gray-800/90 dark:to-gray-800/40 p-6 sm:p-7 shadow-[0_2px_8px_-2px_rgba(16,24,40,0.06),0_4px_16px_-4px_rgba(16,24,40,0.05)]"
-      >
-        <MeshBackground />
-        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
-          <div>
-            <motion.h1
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white"
-            >
-              {greeting}, {user?.name?.split(" ")[0] || "there"}
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.13, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-1.5 text-sm text-gray-600 dark:text-gray-300"
-            >
-              {isAdmin
-                ? "Ready to manage your team's leave today?"
-                : "Ready to plan your time off?"}
-            </motion.p>
-            <p className="mt-3 inline-flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-              <CalendarDaysIcon className="w-4 h-4" />
-              {today}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {user?.role === "employee" && (
-              <motion.button
-                whileTap={{ scale: 0.96 }}
-                onClick={() => setApplyOpen(true)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/60 transition-colors"
-              >
-                <BoltIcon className="w-4 h-4" />
-                Quick Apply
-              </motion.button>
-            )}
-            <motion.button
-              whileHover={{ y: -1 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => (isAdmin ? navigate("/leaves") : setApplyOpen(true))}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-600/20 transition-colors"
-            >
-              <PlusIcon className="w-4 h-4" />
-              {isAdmin ? "View Requests" : "Request Leave"}
-            </motion.button>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* ---------------- Top ring cards ---------------- */}
+      {/* ---------------- Top KPI row (4-up) ---------------- */}
       {showCardsLoading ? (
-        <StatCardsSkeleton count={3} />
+        <StatCardsSkeleton count={4} />
       ) : (
         <motion.div
           variants={staggerItem}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
         >
-          {ringCards.map((c, i) => (
-            <RingStatCard key={i} {...c} strokeOverride={accent} />
+          {kpis.map((c, i) => (
+            <KpiCard key={i} {...c} />
           ))}
         </motion.div>
       )}
 
-      {/* ---------------- Main two-column grid ---------------- */}
+      {/* ---------------- Hero + gauges ---------------- */}
+      <motion.div
+        variants={staggerItem}
+        className="grid grid-cols-1 lg:grid-cols-4 gap-5"
+      >
+        {/* Welcome hero (spans 2) */}
+        <div className={`lg:col-span-2 relative overflow-hidden p-6 sm:p-7 ${CARD}`}>
+          <MeshBackground />
+          <div className="relative flex h-full flex-col justify-between gap-5">
+            <div>
+              <p className="text-overline text-blue-600 dark:text-blue-400">
+                Welcome back
+              </p>
+              <motion.h1
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white"
+              >
+                {greeting}, {user?.name?.split(" ")[0] || "there"}
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.13, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                className="mt-1.5 text-sm text-gray-600 dark:text-gray-300 max-w-md"
+              >
+                {isAdmin
+                  ? "Here's how your team's leave is tracking today. Review pending requests and keep everyone in sync."
+                  : "Here's your time-off at a glance. Plan ahead and request leave in a couple of clicks."}
+              </motion.p>
+              <p className="mt-3 inline-flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                <CalendarDaysIcon className="w-4 h-4" />
+                {today}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              {user?.role === "employee" && (
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => navigate("/apply-leave")}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/60 transition-colors"
+                >
+                  <BoltIcon className="w-4 h-4" />
+                  Quick Apply
+                </motion.button>
+              )}
+              <motion.button
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => navigate(isAdmin ? "/leaves" : "/apply-leave")}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-600/20 transition-colors"
+              >
+                <PlusIcon className="w-4 h-4" />
+                {isAdmin ? "View Requests" : "Request Leave"}
+              </motion.button>
+            </div>
+          </div>
+        </div>
+
+        {/* Two gauges */}
+        {gauges.map((g, i) => (
+          <SemiGauge key={i} {...g} accent={accent} />
+        ))}
+      </motion.div>
+
+      {/* ---------------- Employee Voice widget ---------------- */}
+      <motion.div variants={staggerItem}>
+        <EmployeeVoiceWidget />
+      </motion.div>
+
+      {/* ---------------- Chart + breakdown ---------------- */}
       <motion.div
         variants={staggerItem}
         className="grid grid-cols-1 lg:grid-cols-3 gap-5"
       >
-        {/* Left column (spans 2) */}
-        <div className="lg:col-span-2 space-y-5">
-          {/* Leave Trends chart */}
-          <div className="bg-gradient-to-br from-white to-slate-50/80 dark:from-gray-800/90 dark:to-gray-800/50 rounded-2xl shadow-[0_2px_8px_-2px_rgba(16,24,40,0.06),0_4px_16px_-4px_rgba(16,24,40,0.05)] ring-1 ring-gray-200/70 dark:ring-gray-700/60 p-5">
-            <div className="flex items-start justify-between mb-2">
-              <div>
-                <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                  Leave Trends
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  {isAdmin
-                    ? "Company leave activity across recent requests"
-                    : "Your leave activity across recent requests"}
-                </p>
-              </div>
-              <span className="text-xs font-medium px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300">
-                {new Date().getFullYear()} (Current)
-              </span>
+        {/* Leave Trends area chart (spans 2) */}
+        <div className={`${CARD} ${CARD_HOVER} lg:col-span-2 p-5`}>
+          <div className="flex items-start justify-between mb-2">
+            <div>
+              <h3 className="text-card-title text-gray-900 dark:text-gray-100">
+                Leave Trends
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                {isAdmin
+                  ? "Company leave activity across recent requests"
+                  : "Your leave activity across recent requests"}
+              </p>
             </div>
-            <div className="h-56 w-full">
+            <span className="text-xs font-medium px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300">
+              {new Date().getFullYear()} (Current)
+            </span>
+          </div>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={trendData}
+                margin={{ top: 10, right: 8, left: 8, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="leaveTrend" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={accent} stopOpacity={0.25} />
+                    <stop offset="100%" stopColor={accent} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis
+                  dataKey="month"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fill: "#9ca3af" }}
+                  interval={1}
+                />
+                <Tooltip
+                  cursor={{ stroke: "#c7d2fe", strokeWidth: 1 }}
+                  contentStyle={{
+                    borderRadius: 12,
+                    border: "1px solid #e5e7eb",
+                    fontSize: 12,
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                  }}
+                  labelStyle={{ fontWeight: 600 }}
+                  formatter={(v: any) => [`${v} requests`, "Leaves"]}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke={accent}
+                  strokeWidth={3}
+                  fill="url(#leaveTrend)"
+                  dot={false}
+                  activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Leave by Type — bar chart + mini stats */}
+        <div className={`${CARD} ${CARD_HOVER} p-5 flex flex-col`}>
+          <h3 className="text-card-title text-gray-900 dark:text-gray-100">
+            Leave by Type
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            {isAdmin ? "This month, by category" : "Days used, by category"}
+          </p>
+          <div className="h-32 w-full mt-3">
+            {typeData.some((d: any) => d.value > 0) ? (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={trendData}
-                  margin={{ top: 10, right: 8, left: 8, bottom: 0 }}
+                <BarChart
+                  data={typeData}
+                  margin={{ top: 4, right: 4, left: 4, bottom: 0 }}
                 >
-                  <defs>
-                    <linearGradient id="leaveTrend" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={accent} stopOpacity={0.25} />
-                      <stop offset="100%" stopColor={accent} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
                   <XAxis
-                    dataKey="month"
+                    dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 11, fill: "#9ca3af" }}
-                    interval={1}
+                    tick={{ fontSize: 10, fill: "#9ca3af" }}
                   />
                   <Tooltip
-                    cursor={{ stroke: "#c7d2fe", strokeWidth: 1 }}
+                    cursor={{ fill: "rgba(148,163,184,0.12)" }}
                     contentStyle={{
                       borderRadius: 12,
                       border: "1px solid #e5e7eb",
                       fontSize: 12,
                       boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                     }}
-                    labelStyle={{ fontWeight: 600 }}
-                    formatter={(v: any) => [`${v} requests`, "Leaves"]}
                   />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke={accent}
-                    strokeWidth={3}
-                    fill="url(#leaveTrend)"
-                    dot={false}
-                    activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
-                  />
-                </AreaChart>
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={26}>
+                    {typeData.map((_: any, i: number) => (
+                      <Cell key={i} fill={accent} fillOpacity={0.55 + (i % 3) * 0.15} />
+                    ))}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Recent Activity */}
-          <PanelCard
-            title="Recent Activity"
-            action={
-              <button
-                onClick={() => navigate("/leaves")}
-                className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
-              >
-                View All
-              </button>
-            }
-          >
-            {leavesLoading ? (
-              <div className="flex justify-center py-8">
-                <LoadingSpinner size="md" />
-              </div>
-            ) : recent.length > 0 ? (
-              <ul className="space-y-4">
-                {recent.map((leave: any) => {
-                  const dotColor =
-                    leave.status === "approved"
-                      ? "bg-emerald-500"
-                      : leave.status === "rejected"
-                      ? "bg-red-500"
-                      : leave.status === "pending"
-                      ? "bg-amber-500"
-                      : "bg-blue-500";
-                  const empName =
-                    typeof leave.employee === "object" && leave.employee?.name
-                      ? leave.employee.name
-                      : null;
-                  return (
-                    <li key={leave._id} className="flex gap-3">
-                      <span
-                        className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${dotColor}`}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-3">
-                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 capitalize">
-                            {leave.leaveType} Leave
-                          </p>
-                          <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
-                            {leave.startDate
-                              ? new Date(leave.startDate).toLocaleDateString()
-                              : ""}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                          {isAdmin && empName ? `${empName} • ` : ""}
-                          {leave.totalDays}{" "}
-                          {leave.totalDays === 1 ? "day" : "days"}
-                          {" • "}
-                          <span className="capitalize">{leave.status}</span>
-                        </p>
-                        {leave.status === "approved" && (
-                          <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 ring-1 ring-inset ring-emerald-200/60 dark:ring-emerald-500/20">
-                            <CheckCircleIcon className="w-3 h-3" />
-                            Approved
-                          </span>
-                        )}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
             ) : (
-              <div className="flex flex-col items-center justify-center py-10 text-center">
-                <div className="p-3 rounded-full bg-gray-100 dark:bg-gray-700/60 mb-3">
-                  <CalendarDaysIcon className="w-6 h-6 text-gray-400 dark:text-gray-500" />
-                </div>
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-200">
-                  No recent activity
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Requests will appear here as they come in.
-                </p>
+              <div className="h-full flex items-center justify-center text-xs text-gray-400 dark:text-gray-500">
+                No data yet
               </div>
             )}
-          </PanelCard>
+          </div>
+          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/60 grid grid-cols-2 gap-4">
+            {miniStats.map((m, i) => (
+              <MiniStat key={i} {...m} accent={accent} />
+            ))}
+          </div>
         </div>
+      </motion.div>
 
-        {/* Right column */}
+      {/* ---------------- Activity + timeline ---------------- */}
+      <motion.div
+        variants={staggerItem}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-5"
+      >
+        {/* Recent Activity (spans 2) */}
+        <PanelCard
+          title="Recent Activity"
+          className="lg:col-span-2"
+          action={
+            <button
+              onClick={() => navigate("/leaves")}
+              className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              View All
+            </button>
+          }
+        >
+          {leavesLoading ? (
+            <div className="flex justify-center py-8">
+              <LoadingSpinner size="md" />
+            </div>
+          ) : recent.length > 0 ? (
+            <ul className="space-y-4">
+              {recent.map((leave: any) => {
+                const dotColor =
+                  leave.status === "approved"
+                    ? "bg-emerald-500"
+                    : leave.status === "rejected"
+                    ? "bg-red-500"
+                    : leave.status === "pending"
+                    ? "bg-amber-500"
+                    : "bg-blue-500";
+                const empName =
+                  typeof leave.employee === "object" && leave.employee?.name
+                    ? leave.employee.name
+                    : null;
+                return (
+                  <li key={leave._id} className="flex gap-3">
+                    <span
+                      className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${dotColor}`}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 capitalize">
+                          {leave.leaveType} Leave
+                        </p>
+                        <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                          {leave.startDate
+                            ? new Date(leave.startDate).toLocaleDateString()
+                            : ""}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        {isAdmin && empName ? `${empName} • ` : ""}
+                        {leave.totalDays}{" "}
+                        {leave.totalDays === 1 ? "day" : "days"}
+                        {" • "}
+                        <span className="capitalize">{leave.status}</span>
+                      </p>
+                      {leave.status === "approved" && (
+                        <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 ring-1 ring-inset ring-emerald-200/60 dark:ring-emerald-500/20">
+                          <CheckCircleIcon className="w-3 h-3" />
+                          Approved
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <div className="p-3 rounded-full bg-gray-100 dark:bg-gray-700/60 mb-3">
+                <CalendarDaysIcon className="w-6 h-6 text-gray-400 dark:text-gray-500" />
+              </div>
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-200">
+                No recent activity
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Requests will appear here as they come in.
+              </p>
+            </div>
+          )}
+        </PanelCard>
+
+        {/* Right column: Holidays timeline + Team availability */}
         <div className="space-y-5">
           {/* Public Holidays */}
           <PanelCard
@@ -623,7 +801,10 @@ const DashboardPage: React.FC = () => {
           </PanelCard>
 
           {/* Team Availability */}
-          <PanelCard title="Team Availability">
+          <PanelCard
+            title="Team Availability"
+            action={<SunIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />}
+          >
             {teamFromLeaves.length > 0 ? (
               <ul className="space-y-1">
                 {teamFromLeaves.map((emp: any) => (
@@ -669,8 +850,6 @@ const DashboardPage: React.FC = () => {
           </PanelCard>
         </div>
       </motion.div>
-
-      <ApplyLeaveModal open={applyOpen} onClose={() => setApplyOpen(false)} />
     </motion.div>
   );
 };

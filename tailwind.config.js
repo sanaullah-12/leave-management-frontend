@@ -33,20 +33,22 @@ export default {
       // (.text-display, .text-page-heading, .text-section-heading, .text-card-title,
       //  .text-nav, .text-body, .text-secondary, .text-caption, .text-overline).
       colors: {
-        // Blue theme colors (default)
+        // Blue = the app's accent scale. Values are driven by CSS variables so
+        // the whole scale (and therefore every blue-* utility) recolors to the
+        // active theme. Defaults + per-theme overrides live in design-system.css.
         blue: {
-          25: '#f8faff',
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-          950: '#172554',
+          25: 'rgb(var(--blue-25) / <alpha-value>)',
+          50: 'rgb(var(--blue-50) / <alpha-value>)',
+          100: 'rgb(var(--blue-100) / <alpha-value>)',
+          200: 'rgb(var(--blue-200) / <alpha-value>)',
+          300: 'rgb(var(--blue-300) / <alpha-value>)',
+          400: 'rgb(var(--blue-400) / <alpha-value>)',
+          500: 'rgb(var(--blue-500) / <alpha-value>)',
+          600: 'rgb(var(--blue-600) / <alpha-value>)',
+          700: 'rgb(var(--blue-700) / <alpha-value>)',
+          800: 'rgb(var(--blue-800) / <alpha-value>)',
+          900: 'rgb(var(--blue-900) / <alpha-value>)',
+          950: 'rgb(var(--blue-950) / <alpha-value>)',
         },
         // Purple theme colors
         purple: {

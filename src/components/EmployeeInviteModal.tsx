@@ -1,10 +1,41 @@
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { authAPI, attendanceAPI } from "../services/api";
 // import { useNotifications } from "../components/NotificationSystem"; // Removed for Socket.IO implementation
 import Modal from "./Modal";
+import Select from "./ui/Select";
+import DatePicker from "./ui/DatePicker";
 import LoadingSpinner from "./LoadingSpinner";
+
+const DEPARTMENT_OPTIONS = [
+  "Engineering",
+  "Product & Development",
+  "Marketing",
+  "Sales",
+  "Human Resources",
+  "Finance",
+  "Operations",
+  "Customer Success",
+].map((d) => ({ value: d, label: d }));
+
+const POSITION_OPTIONS = [
+  "Intern",
+  "Jr.Software Engineer",
+  "Sr.Software Engineer",
+  "Sr.Project Manager",
+  "Product Manager",
+  "UX/UI Designer",
+  "Marketing Specialist",
+  "Sales Representative",
+  "HR Specialist",
+  "Financial Analyst",
+  "Operations Manager",
+].map((p) => ({ value: p, label: p }));
+
+// Shared themed input styling — matches the Select / DatePicker triggers.
+const INPUT =
+  "w-full rounded-xl bg-[var(--card-surface)] px-4 py-2.5 text-sm text-gray-900 outline-none ring-1 ring-inset ring-gray-200/70 transition-shadow placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 dark:text-gray-100 dark:placeholder-gray-500 dark:ring-white/10";
 import {
   UserIcon,
   EnvelopeIcon,
@@ -58,6 +89,7 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
     handleSubmit,
     reset,
     setValue,
+    control,
     formState: { errors },
   } = useForm<InviteEmployeeData>();
 
@@ -204,24 +236,21 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
 
             {!useCustomName && machineEmployeesList.length > 0 ? (
               // Machine Employee Dropdown
-              <select
+              <Select
                 value={selectedEmployee?.employeeId || ""}
-                onChange={(e) => handleEmployeeSelect(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
-              >
-                <option value="">Select employee from machine</option>
-                {machineEmployeesList.map((employee: any) => (
-                  <option key={employee.employeeId} value={employee.employeeId}>
-                    {employee.name} (ID: {employee.employeeId})
-                  </option>
-                ))}
-              </select>
+                onChange={handleEmployeeSelect}
+                placeholder="Select employee from machine"
+                options={machineEmployeesList.map((employee: any) => ({
+                  value: employee.employeeId,
+                  label: `${employee.name} (ID: ${employee.employeeId})`,
+                }))}
+              />
             ) : (
               // Custom Name Input
               <input
                 type="text"
                 {...register("name", { required: "Full name is required" })}
-                className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+                className={INPUT}
                 placeholder="Enter full name"
               />
             )}
@@ -257,7 +286,7 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
             <input
               type="text"
               {...register("employeeId")}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+              className={INPUT}
               placeholder="Auto-generated or from machine selection"
               readOnly={!useCustomName && selectedEmployee}
             />
@@ -283,7 +312,7 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
                   message: "Invalid email address",
                 },
               })}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+              className={INPUT}
               placeholder="employee@company.com"
             />
             {errors.email && (
@@ -299,24 +328,19 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
               <BuildingOfficeIcon className="w-4 h-4 mr-2 text-gray-400" />
               Department
             </label>
-            <select
-              {...register("department", {
-                required: "Department is required",
-              })}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
-            >
-              <option value="">Select department</option>
-              <option value="Engineering">Engineering</option>
-              <option value="Product & Development">
-                Product & Development
-              </option>
-              <option value="Marketing">Marketing</option>
-              <option value="Sales">Sales</option>
-              <option value="Human Resources">Human Resources</option>
-              <option value="Finance">Finance</option>
-              <option value="Operations">Operations</option>
-              <option value="Customer Success">Customer Success</option>
-            </select>
+            <Controller
+              name="department"
+              control={control}
+              rules={{ required: "Department is required" }}
+              render={({ field }) => (
+                <Select
+                  value={field.value || ""}
+                  onChange={field.onChange}
+                  placeholder="Select department"
+                  options={DEPARTMENT_OPTIONS}
+                />
+              )}
+            />
             {errors.department && (
               <p className="mt-2 text-sm text-red-600 flex items-center">
                 ⚠ {errors.department.message}
@@ -330,23 +354,19 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
               <BriefcaseIcon className="w-4 h-4 mr-2 text-gray-400" />
               Position
             </label>
-            <select
-              {...register("position", { required: "Position is required" })}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
-            >
-              <option value="">Select position</option>
-              <option value="Intern">Intern</option>
-              <option value="Jr.Software Engineer">Jr.Software Engineer</option>
-              <option value="Sr.Software Engineer">Sr.Software Engineer</option>
-              <option value="Sr.Project Manager">Sr.Project Manager</option>
-              <option value="Product Manager">Product Manager</option>
-              <option value="UX/UI Designer">UX/UI Designer</option>
-              <option value="Marketing Specialist">Marketing Specialist</option>
-              <option value="Sales Representative">Sales Representative</option>
-              <option value="HR Specialist">HR Specialist</option>
-              <option value="Financial Analyst">Financial Analyst</option>
-              <option value="Operations Manager">Operations Manager</option>
-            </select>
+            <Controller
+              name="position"
+              control={control}
+              rules={{ required: "Position is required" }}
+              render={({ field }) => (
+                <Select
+                  value={field.value || ""}
+                  onChange={field.onChange}
+                  placeholder="Select position"
+                  options={POSITION_OPTIONS}
+                />
+              )}
+            />
             {errors.position && (
               <p className="mt-2 text-sm text-red-600 flex items-center">
                 ⚠ {errors.position.message}
@@ -360,10 +380,17 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
               <CalendarIcon className="w-4 h-4 mr-2 text-gray-400" />
               Join Date
             </label>
-            <input
-              type="date"
-              {...register("joinDate", { required: "Join date is required" })}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+            <Controller
+              name="joinDate"
+              control={control}
+              rules={{ required: "Join date is required" }}
+              render={({ field }) => (
+                <DatePicker
+                  value={field.value || ""}
+                  onChange={field.onChange}
+                  placeholder="Select date"
+                />
+              )}
             />
             {errors.joinDate && (
               <p className="mt-2 text-sm text-red-600 flex items-center">
@@ -383,7 +410,7 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={handleAddTag}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+              className={INPUT}
               placeholder="Add tags and press Enter"
             />
 

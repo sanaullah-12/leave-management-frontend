@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { authAPI, usersAPI } from "../../services/api";
 import Avatar from "../Avatar";
 import InlineLoader from "../InlineLoader";
+import Select from "../ui/Select";
 import {
   IdentificationIcon,
   Cog6ToothIcon,
@@ -46,7 +47,7 @@ const inputClass =
 const labelClass =
   "mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400";
 const cardClass =
-  "rounded-2xl border border-gray-100 dark:border-gray-700/60 bg-white dark:bg-gray-800/50 shadow-sm";
+  "surface-card";
 
 const TIMEZONES = [
   "(GMT-08:00) Pacific Time",
@@ -63,6 +64,8 @@ const LANGUAGES = [
   "Français",
   "Deutsch",
 ];
+const TIMEZONE_OPTIONS = TIMEZONES.map((t) => ({ value: t, label: t }));
+const LANGUAGE_OPTIONS = LANGUAGES.map((l) => ({ value: l, label: l }));
 
 const Toggle: React.FC<{ on: boolean; onChange: (v: boolean) => void }> = ({
   on,
@@ -350,27 +353,21 @@ const ProfileSettings: React.FC = () => {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className={labelClass}>Timezone</label>
-              <select
+              <Select
                 value={prefs.timezone}
-                onChange={(e) => savePrefs({ ...prefs, timezone: e.target.value })}
-                className={inputClass}
-              >
-                {TIMEZONES.map((t) => (
-                  <option key={t}>{t}</option>
-                ))}
-              </select>
+                onChange={(v) => savePrefs({ ...prefs, timezone: v })}
+                options={TIMEZONE_OPTIONS}
+                className="w-full"
+              />
             </div>
             <div>
               <label className={labelClass}>Language</label>
-              <select
+              <Select
                 value={prefs.language}
-                onChange={(e) => savePrefs({ ...prefs, language: e.target.value })}
-                className={inputClass}
-              >
-                {LANGUAGES.map((l) => (
-                  <option key={l}>{l}</option>
-                ))}
-              </select>
+                onChange={(v) => savePrefs({ ...prefs, language: v })}
+                options={LANGUAGE_OPTIONS}
+                className="w-full"
+              />
             </div>
           </div>
 

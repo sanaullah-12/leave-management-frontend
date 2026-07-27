@@ -6,6 +6,7 @@ import { attendanceAPI } from '../services/api';
 // import { useNotifications } from '../components/NotificationSystem'; // Removed for Socket.IO implementation
 import Modal from './Modal';
 import LoadingSpinner from './LoadingSpinner';
+import Select from './ui/Select';
 import { UserIcon, EnvelopeIcon, BuildingOfficeIcon, BriefcaseIcon, ShieldCheckIcon, HashtagIcon } from '@heroicons/react/24/outline';
 
 type InviteAdminData = {
@@ -20,6 +21,10 @@ interface AdminInviteModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+// Shared themed input styling — matches the Select / DatePicker triggers.
+const INPUT =
+  "w-full rounded-xl bg-[var(--card-surface)] px-4 py-2.5 text-sm text-gray-900 outline-none ring-1 ring-inset ring-gray-200/70 transition-shadow placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 dark:text-gray-100 dark:placeholder-gray-500 dark:ring-white/10";
 
 const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) => {
   const queryClient = useQueryClient();
@@ -153,24 +158,21 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
 
             {!useCustomName && machineEmployeesList.length > 0 ? (
               // Machine Employee Dropdown
-              <select
+              <Select
                 value={selectedEmployee?.employeeId || ""}
-                onChange={(e) => handleEmployeeSelect(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
-              >
-                <option value="">Select admin from machine</option>
-                {machineEmployeesList.map((employee: any) => (
-                  <option key={employee.employeeId} value={employee.employeeId}>
-                    {employee.name} (ID: {employee.employeeId})
-                  </option>
-                ))}
-              </select>
+                onChange={handleEmployeeSelect}
+                placeholder="Select admin from machine"
+                options={machineEmployeesList.map((employee: any) => ({
+                  value: employee.employeeId,
+                  label: `${employee.name} (ID: ${employee.employeeId})`,
+                }))}
+              />
             ) : (
               // Custom Name Input
               <input
                 type="text"
                 {...register('name', { required: 'Administrator name is required' })}
-                className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+                className={INPUT}
                 placeholder="Enter administrator name"
               />
             )}
@@ -209,7 +211,7 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
             <input
               type="text"
               {...register("employeeId")}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+              className={INPUT}
               placeholder="Auto-generated or from machine selection"
               readOnly={!useCustomName && selectedEmployee}
             />
@@ -235,7 +237,7 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
                   message: 'Invalid email address',
                 },
               })}
-              className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+              className={INPUT}
               placeholder="admin@company.com"
             />
             {errors.email && (
@@ -258,7 +260,7 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
               <input
                 type="text"
                 {...register('department')}
-                className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+                className={INPUT}
                 placeholder="Administration"
               />
             </div>
@@ -272,7 +274,7 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
               <input
                 type="text"
                 {...register('position')}
-                className="w-full px-4 py-3 rounded-lg border transition-colors focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
+                className={INPUT}
                 placeholder="Administrator"
               />
             </div>

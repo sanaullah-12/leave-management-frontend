@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersAPI, leavesAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { ProfileSkeleton } from "../components/Skeletons";
 import Avatar from "../components/Avatar";
@@ -10,29 +11,28 @@ import EmployeeLeaveActivity from "../components/EmployeeLeaveActivity";
 import {
   ArrowLeftIcon,
   EnvelopeIcon,
-  BuildingOfficeIcon,
+  BuildingOffice2Icon,
   CalendarDaysIcon,
-  UserIcon,
   PhoneIcon,
   PencilIcon,
   CheckIcon,
   XMarkIcon,
-  ExclamationTriangleIcon,
+  UserIcon,
+  IdentificationIcon,
+  CheckBadgeIcon,
+  ChartBarIcon,
+  PlusCircleIcon,
+  Square2StackIcon,
 } from "@heroicons/react/24/outline";
 import {
+  AreaChart,
+  Area,
   PieChart,
   Pie,
   Cell,
-  ResponsiveContainer,
-  LineChart,
-  Line,
   XAxis,
-  YAxis,
-  CartesianGrid,
+  ResponsiveContainer,
   Tooltip,
-  Legend,
-  BarChart,
-  Bar,
 } from "recharts";
 import "../styles/design-system.css";
 
@@ -42,12 +42,220 @@ interface LeaveAllocation {
   annual: number;
 }
 
+// Theme accent hex (for the trend area chart) — mirrors the dashboard map.
+const THEME_ACCENT: Record<string, string> = {
+  black: "#374151",
+  purple: "#9c5fd1",
+  blue: "#2563eb",
+  pink: "#db2777",
+  violet: "#7c3aed",
+  indigo: "#4f46e5",
+  orange: "#ea580c",
+  teal: "#0d9488",
+  bronze: "#b45309",
+  mint: "#10b981",
+};
+
+// Neumorphic soft-UI card surface — matches the dashboard / report cards.
+const CARD =
+  "rounded-2xl bg-[var(--card-surface)] " +
+  "shadow-[7px_7px_16px_rgba(174,186,204,0.5),-7px_-7px_16px_rgba(255,255,255,0.95)] " +
+  "dark:shadow-[7px_7px_18px_rgba(0,0,0,0.55),-6px_-6px_16px_rgba(255,255,255,0.045)]";
+
+// Per-leave-type accent + watermark icon (same language as the report page).
+const LEAVE_META = {
+  annual: { label: "Annual Leave", hex: "#10b981", icon: CalendarDaysIcon },
+  sick: { label: "Sick Leave", hex: "#f43f5e", icon: PlusCircleIcon },
+  casual: { label: "Casual Leave", hex: "#6366f1", icon: Square2StackIcon },
+} as const;
+
+type LeaveKey = keyof typeof LEAVE_META;
+const LEAVE_ORDER: LeaveKey[] = ["annual", "sick", "casual"];
+
+/* ------------------------------------------------------------------ */
+/*  Presentational pieces                                              */
+/* ------------------------------------------------------------------ */
+
+// Hollow accent ring (arc only) with a soft glow.
+const ProgressRing: React.FC<{ percent: number; color: string }> = ({
+  percent,
+  color,
+}) => {
+  const p = Math.max(0, Math.min(100, percent));
+  const ARC =
+    "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831";
+  return (
+    <div className="relative h-16 w-16 flex-shrink-0">
+      <svg className="h-16 w-16 -rotate-90" viewBox="0 0 36 36">
+        <path
+          className="stroke-gray-200 dark:stroke-white/10"
+          d={ARC}
+          fill="none"
+          strokeWidth="4"
+        />
+        <path
+          d={ARC}
+          fill="none"
+          stroke={color}
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeDasharray={`${p}, 100`}
+          style={{
+            transition: "stroke-dasharray 0.7s ease",
+            filter: `drop-shadow(0 0 4px ${color}66)`,
+          }}
+        />
+      </svg>
+    </div>
+  );
+};
+
+// Glowing leave-balance card — view mode shows the ring + remaining; edit
+// mode shows an allocation input. Admin-editable.
+const LeaveBalanceCard: React.FC<{
+  leaveKey: LeaveKey;
+  total: number;
+  used: number;
+  remaining: number;
+  editing: boolean;
+  editValue: number;
+  onChange: (v: number) => void;
+}> = ({ leaveKey, total, used, remaining, editing, editValue, onChange }) => {
+  const meta = LEAVE_META[leaveKey];
+  const Icon = meta.icon;
+  const percent = total > 0 ? Math.round((remaining / total) * 100) : 0;
+  const usedPct = total > 0 ? Math.min(100, (used / total) * 100) : 0;
+  return (
+    <div
+      className="group relative overflow-hidden rounded-2xl bg-[var(--card-surface)] p-6 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1"
+      style={{
+        border: `1px solid ${meta.hex}55`,
+        boxShadow: `inset 0 1px 0 ${meta.hex}22, 0 0 0 1px ${meta.hex}1f, 0 14px 34px -14px ${meta.hex}66`,
+      }}
+    >
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-24"
+        style={{ background: `linear-gradient(to bottom, ${meta.hex}14, transparent)` }}
+      />
+      <Icon
+        className="pointer-events-none absolute -bottom-5 -right-4 h-28 w-28"
+        style={{ color: meta.hex, opacity: 0.1 }}
+      />
+
+      <div className="relative flex items-start justify-between gap-4">
+        <div>
+          <h4 className="text-base font-bold text-gray-900 dark:text-white">
+            {meta.label}
+          </h4>
+          <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+            Allocated: {editing ? editValue : total} Days
+          </p>
+        </div>
+        {!editing && (
+          <div className="flex flex-col items-end gap-1">
+            <span
+              className="text-xs font-bold tabular-nums"
+              style={{ color: meta.hex }}
+            >
+              {percent}%
+            </span>
+            <ProgressRing percent={percent} color={meta.hex} />
+          </div>
+        )}
+      </div>
+
+      {editing ? (
+        <div className="relative mt-5">
+          <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+            Allocation (days / year)
+          </label>
+          <input
+            type="number"
+            min={0}
+            max={365}
+            value={editValue}
+            onChange={(e) => onChange(parseInt(e.target.value) || 0)}
+            className="mt-1.5 w-full rounded-xl bg-slate-100 px-4 py-3 text-3xl font-extrabold tabular-nums outline-none ring-1 ring-inset ring-gray-200/70 focus:ring-2 dark:bg-white/5 dark:ring-white/10"
+            style={{ color: meta.hex }}
+          />
+          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            {used} day{used === 1 ? "" : "s"} already used this year
+          </p>
+        </div>
+      ) : (
+        <div className="relative mt-5">
+          <span
+            className="text-5xl font-extrabold leading-none tabular-nums"
+            style={{ color: meta.hex }}
+          >
+            {remaining}
+          </span>
+          <p className="mt-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+            Remaining Days
+          </p>
+          <div className="mt-4">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200/70 dark:bg-white/10">
+              <div
+                className="h-full rounded-full"
+                style={{ width: `${usedPct}%`, backgroundColor: meta.hex }}
+              />
+            </div>
+            <p className="mt-1.5 text-xs text-gray-400 dark:text-gray-500">
+              Used {used} of {total} days
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ProfileField: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+}> = ({ icon, label, value }) => (
+  <div className="flex items-start gap-3">
+    <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-gray-500 dark:bg-white/5 dark:text-gray-400">
+      {icon}
+    </span>
+    <div className="min-w-0">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+        {label}
+      </p>
+      <p className="mt-0.5 truncate font-semibold text-gray-900 dark:text-gray-100">
+        {value}
+      </p>
+    </div>
+  </div>
+);
+
+const SectionHeading: React.FC<{
+  children: React.ReactNode;
+  action?: React.ReactNode;
+}> = ({ children, action }) => (
+  <div className="flex items-center justify-between gap-3">
+    <div className="flex items-center gap-3">
+      <span className="h-6 w-1.5 rounded-full bg-blue-500" />
+      <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+        {children}
+      </h3>
+    </div>
+    {action}
+  </div>
+);
+
+/* ------------------------------------------------------------------ */
+/*  Page                                                               */
+/* ------------------------------------------------------------------ */
+
 const EmployeeDetailPageReal: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { colorScheme } = useTheme();
+  const accent = THEME_ACCENT[colorScheme] || THEME_ACCENT.blue;
   const queryClient = useQueryClient();
-  const [activeChart, setActiveChart] = useState<"pie" | "line" | "bar">("pie");
   const [isEditingAllocation, setIsEditingAllocation] = useState(false);
   const [editAllocation, setEditAllocation] = useState<LeaveAllocation>({
     casual: 10,
@@ -57,8 +265,6 @@ const EmployeeDetailPageReal: React.FC = () => {
   const [savedAllocation, setSavedAllocation] =
     useState<LeaveAllocation | null>(null);
 
-  // All hooks must be at the top - before any conditional returns
-  // Fetch all employees and find the specific one (since individual employee endpoint might not exist)
   const {
     data: employeesData,
     isLoading: employeesLoading,
@@ -67,72 +273,61 @@ const EmployeeDetailPageReal: React.FC = () => {
     queryKey: ["employees"],
     queryFn: () => usersAPI.getEmployees(1, 100),
     retry: 1,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
-  // Fetch employee's leave history
   const { data: leaveHistoryData, isLoading: historyLoading } = useQuery({
     queryKey: ["employee-leaves", id],
     queryFn: () => leavesAPI.getLeaves(1, 50, "", id),
     enabled: !!id,
     retry: 1,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
-  // Fetch company leave policy
   const { data: leavePolicyData } = useQuery({
     queryKey: ["leave-policy"],
     queryFn: () => leavesAPI.getLeavePolicy(),
     retry: 1,
   });
 
-  // Update employee leave allocation mutation
   const updateAllocationMutation = useMutation({
     mutationFn: (allocations: LeaveAllocation) =>
       leavesAPI.updateEmployeeLeaveAllocation(id!, allocations),
     onSuccess: () => {
-      // Update saved allocation state to reflect the new values
       setSavedAllocation(editAllocation);
       queryClient.invalidateQueries({ queryKey: ["employee-leaves", id] });
       queryClient.invalidateQueries({ queryKey: ["employees"] });
-      queryClient.invalidateQueries({
-        queryKey: ["employee-leave-balance", id],
-      });
+      queryClient.invalidateQueries({ queryKey: ["employee-leave-balance", id] });
       queryClient.invalidateQueries({ queryKey: ["leave-policy"] });
       setIsEditingAllocation(false);
     },
   });
 
-  // Get company policy or use default (map backend format to frontend format)
+  // Company policy → default allocation (with sensible fallbacks).
   const defaultPolicy = React.useMemo(() => {
     const policyData = leavePolicyData?.data?.policy || {};
-    console.log("🔍 Policy Data from Backend:", policyData);
-
-    const mappedPolicy = {
+    return {
       casual: policyData.casual || policyData.casualLeave || 10,
       sick: policyData.sick || policyData.sickLeave || 8,
       annual: policyData.annual || policyData.annualLeave || 10,
     };
-
-    console.log("🔍 Mapped Policy:", mappedPolicy);
-    return mappedPolicy;
   }, [leavePolicyData?.data?.policy]);
 
-  // Memoize employee finding to prevent recalculation
   const employees = React.useMemo(
     () => employeesData?.data?.employees || [],
     [employeesData?.data?.employees]
   );
-
   const employee = React.useMemo(
     () => employees.find((emp: any) => emp._id === id),
     [employees, id]
   );
 
-  // Initialize editAllocation only once when component mounts or when we have employee data
   React.useEffect(() => {
-    if (!savedAllocation && defaultPolicy && (defaultPolicy.casual || defaultPolicy.sick || defaultPolicy.annual)) {
-      // Always prioritize company policy over old employee quota data
+    if (
+      !savedAllocation &&
+      defaultPolicy &&
+      (defaultPolicy.casual || defaultPolicy.sick || defaultPolicy.annual)
+    ) {
       const policyAllocation = {
         casual: defaultPolicy.casual || 10,
         sick: defaultPolicy.sick || 8,
@@ -140,9 +335,7 @@ const EmployeeDetailPageReal: React.FC = () => {
       };
       setSavedAllocation(policyAllocation);
       setEditAllocation(policyAllocation);
-      console.log("✅ Using company policy for leave allocation:", policyAllocation);
     } else if (!savedAllocation && employee && employee.leaveQuota) {
-      // Fallback to employee quota only if no company policy is available
       const customAllocation = {
         casual: employee.leaveQuota.casual || 10,
         sick: employee.leaveQuota.sick || 8,
@@ -150,77 +343,43 @@ const EmployeeDetailPageReal: React.FC = () => {
       };
       setSavedAllocation(customAllocation);
       setEditAllocation(customAllocation);
-      console.log("⚠️  Using employee quota as fallback:", customAllocation);
     }
   }, [employee, defaultPolicy, savedAllocation]);
 
-  // Get leave history for this employee
   const leaveHistory = React.useMemo(
     () => leaveHistoryData?.data?.leaves || [],
     [leaveHistoryData?.data?.leaves]
   );
 
-  // Calculate leave balance function (moved up to avoid hook order issues)
   const calculateLeaveBalance = React.useCallback(() => {
-    const currentYear = new Date().getFullYear();
+    const year = new Date().getFullYear();
     const yearlyLeaves = leaveHistory.filter((leave: any) => {
       const leaveYear = new Date(leave.startDate).getFullYear();
-      return leaveYear === currentYear && leave.status === "approved";
+      return leaveYear === year && leave.status === "approved";
     });
 
-    // Use saved allocations with priority: company policy > employee quota > hardcoded fallbacks
     const allocations = savedAllocation || {
       casual: defaultPolicy.casual || 10,
       sick: defaultPolicy.sick || 8,
       annual: defaultPolicy.annual || 10,
     };
 
-    const balance = {
-      casual: {
-        total: allocations.casual,
-        used: yearlyLeaves
-          .filter((leave: any) => leave.leaveType === "casual")
-          .reduce((sum: number, leave: any) => sum + (leave.totalDays || 1), 0),
-        remaining: 0,
-      },
-      sick: {
-        total: allocations.sick,
-        used: yearlyLeaves
-          .filter((leave: any) => leave.leaveType === "sick")
-          .reduce((sum: number, leave: any) => sum + (leave.totalDays || 1), 0),
-        remaining: 0,
-      },
-      annual: {
-        total: allocations.annual,
-        used: yearlyLeaves
-          .filter((leave: any) => leave.leaveType === "annual")
-          .reduce((sum: number, leave: any) => sum + (leave.totalDays || 1), 0),
-        remaining: 0,
-      },
+    const sumFor = (type: string) =>
+      yearlyLeaves
+        .filter((leave: any) => leave.leaveType === type)
+        .reduce((sum: number, leave: any) => sum + (leave.totalDays || 1), 0);
+
+    const build = (total: number, used: number) => ({
+      total,
+      used,
+      remaining: Math.max(0, total - used),
+    });
+
+    return {
+      annual: build(allocations.annual, sumFor("annual")),
+      sick: build(allocations.sick, sumFor("sick")),
+      casual: build(allocations.casual, sumFor("casual")),
     };
-
-    // Calculate remaining leaves
-    balance.casual.remaining = Math.max(
-      0,
-      balance.casual.total - balance.casual.used
-    );
-    balance.sick.remaining = Math.max(
-      0,
-      balance.sick.total - balance.sick.used
-    );
-    balance.annual.remaining = Math.max(
-      0,
-      balance.annual.total - balance.annual.used
-    );
-
-    // Debug logging
-    console.log("🔍 Leave Balance Calculation Debug:");
-    console.log("  Final Allocations Used:", allocations);
-    console.log("  Company Policy:", defaultPolicy);
-    console.log("  Saved Allocation State:", savedAllocation);
-    console.log("  Calculated Balance:", balance);
-
-    return balance;
   }, [leaveHistory, savedAllocation, defaultPolicy]);
 
   const leaveBalance = React.useMemo(
@@ -228,43 +387,32 @@ const EmployeeDetailPageReal: React.FC = () => {
     [calculateLeaveBalance]
   );
 
-  // Loading state
   if (employeesLoading || historyLoading) {
     return <ProfileSkeleton />;
   }
 
-  // Error state
   if (employeesError || !employee) {
     return (
       <div className="space-y-6 fade-in">
-        <div className="flex items-center space-x-4 mb-6">
+        <div className="mb-6 flex items-center gap-4">
           <button
             onClick={() => navigate("/employees")}
-            className="btn-ghost p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+            className="rounded-lg p-2 text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/5"
           >
             <ArrowLeftIcon className="h-5 w-5" />
           </button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-              Employee Not Found
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300">
-              The requested employee could not be found
-            </p>
-          </div>
-        </div>
-
-        <div className="card-elevated p-8 text-center">
-          <UserIcon className="mx-auto h-16 w-16 mb-4 text-gray-400 dark:text-gray-500" />
-          <h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             Employee Not Found
-          </h2>
+          </h1>
+        </div>
+        <div className={`${CARD} p-8 text-center`}>
+          <UserIcon className="mx-auto mb-4 h-16 w-16 text-gray-400 dark:text-gray-500" />
           <p className="mb-6 text-gray-600 dark:text-gray-300">
             This employee may have been removed or the ID is incorrect.
           </p>
           <button
             onClick={() => navigate("/employees")}
-            className="btn-primary"
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25"
           >
             Back to Employees
           </button>
@@ -273,129 +421,72 @@ const EmployeeDetailPageReal: React.FC = () => {
     );
   }
 
-  // Calculate leave statistics
-  const totalAllocated = Object.values(leaveBalance).reduce(
-    (sum: number, balance: any) => sum + balance.total,
-    0
-  );
-  const totalUsed = Object.values(leaveBalance).reduce(
-    (sum: number, balance: any) => sum + balance.used,
-    0
-  );
-  const totalRemaining = totalAllocated - totalUsed;
+  /* ---------------- Derived view data ---------------- */
+  const departmentName =
+    typeof employee.department === "object" && employee.department?.name
+      ? employee.department.name
+      : employee.department || "—";
 
-  // Prepare chart data
-  const pieData = [
-    { name: "Used", value: totalUsed, color: "#ef4444" },
-    { name: "Remaining", value: totalRemaining, color: "#22c55e" },
-  ];
+  const active = employee.status === "active";
 
-  // Generate monthly leave data from actual history
-  const generateMonthlyData = () => {
-    const currentYear = new Date().getFullYear();
-    const months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
+  const totalRemaining =
+    leaveBalance.annual.remaining +
+    leaveBalance.sick.remaining +
+    leaveBalance.casual.remaining;
+  const totalAllocated =
+    leaveBalance.annual.total +
+    leaveBalance.sick.total +
+    leaveBalance.casual.total;
 
-    return months.map((month, index) => {
-      const monthLeaves = leaveHistory.filter((leave: any) => {
-        const leaveDate = new Date(leave.startDate);
-        return (
-          leaveDate.getFullYear() === currentYear &&
-          leaveDate.getMonth() === index &&
-          leave.status === "approved"
-        );
-      });
-
-      const totalDays = monthLeaves.reduce(
-        (sum: number, leave: any) => sum + (leave.totalDays || 1),
-        0
-      );
-
-      return { month, leaves: totalDays };
-    });
-  };
-
-  const monthlyData = generateMonthlyData();
-
-  // Leave type breakdown
-  const leaveTypeData = Object.entries(leaveBalance).map(
-    ([type, data]: [string, any]) => ({
-      type: type.charAt(0).toUpperCase() + type.slice(1),
-      total: data.total,
-      used: data.used,
-      remaining: data.remaining,
-    })
-  );
-
-  const getStatusBadge = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "approved":
-        return "badge-success";
-      case "rejected":
-        return "badge-error";
-      case "pending":
-        return "badge-warning";
-      default:
-        return "badge-gray";
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
-  };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="card-elevated p-3 shadow-lg">
-          <p className="font-medium text-gray-900 dark:text-gray-100">
-            {label}
-          </p>
-          {payload.map((entry: any, index: number) => (
-            <p key={index} style={{ color: entry.color }}>
-              {entry.name}: {entry.value}
-            </p>
-          ))}
-        </div>
-      );
+  const getStatusChip = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "approved":
+        return "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400";
+      case "rejected":
+        return "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400";
+      case "pending":
+        return "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400";
+      default:
+        return "bg-slate-100 text-gray-600 dark:bg-white/5 dark:text-gray-300";
     }
-    return null;
   };
 
-  const handleSaveAllocation = () => {
-    updateAllocationMutation.mutate(editAllocation);
-  };
+  // Monthly approved-leave trend (current year).
+  const MONTHS = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  ];
+  const currentYear = new Date().getFullYear();
+  const monthlyData = MONTHS.map((month, index) => {
+    const leaves = leaveHistory
+      .filter((leave: any) => {
+        const d = new Date(leave.startDate);
+        return (
+          d.getFullYear() === currentYear &&
+          d.getMonth() === index &&
+          leave.status === "approved"
+        );
+      })
+      .reduce((sum: number, leave: any) => sum + (leave.totalDays || 1), 0);
+    return { month, leaves };
+  });
+  const hasTrend = monthlyData.some((m) => m.leaves > 0);
 
-  const handleCancelEdit = () => {
-    // Reset to saved allocation values
-    setEditAllocation(
-      savedAllocation || {
-        casual: defaultPolicy.casual || 10,
-        sick: defaultPolicy.sick || 8,
-        annual: defaultPolicy.annual || 10,
-      }
-    );
-    setIsEditingAllocation(false);
-  };
+  // Distribution donut — used days by type.
+  const distribution = LEAVE_ORDER.map((key) => ({
+    name: LEAVE_META[key].label.split(" ")[0],
+    value: leaveBalance[key].used,
+    hex: LEAVE_META[key].hex,
+  })).filter((d) => d.value > 0);
 
   const handleStartEdit = () => {
-    // Start editing with current saved allocation values
     setEditAllocation(
       savedAllocation || {
         casual: defaultPolicy.casual || 10,
@@ -405,362 +496,299 @@ const EmployeeDetailPageReal: React.FC = () => {
     );
     setIsEditingAllocation(true);
   };
+  const handleCancelEdit = () => {
+    setEditAllocation(
+      savedAllocation || {
+        casual: defaultPolicy.casual || 10,
+        sick: defaultPolicy.sick || 8,
+        annual: defaultPolicy.annual || 10,
+      }
+    );
+    setIsEditingAllocation(false);
+  };
+  const handleSaveAllocation = () =>
+    updateAllocationMutation.mutate(editAllocation);
+
+  const isAdmin = user?.role === "admin";
 
   return (
     <div className="space-y-6 fade-in">
-      {/* Header with Back Button */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-4">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => navigate("/employees")}
-            className="btn-ghost p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+            className="rounded-xl p-2 text-gray-600 transition-colors hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/5"
           >
             <ArrowLeftIcon className="h-5 w-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
               Employee Details
             </h1>
-            <p className="text-gray-600 dark:text-gray-300">
-              Comprehensive overview and analytics
+            <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+              Leave overview & analytics
             </p>
           </div>
         </div>
 
-        {user?.role === "admin" && (
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2">
-              <ExclamationTriangleIcon className="h-4 w-4 text-blue-500" />
-              <span className="text-sm text-gray-600 dark:text-gray-300">
-                Company Policy: {defaultPolicy.casual}C • {defaultPolicy.sick}S
-                • {defaultPolicy.annual}A
-              </span>
-            </div>
-            {!isEditingAllocation && (
-              <button
-                onClick={handleStartEdit}
-                className="btn-secondary inline-flex items-center"
-              >
-                <PencilIcon className="h-4 w-4 mr-2" />
-                Edit Allocation
-              </button>
-            )}
-          </div>
+        {isAdmin && !isEditingAllocation && (
+          <button
+            onClick={handleStartEdit}
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-md"
+          >
+            <PencilIcon className="h-4 w-4" />
+            Edit Allocation
+          </button>
         )}
       </div>
 
-      {/* Employee Profile Header */}
-      <div className="card-elevated">
-        <div className="p-8">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center space-y-6 lg:space-y-0 lg:space-x-8">
-            {/* Profile Info */}
-            <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
-              <Avatar
-                src={employee.profilePicture}
-                name={employee.name}
-                size="3xl"
-                className="hover-lift"
-              />
-              <div className="text-center sm:text-left">
-                <h2 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">
-                  {employee.name}
-                </h2>
-                <p className="text-lg mb-4 text-gray-600 dark:text-gray-300">
-                  {employee.position}
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <EnvelopeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                    <span className="text-gray-600 dark:text-gray-300">
-                      {employee.email}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <BuildingOfficeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                    <span className="text-gray-600 dark:text-gray-300">
-                      {typeof employee.department === "object" &&
-                      (employee.department as any)?.name
-                        ? (employee.department as any).name
-                        : employee.department}
-                    </span>
-                  </div>
-                  {employee.phone && (
-                    <div className="flex items-center space-x-2">
-                      <PhoneIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                      <span className="text-gray-600 dark:text-gray-300">
-                        {employee.phone}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex items-center space-x-2">
-                    <UserIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                    <span className="text-gray-600 dark:text-gray-300">
-                      ID: {employee.employeeId}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2 mt-4">
-                  <span
-                    className={`badge ${
-                      employee.status === "active"
-                        ? "badge-success"
-                        : "badge-warning"
-                    }`}
-                  >
-                    {employee.status === "active" ? "Active" : "Inactive"}
-                  </span>
-                  <span className="badge badge-primary">
-                    {employee.role === "admin" ? "Administrator" : "Employee"}
-                  </span>
-                  {employee.joinDate && (
-                    <span className="badge badge-gray">
-                      Joined {formatDate(employee.joinDate)}
-                    </span>
-                  )}
-                </div>
-              </div>
+      {/* Profile */}
+      <div className={`${CARD} p-6 sm:p-7`}>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+          <Avatar
+            src={employee.profilePicture}
+            name={employee.name}
+            size="2xl"
+            className="ring-4 ring-blue-500/20"
+          />
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {employee.name}
+              </h2>
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                  active
+                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                    : "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
+                }`}
+              >
+                <CheckBadgeIcon className="h-3.5 w-3.5" />
+                {active ? "Active" : employee.status || "Inactive"}
+              </span>
             </div>
-
-            {/* Quick Stats - REMOVED */}
+            <p className="mt-1 text-sm font-medium text-gray-500 dark:text-gray-400">
+              {employee.position || "—"} • {departmentName}
+            </p>
+            <div className="mt-2 inline-flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 ring-1 ring-inset ring-blue-200/60 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20">
+              <CalendarDaysIcon className="h-3.5 w-3.5" />
+              {totalRemaining} of {totalAllocated} leave days remaining
+            </div>
           </div>
+        </div>
+
+        <div className="mt-6 grid grid-cols-1 gap-x-8 gap-y-5 border-t border-gray-100 pt-6 dark:border-white/5 sm:grid-cols-2 lg:grid-cols-3">
+          <ProfileField
+            icon={<EnvelopeIcon className="h-4 w-4" />}
+            label="Email"
+            value={employee.email || "—"}
+          />
+          <ProfileField
+            icon={<IdentificationIcon className="h-4 w-4" />}
+            label="Employee ID"
+            value={employee.employeeId || "—"}
+          />
+          <ProfileField
+            icon={<BuildingOffice2Icon className="h-4 w-4" />}
+            label="Department"
+            value={departmentName}
+          />
+          {employee.phone && (
+            <ProfileField
+              icon={<PhoneIcon className="h-4 w-4" />}
+              label="Phone"
+              value={employee.phone}
+            />
+          )}
+          <ProfileField
+            icon={<CalendarDaysIcon className="h-4 w-4" />}
+            label="Joined"
+            value={employee.joinDate ? formatDate(employee.joinDate) : "—"}
+          />
+          <ProfileField
+            icon={<UserIcon className="h-4 w-4" />}
+            label="Role"
+            value={employee.role === "admin" ? "Administrator" : "Employee"}
+          />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Charts Section */}
-        <div className="xl:col-span-2 space-y-6">
-          {/* Chart Controls */}
-          <div className="card">
-            <div className="card-header">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    Leave Analytics
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Visual breakdown of leave usage patterns for{" "}
-                    {new Date().getFullYear()}
-                  </p>
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => setActiveChart("pie")}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      activeChart === "pie" ? "btn-primary" : "btn-secondary"
-                    }`}
-                  >
-                    Distribution
-                  </button>
-                  <button
-                    onClick={() => setActiveChart("line")}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      activeChart === "line" ? "btn-primary" : "btn-secondary"
-                    }`}
-                  >
-                    Trend
-                  </button>
-                  <button
-                    onClick={() => setActiveChart("bar")}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      activeChart === "bar" ? "btn-primary" : "btn-secondary"
-                    }`}
-                  >
-                    Types
-                  </button>
-                </div>
+      {/* Leave Balance */}
+      <div className="space-y-4">
+        <SectionHeading
+          action={
+            isAdmin && isEditingAllocation ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleCancelEdit}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:text-gray-200 dark:hover:bg-white/5"
+                >
+                  <XMarkIcon className="h-3.5 w-3.5" />
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveAllocation}
+                  disabled={updateAllocationMutation.isPending}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-blue-600/25 disabled:opacity-70"
+                >
+                  {updateAllocationMutation.isPending ? (
+                    <LoadingSpinner size="sm" />
+                  ) : (
+                    <CheckIcon className="h-3.5 w-3.5" />
+                  )}
+                  Save
+                </button>
               </div>
-            </div>
+            ) : (
+              <span className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-200/70 dark:bg-white/5 dark:text-gray-300 dark:ring-white/10">
+                Total: {totalAllocated} Days
+              </span>
+            )
+          }
+        >
+          Leave Balance
+        </SectionHeading>
 
-            <div className="card-body">
-              <div className="h-80">
-                {activeChart === "pie" && (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, value, percent }: any) =>
-                          `${name}: ${value} (${((percent || 0) * 100).toFixed(
-                            0
-                          )}%)`
-                        }
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip content={<CustomTooltip />} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                )}
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+          {LEAVE_ORDER.map((key) => (
+            <LeaveBalanceCard
+              key={key}
+              leaveKey={key}
+              total={leaveBalance[key].total}
+              used={leaveBalance[key].used}
+              remaining={leaveBalance[key].remaining}
+              editing={isEditingAllocation}
+              editValue={editAllocation[key]}
+              onChange={(v) =>
+                setEditAllocation((prev) => ({ ...prev, [key]: v }))
+              }
+            />
+          ))}
+        </div>
+      </div>
 
-                {activeChart === "line" && (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={monthlyData}
-                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        className="stroke-gray-200 dark:stroke-gray-700"
-                      />
-                      <XAxis
-                        dataKey="month"
-                        tick={{ fill: "#6b7280" }}
-                        axisLine={{ stroke: "#e5e7eb" }}
-                      />
-                      <YAxis
-                        tick={{ fill: "#6b7280" }}
-                        axisLine={{ stroke: "#e5e7eb" }}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Line
-                        type="monotone"
-                        dataKey="leaves"
-                        stroke="#3b82f6"
-                        strokeWidth={3}
-                        dot={{ fill: "#3b82f6", strokeWidth: 2, r: 6 }}
-                        activeDot={{ r: 8 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                )}
-
-                {activeChart === "bar" && (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={leaveTypeData}
-                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        className="stroke-gray-200 dark:stroke-gray-700"
-                      />
-                      <XAxis
-                        dataKey="type"
-                        tick={{ fill: "#6b7280" }}
-                        axisLine={{ stroke: "#e5e7eb" }}
-                      />
-                      <YAxis
-                        tick={{ fill: "#6b7280" }}
-                        axisLine={{ stroke: "#e5e7eb" }}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Legend />
-                      <Bar dataKey="used" fill="#ef4444" name="Used" />
-                      <Bar
-                        dataKey="remaining"
-                        fill="#22c55e"
-                        name="Remaining"
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                )}
-              </div>
+      {/* Analytics */}
+      <div className="space-y-4">
+        <SectionHeading>Leave Analytics</SectionHeading>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+          {/* Trend */}
+          <div className={`${CARD} p-6 lg:col-span-2`}>
+            <h4 className="text-sm font-bold text-gray-900 dark:text-white">
+              Leave Trend
+            </h4>
+            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+              Approved leave days across {currentYear}
+            </p>
+            <div className="mt-4 h-60">
+              {hasTrend ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={monthlyData}
+                    margin={{ top: 10, right: 8, left: 8, bottom: 0 }}
+                  >
+                    <defs>
+                      <linearGradient id="edTrend" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={accent} stopOpacity={0.28} />
+                        <stop offset="100%" stopColor={accent} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis
+                      dataKey="month"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 11, fill: "#9ca3af" }}
+                      interval={0}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: "1px solid #e5e7eb",
+                        fontSize: 12,
+                      }}
+                      formatter={(v: any) => [`${v} days`, "Leave"]}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="leaves"
+                      stroke={accent}
+                      strokeWidth={3}
+                      fill="url(#edTrend)"
+                      dot={false}
+                      activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                  No approved leaves recorded this year
+                </div>
+              )}
             </div>
           </div>
-        </div>
 
-        {/* Leave Balance Breakdown */}
-        <div className="space-y-6">
-          <div className="card">
-            <div className="card-header">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    Leave Balance
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    Current allocation status
-                  </p>
-                </div>
-                {user?.role === "admin" && isEditingAllocation && (
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={handleSaveAllocation}
-                      disabled={updateAllocationMutation.isPending}
-                      className="btn-success px-3 py-1 text-xs"
-                    >
-                      {updateAllocationMutation.isPending ? (
-                        <LoadingSpinner size="sm" />
-                      ) : (
-                        <CheckIcon className="h-3 w-3" />
-                      )}
-                    </button>
-                    <button
-                      onClick={handleCancelEdit}
-                      className="btn-secondary px-3 py-1 text-xs"
-                    >
-                      <XMarkIcon className="h-3 w-3" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="card-body space-y-4">
-              {Object.entries(leaveBalance).map(
-                ([type, data]: [string, any]) => (
-                  <div
-                    key={type}
-                    className="p-4 rounded-lg border border-gray-200 dark:border-gray-700"
-                  >
-                    <div className="flex justify-between items-center mb-3">
-                      <h4 className="font-medium capitalize text-gray-900 dark:text-gray-100">
-                        {type} Leave
-                      </h4>
-                      <div className="flex items-center space-x-2">
-                        <span className="badge badge-primary">
-                          {data.remaining}/{data.total}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-300">
-                          Allocated
-                        </span>
-                        <span className="text-gray-900 dark:text-gray-100">
-                          {data.total}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-300">
-                          Used
-                        </span>
-                        <span className="text-red-600">{data.used}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600 dark:text-gray-300">
-                          Remaining
-                        </span>
-                        <span className="text-green-600">{data.remaining}</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-3">
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div
-                          className="bg-gradient-to-r from-red-500 to-green-500 h-2 rounded-full transition-all duration-500"
-                          style={{
-                            width: `${
-                              data.total > 0
-                                ? Math.min(100, (data.used / data.total) * 100)
-                                : 0
-                            }%`,
+          {/* Distribution */}
+          <div className={`${CARD} p-6`}>
+            <h4 className="text-sm font-bold text-gray-900 dark:text-white">
+              Distribution
+            </h4>
+            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+              Days used by type
+            </p>
+            <div className="mt-4 flex h-60 flex-col items-center justify-center gap-4">
+              {distribution.length > 0 ? (
+                <>
+                  <div className="h-40 w-40">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={distribution}
+                          dataKey="value"
+                          nameKey="name"
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={48}
+                          outerRadius={70}
+                          paddingAngle={3}
+                          stroke="none"
+                        >
+                          {distribution.map((d, i) => (
+                            <Cell key={i} fill={d.hex} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{
+                            borderRadius: 12,
+                            border: "1px solid #e5e7eb",
+                            fontSize: 12,
                           }}
+                          formatter={(v: any, n: any) => [`${v} days`, n]}
                         />
-                      </div>
-                    </div>
+                      </PieChart>
+                    </ResponsiveContainer>
                   </div>
-                )
+                  <ul className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+                    {distribution.map((d) => (
+                      <li
+                        key={d.name}
+                        className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300"
+                      >
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{ backgroundColor: d.hex }}
+                        />
+                        {d.name}
+                        <span className="font-semibold text-gray-900 dark:text-white">
+                          {d.value}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <div className="text-sm text-gray-400 dark:text-gray-500">
+                  No leave usage recorded yet
+                </div>
               )}
             </div>
           </div>
@@ -768,110 +796,73 @@ const EmployeeDetailPageReal: React.FC = () => {
       </div>
 
       {/* Leave History */}
-      <div className="card-elevated">
-        <div className="card-header">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                Leave History
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                Complete record of leave requests and approvals
-              </p>
-            </div>
-            <span className="badge badge-primary">
+      <div className="space-y-4">
+        <SectionHeading
+          action={
+            <span className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-200/70 dark:bg-white/5 dark:text-gray-300 dark:ring-white/10">
               {leaveHistory.length} requests
             </span>
-          </div>
-        </div>
+          }
+        >
+          Leave History
+        </SectionHeading>
 
-        <div className="card-body">
-          {leaveHistory.length > 0 ? (
-            <div className="space-y-3">
-              {leaveHistory.map((leave: any) => (
-                <div
-                  key={leave._id}
-                  className="bg-white dark:bg-gray-800 rounded-xl p-6 table-row-hover transition-all duration-200 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700"
-                >
-                  <div className="grid grid-cols-6 gap-6 items-center">
-                    <div>
-                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                        LEAVE TYPE
-                      </div>
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-                        {leave.leaveType}
-                      </span>
-                    </div>
-                    <div>
-                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                        DURATION
-                      </div>
-                      <div className="font-medium text-gray-900 dark:text-gray-100">
-                        {formatDate(leave.startDate)}
-                      </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        to {formatDate(leave.endDate)}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                        DAYS
-                      </div>
-                      <span className="font-medium text-gray-900 dark:text-gray-100">
-                        {leave.totalDays || 1} days
-                      </span>
-                    </div>
-                    <div>
-                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                        STATUS
-                      </div>
-                      <span
-                        className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${getStatusBadge(
-                          leave.status
-                        )}`}
-                      >
-                        {leave.status.charAt(0).toUpperCase() +
-                          leave.status.slice(1)}
-                      </span>
-                    </div>
-                    <div>
-                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                        REASON
-                      </div>
-                      <div
-                        className="text-sm text-gray-900 dark:text-gray-100 truncate max-w-xs"
-                        title={leave.reason}
-                      >
-                        {leave.reason}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                        APPLIED
-                      </div>
-                      <div className="text-sm text-gray-900 dark:text-gray-100">
-                        {formatDate(leave.createdAt || leave.startDate)}
-                      </div>
-                    </div>
+        {leaveHistory.length > 0 ? (
+          <div className="space-y-3">
+            {leaveHistory.map((leave: any) => (
+              <div
+                key={leave._id}
+                className={`${CARD} flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between`}
+              >
+                <div className="flex items-center gap-4">
+                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+                    <ChartBarIcon className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="font-semibold capitalize text-gray-900 dark:text-gray-100">
+                      {leave.leaveType} Leave
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {formatDate(leave.startDate)} → {formatDate(leave.endDate)}{" "}
+                      · {leave.totalDays || 1}{" "}
+                      {leave.totalDays === 1 ? "day" : "days"}
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <CalendarDaysIcon className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
-              <p className="text-lg font-medium mb-2 text-gray-900 dark:text-gray-100">
-                No Leave History
-              </p>
-              <p className="text-gray-600 dark:text-gray-300">
-                This employee hasn't submitted any leave requests yet.
-              </p>
-            </div>
-          )}
-        </div>
+                <div className="flex items-center gap-3 sm:justify-end">
+                  {leave.reason && (
+                    <span
+                      className="hidden max-w-[220px] truncate text-xs text-gray-400 dark:text-gray-500 md:block"
+                      title={leave.reason}
+                    >
+                      “{leave.reason}”
+                    </span>
+                  )}
+                  <span
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold capitalize ${getStatusChip(
+                      leave.status
+                    )}`}
+                  >
+                    {leave.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className={`${CARD} py-12 text-center`}>
+            <CalendarDaysIcon className="mx-auto mb-3 h-12 w-12 text-gray-400 dark:text-gray-500" />
+            <p className="font-medium text-gray-900 dark:text-gray-200">
+              No leave history
+            </p>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              This employee hasn't submitted any leave requests yet.
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Employee Leave Activity Section */}
+      {/* Activity */}
       <EmployeeLeaveActivity
         employeeId={employee._id}
         isCurrentUser={user?.id === employee._id}

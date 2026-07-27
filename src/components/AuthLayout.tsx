@@ -72,9 +72,9 @@ const CARDS = [
 ];
 
 const FEATURES = [
-  "Instant leave requests",
-  "Smart approval workflow",
-  "Real-time team availability",
+  "Leave & approvals",
+  "Attendance & time",
+  "Employee voice",
 ];
 
 const NavPill: React.FC<{ activeTab: Tab }> = ({ activeTab }) => {
@@ -127,10 +127,20 @@ const BrandPanel: React.FC = () => {
       />
 
       {/* Logo */}
-      <div className="absolute left-8 top-7 z-20 flex items-center gap-3">
-        <AppLogo size={40} />
-        <span className="text-lg font-bold text-white">LeaveFlow</span>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, x: -12 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute left-8 top-7 z-20 flex items-center gap-3"
+      >
+        <AppLogo size={52} />
+        <div className="leading-none">
+          <span className="block text-lg font-bold text-white">LeaveFlow</span>
+          <span className="hrms-gradient mt-1 block text-[11px] font-bold uppercase tracking-[0.35em]">
+            HRMS
+          </span>
+        </div>
+      </motion.div>
 
       {/* Journey + floating cards */}
       <div className="absolute inset-x-0 top-24 bottom-[38%] mx-8">
@@ -232,15 +242,13 @@ const BrandPanel: React.FC = () => {
         className="absolute inset-x-0 bottom-0 z-10 p-8"
       >
         <h1 className="text-4xl font-bold leading-tight tracking-tight text-white">
-          Leave management,
+          The modern <span className="hrms-gradient">HRMS</span>
           <br />
-          <span className="bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
-            reimagined.
-          </span>
+          for people-first teams.
         </h1>
         <p className="mt-4 max-w-md text-sm leading-relaxed text-white/60">
-          Manage employee leave with elegance, speed, and complete transparency —
-          built for teams who expect more from their tools.
+          Leave, attendance, employee voice and performance — beautifully
+          unified in one elegant workspace your whole team will love.
         </p>
 
         <div className="mt-6 grid grid-cols-3 gap-3">

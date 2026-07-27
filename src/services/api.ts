@@ -196,7 +196,7 @@ export const leavesAPI = {
   // Leave Policy Management
   getLeavePolicy: () => api.get("/leaves/policy"),
 
-  updateLeavePolicy: (policy: any) => api.put("/leaves/policy", policy),
+  updateLeavePolicy: (policy: any) => api.put("/leaves/policy", { policy }),
 
   updateEmployeeLeaveAllocation: (employeeId: string, allocations: any) =>
     api.put(`/leaves/allocation/${employeeId}`, { allocations }),
@@ -498,9 +498,57 @@ export const realMachinePerformanceAPI = {
   },
 };
 
-// Notification API - Removed for Socket.IO implementation
-// export const notificationsAPI = {
-//   // Will be implemented with Socket.IO in the future
-// };
+// Notifications API (in-app notification center + bell)
+export const notificationsAPI = {
+  getNotifications: (page = 1, limit = 20, unreadOnly = false) => {
+    let url = `/notifications?page=${page}&limit=${limit}`;
+    if (unreadOnly) url += "&unread=true";
+    return api.get(url);
+  },
+
+  markRead: (id: string) => api.put(`/notifications/${id}/read`),
+
+  markAllRead: () => api.put("/notifications/mark-all-read"),
+
+  remove: (id: string) => api.delete(`/notifications/${id}`),
+};
+
+// Employee Voice API
+export const employeeVoiceAPI = {
+  // Submit a new voice. `formData` carries fields + attachments; axios v1
+  // strips the JSON content-type for FormData so the browser sets the
+  // multipart boundary automatically.
+  submitVoice: (formData: FormData) => api.post("/employee-voice", formData),
+
+  getVoices: (params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    category?: string;
+    priority?: string;
+  }) => {
+    const q = new URLSearchParams();
+    q.append("page", String(params?.page ?? 1));
+    q.append("limit", String(params?.limit ?? 50));
+    if (params?.status) q.append("status", params.status);
+    if (params?.category) q.append("category", params.category);
+    if (params?.priority) q.append("priority", params.priority);
+    return api.get(`/employee-voice?${q.toString()}`);
+  },
+
+  getMyVoices: () => api.get("/employee-voice/my-voices"),
+
+  getVoice: (id: string) => api.get(`/employee-voice/${id}`),
+
+  reply: (id: string, message: string) =>
+    api.post(`/employee-voice/${id}/reply`, { message }),
+
+  updateStatus: (id: string, status: string) =>
+    api.put(`/employee-voice/${id}/status`, { status }),
+
+  deleteVoice: (id: string) => api.delete(`/employee-voice/${id}`),
+
+  getStats: () => api.get("/employee-voice/stats/dashboard"),
+};
 
 export default api;
