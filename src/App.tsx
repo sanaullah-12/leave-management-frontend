@@ -10,6 +10,7 @@ import { MotionConfig } from "framer-motion";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import RealtimeProvider from "./providers/RealtimeProvider";
 // import { NotificationProvider } from './components/NotificationSystem'; // Removed for Socket.IO implementation
 import "./styles/themes.css";
 import Layout from "./components/Layout";
@@ -52,6 +53,7 @@ const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
+          <RealtimeProvider>
           <MotionConfig reducedMotion="user">
             <Router>
             <div className="App">
@@ -127,6 +129,7 @@ const App: React.FC = () => {
             </div>
             </Router>
           </MotionConfig>
+          </RealtimeProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

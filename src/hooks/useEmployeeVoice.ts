@@ -19,8 +19,9 @@ export interface VoiceFilters {
 }
 
 /** List of voices for the current viewer (own for employees, all for admins). */
-export function useVoices(filters: VoiceFilters = {}, pollMs = 20000) {
+export function useVoices(filters: VoiceFilters = {}) {
   const { isAuthenticated } = useAuth();
+  // Real-time via Socket.IO (voice:new / voice:updated) — no polling.
   return useQuery({
     queryKey: [...VOICES_KEY, filters],
     queryFn: async () => {
@@ -28,16 +29,16 @@ export function useVoices(filters: VoiceFilters = {}, pollMs = 20000) {
       return (res.data?.voices ?? []) as EmployeeVoice[];
     },
     enabled: isAuthenticated,
-    refetchInterval: pollMs,
-    refetchIntervalInBackground: true,
+    refetchInterval: false,
     refetchOnWindowFocus: true,
-    staleTime: 5000,
+    staleTime: 30 * 1000,
   });
 }
 
 /** Admin dashboard statistics for the Employee Voice module. */
-export function useVoiceStats(pollMs = 20000) {
+export function useVoiceStats() {
   const { user, isAuthenticated } = useAuth();
+  // Real-time via Socket.IO — no polling.
   return useQuery({
     queryKey: VOICE_STATS_KEY,
     queryFn: async () => {
@@ -45,15 +46,15 @@ export function useVoiceStats(pollMs = 20000) {
       return res.data as VoiceStats;
     },
     enabled: isAuthenticated && user?.role === "admin",
-    refetchInterval: pollMs,
-    refetchIntervalInBackground: true,
+    refetchInterval: false,
     refetchOnWindowFocus: true,
-    staleTime: 5000,
+    staleTime: 30 * 1000,
   });
 }
 
 /** Single voice detail (with the reply thread). */
 export function useVoice(id: string | null) {
+  // Real-time via Socket.IO (voice:updated) — no polling.
   return useQuery({
     queryKey: [...VOICES_KEY, "detail", id],
     queryFn: async () => {
@@ -61,8 +62,8 @@ export function useVoice(id: string | null) {
       return res.data.voice as EmployeeVoice;
     },
     enabled: !!id,
-    refetchInterval: 15000,
-    staleTime: 3000,
+    refetchInterval: false,
+    staleTime: 30 * 1000,
   });
 }
 

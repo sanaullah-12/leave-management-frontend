@@ -53,7 +53,7 @@ const EmployeeVoiceWidget: React.FC = () => {
   const navigate = useNavigate();
   const isAdmin = user?.role === "admin";
   const { data: stats } = useVoiceStats();
-  const { data: myVoices = [] } = useVoices({}, isAdmin ? 999999 : 20000);
+  const { data: myVoices = [] } = useVoices({});
   const [submitOpen, setSubmitOpen] = useState(false);
 
   const header = (
