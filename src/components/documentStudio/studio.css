@@ -1,0 +1,65 @@
+/* Document Studio — on-screen styling for the editable A4 body.
+   Kept scoped to .ds-editable / .ds-page so it can never leak into the app. */
+
+.ds-editable h1 {
+  font-size: 1.6em;
+  font-weight: 700;
+  margin: 0 0 0.5em;
+}
+.ds-editable h2 {
+  font-size: 1.3em;
+  font-weight: 700;
+  margin: 0.6em 0 0.4em;
+}
+.ds-editable h3 {
+  font-size: 1.12em;
+  font-weight: 600;
+  margin: 0.6em 0 0.3em;
+}
+.ds-editable p {
+  margin: 0 0 0.6em;
+}
+.ds-editable blockquote {
+  margin: 0 0 0.6em;
+  padding-left: 1em;
+  border-left: 3px solid var(--accent, #2563eb);
+  color: #4b5563;
+}
+.ds-editable ul,
+.ds-editable ol {
+  margin: 0 0 0.6em 1.4em;
+}
+.ds-editable table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 100%;
+  margin: 0.75em 0;
+}
+.ds-editable td,
+.ds-editable th {
+  border: 1px solid #d1d5db;
+  padding: 6px 10px;
+}
+.ds-editable img {
+  max-width: 100%;
+  height: auto;
+  cursor: pointer;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+.ds-editable a {
+  color: var(--accent, #2563eb);
+}
+
+/* Placeholder chip when it lands in the document */
+.ds-editable span[data-token] {
+  background: var(--accent-soft, rgba(37, 99, 235, 0.12));
+  border-radius: 3px;
+  padding: 0 3px;
+}
+
+/* Empty-body helper text */
+.ds-editable:empty::before {
+  content: "Start typing your document…";
+  color: #9ca3af;
+}

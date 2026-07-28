@@ -551,4 +551,53 @@ export const employeeVoiceAPI = {
   getStats: () => api.get("/employee-voice/stats/dashboard"),
 };
 
+// Announcements (company notice board)
+export const announcementsAPI = {
+  getAnnouncements: (params?: {
+    page?: number;
+    limit?: number;
+    category?: string;
+    search?: string;
+  }) => {
+    const q = new URLSearchParams();
+    q.append("page", String(params?.page ?? 1));
+    q.append("limit", String(params?.limit ?? 50));
+    if (params?.category) q.append("category", params.category);
+    if (params?.search) q.append("search", params.search);
+    return api.get(`/announcements?${q.toString()}`);
+  },
+
+  getUnreadCount: () => api.get("/announcements/unread-count"),
+
+  getDashboard: () => api.get("/announcements/dashboard"),
+
+  create: (data: {
+    title: string;
+    body: string;
+    category?: string;
+    audience?: string;
+    pinned?: boolean;
+    expiresAt?: string | null;
+  }) => api.post("/announcements", data),
+
+  update: (
+    id: string,
+    data: Partial<{
+      title: string;
+      body: string;
+      category: string;
+      audience: string;
+      pinned: boolean;
+      expiresAt: string | null;
+    }>
+  ) => api.put(`/announcements/${id}`, data),
+
+  remove: (id: string) => api.delete(`/announcements/${id}`),
+
+  markRead: (id: string) => api.post(`/announcements/${id}/read`),
+
+  react: (id: string, emoji: string) =>
+    api.post(`/announcements/${id}/reactions`, { emoji }),
+};
+
 export default api;

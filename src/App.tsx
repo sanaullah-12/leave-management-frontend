@@ -36,6 +36,8 @@ import DepartmentsPage from "./pages/DepartmentsPage";
 import LeavePolicyPage from "./pages/LeavePolicyPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import EmployeeVoicePage from "./pages/EmployeeVoicePage";
+import DocumentStudioPage from "./pages/DocumentStudioPage";
+import AnnouncementsPage from "./pages/AnnouncementsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -120,7 +122,9 @@ const App: React.FC = () => {
                   <Route path="leave-policies" element={<LeavePolicyPage />} />
                   <Route path="reports" element={<ReportsPage />} />
                   <Route path="notifications" element={<NotificationsPage />} />
+                  <Route path="announcements" element={<AnnouncementsPage />} />
                   <Route path="employee-voice" element={<EmployeeVoicePage />} />
+                  <Route path="document-studio" element={<DocumentStudioPage />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="theme" element={<ThemePage />} />
                 </Route>

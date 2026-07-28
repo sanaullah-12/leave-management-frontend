@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersAPI } from "../services/api";
 // import { useNotifications } from "../components/NotificationSystem"; // Removed for Socket.IO implementation
 import LoadingSpinner from "../components/LoadingSpinner";
-import { HeaderSkeleton, TableSkeleton } from "../components/Skeletons";
+import LogoLoader from "../components/LogoLoader";
 import EmployeeInviteModal from "../components/EmployeeInviteModal";
 import AdminInviteModal from "../components/AdminInviteModal";
 import Avatar from "../components/Avatar";
@@ -209,12 +209,7 @@ const EmployeesPage: React.FC = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="space-y-6 fade-in">
-        <HeaderSkeleton />
-        <TableSkeleton rows={7} cols={5} />
-      </div>
-    );
+    return <LogoLoader label="Loading team…" />;
   }
 
   const users = currentUsers || [];

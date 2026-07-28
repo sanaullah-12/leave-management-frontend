@@ -1288,6 +1288,29 @@ html {
   animation: soft-ping 1.8s var(--ease-out-quint) infinite;
 }
 
+/* --- Attention pulse for the dashboard announcements card --- */
+@keyframes announce-attn {
+  0%, 100% {
+    border-color: var(--accent-soft);
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  }
+  50% {
+    border-color: var(--accent);
+    box-shadow: 0 0 22px 2px var(--accent-soft);
+  }
+}
+.announce-attn {
+  border-width: 1px;
+  border-style: solid;
+  animation: announce-attn 2.4s var(--ease-out-quint) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .announce-attn {
+    animation: none;
+    border-color: var(--accent);
+  }
+}
+
 /* --- Skeleton shimmer sweep --- */
 @keyframes skeleton-shimmer {
   100% {
@@ -1296,7 +1319,7 @@ html {
 }
 
 /* ============================================================ */
-/* 📌 Branded LeaveFlow loader animations                        */
+/* 📌 Branded Nexora loader animations                           */
 /* ============================================================ */
 
 /* Breathing scale for the logo mark */
@@ -1329,7 +1352,7 @@ html {
   animation: brand-glow 3s ease-in-out infinite;
 }
 
-/* ── App logo (leaveflowapplogo.png) ─────────────────────────── */
+/* ── App logo (nexora-logo.png) ──────────────────────────────── */
 /* Gentle floating bob */
 @keyframes logo-float {
   0%,
@@ -1446,7 +1469,7 @@ html {
   }
 }
 
-/* Flowing wave (the "Flow" in LeaveFlow) */
+/* Flowing wave accent */
 @keyframes wave-flow {
   0% {
     transform: translateX(0);

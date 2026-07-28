@@ -90,7 +90,7 @@ const Toggle: React.FC<{ on: boolean; onChange: (v: boolean) => void }> = ({
 
 const loadPrefs = (userId?: string): Prefs => {
   try {
-    const raw = localStorage.getItem(`leaveflow:prefs:${userId}`);
+    const raw = localStorage.getItem(`nexora:prefs:${userId}`);
     if (raw) return JSON.parse(raw);
   } catch {
     /* ignore */
@@ -126,7 +126,7 @@ const ProfileSettings: React.FC = () => {
   const savePrefs = (next: Prefs) => {
     setPrefs(next);
     try {
-      localStorage.setItem(`leaveflow:prefs:${user?.id}`, JSON.stringify(next));
+      localStorage.setItem(`nexora:prefs:${user?.id}`, JSON.stringify(next));
     } catch {
       /* ignore */
     }

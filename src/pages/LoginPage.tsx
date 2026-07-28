@@ -54,7 +54,7 @@ const LoginPage: React.FC = () => {
         Welcome back
       </h1>
       <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-        New to LeaveFlow?{" "}
+        New to Nexora?{" "}
         <Link
           to="/register"
           className="font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400"

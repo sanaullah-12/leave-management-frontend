@@ -6,8 +6,8 @@ const PX: Record<"md" | "lg", number> = { md: 48, lg: 76 };
 /**
  * Loading indicator.
  * - `sm` → compact ring (used inside buttons where a logo won't fit).
- * - `md` / `lg` → the animated LeaveFlow logo (bouncing dot), used for
- *   section- and page-level loading states across the app.
+ * - `md` / `lg` → the Nexora brand mark, used for section- and page-level
+ *   loading states across the app.
  */
 const LoadingSpinner: React.FC<{ size?: "sm" | "md" | "lg" }> = ({
   size = "md",

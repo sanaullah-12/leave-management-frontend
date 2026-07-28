@@ -6,7 +6,7 @@ import { BellIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { useNotifications } from "../hooks/useNotifications";
 import { notificationTarget } from "../components/NotificationBell";
 import { NOTIFICATION_META } from "../lib/voiceMeta";
-import { HeaderSkeleton, NotificationsSkeleton } from "../components/Skeletons";
+import LogoLoader from "../components/LogoLoader";
 import { staggerContainer, staggerItem } from "../lib/motion";
 import "../styles/design-system.css";
 
@@ -16,12 +16,7 @@ const NotificationsPage: React.FC = () => {
     useNotifications({ limit: 50 });
 
   if (isLoading) {
-    return (
-      <div className="space-y-6 fade-in">
-        <HeaderSkeleton />
-        <NotificationsSkeleton rows={6} />
-      </div>
-    );
+    return <LogoLoader label="Loading notifications…" />;
   }
 
   return (

@@ -8,7 +8,9 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import Avatar from "../components/Avatar";
 import { getUpcomingHolidays } from "../data/holidays";
 import AnimatedNumber from "../components/AnimatedNumber";
-import { DashboardSkeleton, StatCardsSkeleton } from "../components/Skeletons";
+import { StatCardsSkeleton } from "../components/Skeletons";
+import LogoLoader from "../components/LogoLoader";
+import DashboardAnnouncements from "../components/DashboardAnnouncements";
 import { motion } from "framer-motion";
 import MeshBackground from "../components/MeshBackground";
 import EmployeeVoiceWidget from "../components/voice/EmployeeVoiceWidget";
@@ -256,7 +258,7 @@ const DashboardPage: React.FC = () => {
   });
 
   if (statsLoading && user?.role === "admin") {
-    return <DashboardSkeleton />;
+    return <LogoLoader label="Loading your dashboard…" />;
   }
 
   const adminStats: any = stats?.data || {};
@@ -482,6 +484,9 @@ const DashboardPage: React.FC = () => {
           ))}
         </motion.div>
       )}
+
+      {/* ---------------- Announcements highlight (fresh 24h + pinned) ---------------- */}
+      <DashboardAnnouncements />
 
       {/* ---------------- Hero + gauges ---------------- */}
       <motion.div

@@ -14,7 +14,7 @@ import {
   addMonths,
   subMonths,
 } from "date-fns";
-import { CalendarSkeleton } from "../components/Skeletons";
+import LogoLoader from "../components/LogoLoader";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -82,7 +82,7 @@ const LeaveCalendarPage: React.FC = () => {
       : lv.leaveType;
 
   if (isLoading) {
-    return <CalendarSkeleton />;
+    return <LogoLoader label="Loading calendar…" />;
   }
 
   return (

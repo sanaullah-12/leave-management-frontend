@@ -11,7 +11,7 @@ import {
 import Avatar from "../components/Avatar";
 import Modal from "../components/ui/Modal";
 import InlineLoader from "../components/InlineLoader";
-import { HeaderSkeleton, TableSkeleton } from "../components/Skeletons";
+import LogoLoader from "../components/LogoLoader";
 import {
   PlusIcon,
   ArrowPathIcon,
@@ -310,12 +310,7 @@ const LeavesPage: React.FC = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="space-y-6 fade-in">
-        <HeaderSkeleton />
-        <TableSkeleton rows={6} cols={6} />
-      </div>
-    );
+    return <LogoLoader label="Loading leave requests…" />;
   }
 
   const leaves = leavesData?.data?.leaves || [];

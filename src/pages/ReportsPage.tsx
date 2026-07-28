@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { leavesAPI } from "../services/api";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { ReportSkeleton } from "../components/Skeletons";
+import LogoLoader from "../components/LogoLoader";
 import StepProgress, { type ProgressStep } from "../components/StepProgress";
 import Avatar from "../components/Avatar";
 import {
@@ -551,7 +551,7 @@ const ReportsPage: React.FC = () => {
   };
 
   if (!reportData) {
-    return <ReportSkeleton />;
+    return <LogoLoader label="Building your reports…" />;
   }
 
   /* ---------------- Derived view data ---------------- */
