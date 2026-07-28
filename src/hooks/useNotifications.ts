@@ -24,8 +24,9 @@ export function useNotifications(options?: { limit?: number; pollMs?: number }) 
   const { isAuthenticated } = useAuth();
   const qc = useQueryClient();
   const limit = options?.limit ?? 20;
-  const pollMs = options?.pollMs ?? 15000;
 
+  // Real-time via Socket.IO (see useSocket) — no polling. We keep a light
+  // refetch-on-focus as a safety net for missed events after sleep/offline.
   const query = useQuery({
     queryKey: [...NOTIF_KEY, limit],
     queryFn: async () => {
@@ -33,10 +34,9 @@ export function useNotifications(options?: { limit?: number; pollMs?: number }) 
       return res.data as NotificationsResponse;
     },
     enabled: isAuthenticated,
-    refetchInterval: pollMs,
-    refetchIntervalInBackground: true,
+    refetchInterval: false,
     refetchOnWindowFocus: true,
-    staleTime: 5000,
+    staleTime: 30 * 1000,
   });
 
   const notifications: AppNotification[] = query.data?.notifications ?? [];
