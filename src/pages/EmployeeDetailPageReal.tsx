@@ -5,7 +5,7 @@ import { usersAPI, leavesAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { ProfileSkeleton } from "../components/Skeletons";
+import LogoLoader from "../components/LogoLoader";
 import Avatar from "../components/Avatar";
 import EmployeeLeaveActivity from "../components/EmployeeLeaveActivity";
 import {
@@ -388,7 +388,7 @@ const EmployeeDetailPageReal: React.FC = () => {
   );
 
   if (employeesLoading || historyLoading) {
-    return <ProfileSkeleton />;
+    return <LogoLoader label="Loading profile…" />;
   }
 
   if (employeesError || !employee) {

@@ -32,9 +32,10 @@ import {
   MagnifyingGlassIcon,
   MegaphoneIcon,
   HomeIcon,
-  RectangleGroupIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
+  DocumentDuplicateIcon,
+  NewspaperIcon,
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 
@@ -90,6 +91,7 @@ const Layout: React.FC = () => {
           icon: HomeIcon,
           items: [
             { name: "Dashboard", href: "/", icon: Squares2X2Icon },
+            { name: "Announcements", href: "/announcements", icon: NewspaperIcon },
             { name: "Reports", href: "/reports", icon: ChartBarIcon },
             { name: "Notifications", href: "/notifications", icon: BellIcon, badge: "notifications" },
           ],
@@ -117,12 +119,27 @@ const Layout: React.FC = () => {
           ],
         },
         {
-          key: "workspace",
-          short: "Work",
-          label: "Workspace",
-          icon: RectangleGroupIcon,
+          key: "attendance",
+          short: "Attendance",
+          label: "Attendance",
+          icon: ClockIcon,
+          items: [{ name: "Attendance", href: "/attendance", icon: ClockIcon }],
+        },
+        {
+          key: "documents",
+          short: "Documents",
+          label: "Document Studio",
+          icon: DocumentDuplicateIcon,
           items: [
-            { name: "Attendance", href: "/attendance", icon: ClockIcon },
+            { name: "Document Studio", href: "/document-studio", icon: DocumentDuplicateIcon },
+          ],
+        },
+        {
+          key: "voice",
+          short: "Voice",
+          label: "Employee Voice",
+          icon: MegaphoneIcon,
+          items: [
             { name: "Employee Voice", href: "/employee-voice", icon: MegaphoneIcon },
           ],
         },
@@ -146,6 +163,7 @@ const Layout: React.FC = () => {
         icon: HomeIcon,
         items: [
           { name: "Dashboard", href: "/", icon: Squares2X2Icon },
+          { name: "Announcements", href: "/announcements", icon: NewspaperIcon },
           { name: "Notifications", href: "/notifications", icon: BellIcon, badge: "notifications" },
         ],
       },
@@ -162,12 +180,18 @@ const Layout: React.FC = () => {
         ],
       },
       {
-        key: "workspace",
-        short: "Work",
-        label: "Workspace",
-        icon: RectangleGroupIcon,
+        key: "attendance",
+        short: "Attendance",
+        label: "Attendance",
+        icon: ClockIcon,
+        items: [{ name: "Attendance", href: "/attendance", icon: ClockIcon }],
+      },
+      {
+        key: "voice",
+        short: "Voice",
+        label: "Employee Voice",
+        icon: MegaphoneIcon,
         items: [
-          { name: "Attendance", href: "/attendance", icon: ClockIcon },
           { name: "Employee Voice", href: "/employee-voice", icon: MegaphoneIcon },
         ],
       },
@@ -254,8 +278,18 @@ const Layout: React.FC = () => {
   // ---- The secondary panel body (title + search + list) ----
   const renderPanelBody = (onNavigate?: () => void, attachRef = false) => (
     <div className="flex h-full flex-col">
+      {/* Brand */}
+      <div className="px-4 pt-4">
+        <p className="text-lg font-bold leading-none tracking-tight text-gray-900 dark:text-white">
+          Nexora
+        </p>
+        <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.26em] text-gray-400 dark:text-gray-500">
+          The HRMS System
+        </p>
+      </div>
+
       {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-4">
+      <div className="mt-3 flex items-center justify-between px-4">
         <h2 className="truncate text-base font-bold text-gray-900 dark:text-white">
           {query ? "Search" : activeGroup.label}
         </h2>
@@ -315,7 +349,7 @@ const Layout: React.FC = () => {
       <Link
         to="/"
         className="mb-1 mt-3 flex h-11 w-11 items-center justify-center"
-        title="LeaveFlow"
+        title="Nexora"
       >
         <AppLogo size={36} />
       </Link>
@@ -438,12 +472,17 @@ const Layout: React.FC = () => {
         <button onClick={() => setMobileOpen(true)} className="text-gray-600 dark:text-gray-300" aria-label="Open menu">
           <Bars3Icon className="h-6 w-6" />
         </button>
-        <h1 className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
-          LeaveFlow
-          <span className="rounded-md bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
-            HRMS
-          </span>
-        </h1>
+        <div className="flex items-center gap-2">
+          <AppLogo size={26} />
+          <div className="leading-none">
+            <p className="text-base font-bold tracking-tight text-gray-900 dark:text-gray-100">
+              Nexora
+            </p>
+            <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.22em] text-gray-400 dark:text-gray-500">
+              The HRMS System
+            </p>
+          </div>
+        </div>
         <div className="flex items-center space-x-3">
           <NotificationBell />
           <button onClick={logout} className="text-gray-600 dark:text-gray-300" aria-label="Logout">

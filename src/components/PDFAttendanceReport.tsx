@@ -432,7 +432,7 @@ const PDFAttendanceReport: React.FC<PDFAttendanceReportProps> = ({
           })}
         </p>
         <p style={{ margin: "5px 0 0 0" }}>
-          LeaveFlow • Attendance Report
+          Nexora • Attendance Report
         </p>
       </div>
     </div>

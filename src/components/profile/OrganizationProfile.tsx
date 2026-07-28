@@ -79,7 +79,7 @@ const cardClass =
 
 const OrganizationProfile: React.FC = () => {
   const { user } = useAuth();
-  const storeKey = `leaveflow:org:${user?.company || "default"}`;
+  const storeKey = `nexora:org:${user?.company || "default"}`;
   const logoRef = useRef<HTMLInputElement>(null);
 
   const [org, setOrg] = useState<OrgData>(() => {

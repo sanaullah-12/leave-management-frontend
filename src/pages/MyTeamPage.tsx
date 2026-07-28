@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { usersAPI } from "../services/api";
-import { CardGridSkeleton } from "../components/Skeletons";
+import LogoLoader from "../components/LogoLoader";
 import Avatar from "../components/Avatar";
 import Dropdown from "../components/ui/Dropdown";
 import {
@@ -230,7 +230,7 @@ const MyTeamPage: React.FC = () => {
           subtitle="Your administrator can view and manage the full team roster."
         />
       ) : isLoading ? (
-        <CardGridSkeleton count={6} />
+        <LogoLoader label="Loading your team…" minHClass="min-h-[420px]" />
       ) : members.length === 0 ? (
         <EmptyState
           title="No team members found"

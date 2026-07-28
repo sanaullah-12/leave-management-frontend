@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { leavesAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { HeaderSkeleton, StatCardsSkeleton } from "../components/Skeletons";
+import LogoLoader from "../components/LogoLoader";
 import {
   ShieldCheckIcon,
   CheckCircleIcon,
@@ -117,12 +117,7 @@ const LeavePolicyPage: React.FC = () => {
   }
 
   if (isLoading) {
-    return (
-      <div className="space-y-6 fade-in">
-        <HeaderSkeleton />
-        <StatCardsSkeleton count={3} />
-      </div>
-    );
+    return <LogoLoader label="Loading leave policies…" />;
   }
 
   // Backend returns { policy: { annual, sick, casual, maternityLeave, paternityLeave } }.

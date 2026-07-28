@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { usersAPI } from "../services/api";
-import { CardGridSkeleton } from "../components/Skeletons";
+import LogoLoader from "../components/LogoLoader";
 import Avatar from "../components/Avatar";
 import { BuildingOffice2Icon } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
@@ -59,7 +59,7 @@ const DepartmentsPage: React.FC = () => {
       {!isAdmin ? (
         <EmptyState subtitle="Your administrator can view and manage departments." />
       ) : isLoading ? (
-        <CardGridSkeleton count={6} />
+        <LogoLoader label="Loading departments…" minHClass="min-h-[420px]" />
       ) : departments.length === 0 ? (
         <EmptyState subtitle="Invite employees and assign departments to get started." />
       ) : (

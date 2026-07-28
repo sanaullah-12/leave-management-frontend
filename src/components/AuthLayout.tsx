@@ -135,9 +135,9 @@ const BrandPanel: React.FC = () => {
       >
         <AppLogo size={52} />
         <div className="leading-none">
-          <span className="block text-lg font-bold text-white">LeaveFlow</span>
-          <span className="hrms-gradient mt-1 block text-[11px] font-bold uppercase tracking-[0.35em]">
-            HRMS
+          <span className="block text-lg font-bold text-white">Nexora</span>
+          <span className="mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.3em] text-white/55">
+            The HRMS System
           </span>
         </div>
       </motion.div>
@@ -242,13 +242,15 @@ const BrandPanel: React.FC = () => {
         className="absolute inset-x-0 bottom-0 z-10 p-8"
       >
         <h1 className="text-4xl font-bold leading-tight tracking-tight text-white">
-          The modern <span className="hrms-gradient">HRMS</span>
-          <br />
-          for people-first teams.
+          Welcome to <span className="hrms-gradient">Nexora</span>
         </h1>
+        <p className="mt-2 text-xs font-semibold uppercase tracking-[0.32em] text-white/45">
+          The HRMS System
+        </p>
         <p className="mt-4 max-w-md text-sm leading-relaxed text-white/60">
-          Leave, attendance, employee voice and performance — beautifully
-          unified in one elegant workspace your whole team will love.
+          Manage your workforce smarter, faster, and more efficiently — leave,
+          attendance, employee voice and performance, beautifully unified in one
+          elegant workspace.
         </p>
 
         <div className="mt-6 grid grid-cols-3 gap-3">

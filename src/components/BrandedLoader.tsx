@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import AppLogo from "./AppLogo";
+import { motion } from "framer-motion";
+import NexoraLoaderMark from "./NexoraLoaderMark";
 
 interface BrandedLoaderProps {
   /** Fixed message (disables cycling). */
@@ -84,19 +85,39 @@ const BrandedLoader: React.FC<BrandedLoaderProps> = ({
 
       {/* Logo mark */}
       <div className="relative z-10 flex flex-col items-center">
-        <div className="animate-breathe">
-          <AppLogo size={104} />
-        </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          style={{ filter: "drop-shadow(0 12px 30px rgba(37,99,235,0.16))" }}
+        >
+          <NexoraLoaderMark size={104} />
+        </motion.div>
 
         {/* Wordmark */}
-        <p className="mt-5 text-lg font-bold tracking-tight text-gray-900 dark:text-white">
-          Leave<span className="font-medium text-blue-600 dark:text-blue-400">Flow</span>
-        </p>
+        <motion.p
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-5 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+        >
+          Nexora
+        </motion.p>
+
+        {/* Slogan */}
+        <motion.p
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 0.6, y: 0 }}
+          transition={{ delay: 0.28, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.32em] text-gray-500 dark:text-gray-400"
+        >
+          The HRMS System
+        </motion.p>
 
         {/* Rotating message */}
         <p
           key={current}
-          className="animate-enter mt-1.5 text-sm text-gray-500 dark:text-gray-400"
+          className="animate-enter mt-4 text-sm text-gray-500 dark:text-gray-400"
         >
           {current}
         </p>
