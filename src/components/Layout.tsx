@@ -227,7 +227,13 @@ const Layout: React.FC = () => {
   }, [query, groups]);
 
   if (isLoading) return <BrandedLoader message="Preparing your workspace..." />;
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAuthenticated) {
+    // The bare root URL is the public front door — send anonymous visitors to
+    // the marketing site instead of straight to the login form. Deep links
+    // into the app (e.g. /leaves) still redirect to /login as before, so the
+    // post-login redirect-back behavior is unaffected.
+    return <Navigate to={location.pathname === "/" ? "/landing" : "/login"} replace />;
+  }
 
   const roleLabel = user?.position || (isAdmin ? "Administrator" : "Employee");
   const leftOffset = collapsed ? "lg:left-16" : "lg:left-[19rem]";
