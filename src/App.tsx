@@ -39,6 +39,10 @@ import EmployeeVoicePage from "./pages/EmployeeVoicePage";
 import DocumentStudioPage from "./pages/DocumentStudioPage";
 import AnnouncementsPage from "./pages/AnnouncementsPage";
 
+// Public marketing page — code-split so its heavy animation bundle only loads
+// when a visitor actually lands on it (keeps the authenticated app lean).
+const LandingPage = React.lazy(() => import("./pages/LandingPage"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -87,6 +91,14 @@ const App: React.FC = () => {
                 }}
               />
               <Routes>
+                <Route
+                  path="/landing"
+                  element={
+                    <React.Suspense fallback={null}>
+                      <LandingPage />
+                    </React.Suspense>
+                  }
+                />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route
