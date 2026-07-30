@@ -1,8 +1,8 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import AppLogo from "../AppLogo";
 import { Magnetic, GlowOrb, GridBackdrop, GradientText, EASE } from "./primitives";
+import ContactModal from "./ContactModal";
 
 /* ============================================================
    Hero — a centered headline wrapped by an animated "workflow
@@ -340,7 +340,9 @@ const Trace: React.FC = () => {
 
 /* ---------- shared copy block ---------- */
 
-const HeroCopy: React.FC = () => (
+const HeroCopy: React.FC = () => {
+  const [contactOpen, setContactOpen] = useState(false);
+  return (
   <div className="mx-auto w-full max-w-xl text-center">
     <motion.h1
       initial={{ opacity: 0, y: 22 }}
@@ -370,14 +372,14 @@ const HeroCopy: React.FC = () => (
       className="mx-auto mt-8 flex w-full max-w-md flex-col items-center justify-center gap-3 sm:w-auto sm:flex-row"
     >
       <Magnetic strength={0.4} className="w-full sm:w-auto">
-        <Link
-          to="/register"
+        <button
+          onClick={() => setContactOpen(true)}
           className="group relative inline-flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-gray-900 px-7 py-3.5 text-[1rem] font-semibold text-white shadow-[0_10px_30px_-8px_rgba(15,23,42,0.5)] dark:bg-white dark:text-gray-900 sm:w-auto"
         >
           <span aria-hidden className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
           <span className="relative">Start free</span>
           <svg className="relative h-4 w-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-        </Link>
+        </button>
       </Magnetic>
       <Magnetic strength={0.25} className="w-full sm:w-auto">
         <button className="group inline-flex w-full items-center justify-center gap-2.5 rounded-full border border-gray-200 bg-white/70 px-6 py-3.5 text-[1rem] font-semibold text-gray-800 backdrop-blur transition-colors hover:border-gray-300 dark:border-white/10 dark:bg-white/5 dark:text-white sm:w-auto">
@@ -395,15 +397,18 @@ const HeroCopy: React.FC = () => (
       transition={{ delay: 0.5, duration: 0.8 }}
       className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-secondary text-gray-500 dark:text-gray-400"
     >
-      {["No credit card required", "Free up to 10 employees", "Setup in minutes"].map((t) => (
+      {["Guided onboarding", "Dedicated support", "Enterprise-grade security"].map((t) => (
         <span key={t} className="inline-flex items-center gap-1.5">
           <svg className="h-4 w-4 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6L9 17l-5-5" /></svg>
           {t}
         </span>
       ))}
     </motion.div>
+
+    <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} />
   </div>
-);
+  );
+};
 
 const HeroSection: React.FC = () => (
   <section className="relative overflow-hidden">

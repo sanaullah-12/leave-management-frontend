@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { authAPI } from '../services/api';
+import { markKnownUser } from '../utils/knownUser';
 
 // Inline type definitions
 interface User {
@@ -152,10 +153,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await authAPI.login(credentials);
       const { token, user } = response.data;
-      
+
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      
+      markKnownUser();
+
       dispatch({
         type: 'LOGIN_SUCCESS',
         payload: { user, token }
@@ -172,10 +174,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await authAPI.registerCompany(data);
       const { token, user } = response.data;
-      
+
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      
+      markKnownUser();
+
       dispatch({
         type: 'LOGIN_SUCCESS',
         payload: { user, token }

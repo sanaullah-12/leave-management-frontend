@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
+import { markKnownUser } from "../utils/knownUser";
 import PasswordInput from "../components/PasswordInput";
 import AuthLayout from "../components/AuthLayout";
 import InlineLoader from "../components/InlineLoader";
@@ -104,15 +105,17 @@ const AcceptInvitePage: React.FC = () => {
     setIsSubmitting(true);
     setError("");
     try {
-      const response = await axios.post(
+      await axios.post(
         `${import.meta.env.VITE_API_URL}/auth/verify-invitation/${token}`,
         { password: data.password }
       );
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      // Deliberately don't auto-login here — this browser now "knows" a real
+      // account exists, so the landing page will show the Sign in button, but
+      // the user still signs in explicitly with the password they just set.
+      markKnownUser();
       setSuccess(true);
       setTimeout(() => {
-        window.location.href = "/"; // full reload to refresh auth context
+        navigate("/landing", { replace: true });
       }, 2500);
     } catch (err: any) {
       console.error("Invitation acceptance error:", err);
@@ -204,10 +207,10 @@ const AcceptInvitePage: React.FC = () => {
             {...fade(0.2)}
             className="mt-2 max-w-sm text-sm text-gray-500 dark:text-gray-400"
           >
-            Your account is ready. Taking you to your dashboard…
+            Your account is ready. Head to the sign-in page to log in with your new password.
           </motion.p>
           <motion.div {...fade(0.3)} className="mt-6">
-            <InlineLoader label="Signing you in" />
+            <InlineLoader label="Redirecting" />
           </motion.div>
         </div>
       </AuthLayout>

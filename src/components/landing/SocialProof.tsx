@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   SectionHeading,
@@ -8,6 +7,7 @@ import {
   Magnetic,
   EASE,
 } from "./primitives";
+import ContactModal from "./ContactModal";
 
 
 /* =========================================================
@@ -53,6 +53,7 @@ const plans = [
 
 export const PricingSection: React.FC = () => {
   const [annual, setAnnual] = useState(true);
+  const [contactOpen, setContactOpen] = useState(false);
   return (
     <section id="pricing" className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-5">
@@ -62,7 +63,7 @@ export const PricingSection: React.FC = () => {
               Simple pricing that <GradientText>scales with you</GradientText>
             </>
           }
-          description="Start free, upgrade when you're ready. No hidden fees, cancel anytime."
+          description="Straightforward plans that scale with your team. Reach out and we'll help you pick the right one."
         />
 
         <Reveal className="mt-8 flex items-center justify-center gap-3">
@@ -124,23 +125,25 @@ export const PricingSection: React.FC = () => {
                   ))}
                 </ul>
                 <Magnetic strength={0.25} className="mt-7">
-                  <Link
-                    to={p.name === "Enterprise" ? "/register" : "/register"}
+                  <button
+                    onClick={() => setContactOpen(true)}
                     className={
-                      "block rounded-xl py-3 text-center text-nav font-semibold transition-shadow " +
+                      "block w-full rounded-xl py-3 text-center text-nav font-semibold transition-shadow " +
                       (p.featured
                         ? "bg-gray-900 text-white hover:shadow-lg dark:bg-white dark:text-gray-900"
                         : "border border-gray-200 text-gray-800 hover:border-gray-300 dark:border-white/10 dark:text-white")
                     }
                   >
                     {p.cta}
-                  </Link>
+                  </button>
                 </Magnetic>
               </div>
             </Reveal>
           ))}
         </div>
       </div>
+
+      <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} />
     </section>
   );
 };
