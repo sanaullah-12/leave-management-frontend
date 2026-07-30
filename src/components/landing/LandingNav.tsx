@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import AppLogo from "../AppLogo";
 import { useTheme } from "../../context/ThemeContext";
+import { isKnownUser } from "../../utils/knownUser";
 import { Magnetic, EASE } from "./primitives";
+import ContactModal from "./ContactModal";
 
 const links = [
   { l: "Features", href: "#features" },
@@ -68,7 +70,13 @@ const ThemeToggle: React.FC = () => {
 const LandingNav: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
+  const [known, setKnown] = useState(false);
   const reduce = useReducedMotion();
+
+  useEffect(() => {
+    setKnown(isKnownUser());
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -115,20 +123,22 @@ const LandingNav: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Link
-            to="/login"
-            className="hidden rounded-lg px-4 py-2 text-nav font-medium text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white sm:block"
-          >
-            Sign in
-          </Link>
-          <Magnetic strength={0.35}>
+          {known && (
             <Link
-              to="/register"
+              to="/login"
+              className="hidden rounded-lg px-4 py-2 text-nav font-medium text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white sm:block"
+            >
+              Sign in
+            </Link>
+          )}
+          <Magnetic strength={0.35}>
+            <button
+              onClick={() => setContactOpen(true)}
               className="group relative inline-flex items-center gap-1.5 overflow-hidden rounded-lg bg-gray-900 px-4 py-2 text-nav font-semibold text-white shadow-sm transition-shadow hover:shadow-lg dark:bg-white dark:text-gray-900"
             >
               <span className="relative z-10">Start free</span>
               <svg className="relative z-10 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            </Link>
+            </button>
           </Magnetic>
           <button
             onClick={() => setOpen((v) => !v)}
@@ -161,6 +171,8 @@ const LandingNav: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} />
     </motion.header>
   );
 };
