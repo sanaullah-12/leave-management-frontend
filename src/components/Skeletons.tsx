@@ -51,22 +51,35 @@ export const CardSkeleton: React.FC = () => (
 );
 
 /* --------------------------- KPI / stat cards ---------------------------- */
-export const StatCardsSkeleton: React.FC<{ count?: number }> = ({ count = 3 }) => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 stagger-children">
-    {Array.from({ length: count }).map((_, i) => (
-      <Card key={i} className="p-5">
-        <div className="flex items-center justify-between">
-          <div className="space-y-3">
-            <Skeleton className="h-3 w-20" />
-            <Skeleton className="h-8 w-24" />
-            <Skeleton className="h-3 w-28" />
+/**
+ * Loading state for a KPI tile row. The internal metrics mirror the real tile
+ * (16px label → 36px value line → 16px caption, 44px icon) and the column count
+ * follows `count`, so the layout doesn't reflow when the data arrives.
+ */
+export const StatCardsSkeleton: React.FC<{ count?: number }> = ({ count = 3 }) => {
+  const columns =
+    count >= 5
+      ? "lg:grid-cols-3 xl:grid-cols-5"
+      : count === 4
+      ? "lg:grid-cols-4"
+      : "lg:grid-cols-3";
+  return (
+    <div className={`grid grid-cols-1 sm:grid-cols-2 ${columns} gap-5 stagger-children`}>
+      {Array.from({ length: count }).map((_, i) => (
+        <Card key={i} className="flex h-full flex-col p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <Skeleton className="h-4 w-20 rounded" />
+              <Skeleton className="mt-2 h-9 w-24 rounded" />
+            </div>
+            <Skeleton className="h-11 w-11 flex-shrink-0 rounded-xl" />
           </div>
-          <Skeleton className="h-16 w-16 rounded-full" />
-        </div>
-      </Card>
-    ))}
-  </div>
-);
+          <Skeleton className="mt-3 h-4 w-28 rounded" />
+        </Card>
+      ))}
+    </div>
+  );
+};
 
 /* -------------------------------- Table ---------------------------------- */
 export const TableSkeleton: React.FC<{ rows?: number; cols?: number }> = ({
@@ -250,6 +263,28 @@ export const ReportSkeleton: React.FC = () => (
         </Card>
       ))}
     </div>
+  </div>
+);
+
+/* --------------------------- Route fallback ------------------------------ */
+/**
+ * Neutral placeholder shown while a lazily-loaded route chunk downloads.
+ * Deliberately generic — a page header, a metric row and a content block —
+ * so it reads as "this page is loading" for any screen in the app rather
+ * than promising a layout the real page may not have.
+ */
+export const RouteFallback: React.FC = () => (
+  <div className="space-y-6 fade-in">
+    <HeaderSkeleton />
+    <StatCardsSkeleton count={4} />
+    <Card className="p-6">
+      <Skeleton className="h-4 w-40" />
+      <div className="mt-5 space-y-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-10 w-full rounded-lg" />
+        ))}
+      </div>
+    </Card>
   </div>
 );
 

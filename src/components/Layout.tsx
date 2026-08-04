@@ -1,10 +1,11 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useMemo, Suspense } from "react";
 import { Navigate, Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
 import Avatar from "./Avatar";
 import NotificationBell from "./NotificationBell";
 import BrandedLoader from "./BrandedLoader";
+import { RouteFallback } from "./Skeletons";
 import AppLogo from "./AppLogo";
 import Dropdown from "./ui/Dropdown";
 import ThemeModal from "./ThemeModal";
@@ -36,6 +37,11 @@ import {
   ChevronDoubleRightIcon,
   DocumentDuplicateIcon,
   NewspaperIcon,
+  BanknotesIcon,
+  CurrencyDollarIcon,
+  PlayCircleIcon,
+  DocumentTextIcon,
+  ArchiveBoxIcon,
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 
@@ -46,6 +52,8 @@ interface PanelItem {
   href: string;
   icon: Icon;
   badge?: "notifications";
+  /** Match the path exactly — for section landing pages that own sub-routes. */
+  exact?: boolean;
 }
 interface NavGroup {
   key: string;
@@ -124,6 +132,20 @@ const Layout: React.FC = () => {
           label: "Attendance",
           icon: ClockIcon,
           items: [{ name: "Attendance", href: "/attendance", icon: ClockIcon }],
+        },
+        {
+          key: "payroll",
+          short: "Payroll",
+          label: "Payroll",
+          icon: BanknotesIcon,
+          items: [
+            { name: "Payroll Dashboard", href: "/payroll", icon: Squares2X2Icon, exact: true },
+            { name: "Employee Salaries", href: "/payroll/salaries", icon: CurrencyDollarIcon },
+            { name: "Run Payroll", href: "/payroll/run", icon: PlayCircleIcon },
+            { name: "Payslips", href: "/payroll/payslips", icon: DocumentTextIcon },
+            { name: "Payroll History", href: "/payroll/history", icon: ArchiveBoxIcon },
+            { name: "Payroll Settings", href: "/payroll/settings", icon: Cog6ToothIcon },
+          ],
         },
         {
           key: "documents",
@@ -208,12 +230,15 @@ const Layout: React.FC = () => {
     ];
   }, [isAdmin]);
 
-  const isActive = (path: string) => {
-    if (path === "/") return location.pathname === "/";
+  const isActive = (path: string, exact = false) => {
+    if (path === "/" || exact) return location.pathname === path;
     return location.pathname.startsWith(path);
   };
 
-  // The active area = the group that owns the current route.
+  const itemActive = (it: PanelItem) => isActive(it.href, it.exact);
+
+  // The active area = the group that owns the current route. Sub-routes count
+  // here (unlike the per-item check) so /payroll/run still highlights Payroll.
   const activeGroup =
     groups.find((g) => g.items.some((i) => isActive(i.href))) ?? groups[0];
 
@@ -246,7 +271,7 @@ const Layout: React.FC = () => {
 
   // ---- Reusable panel item (plain function so inputs keep focus) ----
   const renderRow = (it: PanelItem, onClick?: () => void) => {
-    const active = isActive(it.href);
+    const active = itemActive(it);
     const badge = badgeFor(it);
     return (
       <Link
@@ -562,7 +587,12 @@ const Layout: React.FC = () => {
         <div className="p-4 lg:p-8">
           <div className="mx-auto max-w-7xl">
             <motion.div key={location.pathname} variants={pageVariants} initial="initial" animate="animate">
-              <Outlet />
+              {/* Routes are lazily loaded (see App.tsx). Keeping the boundary
+                  here means only the content area swaps to a skeleton — the
+                  rail, panel and header never unmount during navigation. */}
+              <Suspense fallback={<RouteFallback />}>
+                <Outlet />
+              </Suspense>
             </motion.div>
           </div>
         </div>

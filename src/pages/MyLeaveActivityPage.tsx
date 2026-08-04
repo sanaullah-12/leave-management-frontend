@@ -1,4 +1,5 @@
 import React from "react";
+import { CARD } from "../lib/surfaces";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { leavesAPI } from "../services/api";
@@ -13,11 +14,6 @@ import {
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 
-// Neumorphic soft-UI card surface — matches the report / employee-detail pages.
-const CARD =
-  "rounded-2xl bg-[var(--card-surface)] " +
-  "shadow-[7px_7px_16px_rgba(174,186,204,0.5),-7px_-7px_16px_rgba(255,255,255,0.95)] " +
-  "dark:shadow-[7px_7px_18px_rgba(0,0,0,0.55),-6px_-6px_16px_rgba(255,255,255,0.045)]";
 
 // Per-leave-type accent + watermark icon (same language as the report page).
 const LEAVE_META = {

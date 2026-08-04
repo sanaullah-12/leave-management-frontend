@@ -1,7 +1,9 @@
 import React from "react";
 import Modal from "./ui/Modal";
 import { useTheme, COLOR_SCHEMES } from "../context/ThemeContext";
-import type { ColorScheme, ThemeMode } from "../context/ThemeContext";
+import type { ThemeMode } from "../context/ThemeContext";
+// Accent hex per scheme — single source in lib/themeTokens.
+import { ACCENT_HEX as ACCENT } from "../lib/themeTokens";
 import {
   SwatchIcon,
   SunIcon,
@@ -9,20 +11,6 @@ import {
   ComputerDesktopIcon,
   CheckIcon,
 } from "@heroicons/react/24/outline";
-
-// Accent hex per scheme (matches tailwind.config *-600 values).
-const ACCENT: Record<ColorScheme, string> = {
-  black: "#374151",
-  purple: "#9c5fd1",
-  blue: "#2563eb",
-  pink: "#db2777",
-  violet: "#7c3aed",
-  indigo: "#4f46e5",
-  orange: "#ea580c",
-  teal: "#0d9488",
-  bronze: "#b45309",
-  mint: "#10b981",
-};
 
 const MODES: { key: ThemeMode; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { key: "light", label: "Light", icon: SunIcon },
