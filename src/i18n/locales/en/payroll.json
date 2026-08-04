@@ -1,0 +1,66 @@
+{
+  "dashboard": {
+    "title": "Payroll",
+    "subtitle": "Salary health, monthly cost and processing status at a glance."
+  },
+  "salaries": {
+    "title": "Employee Salaries",
+    "subtitle": "Define each employee's compensation. Net salary is always calculated, never typed."
+  },
+  "run": {
+    "title": "Run Payroll",
+    "subtitle": "Pick a month, review every employee, then generate payslips in one pass.",
+    "generate": "Generate Payroll",
+    "reprocess": "Re-process"
+  },
+  "payslips": {
+    "title": "Payslips",
+    "subtitle": "View, print or download an employee's payslip for any processed month.",
+    "payslip": "Payslip"
+  },
+  "history": {
+    "title": "Payroll History",
+    "subtitle": "Every payroll run, permanently recorded with its full breakdown."
+  },
+  "settings": {
+    "title": "Payroll Settings",
+    "subtitle": "The four values every payroll calculation is based on."
+  },
+  "fields": {
+    "basicSalary": "Basic Salary",
+    "basic": "Basic",
+    "allowances": "Allowances",
+    "deductions": "Deductions",
+    "netSalary": "Net Salary",
+    "grossEarnings": "Gross Earnings",
+    "gross": "Gross",
+    "totalDeductions": "Total Deductions",
+    "payrollMonth": "Payroll Month",
+    "payDate": "Pay Date",
+    "payPeriod": "Pay Period",
+    "companyName": "Company Name",
+    "currency": "Currency",
+    "salaryDate": "Salary Date",
+    "defaultTax": "Default Tax",
+    "earnings": "Earnings"
+  },
+  "stats": {
+    "totalEmployees": "Total Employees",
+    "totalPayroll": "Total Payroll",
+    "processed": "Processed",
+    "pendingSetup": "Pending Setup",
+    "monthlyNet": "Monthly Net",
+    "averageNet": "Average Net",
+    "netPayout": "Net Payout",
+    "payrollRuns": "Payroll Runs",
+    "lifetimePayout": "Lifetime Payout",
+    "payslipsIssued": "Payslips Issued",
+    "lastRun": "Last Run"
+  },
+  "empty": {
+    "noPayslips": "No payslips yet",
+    "noHistory": "No payroll history yet",
+    "noEmployees": "No employees yet",
+    "noMatch": "No employees match your filters"
+  }
+}

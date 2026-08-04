@@ -1,0 +1,66 @@
+{
+  "dashboard": {
+    "title": "給与",
+    "subtitle": "給与の状態、月間コスト、処理状況を一目で確認。"
+  },
+  "salaries": {
+    "title": "従業員の給与",
+    "subtitle": "各従業員の報酬を設定します。手取額は常に自動計算されます。"
+  },
+  "run": {
+    "title": "給与処理",
+    "subtitle": "月を選び、全従業員を確認して、一括で給与明細を生成します。",
+    "generate": "給与を生成",
+    "reprocess": "再処理"
+  },
+  "payslips": {
+    "title": "給与明細",
+    "subtitle": "処理済みの月の給与明細を表示・印刷・ダウンロードできます。",
+    "payslip": "給与明細"
+  },
+  "history": {
+    "title": "給与履歴",
+    "subtitle": "すべての給与処理を内訳とともに永続的に記録。"
+  },
+  "settings": {
+    "title": "給与設定",
+    "subtitle": "すべての給与計算の基礎となる 4 つの値。"
+  },
+  "fields": {
+    "basicSalary": "基本給",
+    "basic": "基本",
+    "allowances": "手当",
+    "deductions": "控除",
+    "netSalary": "手取額",
+    "grossEarnings": "総支給額",
+    "gross": "総額",
+    "totalDeductions": "控除合計",
+    "payrollMonth": "給与月",
+    "payDate": "支払日",
+    "payPeriod": "支給期間",
+    "companyName": "会社名",
+    "currency": "通貨",
+    "salaryDate": "給与日",
+    "defaultTax": "既定税率",
+    "earnings": "支給"
+  },
+  "stats": {
+    "totalEmployees": "従業員総数",
+    "totalPayroll": "給与総額",
+    "processed": "処理済み",
+    "pendingSetup": "設定待ち",
+    "monthlyNet": "月間手取額",
+    "averageNet": "平均手取額",
+    "netPayout": "差引支給額",
+    "payrollRuns": "給与処理回数",
+    "lifetimePayout": "累計支給額",
+    "payslipsIssued": "発行済み明細",
+    "lastRun": "最終処理"
+  },
+  "empty": {
+    "noPayslips": "給与明細はまだありません",
+    "noHistory": "給与履歴はまだありません",
+    "noEmployees": "従業員がいません",
+    "noMatch": "条件に一致する従業員はいません"
+  }
+}

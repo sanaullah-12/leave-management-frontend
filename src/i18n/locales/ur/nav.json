@@ -1,0 +1,72 @@
+{
+  "brand": {
+    "name": "نیکسورا",
+    "tagline": "ایچ آر ایم ایس سسٹم"
+  },
+  "search": {
+    "placeholder": "تلاش کریں",
+    "title": "تلاش",
+    "noResults": "“{{query}}” کے لیے کوئی نتیجہ نہیں"
+  },
+  "sections": {
+    "pages": "صفحات"
+  },
+  "actions": {
+    "collapse": "سکیڑیں",
+    "expand": "پھیلائیں",
+    "logout": "لاگ آؤٹ",
+    "openMenu": "مینو کھولیں",
+    "closeMenu": "مینو بند کریں",
+    "manageAccount": "اکاؤنٹ کا انتظام"
+  },
+  "header": {
+    "welcome": "خوش آمدید، {{name}}",
+    "administrator": "منتظم",
+    "employee": "ملازم"
+  },
+  "groups": {
+    "home": "ہوم",
+    "leave": "چھٹیوں کا انتظام",
+    "team": "ٹیم اور عملہ",
+    "attendance": "حاضری",
+    "payroll": "تنخواہ",
+    "documents": "دستاویز اسٹوڈیو",
+    "voice": "ملازمین کی آواز",
+    "settings": "ترتیبات"
+  },
+  "short": {
+    "home": "ہوم",
+    "leave": "چھٹی",
+    "team": "ٹیم",
+    "attendance": "حاضری",
+    "payroll": "تنخواہ",
+    "documents": "دستاویزات",
+    "voice": "آواز",
+    "settings": "ترتیبات"
+  },
+  "items": {
+    "dashboard": "ڈیش بورڈ",
+    "announcements": "اعلانات",
+    "reports": "رپورٹس",
+    "notifications": "اطلاعات",
+    "leaveRequests": "چھٹی کی درخواستیں",
+    "leaveCalendar": "چھٹی کا کیلنڈر",
+    "applyLeave": "چھٹی کی درخواست",
+    "myLeaveActivity": "میری چھٹیوں کی سرگرمی",
+    "myTeam": "میری ٹیم",
+    "employees": "ملازمین",
+    "departments": "شعبہ جات",
+    "leavePolicies": "چھٹی کی پالیسیاں",
+    "attendance": "حاضری",
+    "payrollDashboard": "تنخواہ ڈیش بورڈ",
+    "employeeSalaries": "ملازمین کی تنخواہیں",
+    "runPayroll": "تنخواہ چلائیں",
+    "payslips": "تنخواہ کی پرچیاں",
+    "payrollHistory": "تنخواہ کی تاریخ",
+    "payrollSettings": "تنخواہ کی ترتیبات",
+    "documentStudio": "دستاویز اسٹوڈیو",
+    "employeeVoice": "ملازمین کی آواز",
+    "profileSettings": "پروفائل اور ترتیبات",
+    "theme": "تھیم"
+  }
+}

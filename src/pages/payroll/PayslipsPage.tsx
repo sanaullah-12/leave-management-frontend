@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   EyeIcon,
@@ -43,6 +44,7 @@ import type { Payslip } from "../../components/payroll/types";
  * paid, even after a raise.
  */
 const PayslipsPage: React.FC = () => {
+  const { t } = useTranslation("payroll");
   const navigate = useNavigate();
   const { state, setPayslipStatus } = usePayroll();
   const { settings, payslips } = state;
@@ -65,7 +67,7 @@ const PayslipsPage: React.FC = () => {
         .sort((a, b) => b[0].localeCompare(a[0]))
         .map(([value, label]) => ({ value, label })),
     ];
-  }, [payslips]);
+  }, [payslips, t]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -84,7 +86,7 @@ const PayslipsPage: React.FC = () => {
           periodKey(b.period).localeCompare(periodKey(a.period)) ||
           a.employee.name.localeCompare(b.employee.name)
       );
-  }, [payslips, query, period, status]);
+  }, [payslips, query, period, status, t]);
 
   const totalNet = useMemo(
     () => filtered.reduce((acc, p) => acc + p.computation.netSalary, 0),
@@ -140,8 +142,8 @@ const PayslipsPage: React.FC = () => {
       <motion.div variants={staggerItem}>
         <PayrollPageHeader
           glyph="📄"
-          title="Payslips"
-          subtitle="View, print or download an employee's payslip for any processed month."
+          title={t("payslips.title")}
+          subtitle={t("payslips.subtitle")}
           actions={
             payslips.length > 0 && (
               <button
@@ -192,7 +194,7 @@ const PayslipsPage: React.FC = () => {
                         Object.keys(PAYSLIP_STATUS) as (keyof typeof PAYSLIP_STATUS)[]
                       ).map((s) => ({
                         value: s,
-                        label: PAYSLIP_STATUS[s].label,
+                        label: t(`common:${PAYSLIP_STATUS[s].labelKey}`),
                         dotColor: PAYSLIP_STATUS[s].dot,
                       })),
                     ]}

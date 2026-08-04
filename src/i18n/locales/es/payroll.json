@@ -1,0 +1,66 @@
+{
+  "dashboard": {
+    "title": "Nómina",
+    "subtitle": "Estado salarial, coste mensual y procesamiento de un vistazo."
+  },
+  "salaries": {
+    "title": "Salarios de empleados",
+    "subtitle": "Define la retribución de cada empleado. El salario neto siempre se calcula."
+  },
+  "run": {
+    "title": "Ejecutar nómina",
+    "subtitle": "Elige un mes, revisa a cada empleado y genera las nóminas de una vez.",
+    "generate": "Generar nómina",
+    "reprocess": "Reprocesar"
+  },
+  "payslips": {
+    "title": "Nóminas",
+    "subtitle": "Consulta, imprime o descarga la nómina de cualquier mes procesado.",
+    "payslip": "Nómina"
+  },
+  "history": {
+    "title": "Historial de nómina",
+    "subtitle": "Cada ejecución de nómina, registrada con su desglose completo."
+  },
+  "settings": {
+    "title": "Ajustes de nómina",
+    "subtitle": "Los cuatro valores en los que se basa cada cálculo."
+  },
+  "fields": {
+    "basicSalary": "Salario base",
+    "basic": "Base",
+    "allowances": "Complementos",
+    "deductions": "Deducciones",
+    "netSalary": "Salario neto",
+    "grossEarnings": "Ingresos brutos",
+    "gross": "Bruto",
+    "totalDeductions": "Deducciones totales",
+    "payrollMonth": "Mes de nómina",
+    "payDate": "Fecha de pago",
+    "payPeriod": "Periodo de pago",
+    "companyName": "Nombre de la empresa",
+    "currency": "Moneda",
+    "salaryDate": "Fecha de salario",
+    "defaultTax": "Impuesto por defecto",
+    "earnings": "Ingresos"
+  },
+  "stats": {
+    "totalEmployees": "Empleados totales",
+    "totalPayroll": "Nómina total",
+    "processed": "Procesado",
+    "pendingSetup": "Configuración pendiente",
+    "monthlyNet": "Neto mensual",
+    "averageNet": "Neto medio",
+    "netPayout": "Pago neto",
+    "payrollRuns": "Ejecuciones",
+    "lifetimePayout": "Pago acumulado",
+    "payslipsIssued": "Nóminas emitidas",
+    "lastRun": "Última ejecución"
+  },
+  "empty": {
+    "noPayslips": "Aún no hay nóminas",
+    "noHistory": "Aún no hay historial",
+    "noEmployees": "Aún no hay empleados",
+    "noMatch": "Ningún empleado coincide con los filtros"
+  }
+}

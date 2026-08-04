@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import {
   BuildingOffice2Icon,
@@ -40,6 +41,7 @@ const DAY_OPTIONS = Array.from({ length: 31 }, (_, i) => ({
  * here plus a resolver in the engine — no structural change.
  */
 const PayrollSettingsPage: React.FC = () => {
+  const { t } = useTranslation("payroll");
   const { state, updateSettings, period, totals } = usePayroll();
   const { settings } = state;
 
@@ -98,8 +100,8 @@ const PayrollSettingsPage: React.FC = () => {
       <motion.div variants={staggerItem}>
         <PayrollPageHeader
           glyph="⚙️"
-          title="Payroll Settings"
-          subtitle="The four values every payroll calculation is based on."
+          title={t("settings.title")}
+          subtitle={t("settings.subtitle")}
           actions={
             <>
               {dirty && (
@@ -131,7 +133,7 @@ const PayrollSettingsPage: React.FC = () => {
             bodyClassName="grid grid-cols-1 gap-5 sm:grid-cols-2"
           >
             <Field
-              label="Company Name"
+              label={t("fields.companyName")}
               hint="Appears in the payslip header and footer."
               icon={<BuildingOffice2Icon className="h-4 w-4" />}
             >
@@ -144,7 +146,7 @@ const PayrollSettingsPage: React.FC = () => {
             </Field>
 
             <Field
-              label="Currency"
+              label={t("fields.currency")}
               hint="Applied across salaries, runs and payslips."
               icon={<CurrencyDollarIcon className="h-4 w-4" />}
             >
@@ -159,7 +161,7 @@ const PayrollSettingsPage: React.FC = () => {
             </Field>
 
             <Field
-              label="Salary Date"
+              label={t("fields.salaryDate")}
               hint="Clamped automatically for shorter months."
               icon={<CalendarDaysIcon className="h-4 w-4" />}
             >
@@ -171,7 +173,7 @@ const PayrollSettingsPage: React.FC = () => {
             </Field>
 
             <Field
-              label="Default Tax"
+              label={t("fields.defaultTax")}
               hint="Percentage of taxable earnings. Set 0 to disable."
               icon={<ReceiptPercentIcon className="h-4 w-4" />}
             >

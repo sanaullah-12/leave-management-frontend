@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect, useMemo, Suspense } from "react";
 import { Navigate, Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./LanguageSwitcher";
 import { motion } from "framer-motion";
 import Avatar from "./Avatar";
 import NotificationBell from "./NotificationBell";
@@ -65,6 +67,8 @@ interface NavGroup {
 
 const Layout: React.FC = () => {
   const { user, logout, isAuthenticated, isLoading } = useAuth();
+  // "nav" is preloaded at init, so these resolve without suspending.
+  const { t } = useTranslation("nav");
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -94,85 +98,85 @@ const Layout: React.FC = () => {
       return [
         {
           key: "home",
-          short: "Home",
-          label: "Home",
+          short: t("short.home"),
+          label: t("groups.home"),
           icon: HomeIcon,
           items: [
-            { name: "Dashboard", href: "/", icon: Squares2X2Icon },
-            { name: "Announcements", href: "/announcements", icon: NewspaperIcon },
-            { name: "Reports", href: "/reports", icon: ChartBarIcon },
-            { name: "Notifications", href: "/notifications", icon: BellIcon, badge: "notifications" },
+            { name: t("items.dashboard"), href: "/", icon: Squares2X2Icon },
+            { name: t("items.announcements"), href: "/announcements", icon: NewspaperIcon },
+            { name: t("items.reports"), href: "/reports", icon: ChartBarIcon },
+            { name: t("items.notifications"), href: "/notifications", icon: BellIcon, badge: "notifications" },
           ],
         },
         {
           key: "leave",
-          short: "Leave",
-          label: "Leave management",
+          short: t("short.leave"),
+          label: t("groups.leave"),
           icon: CalendarDaysIcon,
           items: [
-            { name: "Leave Requests", href: "/leaves", icon: ClipboardDocumentListIcon },
-            { name: "Leave Calendar", href: "/leave-calendar", icon: CalendarDaysIcon },
+            { name: t("items.leaveRequests"), href: "/leaves", icon: ClipboardDocumentListIcon },
+            { name: t("items.leaveCalendar"), href: "/leave-calendar", icon: CalendarDaysIcon },
           ],
         },
         {
           key: "team",
-          short: "Team",
-          label: "Team & people",
+          short: t("short.team"),
+          label: t("groups.team"),
           icon: UserGroupIcon,
           items: [
-            { name: "My Team", href: "/team", icon: UserGroupIcon },
-            { name: "Employees", href: "/employees", icon: IdentificationIcon },
-            { name: "Departments", href: "/departments", icon: BuildingOffice2Icon },
-            { name: "Leave Policies", href: "/leave-policies", icon: ShieldCheckIcon },
+            { name: t("items.myTeam"), href: "/team", icon: UserGroupIcon },
+            { name: t("items.employees"), href: "/employees", icon: IdentificationIcon },
+            { name: t("items.departments"), href: "/departments", icon: BuildingOffice2Icon },
+            { name: t("items.leavePolicies"), href: "/leave-policies", icon: ShieldCheckIcon },
           ],
         },
         {
           key: "attendance",
-          short: "Attendance",
-          label: "Attendance",
+          short: t("short.attendance"),
+          label: t("groups.attendance"),
           icon: ClockIcon,
-          items: [{ name: "Attendance", href: "/attendance", icon: ClockIcon }],
+          items: [{ name: t("items.attendance"), href: "/attendance", icon: ClockIcon }],
         },
         {
           key: "payroll",
-          short: "Payroll",
-          label: "Payroll",
+          short: t("short.payroll"),
+          label: t("groups.payroll"),
           icon: BanknotesIcon,
           items: [
-            { name: "Payroll Dashboard", href: "/payroll", icon: Squares2X2Icon, exact: true },
-            { name: "Employee Salaries", href: "/payroll/salaries", icon: CurrencyDollarIcon },
-            { name: "Run Payroll", href: "/payroll/run", icon: PlayCircleIcon },
-            { name: "Payslips", href: "/payroll/payslips", icon: DocumentTextIcon },
-            { name: "Payroll History", href: "/payroll/history", icon: ArchiveBoxIcon },
-            { name: "Payroll Settings", href: "/payroll/settings", icon: Cog6ToothIcon },
+            { name: t("items.payrollDashboard"), href: "/payroll", icon: Squares2X2Icon, exact: true },
+            { name: t("items.employeeSalaries"), href: "/payroll/salaries", icon: CurrencyDollarIcon },
+            { name: t("items.runPayroll"), href: "/payroll/run", icon: PlayCircleIcon },
+            { name: t("items.payslips"), href: "/payroll/payslips", icon: DocumentTextIcon },
+            { name: t("items.payrollHistory"), href: "/payroll/history", icon: ArchiveBoxIcon },
+            { name: t("items.payrollSettings"), href: "/payroll/settings", icon: Cog6ToothIcon },
           ],
         },
         {
           key: "documents",
-          short: "Documents",
-          label: "Document Studio",
+          short: t("short.documents"),
+          label: t("groups.documents"),
           icon: DocumentDuplicateIcon,
           items: [
-            { name: "Document Studio", href: "/document-studio", icon: DocumentDuplicateIcon },
+            { name: t("items.documentStudio"), href: "/document-studio", icon: DocumentDuplicateIcon },
           ],
         },
         {
           key: "voice",
-          short: "Voice",
-          label: "Employee Voice",
+          short: t("short.voice"),
+          label: t("groups.voice"),
           icon: MegaphoneIcon,
           items: [
-            { name: "Employee Voice", href: "/employee-voice", icon: MegaphoneIcon },
+            { name: t("items.employeeVoice"), href: "/employee-voice", icon: MegaphoneIcon },
           ],
         },
         {
           key: "settings",
-          short: "Settings",
-          label: "Settings",
+          short: t("short.settings"),
+          label: t("groups.settings"),
           icon: Cog6ToothIcon,
           items: [
-            { name: "Profile & Settings", href: "/profile", icon: Cog6ToothIcon },
-            { name: "Theme", href: "/theme", icon: SwatchIcon },
+            { name: t("items.profileSettings"), href: "/profile", icon: Cog6ToothIcon },
+            { name: t("items.theme"), href: "/theme", icon: SwatchIcon },
           ],
         },
       ];
@@ -180,55 +184,58 @@ const Layout: React.FC = () => {
     return [
       {
         key: "home",
-        short: "Home",
-        label: "Home",
+        short: t("short.home"),
+        label: t("groups.home"),
         icon: HomeIcon,
         items: [
-          { name: "Dashboard", href: "/", icon: Squares2X2Icon },
-          { name: "Announcements", href: "/announcements", icon: NewspaperIcon },
-          { name: "Notifications", href: "/notifications", icon: BellIcon, badge: "notifications" },
+          { name: t("items.dashboard"), href: "/", icon: Squares2X2Icon },
+          { name: t("items.announcements"), href: "/announcements", icon: NewspaperIcon },
+          { name: t("items.notifications"), href: "/notifications", icon: BellIcon, badge: "notifications" },
         ],
       },
       {
         key: "leave",
-        short: "Leave",
-        label: "Leave management",
+        short: t("short.leave"),
+        label: t("groups.leave"),
         icon: CalendarDaysIcon,
         items: [
-          { name: "Leave Requests", href: "/leaves", icon: ClipboardDocumentListIcon },
-          { name: "Apply Leave", href: "/apply-leave", icon: PlusCircleIcon },
-          { name: "Leave Calendar", href: "/leave-calendar", icon: CalendarDaysIcon },
-          { name: "My Leave Activity", href: "/my-leave-activity", icon: ClipboardDocumentCheckIcon },
+          { name: t("items.leaveRequests"), href: "/leaves", icon: ClipboardDocumentListIcon },
+          { name: t("items.applyLeave"), href: "/apply-leave", icon: PlusCircleIcon },
+          { name: t("items.leaveCalendar"), href: "/leave-calendar", icon: CalendarDaysIcon },
+          { name: t("items.myLeaveActivity"), href: "/my-leave-activity", icon: ClipboardDocumentCheckIcon },
         ],
       },
       {
         key: "attendance",
-        short: "Attendance",
-        label: "Attendance",
+        short: t("short.attendance"),
+        label: t("groups.attendance"),
         icon: ClockIcon,
-        items: [{ name: "Attendance", href: "/attendance", icon: ClockIcon }],
+        items: [{ name: t("items.attendance"), href: "/attendance", icon: ClockIcon }],
       },
       {
         key: "voice",
-        short: "Voice",
-        label: "Employee Voice",
+        short: t("short.voice"),
+        label: t("groups.voice"),
         icon: MegaphoneIcon,
         items: [
-          { name: "Employee Voice", href: "/employee-voice", icon: MegaphoneIcon },
+          { name: t("items.employeeVoice"), href: "/employee-voice", icon: MegaphoneIcon },
         ],
       },
       {
         key: "settings",
-        short: "Settings",
-        label: "Settings",
+        short: t("short.settings"),
+        label: t("groups.settings"),
         icon: Cog6ToothIcon,
         items: [
-          { name: "Profile & Settings", href: "/profile", icon: Cog6ToothIcon },
-          { name: "Theme", href: "/theme", icon: SwatchIcon },
+          { name: t("items.profileSettings"), href: "/profile", icon: Cog6ToothIcon },
+          { name: t("items.theme"), href: "/theme", icon: SwatchIcon },
         ],
       },
     ];
-  }, [isAdmin]);
+    // `t` is a dependency: its identity changes when the language changes, and
+    // without it every label here would stay frozen in the language that was
+    // active when the sidebar first mounted.
+  }, [isAdmin, t]);
 
   const isActive = (path: string, exact = false) => {
     if (path === "/" || exact) return location.pathname === path;
@@ -260,7 +267,9 @@ const Layout: React.FC = () => {
     return <Navigate to={location.pathname === "/" ? "/landing" : "/login"} replace />;
   }
 
-  const roleLabel = user?.position || (isAdmin ? "Administrator" : "Employee");
+  const roleLabel =
+    user?.position ||
+    (isAdmin ? t("header.administrator") : t("header.employee"));
   const leftOffset = collapsed ? "lg:left-16" : "lg:left-[19rem]";
   const mainOffset = collapsed ? "lg:ml-16" : "lg:ml-[19rem]";
 
@@ -312,23 +321,23 @@ const Layout: React.FC = () => {
       {/* Brand */}
       <div className="px-4 pt-4">
         <p className="text-lg font-bold leading-none tracking-tight text-gray-900 dark:text-white">
-          Nexora
+          {t("brand.name")}
         </p>
         <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.26em] text-gray-400 dark:text-gray-500">
-          The HRMS System
+          {t("brand.tagline")}
         </p>
       </div>
 
       {/* Header */}
       <div className="mt-3 flex items-center justify-between px-4">
         <h2 className="truncate text-base font-bold text-gray-900 dark:text-white">
-          {query ? "Search" : activeGroup.label}
+          {query ? t("search.title") : activeGroup.label}
         </h2>
         <div className="flex items-center gap-1">
           <button
             onClick={() => setCollapsed(true)}
             className="hidden rounded-md p-1 text-gray-500 hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white lg:block"
-            title="Collapse"
+            title={t("actions.collapse")}
           >
             <ChevronDoubleLeftIcon className="h-4 w-4" />
           </button>
@@ -343,7 +352,7 @@ const Layout: React.FC = () => {
             ref={attachRef ? searchRef : undefined}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search"
+            placeholder={t("search.placeholder")}
             className="w-full rounded-lg border border-gray-200 bg-white/70 py-2 pl-8 pr-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-gray-300 dark:border-white/10 dark:bg-white/5 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-white/20"
           />
         </div>
@@ -356,13 +365,13 @@ const Layout: React.FC = () => {
             searchResults.map((it) => renderRow(it, onNavigate))
           ) : (
             <p className="px-3 py-6 text-center text-sm text-gray-500">
-              No results for “{query}”
+              {t("search.noResults", { query })}
             </p>
           )
         ) : (
           <>
             <p className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-              Pages
+              {t("sections.pages")}
             </p>
             {activeGroup.items.map((it) => renderRow(it, onNavigate))}
           </>
@@ -380,7 +389,7 @@ const Layout: React.FC = () => {
       <Link
         to="/"
         className="mb-1 mt-3 flex h-11 w-11 items-center justify-center"
-        title="Nexora"
+        title={t("brand.name")}
       >
         <AppLogo size={36} />
       </Link>
@@ -435,7 +444,7 @@ const Layout: React.FC = () => {
           <button
             onClick={() => setCollapsed(false)}
             className="flex h-9 w-9 items-center justify-center rounded-xl text-gray-500 hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
-            title="Expand"
+            title={t("actions.expand")}
           >
             <ChevronDoubleRightIcon className="h-5 w-5" />
           </button>
@@ -446,7 +455,7 @@ const Layout: React.FC = () => {
         </Link>
         <button
           onClick={logout}
-          title="Logout"
+          title={t("actions.logout")}
           className="flex h-9 w-9 items-center justify-center rounded-xl text-gray-500 hover:bg-black/5 hover:text-red-500 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-red-400"
         >
           <ArrowRightOnRectangleIcon className="h-5 w-5" />
@@ -489,7 +498,7 @@ const Layout: React.FC = () => {
             <button
               onClick={() => setMobileOpen(false)}
               className="rounded-md p-1 text-gray-500 hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
-              aria-label="Close"
+              aria-label={t("actions.closeMenu")}
             >
               <XMarkIcon className="h-5 w-5" />
             </button>
@@ -500,23 +509,23 @@ const Layout: React.FC = () => {
 
       {/* ============ Mobile header ============ */}
       <header className="fixed left-0 right-0 top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200/70 bg-white/70 px-4 backdrop-blur-xl dark:border-gray-700/60 dark:bg-gray-900/60 lg:hidden">
-        <button onClick={() => setMobileOpen(true)} className="text-gray-600 dark:text-gray-300" aria-label="Open menu">
+        <button onClick={() => setMobileOpen(true)} className="text-gray-600 dark:text-gray-300" aria-label={t("actions.openMenu")}>
           <Bars3Icon className="h-6 w-6" />
         </button>
         <div className="flex items-center gap-2">
           <AppLogo size={26} />
           <div className="leading-none">
             <p className="text-base font-bold tracking-tight text-gray-900 dark:text-gray-100">
-              Nexora
+              {t("brand.name")}
             </p>
             <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.22em] text-gray-400 dark:text-gray-500">
-              The HRMS System
+              {t("brand.tagline")}
             </p>
           </div>
         </div>
         <div className="flex items-center space-x-3">
           <NotificationBell />
-          <button onClick={logout} className="text-gray-600 dark:text-gray-300" aria-label="Logout">
+          <button onClick={logout} className="text-gray-600 dark:text-gray-300" aria-label={t("actions.logout")}>
             <ArrowRightOnRectangleIcon className="h-5 w-5" />
           </button>
         </div>
@@ -528,7 +537,7 @@ const Layout: React.FC = () => {
       >
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Welcome back, {user?.name}
+            {t("header.welcome", { name: user?.name ?? "" })}
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-300">
             {typeof user?.department === "object" && (user?.department as any)?.name
@@ -538,6 +547,7 @@ const Layout: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center space-x-4">
+          <LanguageSwitcher />
           <NotificationBell />
           <div className="h-8 w-px bg-gray-200 dark:bg-gray-700" />
           <Dropdown
@@ -562,14 +572,14 @@ const Layout: React.FC = () => {
             sections={[
               {
                 items: [
-                  { label: "Manage Account", icon: Cog6ToothIcon, onClick: () => navigate("/profile") },
-                  { label: "Theme", icon: SwatchIcon, onClick: () => setThemeOpen(true) },
-                  { label: "Notifications", icon: BellIcon, onClick: () => navigate("/notifications") },
+                  { label: t("actions.manageAccount"), icon: Cog6ToothIcon, onClick: () => navigate("/profile") },
+                  { label: t("items.theme"), icon: SwatchIcon, onClick: () => setThemeOpen(true) },
+                  { label: t("items.notifications"), icon: BellIcon, onClick: () => navigate("/notifications") },
                 ],
               },
               {
                 items: [
-                  { label: "Logout", icon: ArrowRightOnRectangleIcon, danger: true, onClick: logout },
+                  { label: t("actions.logout"), icon: ArrowRightOnRectangleIcon, danger: true, onClick: logout },
                 ],
               },
             ]}

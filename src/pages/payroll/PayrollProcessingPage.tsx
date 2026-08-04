@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   PlayCircleIcon,
@@ -53,6 +54,7 @@ import type { PayrollPeriod, SalaryRow } from "../../components/payroll/types";
  * before committing it.
  */
 const PayrollProcessingPage: React.FC = () => {
+  const { t } = useTranslation("payroll");
   const navigate = useNavigate();
   const {
     state,
@@ -117,7 +119,7 @@ const PayrollProcessingPage: React.FC = () => {
       { value: "all", label: "All departments" },
       ...[...set].sort().map((d) => ({ value: d, label: d })),
     ];
-  }, [candidates]);
+  }, [candidates, t]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -206,14 +208,14 @@ const PayrollProcessingPage: React.FC = () => {
         gradient: "from-blue-500 to-indigo-600",
       },
       {
-        label: "Gross Earnings",
+        label: t("fields.grossEarnings"),
         value: formatMoneyCompact(totals.totalGross, settings.currency),
         caption: "Basic plus all allowances",
         icon: <BanknotesIcon className="h-6 w-6" />,
         gradient: "from-cyan-500 to-blue-600",
       },
       {
-        label: "Total Deductions",
+        label: t("fields.totalDeductions"),
         value: formatMoneyCompact(totals.totalDeductions, settings.currency),
         caption: settings.defaultTaxPercent
           ? `Includes ${settings.defaultTaxPercent}% income tax`
@@ -222,7 +224,7 @@ const PayrollProcessingPage: React.FC = () => {
         gradient: "from-rose-500 to-red-600",
       },
       {
-        label: "Net Payout",
+        label: t("stats.netPayout"),
         value: formatMoneyCompact(totals.totalNet, settings.currency),
         caption: `Payable on ${formatDate(
           payDateFor(period, settings.salaryDate)
@@ -231,15 +233,12 @@ const PayrollProcessingPage: React.FC = () => {
         gradient: "from-emerald-500 to-teal-600",
       },
     ],
-    [
-      included.length,
+    [included.length,
       candidates.length,
       notReadyCount,
       totals,
       settings,
-      period,
-    ]
-  );
+      period, t]);
 
   return (
     <motion.div
@@ -251,8 +250,8 @@ const PayrollProcessingPage: React.FC = () => {
       <motion.div variants={staggerItem}>
         <PayrollPageHeader
           glyph="⚙️"
-          title="Run Payroll"
-          subtitle="Pick a month, review every employee, then generate payslips in one pass."
+          title={t("run.title")}
+          subtitle={t("run.subtitle")}
           actions={
             <>
               <PeriodPicker value={period} onChange={setPeriod} />
@@ -266,7 +265,7 @@ const PayrollProcessingPage: React.FC = () => {
                 ) : (
                   <PlayCircleIcon className="h-5 w-5" />
                 )}
-                {existingRun ? "Re-process" : "Generate Payroll"}
+                {existingRun ? t("run.reprocess") : t("run.generate")}
               </button>
             </>
           }

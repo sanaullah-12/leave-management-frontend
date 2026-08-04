@@ -1,0 +1,15 @@
+{
+  "stats": {
+    "highPriority": "Prioridad alta",
+    "newToday": "Nuevos hoy",
+    "pending": "Pendiente",
+    "resolved": "Resuelto"
+  },
+  "widget": {
+    "open": "Abrir",
+    "share": "Compartir",
+    "teamSubmissions": "Aportaciones del equipo",
+    "title": "Voz del empleado",
+    "yourSubmissions": "Tus aportaciones"
+  }
+}

@@ -11,6 +11,7 @@
  */
 import React, { useCallback, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   PlusIcon,
   TrashIcon,
@@ -86,6 +87,7 @@ const SalaryStructureModal: React.FC<Props> = ({
   period,
   onSave,
 }) => {
+  const { t } = useTranslation("common");
   const [basic, setBasic] = useState("");
   const [components, setComponents] = useState<SalaryComponent[]>([]);
   const [status, setStatus] = useState<SalaryStatus>("active");
@@ -271,7 +273,7 @@ const SalaryStructureModal: React.FC<Props> = ({
               options={(["active", "draft", "inactive"] as SalaryStatus[]).map(
                 (s) => ({
                   value: s,
-                  label: SALARY_STATUS[s].label,
+                  label: t(`common:${SALARY_STATUS[s].labelKey}`),
                   dotColor: SALARY_STATUS[s].dot,
                 })
               )}

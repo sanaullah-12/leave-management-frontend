@@ -3,6 +3,8 @@ import { CARD, CARD_HOVER } from "../lib/surfaces";
 import { accentFor } from "../lib/themeTokens";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { useTranslation } from "react-i18next";
+import { useFormatters } from "../i18n/useFormatters";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { leavesAPI } from "../services/api";
@@ -203,6 +205,9 @@ const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { colorScheme } = useTheme();
+  const { t } = useTranslation("dashboard");
+  // Dates follow the chosen language, not the browser locale.
+  const fmt = useFormatters();
   const accent = accentFor(colorScheme);
 
   /* ------------------------------------------------------------------ */
@@ -240,7 +245,7 @@ const DashboardPage: React.FC = () => {
   });
 
   if (statsLoading && user?.role === "admin") {
-    return <LogoLoader label="Loading your dashboard…" />;
+    return <LogoLoader label={t("loading")} />;
   }
 
   const adminStats: any = stats?.data || {};
@@ -256,8 +261,12 @@ const DashboardPage: React.FC = () => {
   // Greeting based on local time (presentational only).
   const hour = new Date().getHours();
   const greeting =
-    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const today = new Date().toLocaleDateString(undefined, {
+    hour < 12
+      ? t("greeting.morning")
+      : hour < 18
+      ? t("greeting.afternoon")
+      : t("greeting.evening");
+  const today = fmt.date(new Date(), {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -265,10 +274,8 @@ const DashboardPage: React.FC = () => {
   });
 
   // Leave-trend line, derived from the recent leaves we already have.
-  const MONTHS = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-  ];
+  // Localised month abbreviations for the trend axis.
+  const MONTHS = Array.from({ length: 12 }, (_, i) => fmt.monthShort(i));
   const monthlyCounts = new Array(12).fill(0);
   recent.forEach((l) => {
     const d = l?.startDate ? new Date(l.startDate) : null;
@@ -303,27 +310,27 @@ const DashboardPage: React.FC = () => {
   const gauges = isAdmin
     ? [
         {
-          label: "Approval Rate",
+          label: t("gauges.approvalRate"),
           percent: decided ? (approved / decided) * 100 : 0,
           big: `${decided ? Math.round((approved / decided) * 100) : 0}%`,
-          small: "of decided requests",
+          small: t("gauges.ofDecidedRequests"),
         },
         {
-          label: "Pending Load",
+          label: t("gauges.pendingLoad"),
           percent: totalReq ? (pending / totalReq) * 100 : 0,
           big: pending,
-          small: "awaiting review",
+          small: t("gauges.awaitingReview"),
         },
       ]
     : [
         {
-          label: "Leave Utilization",
+          label: t("gauges.leaveUtilization"),
           percent: quotaTotal ? (usedTotal / quotaTotal) * 100 : 0,
           big: `${quotaTotal ? Math.round((usedTotal / quotaTotal) * 100) : 0}%`,
           small: `${usedTotal} of ${quotaTotal} days used`,
         },
         {
-          label: "Annual Balance",
+          label: t("gauges.annualBalance"),
           percent: balance.annual?.total
             ? (balance.annual.remaining / balance.annual.total) * 100
             : 0,
@@ -346,16 +353,16 @@ const DashboardPage: React.FC = () => {
   // Mini-stat tiles under the bar chart.
   const miniStats = isAdmin
     ? [
-        { label: "Approved", value: approved, icon: <CheckCircleIcon className="w-4 h-4" /> },
-        { label: "Pending", value: pending, icon: <ClockIcon className="w-4 h-4" /> },
-        { label: "This Month", value: adminStats.thisMonthLeaves || 0, icon: <CalendarDaysIcon className="w-4 h-4" /> },
-        { label: "Employees", value: adminStats.totalEmployees || 0, icon: <UsersIcon className="w-4 h-4" /> },
+        { label: t("kpi.approved"), value: approved, icon: <CheckCircleIcon className="w-4 h-4" /> },
+        { label: t("labels.pending"), value: pending, icon: <ClockIcon className="w-4 h-4" /> },
+        { label: t("kpi.thisMonth"), value: adminStats.thisMonthLeaves || 0, icon: <CalendarDaysIcon className="w-4 h-4" /> },
+        { label: t("labels.employees"), value: adminStats.totalEmployees || 0, icon: <UsersIcon className="w-4 h-4" /> },
       ]
     : [
-        { label: "Days Used", value: usedTotal, icon: <ChartBarIcon className="w-4 h-4" /> },
-        { label: "Remaining", value: remainingTotal, icon: <CheckCircleIcon className="w-4 h-4" /> },
-        { label: "Requests", value: recent.length, icon: <CalendarDaysIcon className="w-4 h-4" /> },
-        { label: "Pending", value: recent.filter((l) => l?.status === "pending").length, icon: <ClockIcon className="w-4 h-4" /> },
+        { label: t("gauges.daysUsed"), value: usedTotal, icon: <ChartBarIcon className="w-4 h-4" /> },
+        { label: t("gauges.remaining"), value: remainingTotal, icon: <CheckCircleIcon className="w-4 h-4" /> },
+        { label: t("labels.requests"), value: recent.length, icon: <CalendarDaysIcon className="w-4 h-4" /> },
+        { label: t("labels.pending"), value: recent.filter((l) => l?.status === "pending").length, icon: <ClockIcon className="w-4 h-4" /> },
       ];
 
   // Team members for the availability widget — reuse the employees found in
@@ -371,10 +378,10 @@ const DashboardPage: React.FC = () => {
   // Real upcoming public holidays, sourced from the shared holidays config.
   const publicHolidays = getUpcomingHolidays(new Date(), 4).map(
     ({ date, holiday }) => ({
-      mon: date.toLocaleString("en-US", { month: "short" }).toUpperCase(),
+      mon: fmt.monthShort(date.getMonth()).toUpperCase(),
       day: String(date.getDate()).padStart(2, "0"),
       name: holiday.name,
-      sub: `${date.toLocaleString("en-US", { weekday: "long" })} • ${date.getFullYear()}`,
+      sub: `${fmt.weekday(date)} • ${date.getFullYear()}`,
     })
   );
 
@@ -382,63 +389,63 @@ const DashboardPage: React.FC = () => {
   const kpis = isAdmin
     ? [
         {
-          label: "Total Employees",
+          label: t("kpi.totalEmployees"),
           value: adminStats.totalEmployees || 0,
-          caption: "Active workforce",
+          caption: t("kpi.activeWorkforce"),
           icon: <UsersIcon className="w-5 h-5" />,
           onClick: () => navigate("/employees"),
         },
         {
-          label: "Pending Requests",
+          label: t("kpi.pendingRequests"),
           value: adminStats.pendingLeaves || 0,
-          caption: "Awaiting your review",
+          caption: t("kpi.awaitingReview"),
           icon: <ClockIcon className="w-5 h-5" />,
           onClick: () => navigate("/leaves?status=pending"),
         },
         {
-          label: "This Month",
+          label: t("kpi.thisMonth"),
           value: adminStats.thisMonthLeaves || 0,
-          caption: "Leave requests logged",
+          caption: t("kpi.leaveRequestsLogged"),
           icon: <CalendarDaysIcon className="w-5 h-5" />,
           onClick: () => navigate("/leaves"),
         },
         {
-          label: "Approved",
+          label: t("kpi.approved"),
           value: approved,
-          caption: "Requests granted",
+          caption: t("kpi.requestsGranted"),
           icon: <CheckCircleIcon className="w-5 h-5" />,
           onClick: () => navigate("/leaves?status=approved"),
         },
       ]
     : [
         {
-          label: "Annual Leave",
+          label: t("kpi.annualLeave"),
           value: balance.annual?.remaining ?? 0,
           suffix: `/ ${balance.annual?.total ?? 0}`,
-          caption: "Days remaining",
+          caption: t("kpi.daysRemaining"),
           icon: <ArrowUpRightIcon className="w-5 h-5" />,
           onClick: () => navigate("/my-leave-activity"),
         },
         {
-          label: "Sick Leave",
+          label: t("kpi.sickLeave"),
           value: balance.sick?.used ?? 0,
           suffix: `/ ${balance.sick?.total ?? 0}`,
-          caption: "Days used",
+          caption: t("kpi.daysUsed"),
           icon: <PlusIcon className="w-5 h-5" />,
           onClick: () => navigate("/my-leave-activity"),
         },
         {
-          label: "Casual Leave",
+          label: t("kpi.casualLeave"),
           value: balance.casual?.remaining ?? 0,
           suffix: `/ ${balance.casual?.total ?? 0}`,
-          caption: "Days remaining",
+          caption: t("kpi.daysRemaining"),
           icon: <UserIcon className="w-5 h-5" />,
           onClick: () => navigate("/my-leave-activity"),
         },
         {
-          label: "Days Taken",
+          label: t("kpi.daysTaken"),
           value: usedTotal,
-          caption: "Across all leave types",
+          caption: t("kpi.acrossAllLeaveTypes"),
           icon: <ChartBarIcon className="w-5 h-5" />,
           onClick: () => navigate("/my-leave-activity"),
         },
@@ -481,7 +488,7 @@ const DashboardPage: React.FC = () => {
           <div className="relative flex h-full flex-col justify-between gap-5">
             <div>
               <p className="text-overline text-blue-600 dark:text-blue-400">
-                Welcome back
+                {t("greeting.welcomeBack")}
               </p>
               <motion.h1
                 initial={{ opacity: 0, y: 8 }}
@@ -497,9 +504,7 @@ const DashboardPage: React.FC = () => {
                 transition={{ delay: 0.13, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                 className="mt-1.5 text-sm text-gray-600 dark:text-gray-300 max-w-md"
               >
-                {isAdmin
-                  ? "Here's how your team's leave is tracking today. Review pending requests and keep everyone in sync."
-                  : "Here's your time-off at a glance. Plan ahead and request leave in a couple of clicks."}
+                {isAdmin ? t("hero.adminSub") : t("hero.employeeSub")}
               </motion.p>
               <p className="mt-3 inline-flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                 <CalendarDaysIcon className="w-4 h-4" />
@@ -515,7 +520,7 @@ const DashboardPage: React.FC = () => {
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/60 transition-colors"
                 >
                   <BoltIcon className="w-4 h-4" />
-                  Quick Apply
+                  {t("actions.quickApply")}
                 </motion.button>
               )}
               <motion.button
@@ -525,7 +530,7 @@ const DashboardPage: React.FC = () => {
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-600/20 transition-colors"
               >
                 <PlusIcon className="w-4 h-4" />
-                {isAdmin ? "View Requests" : "Request Leave"}
+                {isAdmin ? t("hero.viewRequests") : t("hero.requestLeave")}
               </motion.button>
             </div>
           </div>
@@ -552,16 +557,16 @@ const DashboardPage: React.FC = () => {
           <div className="flex items-start justify-between mb-2">
             <div>
               <h3 className="text-card-title text-gray-900 dark:text-gray-100">
-                Leave Trends
+                {t("sections.leaveTrends")}
               </h3>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 {isAdmin
-                  ? "Company leave activity across recent requests"
+                  ? t("sections.companyActivity")
                   : "Your leave activity across recent requests"}
               </p>
             </div>
             <span className="text-xs font-medium px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300">
-              {new Date().getFullYear()} (Current)
+              {new Date().getFullYear()} ({t("sections.current")})
             </span>
           </div>
           <div className="h-64 w-full">
@@ -611,10 +616,12 @@ const DashboardPage: React.FC = () => {
         {/* Leave by Type — bar chart + mini stats */}
         <div className={`${CARD} ${CARD_HOVER} p-5 flex flex-col`}>
           <h3 className="text-card-title text-gray-900 dark:text-gray-100">
-            Leave by Type
+            {t("sections.leaveByType")}
           </h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {isAdmin ? "This month, by category" : "Days used, by category"}
+            {isAdmin
+                ? t("sections.thisMonthByCategory")
+                : t("sections.daysUsedByCategory")}
           </p>
           <div className="h-32 w-full mt-3">
             {typeData.some((d: any) => d.value > 0) ? (
@@ -647,7 +654,7 @@ const DashboardPage: React.FC = () => {
               </ResponsiveContainer>
             ) : (
               <div className="h-full flex items-center justify-center text-xs text-gray-400 dark:text-gray-500">
-                No data yet
+                {t("empty.noDataYet")}
               </div>
             )}
           </div>
@@ -666,14 +673,14 @@ const DashboardPage: React.FC = () => {
       >
         {/* Recent Activity (spans 2) */}
         <PanelCard
-          title="Recent Activity"
+          title={t("sections.recentActivity")}
           className="lg:col-span-2"
           action={
             <button
               onClick={() => navigate("/leaves")}
               className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
             >
-              View All
+              {t("actions.viewAll")}
             </button>
           }
         >
@@ -722,7 +729,7 @@ const DashboardPage: React.FC = () => {
                       {leave.status === "approved" && (
                         <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 ring-1 ring-inset ring-emerald-200/60 dark:ring-emerald-500/20">
                           <CheckCircleIcon className="w-3 h-3" />
-                          Approved
+                          {t("labels.approved")}
                         </span>
                       )}
                     </div>
@@ -736,10 +743,10 @@ const DashboardPage: React.FC = () => {
                 <CalendarDaysIcon className="w-6 h-6 text-gray-400 dark:text-gray-500" />
               </div>
               <p className="text-sm font-medium text-gray-900 dark:text-gray-200">
-                No recent activity
+                {t("empty.noRecentActivity")}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Requests will appear here as they come in.
+                {t("empty.requestsWillAppear")}
               </p>
             </div>
           )}
@@ -749,7 +756,7 @@ const DashboardPage: React.FC = () => {
         <div className="space-y-5">
           {/* Public Holidays */}
           <PanelCard
-            title="Public Holidays"
+            title={t("sections.publicHolidays")}
             action={
               <GlobeAltIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
             }
@@ -783,13 +790,13 @@ const DashboardPage: React.FC = () => {
               onClick={() => navigate("/leave-calendar")}
               className="mt-4 w-full py-2 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700/40 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors"
             >
-              View Company Calendar
+              {t("actions.viewCompanyCalendar")}
             </button>
           </PanelCard>
 
           {/* Team Availability */}
           <PanelCard
-            title="Team Availability"
+            title={t("sections.teamAvailability")}
             action={<SunIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />}
           >
             {teamFromLeaves.length > 0 ? (
@@ -819,7 +826,7 @@ const DashboardPage: React.FC = () => {
                           {emp.name || "Unknown"}
                         </button>
                         <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium truncate">
-                          Available Today
+                          {t("labels.availableToday")}
                         </p>
                       </div>
                     </div>
@@ -831,7 +838,7 @@ const DashboardPage: React.FC = () => {
               </ul>
             ) : (
               <p className="text-sm text-gray-500 dark:text-gray-400 py-4 text-center">
-                No team activity to show yet.
+                {t("empty.noTeamActivity")}
               </p>
             )}
           </PanelCard>

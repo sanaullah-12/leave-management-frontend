@@ -1,0 +1,72 @@
+{
+  "brand": {
+    "name": "Nexora",
+    "tagline": "Das HRMS-System"
+  },
+  "search": {
+    "placeholder": "Suchen",
+    "title": "Suche",
+    "noResults": "Keine Ergebnisse für „{{query}}“"
+  },
+  "sections": {
+    "pages": "Seiten"
+  },
+  "actions": {
+    "collapse": "Einklappen",
+    "expand": "Ausklappen",
+    "logout": "Abmelden",
+    "openMenu": "Menü öffnen",
+    "closeMenu": "Menü schließen",
+    "manageAccount": "Konto verwalten"
+  },
+  "header": {
+    "welcome": "Willkommen zurück, {{name}}",
+    "administrator": "Administrator",
+    "employee": "Mitarbeiter"
+  },
+  "groups": {
+    "home": "Startseite",
+    "leave": "Urlaubsverwaltung",
+    "team": "Team & Personen",
+    "attendance": "Anwesenheit",
+    "payroll": "Gehaltsabrechnung",
+    "documents": "Dokumentenstudio",
+    "voice": "Mitarbeiterstimme",
+    "settings": "Einstellungen"
+  },
+  "short": {
+    "home": "Start",
+    "leave": "Urlaub",
+    "team": "Team",
+    "attendance": "Anwesenh.",
+    "payroll": "Gehalt",
+    "documents": "Dokumente",
+    "voice": "Stimme",
+    "settings": "Einstell."
+  },
+  "items": {
+    "dashboard": "Übersicht",
+    "announcements": "Ankündigungen",
+    "reports": "Berichte",
+    "notifications": "Benachrichtigungen",
+    "leaveRequests": "Urlaubsanträge",
+    "leaveCalendar": "Urlaubskalender",
+    "applyLeave": "Urlaub beantragen",
+    "myLeaveActivity": "Meine Urlaubsübersicht",
+    "myTeam": "Mein Team",
+    "employees": "Mitarbeiter",
+    "departments": "Abteilungen",
+    "leavePolicies": "Urlaubsrichtlinien",
+    "attendance": "Anwesenheit",
+    "payrollDashboard": "Gehalts-Übersicht",
+    "employeeSalaries": "Mitarbeitergehälter",
+    "runPayroll": "Abrechnung starten",
+    "payslips": "Gehaltsabrechnungen",
+    "payrollHistory": "Abrechnungsverlauf",
+    "payrollSettings": "Abrechnungseinstellungen",
+    "documentStudio": "Dokumentenstudio",
+    "employeeVoice": "Mitarbeiterstimme",
+    "profileSettings": "Profil & Einstellungen",
+    "theme": "Design"
+  }
+}

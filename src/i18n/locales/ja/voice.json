@@ -1,0 +1,15 @@
+{
+  "stats": {
+    "highPriority": "優先度高",
+    "newToday": "本日の新規",
+    "pending": "保留中",
+    "resolved": "解決済み"
+  },
+  "widget": {
+    "open": "開く",
+    "share": "共有",
+    "teamSubmissions": "チームからの投稿",
+    "title": "従業員の声",
+    "yourSubmissions": "あなたの投稿"
+  }
+}

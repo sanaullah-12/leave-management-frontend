@@ -1,0 +1,10 @@
+{
+  "language": {
+    "title": "Idioma",
+    "description": "Elige el idioma de la aplicación. Tu elección se recuerda en este dispositivo.",
+    "interface": "Idioma de la interfaz",
+    "appliesImmediately": "Se aplica de inmediato en todas las pantallas.",
+    "changeLanguage": "Cambiar idioma",
+    "rtlNote": "Este idioma se lee de derecha a izquierda. El diseño se refleja automáticamente."
+  }
+}

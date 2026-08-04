@@ -156,32 +156,40 @@ export const COMPUTE_MODE_LABEL: Record<ComputeMode, string> = {
 /* Status vocabularies                                                 */
 /* ------------------------------------------------------------------ */
 
-/** Tailwind classes + dot colour per status, shared by pills and selects. */
+/**
+ * Presentation for one status, shared by pills and select options.
+ *
+ * The visible text is a *translation key* rather than a literal. These objects
+ * live at module scope, so a baked-in English string could never react to a
+ * language change — the key is resolved at render time instead. Keys resolve
+ * against the `common` namespace, which already ships all five languages.
+ */
 export interface StatusStyle {
-  label: string;
+  /** Key within the `common` namespace, e.g. "status.active". */
+  labelKey: string;
   className: string;
   dot: string;
 }
 
 export const SALARY_STATUS: Record<SalaryStatus | "unconfigured", StatusStyle> = {
   active: {
-    label: "Active",
+    labelKey: "status.active",
     className:
       "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300",
     dot: "#10b981",
   },
   draft: {
-    label: "Draft",
+    labelKey: "status.draft",
     className: "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300",
     dot: "#f59e0b",
   },
   inactive: {
-    label: "Inactive",
+    labelKey: "status.inactive",
     className: "bg-gray-100 text-gray-600 dark:bg-gray-700/60 dark:text-gray-300",
     dot: "#9ca3af",
   },
   unconfigured: {
-    label: "Not set up",
+    labelKey: "status.notSetUp",
     className: "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300",
     dot: "#f43f5e",
   },
@@ -189,17 +197,17 @@ export const SALARY_STATUS: Record<SalaryStatus | "unconfigured", StatusStyle> =
 
 export const RUN_STATUS: Record<PayrollRunStatus, StatusStyle> = {
   draft: {
-    label: "Draft",
+    labelKey: "status.draft",
     className: "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300",
     dot: "#f59e0b",
   },
   processed: {
-    label: "Processed",
+    labelKey: "status.processed",
     className: "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300",
     dot: "#3b82f6",
   },
   paid: {
-    label: "Paid",
+    labelKey: "status.paid",
     className:
       "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300",
     dot: "#10b981",
@@ -208,18 +216,18 @@ export const RUN_STATUS: Record<PayrollRunStatus, StatusStyle> = {
 
 export const PAYSLIP_STATUS: Record<PayslipStatus, StatusStyle> = {
   generated: {
-    label: "Generated",
+    labelKey: "status.generated",
     className: "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300",
     dot: "#3b82f6",
   },
   downloaded: {
-    label: "Downloaded",
+    labelKey: "status.downloaded",
     className:
       "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300",
     dot: "#10b981",
   },
   printed: {
-    label: "Printed",
+    labelKey: "status.printed",
     className:
       "bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300",
     dot: "#8b5cf6",

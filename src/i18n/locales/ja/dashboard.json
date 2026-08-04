@@ -1,0 +1,72 @@
+{
+  "actions": {
+    "quickApply": "クイック申請",
+    "viewAll": "すべて表示",
+    "viewCompanyCalendar": "会社カレンダーを見る"
+  },
+  "empty": {
+    "noDataYet": "データはまだありません",
+    "noRecentActivity": "最近のアクティビティはありません",
+    "noTeamActivity": "表示できるチームの活動はまだありません。",
+    "requestsWillAppear": "申請が届くとここに表示されます。"
+  },
+  "gauges": {
+    "annualBalance": "年次残高",
+    "approvalRate": "承認率",
+    "awaitingReview": "確認待ち",
+    "daysUsed": "使用日数",
+    "leaveUtilization": "休暇取得率",
+    "ofDecidedRequests": "決定済み申請のうち",
+    "pendingLoad": "保留中の負荷",
+    "remaining": "残り"
+  },
+  "greeting": {
+    "afternoon": "こんにちは",
+    "evening": "こんばんは",
+    "morning": "おはようございます",
+    "welcomeBack": "おかえりなさい"
+  },
+  "hero": {
+    "adminSub": "本日のチームの休暇状況です。保留中の申請を確認し、全員の足並みを揃えましょう。",
+    "employeeSub": "あなたの休暇の概要です。先を見据えて、数クリックで休暇を申請できます。",
+    "requestLeave": "休暇を申請",
+    "viewRequests": "申請を見る"
+  },
+  "kpi": {
+    "acrossAllLeaveTypes": "すべての休暇種別",
+    "activeWorkforce": "稼働中の従業員",
+    "annualLeave": "年次休暇",
+    "approved": "承認済み",
+    "awaitingReview": "承認待ち",
+    "casualLeave": "私用休暇",
+    "daysRemaining": "残日数",
+    "daysTaken": "取得日数",
+    "daysUsed": "使用日数",
+    "leaveRequestsLogged": "登録された休暇申請",
+    "pendingRequests": "保留中の申請",
+    "requestsGranted": "承認された申請",
+    "sickLeave": "病気休暇",
+    "thisMonth": "今月",
+    "totalEmployees": "従業員総数"
+  },
+  "labels": {
+    "approved": "承認済み",
+    "availableToday": "本日出勤",
+    "employees": "従業員",
+    "pending": "保留中",
+    "requests": "申請"
+  },
+  "loading": "ダッシュボードを読み込み中…",
+  "sections": {
+    "companyActivity": "最近の申請における全社の休暇状況",
+    "current": "現在",
+    "daysUsedByCategory": "使用日数、カテゴリ別",
+    "leaveByType": "種別ごとの休暇",
+    "leaveTrends": "休暇の傾向",
+    "publicHolidays": "祝日",
+    "recentActivity": "最近のアクティビティ",
+    "teamAvailability": "チームの稼働状況",
+    "thisMonthByCategory": "今月、カテゴリ別",
+    "yourActivity": "最近の申請におけるあなたの休暇状況"
+  }
+}

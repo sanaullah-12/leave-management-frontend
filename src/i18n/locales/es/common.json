@@ -1,0 +1,72 @@
+{
+  "actions": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "exportCsv": "Exportar CSV",
+    "print": "Imprimir",
+    "download": "Descargar",
+    "downloadPdf": "Descargar PDF",
+    "view": "Ver",
+    "add": "Añadir",
+    "addCustom": "Añadir personalizado",
+    "remove": "Quitar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "submit": "Enviar",
+    "reset": "Restablecer",
+    "apply": "Aplicar",
+    "discard": "Descartar",
+    "create": "Crear",
+    "update": "Actualizar",
+    "generate": "Generar",
+    "saveChanges": "Guardar cambios",
+    "quickAdd": "Añadir rápido"
+  },
+  "states": {
+    "loading": "Cargando…",
+    "saving": "Guardando…",
+    "noData": "Sin datos",
+    "error": "Algo salió mal",
+    "success": "Correcto",
+    "noResults": "No se encontraron resultados"
+  },
+  "labels": {
+    "employee": "Empleado",
+    "employeeId": "ID de empleado",
+    "department": "Departamento",
+    "designation": "Cargo",
+    "status": "Estado",
+    "actions": "Acciones",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "date": "Fecha",
+    "all": "Todos",
+    "allStatuses": "Todos los estados",
+    "allDepartments": "Todos los departamentos",
+    "generatedOn": "Generado"
+  },
+  "status": {
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "draft": "Borrador",
+    "pending": "Pendiente",
+    "approved": "Aprobado",
+    "rejected": "Rechazado",
+    "processed": "Procesado",
+    "paid": "Pagado",
+    "notSetUp": "Sin configurar",
+    "generated": "Generado",
+    "downloaded": "Descargado",
+    "printed": "Impreso"
+  },
+  "confirm": {
+    "cannotBeUndone": "Esta acción no se puede deshacer."
+  }
+}

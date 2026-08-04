@@ -1,0 +1,10 @@
+{
+  "language": {
+    "title": "言語",
+    "description": "アプリ全体で使用する言語を選択します。選択はこのデバイスに保存されます。",
+    "interface": "表示言語",
+    "appliesImmediately": "すべての画面にすぐに適用されます。",
+    "changeLanguage": "言語を変更",
+    "rtlNote": "この言語は右から左に読みます。レイアウトは自動的に反転します。"
+  }
+}

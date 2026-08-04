@@ -1,0 +1,72 @@
+{
+  "actions": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "close": "閉じる",
+    "confirm": "確認",
+    "search": "検索",
+    "filter": "絞り込む",
+    "export": "エクスポート",
+    "exportCsv": "CSV エクスポート",
+    "print": "印刷",
+    "download": "ダウンロード",
+    "downloadPdf": "PDF をダウンロード",
+    "view": "表示",
+    "add": "追加",
+    "addCustom": "カスタム追加",
+    "remove": "削除",
+    "back": "戻る",
+    "next": "次へ",
+    "submit": "送信",
+    "reset": "リセット",
+    "apply": "適用",
+    "discard": "破棄",
+    "create": "作成",
+    "update": "更新",
+    "generate": "生成",
+    "saveChanges": "変更を保存",
+    "quickAdd": "クイック追加"
+  },
+  "states": {
+    "loading": "読み込み中…",
+    "saving": "保存中…",
+    "noData": "データがありません",
+    "error": "エラーが発生しました",
+    "success": "成功",
+    "noResults": "結果が見つかりません"
+  },
+  "labels": {
+    "employee": "従業員",
+    "employeeId": "従業員 ID",
+    "department": "部署",
+    "designation": "役職",
+    "status": "ステータス",
+    "actions": "操作",
+    "name": "名前",
+    "email": "メールアドレス",
+    "date": "日付",
+    "all": "すべて",
+    "allStatuses": "すべてのステータス",
+    "allDepartments": "すべての部署",
+    "generatedOn": "生成日"
+  },
+  "status": {
+    "active": "有効",
+    "inactive": "無効",
+    "draft": "下書き",
+    "pending": "保留中",
+    "approved": "承認済み",
+    "rejected": "却下",
+    "processed": "処理済み",
+    "paid": "支払済み",
+    "notSetUp": "未設定",
+    "generated": "生成済み",
+    "downloaded": "ダウンロード済み",
+    "printed": "印刷済み"
+  },
+  "confirm": {
+    "cannotBeUndone": "この操作は取り消せません。"
+  }
+}

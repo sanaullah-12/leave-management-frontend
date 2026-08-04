@@ -1,0 +1,72 @@
+{
+  "actions": {
+    "quickApply": "Schnellantrag",
+    "viewAll": "Alle ansehen",
+    "viewCompanyCalendar": "Firmenkalender ansehen"
+  },
+  "empty": {
+    "noDataYet": "Noch keine Daten",
+    "noRecentActivity": "Keine aktuelle Aktivität",
+    "noTeamActivity": "Noch keine Teamaktivität vorhanden.",
+    "requestsWillAppear": "Anträge erscheinen hier, sobald sie eingehen."
+  },
+  "gauges": {
+    "annualBalance": "Jahressaldo",
+    "approvalRate": "Genehmigungsquote",
+    "awaitingReview": "warten auf Prüfung",
+    "daysUsed": "Genutzte Tage",
+    "leaveUtilization": "Urlaubsnutzung",
+    "ofDecidedRequests": "der entschiedenen Anträge",
+    "pendingLoad": "Offene Last",
+    "remaining": "Verbleibend"
+  },
+  "greeting": {
+    "afternoon": "Guten Tag",
+    "evening": "Guten Abend",
+    "morning": "Guten Morgen",
+    "welcomeBack": "Willkommen zurück"
+  },
+  "hero": {
+    "adminSub": "So entwickelt sich der Urlaub Ihres Teams heute. Prüfen Sie offene Anträge und halten Sie alle auf dem Laufenden.",
+    "employeeSub": "Ihre Abwesenheiten auf einen Blick. Planen Sie voraus und beantragen Sie Urlaub mit wenigen Klicks.",
+    "requestLeave": "Urlaub beantragen",
+    "viewRequests": "Anträge ansehen"
+  },
+  "kpi": {
+    "acrossAllLeaveTypes": "Über alle Urlaubsarten",
+    "activeWorkforce": "Aktive Belegschaft",
+    "annualLeave": "Jahresurlaub",
+    "approved": "Genehmigt",
+    "awaitingReview": "Warten auf Ihre Prüfung",
+    "casualLeave": "Sonderurlaub",
+    "daysRemaining": "Verbleibende Tage",
+    "daysTaken": "Genommene Tage",
+    "daysUsed": "Genutzte Tage",
+    "leaveRequestsLogged": "Erfasste Urlaubsanträge",
+    "pendingRequests": "Offene Anträge",
+    "requestsGranted": "Bewilligte Anträge",
+    "sickLeave": "Krankheitstage",
+    "thisMonth": "Diesen Monat",
+    "totalEmployees": "Mitarbeiter gesamt"
+  },
+  "labels": {
+    "approved": "Genehmigt",
+    "availableToday": "Heute verfügbar",
+    "employees": "Mitarbeiter",
+    "pending": "Ausstehend",
+    "requests": "Anträge"
+  },
+  "loading": "Ihr Dashboard wird geladen …",
+  "sections": {
+    "companyActivity": "Urlaubsaktivität des Unternehmens",
+    "current": "Aktuell",
+    "daysUsedByCategory": "Genutzte Tage, nach Kategorie",
+    "leaveByType": "Urlaub nach Art",
+    "leaveTrends": "Urlaubstrends",
+    "publicHolidays": "Feiertage",
+    "recentActivity": "Letzte Aktivität",
+    "teamAvailability": "Teamverfügbarkeit",
+    "thisMonthByCategory": "Diesen Monat, nach Kategorie",
+    "yourActivity": "Ihre Urlaubsaktivität"
+  }
+}

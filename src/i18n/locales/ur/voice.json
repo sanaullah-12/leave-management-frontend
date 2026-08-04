@@ -1,0 +1,15 @@
+{
+  "stats": {
+    "highPriority": "اعلیٰ ترجیح",
+    "newToday": "آج کے نئے",
+    "pending": "زیر التوا",
+    "resolved": "حل شدہ"
+  },
+  "widget": {
+    "open": "کھولیں",
+    "share": "شیئر کریں",
+    "teamSubmissions": "ٹیم کی گزارشات",
+    "title": "ملازمین کی آواز",
+    "yourSubmissions": "آپ کی گزارشات"
+  }
+}

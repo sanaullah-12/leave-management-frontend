@@ -1,0 +1,134 @@
+/* ============================================================
+   RTL support
+   ============================================================
+
+   Urdu reads right-to-left. `LocaleProvider` sets `dir="rtl"` on <html>,
+   which the browser already uses to flip a great deal for free:
+
+     • text alignment and paragraph direction
+     • flexbox main-axis order (`flex-row` reverses)
+     • grid column order
+     • `text-align: start/end`, logical properties, scrollbar side
+
+   What the browser does NOT flip is Tailwind's *physical* utilities —
+   `ml-*`, `pl-*`, `left-*`, `text-left`, `origin-left` and friends. The
+   codebase uses those extensively, so this file mirrors the handful of
+   places where a physical value controls page-level structure. Component
+   micro-spacing is left alone deliberately: it is visually harmless when
+   mirrored, and rewriting every utility app-wide would be a far riskier
+   change than it is worth.
+
+   The long-term fix is Tailwind's logical utilities (`ms-*`, `me-*`,
+   `ps-*`, `pe-*`, `start-*`, `end-*`), which flip automatically. Convert
+   opportunistically when touching a component — see
+   docs/INTERNATIONALIZATION.md.
+   ============================================================ */
+
+/* ---------- Typography ----------------------------------- */
+
+/* Nastaliq-friendly stack for Urdu. Falls back to the app font elsewhere.
+   Urdu needs a slightly larger line-height: its ascenders and descenders
+   overlap more than Latin script and clip at the app's default 1.5. */
+html[lang="ur"] {
+  font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Segoe UI",
+    system-ui, sans-serif;
+  line-height: 1.9;
+}
+
+/* ---------- App shell ------------------------------------ */
+
+/* The sidebar is `fixed inset-y-0 left-0`; in RTL it must anchor right. */
+[dir="rtl"] .fixed.left-0 {
+  left: auto;
+  right: 0;
+}
+
+/* The rail/panel border must sit on the opposite edge. */
+[dir="rtl"] .border-r {
+  border-right-width: 0;
+  border-left-width: 1px;
+}
+
+/* Main content is offset by the sidebar width via `lg:ml-*`. Mirror it. */
+@media (min-width: 1024px) {
+  [dir="rtl"] .lg\:ml-16 {
+    margin-left: 0;
+    margin-right: 4rem;
+  }
+  [dir="rtl"] .lg\:ml-\[19rem\] {
+    margin-left: 0;
+    margin-right: 19rem;
+  }
+  /* The fixed desktop header is positioned from the left by the same offset. */
+  [dir="rtl"] .lg\:left-16 {
+    left: auto;
+    right: 4rem;
+  }
+  [dir="rtl"] .lg\:left-\[19rem\] {
+    left: auto;
+    right: 19rem;
+  }
+}
+
+/* The mobile drawer slides in from the right. */
+[dir="rtl"] .-translate-x-full {
+  --tw-translate-x: 100%;
+  transform: translateX(100%);
+}
+
+/* ---------- Text alignment ------------------------------- */
+
+/* Explicit physical alignment must follow the reading direction. Numeric
+   columns keep `text-right` intentionally (see the exception below). */
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+/* Money and count columns stay visually right-aligned in LTR. In RTL the
+   "end" of the row is the left, so mirror them for correct column ragging. */
+[dir="rtl"] .text-right:not(.tabular-nums) {
+  text-align: left;
+}
+
+/* ---------- Numerals ------------------------------------- */
+
+/* Keep Western Arabic numerals for money and dates even in Urdu: payroll
+   figures, employee IDs and ISO dates are read alongside exported PDFs and
+   bank files, and switching numeral systems mid-product causes mistakes. */
+[dir="rtl"] .tabular-nums,
+[dir="rtl"] time,
+[dir="rtl"] [data-numeric] {
+  direction: ltr;
+  unicode-bidi: embed;
+  text-align: inherit;
+  font-feature-settings: "tnum";
+}
+
+/* ---------- Icons ---------------------------------------- */
+
+/* Directional glyphs (chevrons, arrows) point the wrong way when mirrored.
+   Opt a specific icon in with `data-flip-rtl`, rather than blanket-flipping
+   every SVG — most icons (search, bell, user) must NOT flip. */
+[dir="rtl"] [data-flip-rtl] {
+  transform: scaleX(-1);
+}
+
+/* ---------- Transform origins ---------------------------- */
+
+[dir="rtl"] .origin-top-left {
+  transform-origin: top right;
+}
+[dir="rtl"] .origin-top-right {
+  transform-origin: top left;
+}
+
+/* ---------- Print ---------------------------------------- */
+
+/* Generated documents (payslips, HR letters) compose their own standalone
+   HTML with an explicit direction. Never let the app's RTL leak into them. */
+@media print {
+  [dir="rtl"] .ds-page,
+  [dir="rtl"] .ps-page {
+    direction: ltr;
+  }
+}
