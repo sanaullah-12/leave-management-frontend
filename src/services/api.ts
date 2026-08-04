@@ -31,6 +31,15 @@ interface InviteEmployeeData {
   employeeId?: string; // Optional custom employee ID
 }
 
+interface InviteAdminData {
+  name: string;
+  email: string;
+  /** Defaulted by the invite form; the backend accepts them optionally. */
+  department?: string;
+  position?: string;
+  employeeId?: string;
+}
+
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
@@ -133,11 +142,41 @@ export const authAPI = {
   inviteEmployee: (data: InviteEmployeeData) =>
     inviteApi.post("/auth/invite-employee", data), // Use inviteApi with 15s timeout (email is now async)
 
+  inviteAdmin: (data: InviteAdminData) =>
+    inviteApi.post("/auth/invite-admin", data),
+
   // Email queue status endpoints
   getEmailQueueStatus: () => api.get("/auth/email-queue/status"),
 
   getEmailJobStatus: (jobId: string) =>
     api.get(`/auth/email-queue/job/${jobId}`),
+
+  /* ---------------------------------------------------------------- */
+  /* Public (token-based) flows                                        */
+  /*                                                                   */
+  /* These need no session — they authenticate via a one-time token in */
+  /* the URL. They still go through the shared instance so they pick   */
+  /* up the base URL, timeout and error shape every other call uses.   */
+  /* The backend answers these with 200/400/500 only (never 401), so   */
+  /* the session-expiry interceptor never fires for them.              */
+  /* ---------------------------------------------------------------- */
+
+  forgotPassword: (data: { email: string }) =>
+    api.post("/auth/forgot-password", data),
+
+  /** Validate a password-reset token before showing the form. */
+  verifyResetToken: (token: string) =>
+    api.get(`/auth/reset-password/${token}`),
+
+  resetPassword: (token: string, data: { password: string }) =>
+    api.post(`/auth/reset-password/${token}`, data),
+
+  /** Fetch the invited user's details for the accept-invite screen. */
+  getInvitation: (token: string) => api.get(`/auth/invitation/${token}`),
+
+  /** Complete an invitation by setting the account password. */
+  verifyInvitation: (token: string, data: { password: string }) =>
+    api.post(`/auth/verify-invitation/${token}`, data),
 };
 
 // Users API

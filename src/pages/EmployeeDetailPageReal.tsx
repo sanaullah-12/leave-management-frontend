@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { CARD } from "../lib/surfaces";
+import { accentFor } from "../lib/themeTokens";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersAPI, leavesAPI } from "../services/api";
@@ -42,25 +44,7 @@ interface LeaveAllocation {
   annual: number;
 }
 
-// Theme accent hex (for the trend area chart) — mirrors the dashboard map.
-const THEME_ACCENT: Record<string, string> = {
-  black: "#374151",
-  purple: "#9c5fd1",
-  blue: "#2563eb",
-  pink: "#db2777",
-  violet: "#7c3aed",
-  indigo: "#4f46e5",
-  orange: "#ea580c",
-  teal: "#0d9488",
-  bronze: "#b45309",
-  mint: "#10b981",
-};
 
-// Neumorphic soft-UI card surface — matches the dashboard / report cards.
-const CARD =
-  "rounded-2xl bg-[var(--card-surface)] " +
-  "shadow-[7px_7px_16px_rgba(174,186,204,0.5),-7px_-7px_16px_rgba(255,255,255,0.95)] " +
-  "dark:shadow-[7px_7px_18px_rgba(0,0,0,0.55),-6px_-6px_16px_rgba(255,255,255,0.045)]";
 
 // Per-leave-type accent + watermark icon (same language as the report page).
 const LEAVE_META = {
@@ -254,7 +238,7 @@ const EmployeeDetailPageReal: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { colorScheme } = useTheme();
-  const accent = THEME_ACCENT[colorScheme] || THEME_ACCENT.blue;
+  const accent = accentFor(colorScheme);
   const queryClient = useQueryClient();
   const [isEditingAllocation, setIsEditingAllocation] = useState(false);
   const [editAllocation, setEditAllocation] = useState<LeaveAllocation>({

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
-import axios from "axios";
+import { authAPI } from "../services/api";
 import {
   EnvelopeIcon,
   ArrowLeftIcon,
@@ -34,10 +34,7 @@ const ForgotPasswordPage: React.FC = () => {
     setIsSubmitting(true);
     setError("");
     try {
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/auth/forgot-password`,
-        data
-      );
+      await authAPI.forgotPassword(data);
       setSuccess(true);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to send reset email");

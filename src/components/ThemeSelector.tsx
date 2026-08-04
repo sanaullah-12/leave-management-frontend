@@ -2,8 +2,9 @@ import React from "react";
 import { motion } from "framer-motion";
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { SunIcon, MoonIcon, ComputerDesktopIcon } from "@heroicons/react/24/outline";
-import { useTheme } from "../context/ThemeContext";
+import { useTheme, COLOR_SCHEMES } from "../context/ThemeContext";
 import type { ColorScheme, ThemeMode } from "../context/ThemeContext";
+import { ACCENT_HEX, SCHEME_LABEL } from "../lib/themeTokens";
 
 interface ColorOption {
   key: ColorScheme;
@@ -11,19 +12,13 @@ interface ColorOption {
   color: string;
 }
 
-// Ordered to mirror the reference layout (3 per row).
-const COLORS: ColorOption[] = [
-  { key: "black", name: "Black", color: "#374151" },
-  { key: "purple", name: "Purple", color: "#9c5fd1" },
-  { key: "blue", name: "Blue", color: "#2563eb" },
-  { key: "pink", name: "Pink", color: "#db2777" },
-  { key: "violet", name: "Violet", color: "#7c3aed" },
-  { key: "indigo", name: "Indigo", color: "#4f46e5" },
-  { key: "orange", name: "Orange", color: "#ea580c" },
-  { key: "teal", name: "Teal", color: "#0d9488" },
-  { key: "bronze", name: "Bronze", color: "#b45309" },
-  { key: "mint", name: "Mint", color: "#10b981" },
-];
+// Derived from the single scheme vocabulary + palette, so a new colour scheme
+// appears here automatically instead of needing a second hand-kept list.
+const COLORS: ColorOption[] = COLOR_SCHEMES.map((key) => ({
+  key,
+  name: SCHEME_LABEL[key],
+  color: ACCENT_HEX[key],
+}));
 
 const MODES: {
   key: ThemeMode;

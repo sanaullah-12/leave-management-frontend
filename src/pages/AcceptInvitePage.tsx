@@ -17,7 +17,7 @@ import {
   UserPlusIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
-import axios from "axios";
+import { authAPI } from "../services/api";
 
 interface AcceptInviteForm {
   password: string;
@@ -79,9 +79,7 @@ const AcceptInvitePage: React.FC = () => {
 
     const fetchInvitationDetails = async () => {
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/auth/invitation/${token}`
-        );
+        const response = await authAPI.getInvitation(token!);
         setInvitation(response.data.user);
       } catch (err: any) {
         console.error("Invitation fetch error:", err);
@@ -105,10 +103,7 @@ const AcceptInvitePage: React.FC = () => {
     setIsSubmitting(true);
     setError("");
     try {
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/auth/verify-invitation/${token}`,
-        { password: data.password }
-      );
+      await authAPI.verifyInvitation(token!, { password: data.password });
       // Deliberately don't auto-login here — this browser now "knows" a real
       // account exists, so the landing page will show the Sign in button, but
       // the user still signs in explicitly with the password they just set.

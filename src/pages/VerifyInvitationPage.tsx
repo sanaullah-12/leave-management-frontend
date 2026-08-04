@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import PasswordInput from '../components/PasswordInput';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
+import { authAPI } from '../services/api';
 
 interface VerifyInvitationForm {
   password: string;
@@ -43,7 +43,7 @@ const VerifyInvitationPage: React.FC = () => {
   useEffect(() => {
     const fetchInvitationDetails = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/auth/invitation/${token}`);
+        const response = await authAPI.getInvitation(token!);
         setInvitation(response.data.user);
       } catch (error: any) {
         setError(error.response?.data?.message || 'Invalid invitation link');
@@ -106,8 +106,8 @@ const VerifyInvitationPage: React.FC = () => {
     setError('');
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/verify-invitation/${token}`, {
-        password: data.password
+      const response = await authAPI.verifyInvitation(token!, {
+        password: data.password,
       });
 
       // Store token and user data

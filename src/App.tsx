@@ -15,33 +15,76 @@ import RealtimeProvider from "./providers/RealtimeProvider";
 import "./styles/themes.css";
 import Layout from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
-import DashboardPage from "./pages/DashboardPage";
-import LeavesPage from "./pages/LeavesPage";
-import AttendancePage from "./pages/AttendancePage";
-import EmployeesPage from "./pages/EmployeesPage";
-import EmployeeDetailPageReal from "./pages/EmployeeDetailPageReal";
-import MyLeaveActivityPage from "./pages/MyLeaveActivityPage";
-import ProfilePage from "./pages/ProfilePage";
-import VerifyInvitationPage from "./pages/VerifyInvitationPage";
-import AcceptInvitePage from "./pages/AcceptInvitePage";
-import ReportsPage from "./pages/ReportsPage";
-import ThemePage from "./pages/ThemePage";
-import ApplyLeavePage from "./pages/ApplyLeavePage";
-import LeaveCalendarPage from "./pages/LeaveCalendarPage";
-import MyTeamPage from "./pages/MyTeamPage";
-import DepartmentsPage from "./pages/DepartmentsPage";
-import LeavePolicyPage from "./pages/LeavePolicyPage";
-import NotificationsPage from "./pages/NotificationsPage";
-import EmployeeVoicePage from "./pages/EmployeeVoicePage";
-import DocumentStudioPage from "./pages/DocumentStudioPage";
-import AnnouncementsPage from "./pages/AnnouncementsPage";
 
-// Public marketing page — code-split so its heavy animation bundle only loads
-// when a visitor actually lands on it (keeps the authenticated app lean).
+/* ------------------------------------------------------------------ */
+/*  Route-level code splitting                                         */
+/*                                                                     */
+/*  Every route below is lazily imported so a visitor downloads only    */
+/*  the screen they actually opened. Previously all ~20 pages (plus     */
+/*  Recharts, the Document Studio editor and the attendance module)     */
+/*  were bundled into a single eager chunk that every user paid for on  */
+/*  first paint, regardless of role or destination.                     */
+/*                                                                     */
+/*  LoginPage is the one deliberate exception: it is the guaranteed     */
+/*  first paint for anyone without a session, so keeping it eager       */
+/*  avoids an extra round-trip on the most common cold entry.           */
+/* ------------------------------------------------------------------ */
+
+// Public
 const LandingPage = React.lazy(() => import("./pages/LandingPage"));
+const RegisterPage = React.lazy(() => import("./pages/RegisterPage"));
+const ForgotPasswordPage = React.lazy(() => import("./pages/ForgotPasswordPage"));
+const ResetPasswordPage = React.lazy(() => import("./pages/ResetPasswordPage"));
+const AcceptInvitePage = React.lazy(() => import("./pages/AcceptInvitePage"));
+const VerifyInvitationPage = React.lazy(
+  () => import("./pages/VerifyInvitationPage")
+);
+
+// Core app
+const DashboardPage = React.lazy(() => import("./pages/DashboardPage"));
+const LeavesPage = React.lazy(() => import("./pages/LeavesPage"));
+const ApplyLeavePage = React.lazy(() => import("./pages/ApplyLeavePage"));
+const LeaveCalendarPage = React.lazy(() => import("./pages/LeaveCalendarPage"));
+const AttendancePage = React.lazy(() => import("./pages/AttendancePage"));
+const EmployeesPage = React.lazy(() => import("./pages/EmployeesPage"));
+const EmployeeDetailPageReal = React.lazy(
+  () => import("./pages/EmployeeDetailPageReal")
+);
+const MyLeaveActivityPage = React.lazy(
+  () => import("./pages/MyLeaveActivityPage")
+);
+const MyTeamPage = React.lazy(() => import("./pages/MyTeamPage"));
+const DepartmentsPage = React.lazy(() => import("./pages/DepartmentsPage"));
+const LeavePolicyPage = React.lazy(() => import("./pages/LeavePolicyPage"));
+const ReportsPage = React.lazy(() => import("./pages/ReportsPage"));
+const NotificationsPage = React.lazy(() => import("./pages/NotificationsPage"));
+const AnnouncementsPage = React.lazy(() => import("./pages/AnnouncementsPage"));
+const EmployeeVoicePage = React.lazy(() => import("./pages/EmployeeVoicePage"));
+const DocumentStudioPage = React.lazy(
+  () => import("./pages/DocumentStudioPage")
+);
+const ProfilePage = React.lazy(() => import("./pages/ProfilePage"));
+const ThemePage = React.lazy(() => import("./pages/ThemePage"));
+
+// Payroll is admin-only and pulls in charts + PDF tooling, so the whole module
+// is code-split. Employees never download a byte of it.
+const PayrollLayout = React.lazy(() => import("./pages/payroll/PayrollLayout"));
+const PayrollDashboardPage = React.lazy(
+  () => import("./pages/payroll/PayrollDashboardPage")
+);
+const SalaryManagementPage = React.lazy(
+  () => import("./pages/payroll/SalaryManagementPage")
+);
+const PayrollProcessingPage = React.lazy(
+  () => import("./pages/payroll/PayrollProcessingPage")
+);
+const PayslipsPage = React.lazy(() => import("./pages/payroll/PayslipsPage"));
+const PayrollHistoryPage = React.lazy(
+  () => import("./pages/payroll/PayrollHistoryPage")
+);
+const PayrollSettingsPage = React.lazy(
+  () => import("./pages/payroll/PayrollSettingsPage")
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -90,15 +133,12 @@ const App: React.FC = () => {
                   },
                 }}
               />
+              {/* One boundary for the public routes. The authenticated routes
+                  have their own boundary inside <Layout>, so the sidebar and
+                  header stay painted while a page chunk downloads. */}
+              <React.Suspense fallback={null}>
               <Routes>
-                <Route
-                  path="/landing"
-                  element={
-                    <React.Suspense fallback={null}>
-                      <LandingPage />
-                    </React.Suspense>
-                  }
-                />
+                <Route path="/landing" element={<LandingPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route
@@ -137,11 +177,20 @@ const App: React.FC = () => {
                   <Route path="announcements" element={<AnnouncementsPage />} />
                   <Route path="employee-voice" element={<EmployeeVoicePage />} />
                   <Route path="document-studio" element={<DocumentStudioPage />} />
+                  <Route path="payroll" element={<PayrollLayout />}>
+                    <Route index element={<PayrollDashboardPage />} />
+                    <Route path="salaries" element={<SalaryManagementPage />} />
+                    <Route path="run" element={<PayrollProcessingPage />} />
+                    <Route path="payslips" element={<PayslipsPage />} />
+                    <Route path="history" element={<PayrollHistoryPage />} />
+                    <Route path="settings" element={<PayrollSettingsPage />} />
+                  </Route>
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="theme" element={<ThemePage />} />
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
+              </React.Suspense>
             </div>
             </Router>
           </MotionConfig>

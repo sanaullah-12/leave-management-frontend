@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { attendanceAPI } from '../services/api';
+
+import { attendanceAPI, authAPI } from '../services/api';
 // import { useNotifications } from '../components/NotificationSystem'; // Removed for Socket.IO implementation
 import Modal from './Modal';
 import LoadingSpinner from './LoadingSpinner';
@@ -81,12 +81,9 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
   };
 
   const inviteAdminMutation = useMutation({
-    mutationFn: (data: InviteAdminData) =>
-      axios.post(`${import.meta.env.VITE_API_URL}/auth/invite-admin`, data, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      }),
+    // The shared client attaches the bearer token via its request
+    // interceptor, so no manual Authorization header is needed here.
+    mutationFn: (data: InviteAdminData) => authAPI.inviteAdmin(data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       reset();

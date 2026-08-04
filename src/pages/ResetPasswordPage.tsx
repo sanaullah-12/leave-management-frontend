@@ -9,7 +9,7 @@ import {
   XCircleIcon, 
   ClockIcon 
 } from '@heroicons/react/24/outline';
-import axios from 'axios';
+import { authAPI } from '../services/api';
 
 interface ResetPasswordForm {
   password: string;
@@ -44,7 +44,7 @@ const ResetPasswordPage: React.FC = () => {
   useEffect(() => {
     const validateToken = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/auth/reset-password/${token}`);
+        const response = await authAPI.verifyResetToken(token!);
         setTokenValidation(response.data);
       } catch (error: any) {
         setError(error.response?.data?.message || 'Invalid or expired reset token');
@@ -64,9 +64,7 @@ const ResetPasswordPage: React.FC = () => {
     setError('');
 
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/auth/reset-password/${token}`, {
-        password: data.password
-      });
+      await authAPI.resetPassword(token!, { password: data.password });
       setSuccess(true);
     } catch (error: any) {
       setError(error.response?.data?.message || 'Failed to reset password');

@@ -1,22 +1,14 @@
 import React from "react";
 import { motion } from "framer-motion";
-import {
-  RectangleStackIcon,
-  DocumentCheckIcon,
-  PencilSquareIcon,
-  SparklesIcon,
-  TrophyIcon,
-} from "@heroicons/react/24/outline";
 import AnimatedNumber from "../AnimatedNumber";
 import { staggerContainer, staggerItem } from "../../lib/motion";
-import { CARD, CARD_HOVER } from "./ui";
-import type { StudioStats } from "./useStudioStore";
+import { CARD, CARD_HOVER } from "../../lib/surfaces";
 
-interface Props {
-  stats: StudioStats;
-}
-
-interface Tile {
+/**
+ * A single KPI tile. `value` is pre-formatted for money/text tiles; pass a
+ * number instead to get the count-up animation used across the dashboard.
+ */
+export interface StatTile {
   label: string;
   value: number | string;
   caption: string;
@@ -24,58 +16,29 @@ interface Tile {
   gradient: string;
 }
 
+interface Props {
+  tiles: StatTile[];
+  /** Tailwind column count at xl. Defaults to one column per tile. */
+  columnsClassName?: string;
+}
+
 /**
- * The five headline metrics for Document Studio. Mirrors the dashboard KPI tile
- * exactly (neumorphic surface, count-up numbers, hover lift + icon micro-tilt)
- * so it reads as part of the same product.
+ * Generic KPI row for Payroll. Renders the exact dashboard tile — neumorphic
+ * surface, count-up numbers, hover lift with an icon micro-tilt — so payroll
+ * reads as part of the same product rather than a bolted-on module. Kept
+ * presentational and memoised: it never knows what a payroll is.
  */
-const StudioOverviewCards: React.FC<Props> = ({ stats }) => {
-  const tiles: Tile[] = [
-    {
-      label: "Total Templates",
-      value: stats.totalTemplates,
-      caption: "Ready-to-use blueprints",
-      icon: <RectangleStackIcon className="h-6 w-6" />,
-      gradient: "from-blue-500 to-indigo-600",
-    },
-    {
-      label: "Generated Documents",
-      value: stats.generatedDocuments,
-      caption: "Issued to employees",
-      icon: <DocumentCheckIcon className="h-6 w-6" />,
-      gradient: "from-emerald-500 to-teal-600",
-    },
-    {
-      label: "Draft Documents",
-      value: stats.draftDocuments,
-      caption: "Saved & in progress",
-      icon: <PencilSquareIcon className="h-6 w-6" />,
-      gradient: "from-amber-500 to-orange-600",
-    },
-    {
-      label: "Recently Created",
-      value: stats.recentlyCreated,
-      caption: "In the last 7 days",
-      icon: <SparklesIcon className="h-6 w-6" />,
-      gradient: "from-violet-500 to-purple-600",
-    },
-    {
-      label: "Most Used Template",
-      value: stats.mostUsedTemplate?.name ?? "—",
-      caption: stats.mostUsedTemplate
-        ? `${stats.mostUsedTemplate.usageCount} generations`
-        : "No usage yet",
-      icon: <TrophyIcon className="h-6 w-6" />,
-      gradient: "from-pink-500 to-rose-600",
-    },
-  ];
+const PayrollStatCards: React.FC<Props> = ({ tiles, columnsClassName }) => {
+  const cols =
+    columnsClassName ??
+    (tiles.length >= 5 ? "xl:grid-cols-5" : "xl:grid-cols-4");
 
   return (
     <motion.div
       variants={staggerContainer}
       initial="initial"
       animate="animate"
-      className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+      className={`grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 ${cols}`}
     >
       {tiles.map((t) => (
         // `h-full` on both the grid item and the card: the motion wrapper is
@@ -91,8 +54,8 @@ const StudioOverviewCards: React.FC<Props> = ({ stats }) => {
                 >
                   {t.label}
                 </p>
-                {/* Fixed-height value line so a text value (e.g. a template
-                    name) and a count-up number sit on the same baseline. */}
+                {/* Fixed-height value line so a text value (e.g. "August 2026")
+                    and a count-up number sit on the same baseline. */}
                 <p className="mt-2 flex min-h-[2rem] min-w-0 items-end sm:min-h-[2.25rem]">
                   {typeof t.value === "number" ? (
                     <span className="text-2xl font-bold tabular-nums leading-none text-gray-900 sm:text-3xl dark:text-white">
@@ -100,7 +63,7 @@ const StudioOverviewCards: React.FC<Props> = ({ stats }) => {
                     </span>
                   ) : (
                     <span
-                      className="block min-w-0 truncate text-lg font-bold leading-tight text-gray-900 dark:text-white"
+                      className="block min-w-0 truncate text-xl font-bold tabular-nums leading-none text-gray-900 sm:text-2xl dark:text-white"
                       title={t.value}
                     >
                       {t.value}
@@ -126,4 +89,4 @@ const StudioOverviewCards: React.FC<Props> = ({ stats }) => {
   );
 };
 
-export default StudioOverviewCards;
+export default React.memo(PayrollStatCards);

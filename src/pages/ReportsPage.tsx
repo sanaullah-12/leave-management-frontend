@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { CARD, CARD_HOVER } from "../lib/surfaces";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -75,17 +76,7 @@ const LEAVE_META = {
 
 type LeaveKey = keyof typeof LEAVE_META;
 
-// Neumorphic soft-UI card surface — identical to the dashboard cards.
-const CARD =
-  "rounded-2xl bg-[var(--card-surface)] " +
-  "shadow-[7px_7px_16px_rgba(174,186,204,0.5),-7px_-7px_16px_rgba(255,255,255,0.95)] " +
-  "dark:shadow-[7px_7px_18px_rgba(0,0,0,0.55),-6px_-6px_16px_rgba(255,255,255,0.045)]";
 
-// Hover lift + deepened soft shadows (matches the dashboard).
-const CARD_HOVER =
-  "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 " +
-  "hover:shadow-[12px_12px_24px_rgba(174,186,204,0.6),-12px_-12px_24px_rgba(255,255,255,1)] " +
-  "dark:hover:shadow-[12px_12px_28px_rgba(0,0,0,0.7),-10px_-10px_24px_rgba(255,255,255,0.06)]";
 
 /* ------------------------------------------------------------------ */
 /*  Relative-time helper for the activity timeline                     */
@@ -129,11 +120,13 @@ const InfoCard: React.FC<{
   label: string;
   value: string;
 }> = ({ icon, label, value }) => (
-  <div className={`group ${CARD} ${CARD_HOVER} p-5`}>
-    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:-rotate-3 dark:bg-blue-500/10 dark:text-blue-400">
+  <div className={`group ${CARD} ${CARD_HOVER} flex h-full flex-col p-5`}>
+    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:-rotate-3 dark:bg-blue-500/10 dark:text-blue-400">
       {icon}
     </span>
-    <p className="mt-3 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+    {/* Label + value pinned to the bottom so they align across the row even
+        when one card's value wraps to a second line. */}
+    <p className="mt-auto pt-3 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
       {label}
     </p>
     <p className="mt-1 text-lg font-bold text-gray-900 dark:text-white">

@@ -1,4 +1,6 @@
 import React from "react";
+import { CARD, CARD_HOVER } from "../lib/surfaces";
+import { accentFor } from "../lib/themeTokens";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useQuery } from "@tanstack/react-query";
@@ -48,36 +50,8 @@ import "../styles/design-system.css";
 /*  Geist type scale comes from the semantic .text-* classes.           */
 /* ------------------------------------------------------------------ */
 
-// Primary accent hex per color theme — used for the parts that can't be
-// styled with CSS classes (SVG chart stroke/gradient, gauge/ring stroke).
-// Keep these in sync with tailwind.config.js *-600 values.
-const THEME_ACCENT: Record<string, string> = {
-  black: "#374151",
-  purple: "#9c5fd1",
-  blue: "#2563eb",
-  pink: "#db2777",
-  violet: "#7c3aed",
-  indigo: "#4f46e5",
-  orange: "#ea580c",
-  teal: "#0d9488",
-  bronze: "#b45309",
-  mint: "#10b981",
-};
 
-// Shared neumorphic (soft-UI) card surface. Dual shadows — a dark shadow
-// bottom-right + a light highlight top-left — make the card read as extruded
-// from the page surface. Tuned separately for light and dark mode.
-const CARD =
-  "rounded-2xl bg-[var(--card-surface)] " +
-  "shadow-[7px_7px_16px_rgba(174,186,204,0.5),-7px_-7px_16px_rgba(255,255,255,0.95)] " +
-  "dark:shadow-[7px_7px_18px_rgba(0,0,0,0.55),-6px_-6px_16px_rgba(255,255,255,0.045)]";
 
-// Hover: lift + the shadows spread/deepen so the card appears to rise off the
-// surface. Smooth easing matches the app's motion tokens.
-const CARD_HOVER =
-  "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 " +
-  "hover:shadow-[12px_12px_24px_rgba(174,186,204,0.6),-12px_-12px_24px_rgba(255,255,255,1)] " +
-  "dark:hover:shadow-[12px_12px_28px_rgba(0,0,0,0.7),-10px_-10px_24px_rgba(255,255,255,0.06)]";
 
 /* ------------------------------------------------------------------ */
 /*  Presentational helpers — visual only, data is passed in            */
@@ -95,19 +69,26 @@ const KpiCard: React.FC<{
 }> = ({ label, value, suffix, caption, icon, onClick }) => (
   <div
     onClick={onClick}
-    className={`group ${CARD} ${CARD_HOVER} p-5 ${
+    className={`group ${CARD} ${CARD_HOVER} flex h-full flex-col p-5 ${
       onClick ? "cursor-pointer" : ""
     }`}
   >
     <div className="flex items-start justify-between gap-3">
-      <div className="min-w-0">
-        <p className="text-overline text-gray-400 dark:text-gray-500">{label}</p>
-        <p className="mt-2 flex items-baseline gap-1">
-          <span className="text-2xl sm:text-3xl font-bold tabular-nums text-gray-900 dark:text-white">
+      <div className="min-w-0 flex-1">
+        <p
+          className="text-overline truncate text-gray-400 dark:text-gray-500"
+          title={label}
+        >
+          {label}
+        </p>
+        {/* Fixed-height value line keeps every tile's number on the same
+            baseline, with or without a suffix. */}
+        <p className="mt-2 flex min-h-[2rem] items-end gap-1 sm:min-h-[2.25rem]">
+          <span className="text-2xl sm:text-3xl font-bold tabular-nums leading-none text-gray-900 dark:text-white">
             {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
           </span>
           {suffix && (
-            <span className="text-sm font-medium text-gray-400 dark:text-gray-500">
+            <span className="text-sm font-medium leading-none text-gray-400 dark:text-gray-500">
               {suffix}
             </span>
           )}
@@ -117,7 +98,8 @@ const KpiCard: React.FC<{
         {icon}
       </div>
     </div>
-    <p className="mt-3 text-xs font-medium text-gray-500 dark:text-gray-400">
+    {/* Pinned to the bottom so captions align across the whole row. */}
+    <p className="mt-auto pt-3 text-xs font-medium text-gray-500 dark:text-gray-400">
       {caption}
     </p>
   </div>
@@ -221,7 +203,7 @@ const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { colorScheme } = useTheme();
-  const accent = THEME_ACCENT[colorScheme] || THEME_ACCENT.blue;
+  const accent = accentFor(colorScheme);
 
   /* ------------------------------------------------------------------ */
   /*  DATA WIRING — unchanged from the original dashboard                */
