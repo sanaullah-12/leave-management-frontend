@@ -16,7 +16,6 @@
  * `_meta.json` carries the two facts that cannot be inferred from a folder
  * name: how the language writes its own name, and which direction it reads.
  */
-checking;
 /** Text direction. Urdu (and future Arabic/Hebrew) read right-to-left. */
 export type TextDirection = "ltr" | "rtl";
 
