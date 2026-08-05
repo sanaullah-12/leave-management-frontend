@@ -16,7 +16,7 @@
  * `_meta.json` carries the two facts that cannot be inferred from a folder
  * name: how the language writes its own name, and which direction it reads.
  */
-
+checking;
 /** Text direction. Urdu (and future Arabic/Hebrew) read right-to-left. */
 export type TextDirection = "ltr" | "rtl";
 
@@ -48,12 +48,12 @@ export interface LanguageMeta {
 // round-trip a lazy load would cost.
 const metaModules = import.meta.glob<{ default: LanguageMeta }>(
   "./locales/*/_meta.json",
-  { eager: true }
+  { eager: true },
 );
 
 /** Every language the app ships, keyed by code. */
 export const LANGUAGES: Record<string, LanguageMeta> = Object.entries(
-  metaModules
+  metaModules,
 ).reduce<Record<string, LanguageMeta>>((acc, [path, mod]) => {
   // "./locales/de/_meta.json" → "de"
   const code = path.split("/")[2];
@@ -64,7 +64,7 @@ export const LANGUAGES: Record<string, LanguageMeta> = Object.entries(
 /** Language codes, ordered for display. */
 export const SUPPORTED_LANGUAGES: string[] = Object.values(LANGUAGES)
   .sort(
-    (a, b) => (a.order ?? 99) - (b.order ?? 99) || a.name.localeCompare(b.name)
+    (a, b) => (a.order ?? 99) - (b.order ?? 99) || a.name.localeCompare(b.name),
   )
   .map((l) => l.code);
 
