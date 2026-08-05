@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -49,6 +50,7 @@ const MiniStat: React.FC<{
 );
 
 const EmployeeVoiceWidget: React.FC = () => {
+  const { t } = useTranslation("voice");
   const { user } = useAuth();
   const navigate = useNavigate();
   const isAdmin = user?.role === "admin";
@@ -64,10 +66,10 @@ const EmployeeVoiceWidget: React.FC = () => {
         </span>
         <div>
           <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            Employee Voice
+            {t("widget.title")}
           </h3>
           <p className="text-[11px] text-gray-400">
-            {isAdmin ? "Team submissions" : "Your submissions"}
+            {isAdmin ? t("widget.teamSubmissions") : t("widget.yourSubmissions")}
           </p>
         </div>
       </div>
@@ -75,7 +77,7 @@ const EmployeeVoiceWidget: React.FC = () => {
         onClick={() => navigate("/employee-voice")}
         className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
       >
-        Open <ArrowRightIcon className="h-3.5 w-3.5" />
+        {t("widget.open")} <ArrowRightIcon className="h-3.5 w-3.5" />
       </button>
     </div>
   );
@@ -90,25 +92,25 @@ const EmployeeVoiceWidget: React.FC = () => {
         {header}
         <div className="grid grid-cols-2 gap-2.5 px-5 pb-5 sm:grid-cols-4">
           <MiniStat
-            label="Pending"
+            label={t("stats.pending")}
             value={stats?.pending ?? 0}
             icon={<ClockIcon className="h-4 w-4" />}
             tile="bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400"
           />
           <MiniStat
-            label="Resolved"
+            label={t("stats.resolved")}
             value={stats?.resolved ?? 0}
             icon={<CheckCircleIcon className="h-4 w-4" />}
             tile="bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"
           />
           <MiniStat
-            label="New Today"
+            label={t("stats.newToday")}
             value={stats?.newToday ?? 0}
             icon={<SparklesIcon className="h-4 w-4" />}
             tile="bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400"
           />
           <MiniStat
-            label="High Priority"
+            label={t("stats.highPriority")}
             value={stats?.highPriority ?? 0}
             icon={<FireIcon className="h-4 w-4" />}
             tile="bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
@@ -155,7 +157,7 @@ const EmployeeVoiceWidget: React.FC = () => {
             className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-colors hover:bg-blue-700"
           >
             <PlusIcon className="h-4 w-4" />
-            Share
+            {t("widget.share")}
           </motion.button>
         </div>
       </motion.div>

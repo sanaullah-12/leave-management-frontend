@@ -6,6 +6,7 @@
  * so they can be reused anywhere in the module (and unit-tested standalone).
  */
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import {
   BanknotesIcon,
@@ -29,19 +30,29 @@ import type { PayrollPeriod } from "./types";
 /* Status pill                                                         */
 /* ------------------------------------------------------------------ */
 
-/** Colour-coded status chip driven by the shared status vocabularies. */
+/**
+ * Colour-coded status chip driven by the shared status vocabularies.
+ *
+ * The label is resolved here rather than baked into the constant: the status
+ * objects live at module scope, so a literal string could never react to a
+ * language change. `useTranslation` also subscribes this component to language
+ * switches, which is what makes every pill in a table update at once.
+ */
 export const StatusPill: React.FC<{ status: StatusStyle; className?: string }> =
-  React.memo(({ status, className = "" }) => (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${status.className} ${className}`}
-    >
+  React.memo(({ status, className = "" }) => {
+    const { t } = useTranslation("common");
+    return (
       <span
-        className="h-1.5 w-1.5 rounded-full"
-        style={{ backgroundColor: status.dot }}
-      />
-      {status.label}
-    </span>
-  ));
+        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${status.className} ${className}`}
+      >
+        <span
+          className="h-1.5 w-1.5 rounded-full"
+          style={{ backgroundColor: status.dot }}
+        />
+        {t(status.labelKey)}
+      </span>
+    );
+  });
 StatusPill.displayName = "StatusPill";
 
 /* ------------------------------------------------------------------ */

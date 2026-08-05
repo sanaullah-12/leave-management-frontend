@@ -1,0 +1,15 @@
+{
+  "stats": {
+    "highPriority": "High Priority",
+    "newToday": "New Today",
+    "pending": "Pending",
+    "resolved": "Resolved"
+  },
+  "widget": {
+    "open": "Open",
+    "share": "Share",
+    "teamSubmissions": "Team submissions",
+    "title": "Employee Voice",
+    "yourSubmissions": "Your submissions"
+  }
+}

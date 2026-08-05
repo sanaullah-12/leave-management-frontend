@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import {
   UserGroupIcon,
@@ -72,6 +73,7 @@ const TREND_MONTHS = 6;
  * table or the payslips.
  */
 const PayrollDashboardPage: React.FC = () => {
+  const { t } = useTranslation("payroll");
   const navigate = useNavigate();
   const { colorScheme } = useTheme();
   const accent = THEME_ACCENT[colorScheme] ?? THEME_ACCENT.blue;
@@ -99,7 +101,7 @@ const PayrollDashboardPage: React.FC = () => {
   const tiles: StatTile[] = useMemo(
     () => [
       {
-        label: "Total Employees",
+        label: t("stats.totalEmployees"),
         value: employees.length,
         caption: `${payableRows.length} ready for payroll`,
         icon: <UserGroupIcon className="h-6 w-6" />,
@@ -115,7 +117,7 @@ const PayrollDashboardPage: React.FC = () => {
         gradient: "from-violet-500 to-purple-600",
       },
       {
-        label: "Total Payroll",
+        label: t("stats.totalPayroll"),
         value: formatMoneyCompact(totals.totalNet, settings.currency),
         caption: `Gross ${formatMoneyCompact(
           totals.totalGross,
@@ -125,7 +127,7 @@ const PayrollDashboardPage: React.FC = () => {
         gradient: "from-emerald-500 to-teal-600",
       },
       {
-        label: "Processed",
+        label: t("stats.processed"),
         value: currentRun?.employeeCount ?? 0,
         caption: currentRun
           ? `Payslips issued for ${formatPeriod(period)}`
@@ -134,7 +136,7 @@ const PayrollDashboardPage: React.FC = () => {
         gradient: "from-cyan-500 to-blue-600",
       },
       {
-        label: "Pending Setup",
+        label: t("stats.pendingSetup"),
         value: pendingCount,
         caption: pendingCount
           ? "Employees without an active salary"
@@ -143,16 +145,13 @@ const PayrollDashboardPage: React.FC = () => {
         gradient: "from-amber-500 to-orange-600",
       },
     ],
-    [
-      employees.length,
+    [employees.length,
       payableRows.length,
       period,
       currentRun,
       totals,
       settings.currency,
-      pendingCount,
-    ]
-  );
+      pendingCount, t]);
 
   /* ---------------- Trend ---------------- */
 
@@ -166,7 +165,7 @@ const PayrollDashboardPage: React.FC = () => {
         month: formatPeriodShort(p),
         amount: byPeriod.get(periodKey(p))?.totalNet ?? 0,
       }));
-  }, [runs, period]);
+  }, [runs, period, t]);
 
   const hasTrend = trend.some((t) => t.amount > 0);
   const recentRuns = useMemo(() => runs.slice(0, 5), [runs]);
@@ -215,8 +214,8 @@ const PayrollDashboardPage: React.FC = () => {
     >
       <motion.div variants={staggerItem}>
         <PayrollPageHeader
-          title="Payroll"
-          subtitle="Salary health, monthly cost and processing status at a glance."
+          title={t("dashboard.title")}
+          subtitle={t("dashboard.subtitle")}
           actions={
             <button
               onClick={() => navigate("/payroll/run")}

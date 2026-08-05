@@ -1,0 +1,72 @@
+{
+  "actions": {
+    "quickApply": "Quick Apply",
+    "viewAll": "View All",
+    "viewCompanyCalendar": "View Company Calendar"
+  },
+  "empty": {
+    "noDataYet": "No data yet",
+    "noRecentActivity": "No recent activity",
+    "noTeamActivity": "No team activity to show yet.",
+    "requestsWillAppear": "Requests will appear here as they come in."
+  },
+  "gauges": {
+    "annualBalance": "Annual Balance",
+    "approvalRate": "Approval Rate",
+    "awaitingReview": "awaiting review",
+    "daysUsed": "Days Used",
+    "leaveUtilization": "Leave Utilization",
+    "ofDecidedRequests": "of decided requests",
+    "pendingLoad": "Pending Load",
+    "remaining": "Remaining"
+  },
+  "greeting": {
+    "afternoon": "Good afternoon",
+    "evening": "Good evening",
+    "morning": "Good morning",
+    "welcomeBack": "Welcome back"
+  },
+  "hero": {
+    "adminSub": "Here's how your team's leave is tracking today. Review pending requests and keep everyone in sync.",
+    "employeeSub": "Here's your time-off at a glance. Plan ahead and request leave in a couple of clicks.",
+    "requestLeave": "Request Leave",
+    "viewRequests": "View Requests"
+  },
+  "kpi": {
+    "acrossAllLeaveTypes": "Across all leave types",
+    "activeWorkforce": "Active workforce",
+    "annualLeave": "Annual Leave",
+    "approved": "Approved",
+    "awaitingReview": "Awaiting your review",
+    "casualLeave": "Casual Leave",
+    "daysRemaining": "Days remaining",
+    "daysTaken": "Days Taken",
+    "daysUsed": "Days used",
+    "leaveRequestsLogged": "Leave requests logged",
+    "pendingRequests": "Pending Requests",
+    "requestsGranted": "Requests granted",
+    "sickLeave": "Sick Leave",
+    "thisMonth": "This Month",
+    "totalEmployees": "Total Employees"
+  },
+  "labels": {
+    "approved": "Approved",
+    "availableToday": "Available Today",
+    "employees": "Employees",
+    "pending": "Pending",
+    "requests": "Requests"
+  },
+  "loading": "Loading your dashboard…",
+  "sections": {
+    "companyActivity": "Company leave activity across recent requests",
+    "current": "Current",
+    "daysUsedByCategory": "Days used, by category",
+    "leaveByType": "Leave by Type",
+    "leaveTrends": "Leave Trends",
+    "publicHolidays": "Public Holidays",
+    "recentActivity": "Recent Activity",
+    "teamAvailability": "Team Availability",
+    "thisMonthByCategory": "This month, by category",
+    "yourActivity": "Your leave activity across recent requests"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "actions": {
+    "quickApply": "فوری درخواست",
+    "viewAll": "سب دیکھیں",
+    "viewCompanyCalendar": "کمپنی کیلنڈر دیکھیں"
+  },
+  "empty": {
+    "noDataYet": "ابھی کوئی ڈیٹا نہیں",
+    "noRecentActivity": "کوئی حالیہ سرگرمی نہیں",
+    "noTeamActivity": "ابھی ٹیم کی کوئی سرگرمی نہیں۔",
+    "requestsWillAppear": "درخواستیں آتے ہی یہاں ظاہر ہوں گی۔"
+  },
+  "gauges": {
+    "annualBalance": "سالانہ بیلنس",
+    "approvalRate": "منظوری کی شرح",
+    "awaitingReview": "جائزے کے منتظر",
+    "daysUsed": "استعمال شدہ دن",
+    "leaveUtilization": "چھٹیوں کا استعمال",
+    "ofDecidedRequests": "فیصلہ شدہ درخواستوں میں سے",
+    "pendingLoad": "زیر التوا بوجھ",
+    "remaining": "باقی"
+  },
+  "greeting": {
+    "afternoon": "سہ پہر بخیر",
+    "evening": "شام بخیر",
+    "morning": "صبح بخیر",
+    "welcomeBack": "خوش آمدید"
+  },
+  "hero": {
+    "adminSub": "آج آپ کی ٹیم کی چھٹیوں کی صورتحال یہ ہے۔ زیر التوا درخواستوں کا جائزہ لیں اور سب کو ہم آہنگ رکھیں۔",
+    "employeeSub": "آپ کی چھٹیوں کا خلاصہ یہ ہے۔ پیشگی منصوبہ بنائیں اور چند کلکس میں چھٹی کی درخواست دیں۔",
+    "requestLeave": "چھٹی کی درخواست",
+    "viewRequests": "درخواستیں دیکھیں"
+  },
+  "kpi": {
+    "acrossAllLeaveTypes": "تمام اقسام کی چھٹیوں میں",
+    "activeWorkforce": "فعال افرادی قوت",
+    "annualLeave": "سالانہ چھٹی",
+    "approved": "منظور شدہ",
+    "awaitingReview": "آپ کے جائزے کے منتظر",
+    "casualLeave": "اتفاقی چھٹی",
+    "daysRemaining": "باقی دن",
+    "daysTaken": "لی گئی چھٹیاں",
+    "daysUsed": "استعمال شدہ دن",
+    "leaveRequestsLogged": "درج شدہ چھٹی کی درخواستیں",
+    "pendingRequests": "زیر التوا درخواستیں",
+    "requestsGranted": "منظور شدہ درخواستیں",
+    "sickLeave": "بیماری کی چھٹی",
+    "thisMonth": "اس مہینے",
+    "totalEmployees": "کل ملازمین"
+  },
+  "labels": {
+    "approved": "منظور شدہ",
+    "availableToday": "آج دستیاب",
+    "employees": "ملازمین",
+    "pending": "زیر التوا",
+    "requests": "درخواستیں"
+  },
+  "loading": "آپ کا ڈیش بورڈ لوڈ ہو رہا ہے…",
+  "sections": {
+    "companyActivity": "حالیہ درخواستوں میں کمپنی کی چھٹیوں کی سرگرمی",
+    "current": "موجودہ",
+    "daysUsedByCategory": "استعمال شدہ دن، زمرے کے لحاظ سے",
+    "leaveByType": "قسم کے لحاظ سے چھٹیاں",
+    "leaveTrends": "چھٹیوں کے رجحانات",
+    "publicHolidays": "عام تعطیلات",
+    "recentActivity": "حالیہ سرگرمی",
+    "teamAvailability": "ٹیم کی دستیابی",
+    "thisMonthByCategory": "اس مہینے، زمرے کے لحاظ سے",
+    "yourActivity": "حالیہ درخواستوں میں آپ کی چھٹیوں کی سرگرمی"
+  }
+}

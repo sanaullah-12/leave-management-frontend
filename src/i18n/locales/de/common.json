@@ -1,0 +1,72 @@
+{
+  "actions": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "export": "Exportieren",
+    "exportCsv": "CSV exportieren",
+    "print": "Drucken",
+    "download": "Herunterladen",
+    "downloadPdf": "PDF herunterladen",
+    "view": "Ansehen",
+    "add": "Hinzufügen",
+    "addCustom": "Eigenes hinzufügen",
+    "remove": "Entfernen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "submit": "Absenden",
+    "reset": "Zurücksetzen",
+    "apply": "Anwenden",
+    "discard": "Verwerfen",
+    "create": "Erstellen",
+    "update": "Aktualisieren",
+    "generate": "Generieren",
+    "saveChanges": "Änderungen speichern",
+    "quickAdd": "Schnell hinzufügen"
+  },
+  "states": {
+    "loading": "Wird geladen …",
+    "saving": "Wird gespeichert …",
+    "noData": "Keine Daten",
+    "error": "Etwas ist schiefgelaufen",
+    "success": "Erfolg",
+    "noResults": "Keine Ergebnisse gefunden"
+  },
+  "labels": {
+    "employee": "Mitarbeiter",
+    "employeeId": "Mitarbeiter-ID",
+    "department": "Abteilung",
+    "designation": "Position",
+    "status": "Status",
+    "actions": "Aktionen",
+    "name": "Name",
+    "email": "E-Mail",
+    "date": "Datum",
+    "all": "Alle",
+    "allStatuses": "Alle Status",
+    "allDepartments": "Alle Abteilungen",
+    "generatedOn": "Erstellt"
+  },
+  "status": {
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "draft": "Entwurf",
+    "pending": "Ausstehend",
+    "approved": "Genehmigt",
+    "rejected": "Abgelehnt",
+    "processed": "Verarbeitet",
+    "paid": "Bezahlt",
+    "notSetUp": "Nicht eingerichtet",
+    "generated": "Erstellt",
+    "downloaded": "Heruntergeladen",
+    "printed": "Gedruckt"
+  },
+  "confirm": {
+    "cannotBeUndone": "Diese Aktion kann nicht rückgängig gemacht werden."
+  }
+}

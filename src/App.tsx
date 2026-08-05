@@ -10,6 +10,7 @@ import { MotionConfig } from "framer-motion";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import { LocaleProvider } from "./i18n/LocaleProvider";
 import RealtimeProvider from "./providers/RealtimeProvider";
 // import { NotificationProvider } from './components/NotificationSystem'; // Removed for Socket.IO implementation
 import "./styles/themes.css";
@@ -100,6 +101,9 @@ const queryClient = new QueryClient({
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
+      {/* LocaleProvider sits above everything that renders text so a language
+          switch re-renders the whole tree once, and owns <html lang|dir>. */}
+      <LocaleProvider>
       <ThemeProvider>
         <AuthProvider>
           <RealtimeProvider>
@@ -197,6 +201,7 @@ const App: React.FC = () => {
           </RealtimeProvider>
         </AuthProvider>
       </ThemeProvider>
+      </LocaleProvider>
     </QueryClientProvider>
   );
 };

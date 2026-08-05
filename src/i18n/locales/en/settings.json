@@ -1,0 +1,10 @@
+{
+  "language": {
+    "title": "Language",
+    "description": "Choose the language used across the app. Your choice is remembered on this device.",
+    "interface": "Interface language",
+    "appliesImmediately": "Applies immediately across every screen.",
+    "changeLanguage": "Change language",
+    "rtlNote": "This language reads right-to-left. The layout mirrors automatically."
+  }
+}

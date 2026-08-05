@@ -1,0 +1,72 @@
+{
+  "brand": {
+    "name": "Nexora",
+    "tagline": "El sistema HRMS"
+  },
+  "search": {
+    "placeholder": "Buscar",
+    "title": "Búsqueda",
+    "noResults": "Sin resultados para «{{query}}»"
+  },
+  "sections": {
+    "pages": "Páginas"
+  },
+  "actions": {
+    "collapse": "Contraer",
+    "expand": "Expandir",
+    "logout": "Cerrar sesión",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "manageAccount": "Gestionar cuenta"
+  },
+  "header": {
+    "welcome": "Bienvenido de nuevo, {{name}}",
+    "administrator": "Administrador",
+    "employee": "Empleado"
+  },
+  "groups": {
+    "home": "Inicio",
+    "leave": "Gestión de ausencias",
+    "team": "Equipo y personas",
+    "attendance": "Asistencia",
+    "payroll": "Nómina",
+    "documents": "Estudio de documentos",
+    "voice": "Voz del empleado",
+    "settings": "Ajustes"
+  },
+  "short": {
+    "home": "Inicio",
+    "leave": "Ausencias",
+    "team": "Equipo",
+    "attendance": "Asistencia",
+    "payroll": "Nómina",
+    "documents": "Documentos",
+    "voice": "Voz",
+    "settings": "Ajustes"
+  },
+  "items": {
+    "dashboard": "Panel",
+    "announcements": "Anuncios",
+    "reports": "Informes",
+    "notifications": "Notificaciones",
+    "leaveRequests": "Solicitudes de ausencia",
+    "leaveCalendar": "Calendario de ausencias",
+    "applyLeave": "Solicitar ausencia",
+    "myLeaveActivity": "Mi actividad de ausencias",
+    "myTeam": "Mi equipo",
+    "employees": "Empleados",
+    "departments": "Departamentos",
+    "leavePolicies": "Políticas de ausencia",
+    "attendance": "Asistencia",
+    "payrollDashboard": "Panel de nómina",
+    "employeeSalaries": "Salarios de empleados",
+    "runPayroll": "Ejecutar nómina",
+    "payslips": "Nóminas",
+    "payrollHistory": "Historial de nómina",
+    "payrollSettings": "Ajustes de nómina",
+    "documentStudio": "Estudio de documentos",
+    "employeeVoice": "Voz del empleado",
+    "profileSettings": "Perfil y ajustes",
+    "theme": "Tema"
+  }
+}

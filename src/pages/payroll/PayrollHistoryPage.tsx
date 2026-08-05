@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   TrashIcon,
@@ -46,6 +47,7 @@ import type { PayrollRun } from "../../components/payroll/types";
  * payslips both happen here, because this is where finance works.
  */
 const PayrollHistoryPage: React.FC = () => {
+  const { t } = useTranslation("payroll");
   const navigate = useNavigate();
   const { state, payslipsByRun, setRunStatus, deleteRun } = usePayroll();
   const { runs, settings } = state;
@@ -65,7 +67,7 @@ const PayrollHistoryPage: React.FC = () => {
       { value: "all", label: "All years" },
       ...years.map((y) => ({ value: String(y), label: String(y) })),
     ];
-  }, [runs]);
+  }, [runs, t]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -79,7 +81,7 @@ const PayrollHistoryPage: React.FC = () => {
           r.generatedBy.toLowerCase().includes(q)
       )
       .sort((a, b) => periodKey(b.period).localeCompare(periodKey(a.period)));
-  }, [runs, query, status, year]);
+  }, [runs, query, status, year, t]);
 
   /* ---------------- summary ---------------- */
 
@@ -99,28 +101,28 @@ const PayrollHistoryPage: React.FC = () => {
   const tiles: StatTile[] = useMemo(
     () => [
       {
-        label: "Payroll Runs",
+        label: t("stats.payrollRuns"),
         value: summary.runs,
         caption: `${summary.paid} marked as paid`,
         icon: <CalendarDaysIcon className="h-6 w-6" />,
         gradient: "from-blue-500 to-indigo-600",
       },
       {
-        label: "Lifetime Payout",
+        label: t("stats.lifetimePayout"),
         value: formatMoneyCompact(summary.lifetime, settings.currency),
         caption: "Net across every recorded run",
         icon: <BanknotesIcon className="h-6 w-6" />,
         gradient: "from-emerald-500 to-teal-600",
       },
       {
-        label: "Payslips Issued",
+        label: t("stats.payslipsIssued"),
         value: summary.employees,
         caption: "Cumulative employee payslips",
         icon: <UserGroupIcon className="h-6 w-6" />,
         gradient: "from-violet-500 to-purple-600",
       },
       {
-        label: "Last Run",
+        label: t("stats.lastRun"),
         value: summary.latest ? formatPeriod(summary.latest.period) : "—",
         caption: summary.latest
           ? `Generated ${relativeTime(summary.latest.generatedAt)}`
@@ -129,8 +131,7 @@ const PayrollHistoryPage: React.FC = () => {
         gradient: "from-amber-500 to-orange-600",
       },
     ],
-    [summary, settings.currency]
-  );
+    [summary, settings.currency, t]);
 
   /* ---------------- actions ---------------- */
 
@@ -162,8 +163,8 @@ const PayrollHistoryPage: React.FC = () => {
       <motion.div variants={staggerItem}>
         <PayrollPageHeader
           glyph="🗂️"
-          title="Payroll History"
-          subtitle="Every payroll run, permanently recorded with its full breakdown."
+          title={t("history.title")}
+          subtitle={t("history.subtitle")}
         />
       </motion.div>
 
@@ -199,7 +200,7 @@ const PayrollHistoryPage: React.FC = () => {
                         Object.keys(RUN_STATUS) as (keyof typeof RUN_STATUS)[]
                       ).map((s) => ({
                         value: s,
-                        label: RUN_STATUS[s].label,
+                        label: t(`common:${RUN_STATUS[s].labelKey}`),
                         dotColor: RUN_STATUS[s].dot,
                       })),
                     ]}

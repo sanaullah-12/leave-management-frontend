@@ -1,0 +1,72 @@
+{
+  "brand": {
+    "name": "Nexora",
+    "tagline": "The HRMS System"
+  },
+  "search": {
+    "placeholder": "Search",
+    "title": "Search",
+    "noResults": "No results for “{{query}}”"
+  },
+  "sections": {
+    "pages": "Pages"
+  },
+  "actions": {
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "logout": "Logout",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "manageAccount": "Manage Account"
+  },
+  "header": {
+    "welcome": "Welcome back, {{name}}",
+    "administrator": "Administrator",
+    "employee": "Employee"
+  },
+  "groups": {
+    "home": "Home",
+    "leave": "Leave management",
+    "team": "Team & people",
+    "attendance": "Attendance",
+    "payroll": "Payroll",
+    "documents": "Document Studio",
+    "voice": "Employee Voice",
+    "settings": "Settings"
+  },
+  "short": {
+    "home": "Home",
+    "leave": "Leave",
+    "team": "Team",
+    "attendance": "Attendance",
+    "payroll": "Payroll",
+    "documents": "Documents",
+    "voice": "Voice",
+    "settings": "Settings"
+  },
+  "items": {
+    "dashboard": "Dashboard",
+    "announcements": "Announcements",
+    "reports": "Reports",
+    "notifications": "Notifications",
+    "leaveRequests": "Leave Requests",
+    "leaveCalendar": "Leave Calendar",
+    "applyLeave": "Apply Leave",
+    "myLeaveActivity": "My Leave Activity",
+    "myTeam": "My Team",
+    "employees": "Employees",
+    "departments": "Departments",
+    "leavePolicies": "Leave Policies",
+    "attendance": "Attendance",
+    "payrollDashboard": "Payroll Dashboard",
+    "employeeSalaries": "Employee Salaries",
+    "runPayroll": "Run Payroll",
+    "payslips": "Payslips",
+    "payrollHistory": "Payroll History",
+    "payrollSettings": "Payroll Settings",
+    "documentStudio": "Document Studio",
+    "employeeVoice": "Employee Voice",
+    "profileSettings": "Profile & Settings",
+    "theme": "Theme"
+  }
+}

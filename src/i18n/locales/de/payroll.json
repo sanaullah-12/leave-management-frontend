@@ -1,0 +1,66 @@
+{
+  "dashboard": {
+    "title": "Gehaltsabrechnung",
+    "subtitle": "Gehaltsstatus, Monatskosten und Abrechnungsstand auf einen Blick."
+  },
+  "salaries": {
+    "title": "Mitarbeitergehälter",
+    "subtitle": "Legen Sie die Vergütung jedes Mitarbeiters fest. Das Nettogehalt wird stets berechnet."
+  },
+  "run": {
+    "title": "Abrechnung starten",
+    "subtitle": "Wählen Sie einen Monat, prüfen Sie alle Mitarbeiter und erstellen Sie die Abrechnungen.",
+    "generate": "Abrechnung erstellen",
+    "reprocess": "Neu abrechnen"
+  },
+  "payslips": {
+    "title": "Gehaltsabrechnungen",
+    "subtitle": "Gehaltsabrechnungen für jeden abgerechneten Monat ansehen, drucken oder herunterladen.",
+    "payslip": "Gehaltsabrechnung"
+  },
+  "history": {
+    "title": "Abrechnungsverlauf",
+    "subtitle": "Jede Abrechnung, dauerhaft mit vollständiger Aufschlüsselung gespeichert."
+  },
+  "settings": {
+    "title": "Abrechnungseinstellungen",
+    "subtitle": "Die vier Werte, auf denen jede Abrechnung basiert."
+  },
+  "fields": {
+    "basicSalary": "Grundgehalt",
+    "basic": "Basis",
+    "allowances": "Zulagen",
+    "deductions": "Abzüge",
+    "netSalary": "Nettogehalt",
+    "grossEarnings": "Bruttoverdienst",
+    "gross": "Brutto",
+    "totalDeductions": "Abzüge gesamt",
+    "payrollMonth": "Abrechnungsmonat",
+    "payDate": "Zahltag",
+    "payPeriod": "Abrechnungszeitraum",
+    "companyName": "Firmenname",
+    "currency": "Währung",
+    "salaryDate": "Gehaltsdatum",
+    "defaultTax": "Standardsteuer",
+    "earnings": "Verdienst"
+  },
+  "stats": {
+    "totalEmployees": "Mitarbeiter gesamt",
+    "totalPayroll": "Gesamtabrechnung",
+    "processed": "Verarbeitet",
+    "pendingSetup": "Einrichtung offen",
+    "monthlyNet": "Netto monatlich",
+    "averageNet": "Netto-Durchschnitt",
+    "netPayout": "Nettoauszahlung",
+    "payrollRuns": "Abrechnungsläufe",
+    "lifetimePayout": "Gesamtauszahlung",
+    "payslipsIssued": "Ausgestellte Abrechnungen",
+    "lastRun": "Letzter Lauf"
+  },
+  "empty": {
+    "noPayslips": "Noch keine Abrechnungen",
+    "noHistory": "Noch kein Abrechnungsverlauf",
+    "noEmployees": "Noch keine Mitarbeiter",
+    "noMatch": "Keine Mitarbeiter entsprechen den Filtern"
+  }
+}

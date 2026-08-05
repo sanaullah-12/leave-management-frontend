@@ -1,0 +1,72 @@
+{
+  "actions": {
+    "quickApply": "Solicitud rápida",
+    "viewAll": "Ver todo",
+    "viewCompanyCalendar": "Ver calendario de la empresa"
+  },
+  "empty": {
+    "noDataYet": "Aún no hay datos",
+    "noRecentActivity": "Sin actividad reciente",
+    "noTeamActivity": "Aún no hay actividad del equipo.",
+    "requestsWillAppear": "Las solicitudes aparecerán aquí cuando lleguen."
+  },
+  "gauges": {
+    "annualBalance": "Saldo anual",
+    "approvalRate": "Tasa de aprobación",
+    "awaitingReview": "en espera de revisión",
+    "daysUsed": "Días usados",
+    "leaveUtilization": "Uso de ausencias",
+    "ofDecidedRequests": "de solicitudes resueltas",
+    "pendingLoad": "Carga pendiente",
+    "remaining": "Restante"
+  },
+  "greeting": {
+    "afternoon": "Buenas tardes",
+    "evening": "Buenas noches",
+    "morning": "Buenos días",
+    "welcomeBack": "Bienvenido de nuevo"
+  },
+  "hero": {
+    "adminSub": "Así va el tiempo libre de tu equipo hoy. Revisa las solicitudes pendientes y mantén a todos sincronizados.",
+    "employeeSub": "Tu tiempo libre de un vistazo. Planifica y solicita ausencias en un par de clics.",
+    "requestLeave": "Solicitar ausencia",
+    "viewRequests": "Ver solicitudes"
+  },
+  "kpi": {
+    "acrossAllLeaveTypes": "En todos los tipos de ausencia",
+    "activeWorkforce": "Plantilla activa",
+    "annualLeave": "Vacaciones anuales",
+    "approved": "Aprobadas",
+    "awaitingReview": "Pendientes de su revisión",
+    "casualLeave": "Permiso personal",
+    "daysRemaining": "Días restantes",
+    "daysTaken": "Días tomados",
+    "daysUsed": "Días usados",
+    "leaveRequestsLogged": "Solicitudes registradas",
+    "pendingRequests": "Solicitudes pendientes",
+    "requestsGranted": "Solicitudes concedidas",
+    "sickLeave": "Baja por enfermedad",
+    "thisMonth": "Este mes",
+    "totalEmployees": "Empleados totales"
+  },
+  "labels": {
+    "approved": "Aprobado",
+    "availableToday": "Disponible hoy",
+    "employees": "Empleados",
+    "pending": "Pendiente",
+    "requests": "Solicitudes"
+  },
+  "loading": "Cargando tu panel…",
+  "sections": {
+    "companyActivity": "Actividad de ausencias de la empresa",
+    "current": "Actual",
+    "daysUsedByCategory": "Días usados, por categoría",
+    "leaveByType": "Ausencias por tipo",
+    "leaveTrends": "Tendencias de ausencias",
+    "publicHolidays": "Días festivos",
+    "recentActivity": "Actividad reciente",
+    "teamAvailability": "Disponibilidad del equipo",
+    "thisMonthByCategory": "Este mes, por categoría",
+    "yourActivity": "Tu actividad de ausencias"
+  }
+}

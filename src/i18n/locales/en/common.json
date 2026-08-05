@@ -1,0 +1,72 @@
+{
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "exportCsv": "Export CSV",
+    "print": "Print",
+    "download": "Download",
+    "downloadPdf": "Download PDF",
+    "view": "View",
+    "add": "Add",
+    "addCustom": "Add custom",
+    "remove": "Remove",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "reset": "Reset",
+    "apply": "Apply",
+    "discard": "Discard",
+    "create": "Create",
+    "update": "Update",
+    "generate": "Generate",
+    "saveChanges": "Save Changes",
+    "quickAdd": "Quick add"
+  },
+  "states": {
+    "loading": "Loading…",
+    "saving": "Saving…",
+    "noData": "No data",
+    "error": "Something went wrong",
+    "success": "Success",
+    "noResults": "No results found"
+  },
+  "labels": {
+    "employee": "Employee",
+    "employeeId": "Employee ID",
+    "department": "Department",
+    "designation": "Designation",
+    "status": "Status",
+    "actions": "Actions",
+    "name": "Name",
+    "email": "Email",
+    "date": "Date",
+    "all": "All",
+    "allStatuses": "All statuses",
+    "allDepartments": "All departments",
+    "generatedOn": "Generated"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "draft": "Draft",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "processed": "Processed",
+    "paid": "Paid",
+    "notSetUp": "Not set up",
+    "generated": "Generated",
+    "downloaded": "Downloaded",
+    "printed": "Printed"
+  },
+  "confirm": {
+    "cannotBeUndone": "This action cannot be undone."
+  }
+}

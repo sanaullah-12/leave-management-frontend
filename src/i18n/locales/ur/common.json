@@ -1,0 +1,72 @@
+{
+  "actions": {
+    "save": "محفوظ کریں",
+    "cancel": "منسوخ کریں",
+    "delete": "حذف کریں",
+    "edit": "ترمیم کریں",
+    "close": "بند کریں",
+    "confirm": "تصدیق کریں",
+    "search": "تلاش کریں",
+    "filter": "فلٹر کریں",
+    "export": "برآمد کریں",
+    "exportCsv": "CSV برآمد کریں",
+    "print": "پرنٹ کریں",
+    "download": "ڈاؤن لوڈ کریں",
+    "downloadPdf": "PDF ڈاؤن لوڈ کریں",
+    "view": "دیکھیں",
+    "add": "شامل کریں",
+    "addCustom": "حسب ضرورت شامل کریں",
+    "remove": "ہٹائیں",
+    "back": "واپس",
+    "next": "اگلا",
+    "submit": "جمع کرائیں",
+    "reset": "ری سیٹ کریں",
+    "apply": "لاگو کریں",
+    "discard": "مسترد کریں",
+    "create": "بنائیں",
+    "update": "اپ ڈیٹ کریں",
+    "generate": "تیار کریں",
+    "saveChanges": "تبدیلیاں محفوظ کریں",
+    "quickAdd": "فوری اضافہ"
+  },
+  "states": {
+    "loading": "لوڈ ہو رہا ہے…",
+    "saving": "محفوظ ہو رہا ہے…",
+    "noData": "کوئی ڈیٹا نہیں",
+    "error": "کچھ غلط ہو گیا",
+    "success": "کامیاب",
+    "noResults": "کوئی نتیجہ نہیں ملا"
+  },
+  "labels": {
+    "employee": "ملازم",
+    "employeeId": "ملازم شناخت",
+    "department": "شعبہ",
+    "designation": "عہدہ",
+    "status": "حالت",
+    "actions": "اعمال",
+    "name": "نام",
+    "email": "ای میل",
+    "date": "تاریخ",
+    "all": "تمام",
+    "allStatuses": "تمام حالتیں",
+    "allDepartments": "تمام شعبے",
+    "generatedOn": "تیار شدہ"
+  },
+  "status": {
+    "active": "فعال",
+    "inactive": "غیر فعال",
+    "draft": "مسودہ",
+    "pending": "زیر التوا",
+    "approved": "منظور شدہ",
+    "rejected": "مسترد",
+    "processed": "کارروائی شدہ",
+    "paid": "ادا شدہ",
+    "notSetUp": "ترتیب نہیں دیا گیا",
+    "generated": "تیار شدہ",
+    "downloaded": "ڈاؤن لوڈ شدہ",
+    "printed": "پرنٹ شدہ"
+  },
+  "confirm": {
+    "cannotBeUndone": "یہ عمل واپس نہیں لیا جا سکتا۔"
+  }
+}

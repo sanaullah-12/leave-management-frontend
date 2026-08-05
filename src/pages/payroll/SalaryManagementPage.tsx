@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import {
   PencilSquareIcon,
@@ -43,6 +44,7 @@ type StatusFilter = SalaryStatus | "unconfigured" | "all";
  * neither action recomputes a single salary.
  */
 const SalaryManagementPage: React.FC = () => {
+  const { t } = useTranslation("payroll");
   const {
     rows,
     state,
@@ -68,7 +70,7 @@ const SalaryManagementPage: React.FC = () => {
       { value: "all", label: "All departments" },
       ...[...set].sort().map((d) => ({ value: d, label: d })),
     ];
-  }, [rows]);
+  }, [rows, t]);
 
   const statusOptions = useMemo(
     () => [
@@ -77,11 +79,11 @@ const SalaryManagementPage: React.FC = () => {
         ["active", "draft", "inactive", "unconfigured"] as StatusFilter[]
       ).map((s) => ({
         value: s,
-        label: SALARY_STATUS[s as keyof typeof SALARY_STATUS].label,
+        label: t(`common:${SALARY_STATUS[s as keyof typeof SALARY_STATUS].labelKey}`),
         dotColor: SALARY_STATUS[s as keyof typeof SALARY_STATUS].dot,
       })),
     ],
-    []
+    [t]
   );
 
   /* ---------------- filtering ---------------- */
@@ -128,14 +130,14 @@ const SalaryManagementPage: React.FC = () => {
         gradient: "from-blue-500 to-indigo-600",
       },
       {
-        label: "Monthly Net",
+        label: t("stats.monthlyNet"),
         value: formatMoneyCompact(summary.total, settings.currency),
         caption: "Across all configured employees",
         icon: <BanknotesIcon className="h-6 w-6" />,
         gradient: "from-emerald-500 to-teal-600",
       },
       {
-        label: "Average Net",
+        label: t("stats.averageNet"),
         value: formatMoneyCompact(summary.average, settings.currency),
         caption: `Highest ${formatMoneyCompact(
           summary.highest,
@@ -145,7 +147,7 @@ const SalaryManagementPage: React.FC = () => {
         gradient: "from-violet-500 to-purple-600",
       },
       {
-        label: "Pending Setup",
+        label: t("stats.pendingSetup"),
         value: summary.pending,
         caption: summary.pending
           ? "Add a structure to include them in payroll"
@@ -154,8 +156,7 @@ const SalaryManagementPage: React.FC = () => {
         gradient: "from-amber-500 to-orange-600",
       },
     ],
-    [rows.length, summary, settings.currency]
-  );
+    [rows.length, summary, settings.currency, t]);
 
   /* ---------------- actions ---------------- */
 
@@ -208,8 +209,8 @@ const SalaryManagementPage: React.FC = () => {
       <motion.div variants={staggerItem}>
         <PayrollPageHeader
           glyph="🧾"
-          title="Employee Salaries"
-          subtitle="Define each employee's compensation. Net salary is always calculated, never typed."
+          title={t("salaries.title")}
+          subtitle={t("salaries.subtitle")}
         />
       </motion.div>
 

@@ -1,0 +1,72 @@
+{
+  "brand": {
+    "name": "Nexora",
+    "tagline": "HRMS システム"
+  },
+  "search": {
+    "placeholder": "検索",
+    "title": "検索",
+    "noResults": "「{{query}}」の結果はありません"
+  },
+  "sections": {
+    "pages": "ページ"
+  },
+  "actions": {
+    "collapse": "折りたたむ",
+    "expand": "展開",
+    "logout": "ログアウト",
+    "openMenu": "メニューを開く",
+    "closeMenu": "メニューを閉じる",
+    "manageAccount": "アカウント管理"
+  },
+  "header": {
+    "welcome": "おかえりなさい、{{name}} さん",
+    "administrator": "管理者",
+    "employee": "従業員"
+  },
+  "groups": {
+    "home": "ホーム",
+    "leave": "休暇管理",
+    "team": "チームと社員",
+    "attendance": "勤怠",
+    "payroll": "給与",
+    "documents": "ドキュメントスタジオ",
+    "voice": "従業員の声",
+    "settings": "設定"
+  },
+  "short": {
+    "home": "ホーム",
+    "leave": "休暇",
+    "team": "チーム",
+    "attendance": "勤怠",
+    "payroll": "給与",
+    "documents": "文書",
+    "voice": "声",
+    "settings": "設定"
+  },
+  "items": {
+    "dashboard": "ダッシュボード",
+    "announcements": "お知らせ",
+    "reports": "レポート",
+    "notifications": "通知",
+    "leaveRequests": "休暇申請",
+    "leaveCalendar": "休暇カレンダー",
+    "applyLeave": "休暇を申請",
+    "myLeaveActivity": "自分の休暇履歴",
+    "myTeam": "自分のチーム",
+    "employees": "従業員",
+    "departments": "部署",
+    "leavePolicies": "休暇ポリシー",
+    "attendance": "勤怠",
+    "payrollDashboard": "給与ダッシュボード",
+    "employeeSalaries": "従業員の給与",
+    "runPayroll": "給与処理",
+    "payslips": "給与明細",
+    "payrollHistory": "給与履歴",
+    "payrollSettings": "給与設定",
+    "documentStudio": "ドキュメントスタジオ",
+    "employeeVoice": "従業員の声",
+    "profileSettings": "プロフィールと設定",
+    "theme": "テーマ"
+  }
+}
