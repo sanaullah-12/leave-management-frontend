@@ -16,6 +16,7 @@ import RealtimeProvider from "./providers/RealtimeProvider";
 import "./styles/themes.css";
 import Layout from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
+import PWAManager from "./components/pwa/PWAManager";
 
 /* ------------------------------------------------------------------ */
 /*  Route-level code splitting                                         */
@@ -197,6 +198,11 @@ const App: React.FC = () => {
               </React.Suspense>
             </div>
             </Router>
+
+            {/* Install and update surfaces. Deliberately outside <Router>:
+                they are app-wide and must not remount on navigation. This is
+                also the only place the service worker is registered. */}
+            <PWAManager />
           </MotionConfig>
           </RealtimeProvider>
         </AuthProvider>

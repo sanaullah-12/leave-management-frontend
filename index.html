@@ -2,15 +2,64 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="./src/assets/nexora-logo.png" />
-    <link rel="apple-touch-icon" href="./src/assets/nexora-logo.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Icons are served from /public at stable, unhashed paths. The previous
+         ./src/assets reference produced a content-hashed filename, which iOS
+         cannot use for a home-screen icon and which breaks whenever the file
+         changes. -->
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+
+    <!-- viewport-fit=cover lets the app paint into the safe areas on notched
+         iPhones; without it the installed app is letterboxed with white bars.
+         Zoom is deliberately NOT disabled - pinch-zoom is an accessibility
+         requirement and user-scalable=no fails audits. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+
     <title>Nexora The HRMS System</title>
     <meta name="application-name" content="Nexora" />
     <meta
       name="description"
       content="Nexora — The HRMS System. Manage your workforce smarter, faster, and more efficiently."
     />
+
+    <!-- Colours the browser and OS chrome. Two entries so the status bar
+         follows the user's system theme instead of always showing the light
+         background. -->
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: light)"
+      content="#2563eb"
+    />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: dark)"
+      content="#0f1420"
+    />
+
+    <!-- ===================== iOS home-screen support =====================
+         Safari ignores the web app manifest for installation. Everything iOS
+         needs to launch Nexora full screen has to be declared here. -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <!-- Retained alongside the standard tag above: iOS still reads the
+         apple-prefixed form, and dropping it re-introduces the Safari chrome. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Nexora" />
+    <!-- black-translucent lets the app draw under the status bar. The safe-area
+         padding in index.css keeps the header clear of the notch. -->
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+
+    <!-- Stops iOS turning employee IDs and dates into tappable phone links,
+         which looks broken inside an installed app. -->
+    <meta name="format-detection" content="telephone=no" />
 
     <!-- Geist — the official Vercel typeface -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

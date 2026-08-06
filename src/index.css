@@ -24,6 +24,23 @@
     font-size: 0.9375rem;
     line-height: 1.6;
     letter-spacing: -0.006em;
+    /* Installed on iOS the app draws under the status bar and home indicator
+       (viewport-fit=cover + black-translucent). Reserving the safe areas keeps
+       content clear of the notch and the gesture bar. On every other surface
+       these resolve to 0, so nothing changes in a browser tab. */
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    /* Overscroll bounce reveals the page behind the app and reads as a bug in
+       a standalone window. */
+    overscroll-behavior-y: none;
+  }
+
+  /* Installed apps have no URL bar to reload from, so a mis-set 100vh cannot be
+     scrolled away from. `dvh` tracks the visible viewport on mobile Safari. */
+  @supports (height: 100dvh) {
+    body {
+      min-height: 100dvh;
+    }
   }
 
   /* ============================================================ */
