@@ -110,7 +110,7 @@ const SubmitVoiceModal: React.FC<Props> = ({ open, onClose }) => {
     submit.mutate(fd, {
       onSuccess: () => {
         setPhase("success");
-        showSuccessToast("Your voice has been submitted", { icon: "📣" });
+        showSuccessToast("Your voice has been submitted", { icon: "announce" });
         setTimeout(close, 1900);
       },
       onError: (err: any) => {
@@ -166,7 +166,7 @@ const SubmitVoiceModal: React.FC<Props> = ({ open, onClose }) => {
             >
               {isAnonymous
                 ? "Submitted anonymously. HR will review it shortly."
-                : "Thanks for speaking up — HR will review it shortly."}
+                : "Thanks for speaking up - HR will review it shortly."}
             </motion.p>
           </motion.div>
         ) : (
@@ -224,7 +224,7 @@ const SubmitVoiceModal: React.FC<Props> = ({ open, onClose }) => {
                 value={title}
                 maxLength={140}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="A short summary…"
+                placeholder="A short summary..."
                 className={`${inputClass} mt-2`}
               />
             </div>
@@ -242,7 +242,7 @@ const SubmitVoiceModal: React.FC<Props> = ({ open, onClose }) => {
                 maxLength={4000}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Share the details. The more context you give, the faster HR can help…"
+                placeholder="Share the details. The more context you give, the faster HR can help..."
                 className={`${inputClass} mt-2 resize-none`}
               />
             </div>
@@ -444,7 +444,7 @@ const SubmitVoiceModal: React.FC<Props> = ({ open, onClose }) => {
                 {submit.isPending ? (
                   <>
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-                    Submitting…
+                    Submitting...
                   </>
                 ) : (
                   <>

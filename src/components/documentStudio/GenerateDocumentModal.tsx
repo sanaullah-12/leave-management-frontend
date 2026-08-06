@@ -162,7 +162,7 @@ const GenerateDocumentModal: React.FC<Props> = ({
 
   const unresolved = useMemo(() => findUnresolved(cleanBody), [cleanBody]);
 
-  const docName = `${templateName}${selected ? ` — ${selected.name}` : ""}`;
+  const docName = `${templateName}${selected ? ` - ${selected.name}` : ""}`;
 
   const ensureGenerated = (): StudioDocument => {
     if (generatedDoc) return generatedDoc;
@@ -313,7 +313,7 @@ const GenerateDocumentModal: React.FC<Props> = ({
                             active ? "text-white/80" : "text-gray-400 dark:text-gray-500"
                           }`}
                         >
-                          {e.position || "—"} · {e.department || "—"}
+                          {e.position || "-"} · {e.department || "-"}
                         </span>
                       </span>
                       {active && <CheckCircleIcon className="h-4 w-4" />}

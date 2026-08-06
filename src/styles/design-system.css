@@ -1,5 +1,5 @@
 /* ============================= */
-/* 🎨 Design System - Pure Tailwind CSS  */
+/* Design System - Pure Tailwind CSS */
 /* ============================= */
 
 /* Base Styles */
@@ -12,7 +12,7 @@ body {
 }
 
 /* ============================= */
-/* 📌 Animations */
+/* Animations */
 /* ============================= */
 
 .fade-in {
@@ -39,7 +39,7 @@ body {
 }
 
 /* ============================= */
-/* 📌 Card Hover Animations */
+/* Card Hover Animations */
 /* ============================= */
 
 .card-hover-interactive {
@@ -119,7 +119,7 @@ body {
 }
 
 /* ============================= */
-/* 📌 Avatar Classes */
+/* Avatar Classes */
 /* ============================= */
 
 .user-initials-circle {
@@ -132,7 +132,7 @@ body {
 }
 
 /* ============================= */
-/* 📌 Custom Button Classes */
+/* Custom Button Classes */
 /* ============================= */
 
 /* Primary Button */
@@ -153,7 +153,7 @@ body {
   @apply bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700;
 }
 
-/* Success Button — soft, professional tint (no harsh solid fill) */
+/* Success Button - soft, professional tint (no harsh solid fill) */
 .btn-success {
   @apply inline-flex items-center justify-center px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-semibold rounded-xl border border-emerald-200 dark:border-emerald-500/30 cursor-pointer transition-all duration-200 ease-in-out;
 }
@@ -162,7 +162,7 @@ body {
   @apply bg-emerald-100 dark:bg-emerald-500/20 border-emerald-300 dark:border-emerald-500/50;
 }
 
-/* Danger Button — soft, professional tint (no harsh solid fill) */
+/* Danger Button - soft, professional tint (no harsh solid fill) */
 .btn-danger {
   @apply inline-flex items-center justify-center px-4 py-2 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 font-semibold rounded-xl border border-red-200 dark:border-red-500/30 cursor-pointer transition-all duration-200 ease-in-out;
 }
@@ -181,7 +181,7 @@ body {
 }
 
 /* ============================= */
-/* 📌 Custom Badge Classes */
+/* Custom Badge Classes */
 /* ============================= */
 
 .badge-primary {
@@ -205,7 +205,7 @@ body {
 }
 
 /* ============================= */
-/* 📌 Custom Card Classes */
+/* Custom Card Classes */
 /* ============================= */
 
 .card {
@@ -229,10 +229,10 @@ body {
 }
 
 /* ============================= */
-/* 📌 Navigation Classes */
+/* Navigation Classes */
 /* ============================= */
 
-/* Navigation — Geist Medium 15px */
+/* Navigation - Geist Medium 15px */
 .nav-item {
   @apply flex items-center px-4 py-2.5 my-0.5 rounded-xl font-medium text-gray-600 dark:text-gray-300 no-underline transition-all duration-200 ease-in-out relative cursor-pointer;
   font-size: 0.9375rem;
@@ -260,7 +260,7 @@ body {
 }
 
 /* ============================= */
-/* 📌 Input Field Classes */
+/* Input Field Classes */
 /* ============================= */
 
 .input-field {
@@ -272,7 +272,7 @@ body {
 }
 
 /* ============================= */
-/* 📌 Table Classes */
+/* Table Classes */
 /* ============================= */
 
 .table-row-hover {
@@ -284,7 +284,7 @@ body {
 }
 
 /* ============================= */
-/* 📌 Theme-specific Overrides */
+/* Theme-specific Overrides */
 /* ============================= */
 
 /* Purple Theme Overrides */
@@ -454,7 +454,7 @@ html.theme-custom .table-row-hover:hover {
 }
 
 /* ============================= */
-/* 📌 Admin Privileges Container Theme Overrides */
+/* Admin Privileges Container Theme Overrides */
 /* ============================= */
 
 /* Purple theme admin privileges */
@@ -586,7 +586,7 @@ html.theme-custom .text-blue-400 {
 }
 
 /* ============================= */
-/* 📌 Profile Container Gradients */
+/* Profile Container Gradients */
 /* ============================= */
 
 .profile-gradient {
@@ -606,7 +606,7 @@ html.theme-custom .profile-gradient {
 }
 
 /* ============================= */
-/* 📌 Form Label Styling */
+/* Form Label Styling */
 /* ============================= */
 
 .form-label {
@@ -614,7 +614,7 @@ html.theme-custom .profile-gradient {
 }
 
 /* ============================= */
-/* 📌 Tab Border Theme Overrides */
+/* Tab Border Theme Overrides */
 /* ============================= */
 
 html.theme-purple .border-primary-500 {
@@ -654,7 +654,7 @@ html.theme-custom .dark\\:border-primary-800 {
 }
 
 /* ============================= */
-/* 📌 Coming Soon Animations */
+/* Coming Soon Animations */
 /* ============================= */
 
 /* Animation delays */
@@ -779,7 +779,7 @@ html.theme-custom .dark\\:border-primary-800 {
 }
 
 /* ============================= */
-/* 📌 Complete Primary Color Theme Overrides */
+/* Complete Primary Color Theme Overrides */
 /* ============================= */
 
 /* Purple theme primary color overrides */
@@ -897,7 +897,7 @@ html.theme-custom .focus\:border-primary-500:focus {
 }
 
 /* ============================= */
-/* 📌 Gradient Theme Overrides */
+/* Gradient Theme Overrides */
 /* ============================= */
 
 /* Purple theme gradient overrides */
@@ -934,7 +934,7 @@ html.theme-custom .from-primary-500 {
 }
 
 /* ============================= */
-/* 📌 Background Primary Color Overrides */
+/* Background Primary Color Overrides */
 /* ============================= */
 
 /* Purple theme bg-primary overrides */
@@ -1007,7 +1007,7 @@ html.theme-custom .dark\:border-primary-700 {
 }
 
 /* ============================= */
-/* 📌 Total Late Minutes Card Theme Overrides */
+/* Total Late Minutes Card Theme Overrides */
 /* ============================= */
 
 /* Purple theme - use purple instead of orange for consistency */
@@ -1098,13 +1098,13 @@ html.theme-custom .text-orange-500 {
 }
 
 /* ============================================= */
-/* 📌 Complete accent remaps for redesigned UI    */
+/* Complete accent remaps for redesigned UI */
 /* Ensures every blue accent (buttons, rings,     */
 /* chart-adjacent chips, fills) follows the       */
 /* selected color theme in light AND dark mode.   */
 /* ============================================= */
 
-/* -------- PURPLE -------- */
+/* --- PURPLE --- */
 html.theme-purple .bg-blue-500 { @apply bg-purple-500; }
 html.theme-purple .bg-blue-600 { @apply bg-purple-600; }
 html.theme-purple .hover\:bg-blue-700:hover { @apply hover:bg-purple-700; }
@@ -1128,7 +1128,7 @@ html.theme-purple .hover\:text-blue-600:hover { @apply hover:text-purple-600; }
 html.theme-purple .dark\:hover\:text-blue-400:hover { @apply dark:hover:text-purple-400; }
 html.theme-purple .shadow-blue-600\/20 { --tw-shadow-color: rgb(156 95 209 / 0.2); }
 
-/* -------- GREEN -------- */
+/* --- GREEN --- */
 html.theme-green .bg-blue-500 { @apply bg-green-500; }
 html.theme-green .bg-blue-600 { @apply bg-green-600; }
 html.theme-green .hover\:bg-blue-700:hover { @apply hover:bg-green-700; }
@@ -1152,7 +1152,7 @@ html.theme-green .hover\:text-blue-600:hover { @apply hover:text-green-600; }
 html.theme-green .dark\:hover\:text-blue-400:hover { @apply dark:hover:text-green-400; }
 html.theme-green .shadow-blue-600\/20 { --tw-shadow-color: rgb(22 163 74 / 0.2); }
 
-/* -------- CUSTOM -------- */
+/* --- CUSTOM --- */
 html.theme-custom .bg-blue-500 { @apply bg-custom-500; }
 html.theme-custom .bg-blue-600 { @apply bg-custom-600; }
 html.theme-custom .hover\:bg-blue-700:hover { @apply hover:bg-custom-700; }
@@ -1177,7 +1177,7 @@ html.theme-custom .dark\:hover\:text-blue-400:hover { @apply dark:hover:text-cus
 html.theme-custom .shadow-blue-600\/20 { --tw-shadow-color: rgb(3 150 211 / 0.2); }
 
 /* ============================================================ */
-/* 📌 Motion System — tasteful, professional micro-interactions  */
+/* Motion System - tasteful, professional micro-interactions */
 /*    (Linear / Vercel / Stripe flavour). Everything below is    */
 /*    disabled under prefers-reduced-motion at the end.          */
 /* ============================================================ */
@@ -1319,7 +1319,7 @@ html {
 }
 
 /* ============================================================ */
-/* 📌 Branded Nexora loader animations                           */
+/* Branded Nexora loader animations */
 /* ============================================================ */
 
 /* Breathing scale for the logo mark */
@@ -1352,7 +1352,7 @@ html {
   animation: brand-glow 3s ease-in-out infinite;
 }
 
-/* ── App logo (nexora-logo.png) ──────────────────────────────── */
+/* -- App logo (nexora-logo.png) --- */
 /* Gentle floating bob */
 @keyframes logo-float {
   0%,
@@ -1448,7 +1448,7 @@ html {
   }
 }
 
-/* ── Employee Voice — soft glow for the live slide-in toast ───────────── */
+/* -- Employee Voice - soft glow for the live slide-in toast --- */
 @keyframes voice-toast-glow {
   0%,
   100% {
@@ -1568,7 +1568,7 @@ html {
 }
 
 /* ============================================================ */
-/* 📌 INDIGO theme (matches the Sign in / Sign up button)        */
+/* INDIGO theme (matches the Sign in / Sign up button) */
 /* ============================================================ */
 html.theme-indigo .btn-primary {
   @apply bg-indigo-600;
@@ -1781,7 +1781,7 @@ html.theme-indigo .dark\:hover\:text-blue-400:hover { @apply dark:hover:text-ind
 html.theme-indigo .shadow-blue-600\/20 { --tw-shadow-color: rgb(79 70 229 / 0.2); }
 
 /* ============================================================ */
-/* 📌 Auth-page accent remaps — focus rings & link hovers so the */
+/* Auth-page accent remaps - focus rings & link hovers so the */
 /*    login / signup / onboarding pages follow the active theme. */
 /* ============================================================ */
 html.theme-purple .focus\:border-blue-500:focus { @apply focus:border-purple-500; }
@@ -1982,7 +1982,7 @@ html.theme-teal   { --accent-wash: rgba(13, 148, 136, 0.11); }
 html.theme-bronze { --accent-wash: rgba(180, 83, 9, 0.11); }
 html.theme-mint   { --accent-wash: rgba(16, 185, 129, 0.11); }
 
-/* ===== Theme palette — remaps the `blue` scale to the active theme so EVERY blue-* utility recolors ===== */
+/* ===== Theme palette - remaps the `blue` scale to the active theme so EVERY blue-* utility recolors ===== */
 :root { --blue-25: 248 250 255; --blue-50: 239 246 255; --blue-100: 219 234 254; --blue-200: 191 219 254; --blue-300: 147 197 253; --blue-400: 96 165 250; --blue-500: 59 130 246; --blue-600: 37 99 235; --blue-700: 29 78 216; --blue-800: 30 64 175; --blue-900: 30 58 138; --blue-950: 23 37 84; }
 html.theme-blue { --blue-25: 248 250 255; --blue-50: 239 246 255; --blue-100: 219 234 254; --blue-200: 191 219 254; --blue-300: 147 197 253; --blue-400: 96 165 250; --blue-500: 59 130 246; --blue-600: 37 99 235; --blue-700: 29 78 216; --blue-800: 30 64 175; --blue-900: 30 58 138; --blue-950: 23 37 84; }
 html.theme-black { --blue-25: 248 250 252; --blue-50: 248 250 252; --blue-100: 241 245 249; --blue-200: 226 232 240; --blue-300: 203 213 225; --blue-400: 148 163 184; --blue-500: 100 116 139; --blue-600: 71 85 105; --blue-700: 51 65 85; --blue-800: 30 41 59; --blue-900: 15 23 42; --blue-950: 2 6 23; }

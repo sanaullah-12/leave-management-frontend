@@ -59,7 +59,7 @@ const DepartmentsPage: React.FC = () => {
       {!isAdmin ? (
         <EmptyState subtitle="Your administrator can view and manage departments." />
       ) : isLoading ? (
-        <LogoLoader label="Loading departments…" minHClass="min-h-[420px]" />
+        <LogoLoader label="Loading departments..." minHClass="min-h-[420px]" />
       ) : departments.length === 0 ? (
         <EmptyState subtitle="Invite employees and assign departments to get started." />
       ) : (
@@ -70,7 +70,7 @@ const DepartmentsPage: React.FC = () => {
               className="surface-card surface-card-interactive p-5"
             >
               <div className="flex items-start justify-between">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl text-blue-600 dark:text-blue-400">
                   <BuildingOffice2Icon className="h-6 w-6" />
                 </div>
                 <span className="text-2xl font-bold tabular-nums text-gray-900 dark:text-white">
@@ -114,7 +114,7 @@ const DepartmentsPage: React.FC = () => {
 
 const EmptyState: React.FC<{ subtitle: string }> = ({ subtitle }) => (
   <div className="surface-card py-16 text-center">
-    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-700/60">
+    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl text-blue-600 dark:text-blue-400">
       <BuildingOffice2Icon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
     </div>
     <p className="text-lg font-medium text-gray-600 dark:text-gray-300">

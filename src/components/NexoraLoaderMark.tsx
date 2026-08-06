@@ -3,11 +3,11 @@ import { motion, useReducedMotion } from "framer-motion";
 import body from "../assets/nexora-mark-body.png";
 
 /**
- * Nexora orbital mark — the official animated logo.
+ * Nexora orbital mark - the official animated logo.
  *
  * The full Nexora monogram is preserved: the flowing wave "body" stays fixed,
  * while its two nodes (blue + green) gracefully detach, exchange positions
- * along a smooth circular orbit, and reattach into the body — a subtle
+ * along a smooth circular orbit, and reattach into the body - a subtle
  * mid-motion "breath" along the way. One seamless six-second cycle, forever.
  * At rest (and under reduced motion) the nodes sit in their sockets, showing
  * the complete brand mark. Calm, precise, enterprise-grade.
@@ -126,7 +126,7 @@ const NexoraLoaderMark: React.FC<Props> = ({ size = 96, className = "" }) => {
         </filter>
       </defs>
 
-      {/* Static wave body — the "main" of the mark, always present */}
+      {/* Static wave body - the "main" of the mark, always present */}
       <image href={body} x="0" y="0" width={VB} height={VB} />
 
       {/* Two orbiting nodes */}

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
+import { showInfoToast } from "../utils/toastHelpers";
 import { connectSocket, disconnectSocket, getSocket } from "../socket/socket";
 import { SOCKET_EVENTS } from "../socket/events";
 import { useAppDispatch } from "../store/hooks";
@@ -19,7 +19,7 @@ import { VOICES_KEY, VOICE_STATS_KEY } from "./useEmployeeVoice";
  *
  * Performance & correctness:
  *  • one socket instance (see socket.ts), one set of listeners (guarded ref)
- *  • event-driven invalidation only — no polling
+ *  • event-driven invalidation only - no polling
  *  • full cleanup prevents duplicate listeners and memory leaks
  */
 export function useSocket() {
@@ -51,7 +51,7 @@ export function useSocket() {
       keys.forEach((queryKey) => qc.invalidateQueries({ queryKey }));
     };
 
-    // ── Connection lifecycle ──────────────────────────────────────────────
+    // -- Connection lifecycle ----------------------------------------------
     const onConnect = () => dispatch(setConnected(true));
     const onDisconnect = () => dispatch(setConnected(false));
     socket.on("connect", onConnect);
@@ -59,20 +59,20 @@ export function useSocket() {
     socket.on(SOCKET_EVENTS.CONNECTED, onConnect);
     if (socket.connected) dispatch(setConnected(true));
 
-    // ── Presence ──────────────────────────────────────────────────────────
+    // -- Presence ----------------------------------------------------------
     socket.on(SOCKET_EVENTS.PRESENCE_UPDATE, (p: { online?: string[] }) =>
       dispatch(setPresence(p?.online ?? []))
     );
 
-    // ── Notifications (bell / center / toast) ─────────────────────────────
+    // -- Notifications (bell / center / toast) -----------------------------
     socket.on(SOCKET_EVENTS.NOTIFICATION_NEW, (n: { title?: string }) => {
       invalidate([NOTIF_KEY as unknown as unknown[]]);
       if (n?.title) {
-        toast(n.title, { icon: "🔔", duration: 4000 });
+        showInfoToast(n.title, { duration: 4000 });
       }
     });
 
-    // ── Leave lifecycle ───────────────────────────────────────────────────
+    // -- Leave lifecycle ---------------------------------------------------
     socket.on(SOCKET_EVENTS.LEAVE_NEW, () =>
       invalidate([["recent-leaves"], ["leaves"], ["dashboard-stats"]])
     );
@@ -85,7 +85,7 @@ export function useSocket() {
       ])
     );
 
-    // ── Employee Voice ────────────────────────────────────────────────────
+    // -- Employee Voice ----------------------------------------------------
     socket.on(SOCKET_EVENTS.VOICE_NEW, () =>
       invalidate([
         VOICES_KEY as unknown as unknown[],
@@ -100,7 +100,7 @@ export function useSocket() {
       ])
     );
 
-    // ── Announcements / attendance / generic stats ────────────────────────
+    // -- Announcements / attendance / generic stats ------------------------
     socket.on(SOCKET_EVENTS.ANNOUNCEMENT_NEW, () =>
       invalidate([["announcements"], NOTIF_KEY as unknown as unknown[]])
     );
@@ -111,7 +111,7 @@ export function useSocket() {
       invalidate([["dashboard-stats"], ["recent-leaves"], ["leave-balance"]])
     );
 
-    // ── Cleanup: remove only our listeners (keep the socket for reuse) ─────
+    // -- Cleanup: remove only our listeners (keep the socket for reuse) -----
     return () => {
       const s = getSocket();
       if (s) {

@@ -11,6 +11,7 @@ import {
   BanknotesIcon,
   UserGroupIcon,
   ClockIcon,
+  FolderOpenIcon,
 } from "@heroicons/react/24/outline";
 import Select from "../../components/ui/Select";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
@@ -40,7 +41,7 @@ import {
 import type { PayrollRun } from "../../components/payroll/types";
 
 /**
- * Payroll History — the permanent record.
+ * Payroll History - the permanent record.
  *
  * Every run ever generated, with its denormalised totals so the table renders
  * without touching a single payslip. Marking a run paid and exporting its
@@ -123,7 +124,7 @@ const PayrollHistoryPage: React.FC = () => {
       },
       {
         label: t("stats.lastRun"),
-        value: summary.latest ? formatPeriod(summary.latest.period) : "—",
+        value: summary.latest ? formatPeriod(summary.latest.period) : "-",
         caption: summary.latest
           ? `Generated ${relativeTime(summary.latest.generatedAt)}`
           : "No payroll processed yet",
@@ -162,7 +163,7 @@ const PayrollHistoryPage: React.FC = () => {
     >
       <motion.div variants={staggerItem}>
         <PayrollPageHeader
-          glyph="🗂️"
+          icon={FolderOpenIcon}
           title={t("history.title")}
           subtitle={t("history.subtitle")}
         />
@@ -216,7 +217,7 @@ const PayrollHistoryPage: React.FC = () => {
           {runs.length === 0 ? (
             <PayrollEmptyState
               headline="No payroll history yet"
-              sub="Every payroll you generate is recorded here — the month, who ran it, how many employees were paid and the total cost."
+              sub="Every payroll you generate is recorded here - the month, who ran it, how many employees were paid and the total cost."
               ctaLabel="Run payroll"
               onAction={() => navigate("/payroll/run")}
             />

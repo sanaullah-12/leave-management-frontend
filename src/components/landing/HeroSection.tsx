@@ -5,7 +5,7 @@ import { Magnetic, GlowOrb, GridBackdrop, GradientText, EASE } from "./primitive
 import ContactModal from "./ContactModal";
 
 /* ============================================================
-   Hero — a centered headline wrapped by an animated "workflow
+   Hero - a centered headline wrapped by an animated "workflow
    trace": a curved circuit path that loops around the copy with
    a raised top notch and inward side pockets that cradle the
    floating HR nodes. Trace + nodes share ONE centered, fixed
@@ -68,7 +68,7 @@ const WAYPOINTS: Pt[] = [
 const D = roundedPath(WAYPOINTS, 26);
 
 // Decorative circuit branches that stub off the main loop into the top,
-// left and right gaps — each ends in a small node dot. Purely ambient.
+// left and right gaps - each ends in a small node dot. Purely ambient.
 const branch = (pts: Pt[]) => roundedPath(pts, 14);
 const BRANCHES: { d: string; dot: Pt }[] = [
   // top
@@ -281,7 +281,7 @@ const Trace: React.FC = () => {
           </span>
         </Node>
 
-        {/* 4 · right pocket — check card */}
+        {/* 4 · right pocket - check card */}
         <Node anchor={{ x: 1016, y: 365 }} transform="translate(-34%, -50%)" delay={1.6} float={10}>
           <Card>
             <span className="grid h-6 w-6 place-items-center rounded-full bg-emerald-500 text-white">
@@ -291,7 +291,7 @@ const Trace: React.FC = () => {
           </Card>
         </Node>
 
-        {/* 5 · bottom-right corner — approve request */}
+        {/* 5 · bottom-right corner - approve request */}
         <Node anchor={{ x: 1080, y: 650 }} transform="translate(-90%, -38%)" delay={1.4}>
           <Card>
             <span className="grid h-6 w-6 place-items-center rounded-md bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-300">
@@ -313,7 +313,7 @@ const Trace: React.FC = () => {
           </Card>
         </Node>
 
-        {/* 7 · left pocket — attendance chip */}
+        {/* 7 · left pocket - attendance chip */}
         <Node anchor={{ x: 184, y: 415 }} transform="translate(-42%, -50%)" delay={0.7} float={6}>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[12px] font-semibold text-blue-700 shadow-sm dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300">
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 6v6l4 2M12 2a10 10 0 100 20 10 10 0 000-20z" /></svg>
@@ -321,7 +321,7 @@ const Trace: React.FC = () => {
           </span>
         </Node>
 
-        {/* 8 · bottom-left corner — document card */}
+        {/* 8 · bottom-left corner - document card */}
         <Node anchor={{ x: 120, y: 650 }} transform="translate(-8%, -38%)" delay={1.2}>
           <Card>
             <span className="grid h-7 w-7 place-items-center rounded-lg bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-500/15">

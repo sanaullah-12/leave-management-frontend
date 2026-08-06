@@ -11,7 +11,7 @@ export interface ProgressStep {
 
 interface StepProgressProps {
   steps: ProgressStep[];
-  /** 0–100. If omitted, the bar animates indeterminately. */
+  /** 0-100. If omitted, the bar animates indeterminately. */
   progress?: number;
   /** e.g. "about 10s remaining" */
   eta?: string;
@@ -27,7 +27,7 @@ const StepProgress: React.FC<StepProgressProps> = ({
   steps,
   progress,
   eta,
-  title = "Working on it…",
+  title = "Working on it...",
   className = "",
 }) => {
   const determinate = typeof progress === "number";

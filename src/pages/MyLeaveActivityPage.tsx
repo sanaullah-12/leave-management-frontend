@@ -59,7 +59,7 @@ const ProgressRing: React.FC<{ percent: number; color: string }> = ({
   );
 };
 
-// Glowing leave-balance card (view-only) — matches the report/detail design.
+// Glowing leave-balance card (view-only) - matches the report/detail design.
 const LeaveRingCard: React.FC<{
   leaveKey: LeaveKey;
   total: number;
@@ -193,7 +193,7 @@ const MyLeaveActivityPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-600/25">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl text-blue-600 dark:text-blue-400">
             <ClipboardDocumentListIcon className="h-6 w-6" />
           </span>
           <div>
@@ -251,7 +251,7 @@ const MyLeaveActivityPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Activity (existing functionality — untouched) */}
+      {/* Activity (existing functionality - untouched) */}
       <div className="space-y-4">
         <SectionHeading>Leave Activity</SectionHeading>
         <EmployeeLeaveActivity employeeId={user.id} isCurrentUser={true} />
@@ -260,12 +260,12 @@ const MyLeaveActivityPage: React.FC = () => {
       {/* Read-only info */}
       <div className={`${CARD} p-6`}>
         <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-blue-600 dark:text-blue-400">
             <InformationCircleIcon className="h-5 w-5" />
           </span>
           <div>
             <h4 className="text-sm font-bold text-gray-900 dark:text-white">
-              Employee view — read only
+              Employee view - read only
             </h4>
             <ul className="mt-2 space-y-1 text-sm text-gray-500 dark:text-gray-400">
               <li>• View all your leave requests and their current status.</li>

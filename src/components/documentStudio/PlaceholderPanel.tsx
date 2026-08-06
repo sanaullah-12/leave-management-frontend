@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { PLACEHOLDERS } from "./constants";
+import { studioIcon } from "./icons";
 import type { PlaceholderDef } from "./types";
 
 interface Props {
@@ -19,7 +20,7 @@ const GROUP_ORDER: PlaceholderDef["group"][] = [
 
 /**
  * Draggable placeholder palette. Each chip can be dragged onto the canvas or
- * clicked to insert at the caret — HR never types a {{token}} by hand.
+ * clicked to insert at the caret - HR never types a {{token}} by hand.
  */
 const PlaceholderPanel: React.FC<Props> = ({ onInsert, disabled }) => {
   const [query, setQuery] = useState("");
@@ -79,8 +80,10 @@ const PlaceholderPanel: React.FC<Props> = ({ onInsert, disabled }) => {
                   className="group flex items-center gap-2.5 rounded-lg border border-gray-200/70 bg-white/60 px-2.5 py-2 text-left transition-colors hover:border-transparent disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700/50 dark:bg-white/5"
                   style={{ cursor: disabled ? "not-allowed" : "grab" }}
                 >
-                  <span className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-md bg-gray-100 text-sm dark:bg-gray-700/60">
-                    {p.glyph}
+                  <span className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-md text-gray-500 dark:text-gray-400">
+                    {React.createElement(studioIcon(p.glyph), {
+                      className: "h-4 w-4",
+                    })}
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium text-gray-800 dark:text-gray-200">

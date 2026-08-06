@@ -1,5 +1,5 @@
 /**
- * Payroll — presentation helpers.
+ * Payroll - presentation helpers.
  *
  * Formatting lives strictly outside {@link engine}: the engine produces numbers,
  * this file turns them into strings. Keeping the split means a currency or
@@ -28,7 +28,7 @@ function formatterFor(currency: string, compact: boolean): Intl.NumberFormat {
       notation: compact ? "compact" : "standard",
     });
   } catch {
-    // Unknown/invalid ISO code — fall back to plain grouped numbers.
+    // Unknown/invalid ISO code - fall back to plain grouped numbers.
     fmt = new Intl.NumberFormat(undefined, {
       maximumFractionDigits: compact ? 1 : 0,
       notation: compact ? "compact" : "standard",
@@ -38,7 +38,7 @@ function formatterFor(currency: string, compact: boolean): Intl.NumberFormat {
   return fmt;
 }
 
-/** Full currency string, e.g. "₨ 250,000". Decimals are dropped — payroll
+/** Full currency string, e.g. "₨ 250,000". Decimals are dropped - payroll
  *  figures read better whole, and the engine already rounds to 2dp. */
 export const formatMoney = (amount: number, currency: string): string =>
   formatterFor(currency, false).format(Number.isFinite(amount) ? amount : 0);
@@ -47,7 +47,53 @@ export const formatMoney = (amount: number, currency: string): string =>
 export const formatMoneyCompact = (amount: number, currency: string): string =>
   formatterFor(currency, true).format(Number.isFinite(amount) ? amount : 0);
 
-/** Grouped number with no currency — for inputs and exports. */
+// Separate cache: this one keeps the cents, which formatMoney deliberately
+// drops. Only the dashboard headline figures use it.
+const preciseCache = new Map<string, Intl.NumberFormat>();
+
+function preciseFormatter(currency: string): Intl.NumberFormat {
+  const cached = preciseCache.get(currency);
+  if (cached) return cached;
+  let fmt: Intl.NumberFormat;
+  try {
+    fmt = new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  } catch {
+    fmt = new Intl.NumberFormat(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+  preciseCache.set(currency, fmt);
+  return fmt;
+}
+
+/**
+ * Split a formatted amount into the part to show large and the trailing cents
+ * to show small and muted, e.g. `{ main: "$12,135", cents: ".69" }`.
+ *
+ * Uses `formatToParts` rather than splitting on ".", because the decimal
+ * separator is a comma in most of the locales this app ships with.
+ */
+export const splitMoney = (
+  amount: number,
+  currency: string
+): { main: string; cents: string } => {
+  const safe = Number.isFinite(amount) ? amount : 0;
+  const parts = preciseFormatter(currency).formatToParts(safe);
+  const cut = parts.findIndex((p) => p.type === "decimal");
+  if (cut === -1) return { main: parts.map((p) => p.value).join(""), cents: "" };
+  return {
+    main: parts.slice(0, cut).map((p) => p.value).join(""),
+    cents: parts.slice(cut).map((p) => p.value).join(""),
+  };
+};
+
+/** Grouped number with no currency - for inputs and exports. */
 export const formatNumber = (amount: number): string =>
   new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(
     Number.isFinite(amount) ? amount : 0
@@ -82,7 +128,7 @@ export const parsePeriodKey = (key: PeriodKey): PayrollPeriod => {
 export const formatPeriod = (p: PayrollPeriod): string =>
   `${MONTHS[Math.min(11, Math.max(0, p.month - 1))]} ${p.year}`;
 
-/** "Aug 2026" — for tight table cells. */
+/** "Aug 2026" - for tight table cells. */
 export const formatPeriodShort = (p: PayrollPeriod): string =>
   `${MONTHS[Math.min(11, Math.max(0, p.month - 1))].slice(0, 3)} ${p.year}`;
 
@@ -124,7 +170,7 @@ export const payDateFor = (p: PayrollPeriod, salaryDate: number): string => {
 
 export const formatDate = (iso: string): string => {
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "-";
   return d.toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
@@ -134,7 +180,7 @@ export const formatDate = (iso: string): string => {
 
 export const formatDateTime = (iso: string): string => {
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "-";
   return d.toLocaleString(undefined, {
     month: "short",
     day: "numeric",
@@ -161,7 +207,7 @@ export const ordinal = (n: number): string => {
   }
 };
 
-/** "40%" / "₨ 5,000" — how a component's raw value should read in a table. */
+/** "40%" / "₨ 5,000" - how a component's raw value should read in a table. */
 export const formatComponentValue = (
   mode: string,
   value: number,

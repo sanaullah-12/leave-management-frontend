@@ -9,7 +9,7 @@ import {
 } from "framer-motion";
 
 /* ============================================================
-   Nexora landing — shared design primitives
+   Nexora landing - shared design primitives
    A small, cohesive kit of scroll-reveal, motion and layout
    helpers used across every marketing section. Everything is
    GPU-friendly (transform/opacity/filter only) and degrades

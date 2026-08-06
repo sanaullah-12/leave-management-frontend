@@ -155,7 +155,7 @@ const VoiceDetailDrawer: React.FC<Props> = ({ voiceId, open, onClose }) => {
       width="xl"
       icon={<CatIcon className="h-5 w-5" />}
       iconClassName={cat?.tile}
-      title={voice?.title || (isLoading ? "Loading…" : "Submission")}
+      title={voice?.title || (isLoading ? "Loading..." : "Submission")}
       description={
         voice ? (
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
@@ -181,7 +181,7 @@ const VoiceDetailDrawer: React.FC<Props> = ({ voiceId, open, onClose }) => {
             onKeyDown={(e) => {
               if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) sendReply();
             }}
-            placeholder={isAdmin ? "Reply to the employee…" : "Add a reply…"}
+            placeholder={isAdmin ? "Reply to the employee..." : "Add a reply..."}
             className="max-h-32 min-h-[42px] flex-1 resize-none rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-100"
           />
           <motion.button
@@ -228,7 +228,7 @@ const VoiceDetailDrawer: React.FC<Props> = ({ voiceId, open, onClose }) => {
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 {departmentName(voice.employee?.department) ||
                   voice.department ||
-                  "—"}{" "}
+                  "-"}{" "}
                 • {format(new Date(voice.createdAt), "MMM d, yyyy 'at' h:mm a")}
               </p>
             </div>

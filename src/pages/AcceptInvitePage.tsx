@@ -104,7 +104,7 @@ const AcceptInvitePage: React.FC = () => {
     setError("");
     try {
       await authAPI.verifyInvitation(token!, { password: data.password });
-      // Deliberately don't auto-login here — this browser now "knows" a real
+      // Deliberately don't auto-login here - this browser now "knows" a real
       // account exists, so the landing page will show the Sign in button, but
       // the user still signs in explicitly with the password they just set.
       markKnownUser();
@@ -134,7 +134,7 @@ const AcceptInvitePage: React.FC = () => {
             className="h-12 w-12 rounded-full border-[3px] border-blue-500/25 border-t-blue-600"
           />
           <p className="mt-5 text-sm text-gray-500 dark:text-gray-400">
-            Loading your invitation…
+            Loading your invitation...
           </p>
         </div>
       </AuthLayout>
@@ -146,7 +146,7 @@ const AcceptInvitePage: React.FC = () => {
     return (
       <AuthLayout activeTab="signup">
         <motion.div {...fade()} className="text-center">
-          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-500/10">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl text-blue-600 dark:text-blue-400">
             <XCircleIcon className="h-9 w-9 text-red-500" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -196,7 +196,7 @@ const AcceptInvitePage: React.FC = () => {
             {...fade(0.1)}
             className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
           >
-            Welcome to the team! 🎉
+            Welcome to the team!
           </motion.h1>
           <motion.p
             {...fade(0.2)}
@@ -366,7 +366,7 @@ const AcceptInvitePage: React.FC = () => {
           className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 hover:shadow-xl disabled:opacity-70"
         >
           {isSubmitting ? (
-            <InlineLoader label="Creating your account…" />
+            <InlineLoader label="Creating your account..." />
           ) : (
             <>
               <UserPlusIcon className="h-4 w-4" />

@@ -84,7 +84,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             disabled={loading}
             className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition-all disabled:opacity-70 ${s.confirm}`}
           >
-            {loading ? <InlineLoader label="Working…" /> : confirmLabel}
+            {loading ? <InlineLoader label="Working..." /> : confirmLabel}
           </motion.button>
         </>
       }

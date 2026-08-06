@@ -2,7 +2,7 @@ import React from "react";
 import UIModal from "./ui/Modal";
 
 /**
- * Legacy Modal API — kept for backwards compatibility.
+ * Legacy Modal API - kept for backwards compatibility.
  * It now delegates to the premium `ui/Modal` so every existing consumer
  * (invite modals, etc.) automatically gets the new animated, glassmorphic
  * dialog with a consistent header, blur backdrop, and responsive bottom-sheet.

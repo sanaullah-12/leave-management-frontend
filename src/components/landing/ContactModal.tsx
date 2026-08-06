@@ -5,7 +5,7 @@ import AppLogo from "../AppLogo";
 import { EASE } from "./primitives";
 
 /* ============================================================
-   Nexora is an invite-only, enterprise HRMS — there's no
+   Nexora is an invite-only, enterprise HRMS - there's no
    self-serve signup. Every "Start free" style CTA on the
    landing page opens this instead: a short, well-designed
    pitch for a guided demo, with direct WhatsApp lines to reach

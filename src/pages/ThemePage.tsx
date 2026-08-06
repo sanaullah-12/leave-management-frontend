@@ -39,11 +39,11 @@ const ThemePage: React.FC = () => {
         <ThemeSelector />
       </motion.div>
 
-      {/* Language — sits alongside theme because both are per-device
+      {/* Language - sits alongside theme because both are per-device
           presentation preferences persisted to localStorage. */}
       <motion.div variants={staggerItem} className="surface-card p-6 sm:p-8">
         <div className="mb-4 flex items-start gap-3">
-          <span className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
+          <span className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl text-[var(--accent)]">
             <LanguageIcon className="h-5 w-5" />
           </span>
           <div className="min-w-0">

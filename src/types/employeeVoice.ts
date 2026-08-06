@@ -1,4 +1,4 @@
-// ── Employee Voice domain types ──────────────────────────────────────────
+// -- Employee Voice domain types ------------------------------------------
 
 export type VoiceCategory =
   | "workplace_issue"

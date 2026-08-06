@@ -42,10 +42,10 @@ const deptName = (m: any): string =>
     : m.department || "General";
 
 const formatJoin = (d?: string) =>
-  d ? new Date(d).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "—";
+  d ? new Date(d).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "-";
 
 const formatTenure = (d?: string): string => {
-  if (!d) return "—";
+  if (!d) return "-";
   const yrs = (Date.now() - new Date(d).getTime()) / (1000 * 60 * 60 * 24 * 365.25);
   if (yrs < 1) return `${Math.max(1, Math.round(yrs * 12))} Mo`;
   return `${yrs.toFixed(1)} Years`;
@@ -53,7 +53,7 @@ const formatTenure = (d?: string): string => {
 
 type SortKey = "name" | "tenure" | "recent";
 const SORT_LABELS: Record<SortKey, string> = {
-  name: "Name (A–Z)",
+  name: "Name (A-Z)",
   tenure: "Tenure (longest)",
   recent: "Recently joined",
 };
@@ -147,7 +147,7 @@ const MyTeamPage: React.FC = () => {
       <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
         <div className="max-w-xl">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-600/25">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl text-blue-600 dark:text-blue-400">
               <UserGroupIcon className="h-6 w-6" />
             </span>
             <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
@@ -172,7 +172,7 @@ const MyTeamPage: React.FC = () => {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search employees, roles…"
+                placeholder="Search employees, roles..."
                 className="w-full rounded-xl bg-[var(--card-surface)] py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 ring-1 ring-inset ring-gray-200/70 outline-none transition-shadow focus:ring-2 focus:ring-blue-500/50 dark:text-gray-100 dark:placeholder-gray-500 dark:ring-white/10"
               />
             </div>
@@ -222,7 +222,7 @@ const MyTeamPage: React.FC = () => {
           subtitle="Your administrator can view and manage the full team roster."
         />
       ) : isLoading ? (
-        <LogoLoader label="Loading your team…" minHClass="min-h-[420px]" />
+        <LogoLoader label="Loading your team..." minHClass="min-h-[420px]" />
       ) : members.length === 0 ? (
         <EmptyState
           title="No team members found"
@@ -286,14 +286,14 @@ const MyTeamPage: React.FC = () => {
                     {m.name}
                   </h3>
                   <p className="mt-0.5 truncate text-sm text-gray-500 dark:text-gray-400">
-                    {m.position || "—"}
+                    {m.position || "-"}
                   </p>
                 </div>
 
                 {/* Meta chips */}
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Chip icon={<IdentificationIcon className="h-3.5 w-3.5" />}>
-                    {m.employeeId || "—"}
+                    {m.employeeId || "-"}
                   </Chip>
                   <Chip icon={<CalendarDaysIcon className="h-3.5 w-3.5" />}>
                     {formatJoin(m.joinDate)}
@@ -335,7 +335,7 @@ const EmptyState: React.FC<{ title: string; subtitle: string }> = ({
   subtitle,
 }) => (
   <div className={`${CARD} py-16 text-center`}>
-    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/5">
+    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl text-blue-600 dark:text-blue-400">
       <UserGroupIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
     </div>
     <p className="text-lg font-medium text-gray-600 dark:text-gray-300">{title}</p>

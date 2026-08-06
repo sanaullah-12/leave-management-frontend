@@ -12,6 +12,7 @@ import {
   ClockIcon,
   LockOpenIcon,
   LockClosedIcon,
+  CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
 import { attendanceAPI } from "../services/api";
 import AttendanceModal from "../components/AttendanceModal";
@@ -497,7 +498,7 @@ const AttendancePage: React.FC = () => {
           </p>
         </div>
 
-        {/* Remote Door Unlock — Admin only */}
+        {/* Remote Door Unlock - Admin only */}
         {(!currentUser || currentUser.role === "admin") && (
           <div className="flex flex-col items-stretch sm:items-end gap-2">
             <button
@@ -514,8 +515,8 @@ const AttendancePage: React.FC = () => {
                 <>
                   <ArrowPathIcon className="w-5 h-5 animate-spin" />
                   {doorCountdown > 0
-                    ? `Door open — ${doorCountdown}s`
-                    : "Unlocking…"}
+                    ? `Door open - ${doorCountdown}s`
+                    : "Unlocking..."}
                 </>
               ) : (
                 <>
@@ -558,7 +559,7 @@ const AttendancePage: React.FC = () => {
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
                   <ServerIcon className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -790,7 +791,7 @@ const AttendancePage: React.FC = () => {
         <div className="card">
           <div className="p-6">
             <div className="flex items-center space-x-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
                 <UsersIcon className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -939,7 +940,7 @@ const AttendancePage: React.FC = () => {
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-md">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
                   <UsersIcon className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -980,7 +981,8 @@ const AttendancePage: React.FC = () => {
                 <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600 hover:shadow-md transition-shadow duration-200">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600 dark:text-gray-300 font-medium">
-                      📅 Date Range:
+                      <CalendarDaysIcon className="mr-1 inline h-4 w-4 align-text-bottom" />
+                Date Range:
                     </span>
                     <span className="font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-600">
                       {employeeAttendanceData.dateRange?.from} to{" "}
@@ -1215,7 +1217,7 @@ const AttendancePage: React.FC = () => {
               <div className="bg-gradient-to-r from-primary-50 to-primary-50 dark:from-primary-900/20 dark:to-primary-900/20 border-b border-primary-200 dark:border-primary-700 p-6 rounded-t-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
                       <UsersIcon className="w-6 h-6 text-white" />
                     </div>
                     <div>
@@ -1277,7 +1279,7 @@ const AttendancePage: React.FC = () => {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600 dark:text-blue-400">
                       <UsersIcon className="w-10 h-10 text-gray-400 dark:text-gray-500" />
                     </div>
                     <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">

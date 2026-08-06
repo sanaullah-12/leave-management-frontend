@@ -82,7 +82,7 @@ const LeaveCalendarPage: React.FC = () => {
       : lv.leaveType;
 
   if (isLoading) {
-    return <LogoLoader label="Loading calendar…" />;
+    return <LogoLoader label="Loading calendar..." />;
   }
 
   return (
@@ -197,7 +197,7 @@ const LeaveCalendarPage: React.FC = () => {
                   {dayLeaves.slice(0, 3).map((lv) => (
                     <div
                       key={lv._id}
-                      title={`${nameOf(lv)} — ${lv.leaveType} (${lv.status})`}
+                      title={`${nameOf(lv)} - ${lv.leaveType} (${lv.status})`}
                       className={`flex items-center gap-1 truncate rounded px-1.5 py-0.5 text-[11px] ${
                         lv.status === "pending"
                           ? "bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300"

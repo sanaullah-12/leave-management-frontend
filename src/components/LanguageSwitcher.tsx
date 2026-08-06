@@ -2,14 +2,14 @@
  * Language switcher.
  *
  * Two presentations of the same control, both driven entirely by the language
- * registry — neither hard-codes a language, so a new locale folder shows up
+ * registry - neither hard-codes a language, so a new locale folder shows up
  * here automatically:
  *
- *  • `variant="menu"`   — compact dropdown for the app header.
- *  • `variant="cards"`  — full picker for the settings page.
+ *  • `variant="menu"` - compact dropdown for the app header.
+ *  • `variant="cards"` - full picker for the settings page.
  *
  * Language names are shown in their own script (`nativeName`), which is what
- * users scanning for their language actually recognise — an Urdu speaker looks
+ * users scanning for their language actually recognise - an Urdu speaker looks
  * for "اردو", not "Urdu".
  */
 import React from "react";
@@ -82,7 +82,7 @@ const LanguageSwitcher: React.FC<Props> = ({ variant = "menu", className = "" })
               active
                 ? {
                     backgroundColor: "var(--accent-soft)",
-                    // Ring colour can't come from a class — it's theme-driven.
+                    // Ring colour can't come from a class - it's theme-driven.
                     boxShadow: "0 0 0 2px var(--accent)",
                   }
                 : undefined
@@ -97,7 +97,7 @@ const LanguageSwitcher: React.FC<Props> = ({ variant = "menu", className = "" })
                 />
               )}
             </span>
-            {/* The native name leads — it is what a speaker scans for. */}
+            {/* The native name leads - it is what a speaker scans for. */}
             <span
               className="text-base font-semibold text-gray-900 dark:text-white"
               // Render each name in its own direction so Urdu doesn't

@@ -10,13 +10,13 @@ interface Props {
 }
 
 /**
- * Premium empty state — a bespoke floating-document illustration (theme-tinted
+ * Premium empty state - a bespoke floating-document illustration (theme-tinted
  * via --accent) so the Studio never shows a bare page.
  */
 const StudioEmptyState: React.FC<Props> = ({
   onCreate,
   headline = "Create your first HR document",
-  sub = "Design offer letters, certificates and more — beautifully, without ever leaving Nexora.",
+  sub = "Design offer letters, certificates and more - beautifully, without ever leaving Nexora.",
   ctaLabel = "Create Template",
 }) => {
   return (

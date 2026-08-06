@@ -100,7 +100,7 @@ const fmt = (d?: string) =>
         day: "numeric",
         year: "numeric",
       })
-    : "—";
+    : "-";
 
 const ApplyLeavePage: React.FC = () => {
   const { user } = useAuth();
@@ -127,7 +127,7 @@ const ApplyLeavePage: React.FC = () => {
   const balance: Record<string, { total: number; used: number; remaining: number }> =
     (leaveBalance as any)?.data?.balance || {};
 
-  // Current policy allocation — used as a fallback so the balance/leave-bank
+  // Current policy allocation - used as a fallback so the balance/leave-bank
   // always render even before (or without) live balance data.
   const POLICY_CORE: Record<string, number> = { annual: 10, casual: 10, sick: 8 };
   const coreBal = (key: string) => {
@@ -216,7 +216,7 @@ const ApplyLeavePage: React.FC = () => {
     <div className="space-y-6 fade-in">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-600/25">
+        <span className="flex h-11 w-11 items-center justify-center rounded-2xl text-blue-600 dark:text-blue-400">
           <PlusCircleIcon className="h-6 w-6" />
         </span>
         <div>
@@ -346,7 +346,7 @@ const ApplyLeavePage: React.FC = () => {
                   rows={4}
                   {...register("reason", { required: "Reason is required" })}
                   className={TEXTAREA}
-                  placeholder="Briefly describe the reason for your leave…"
+                  placeholder="Briefly describe the reason for your leave..."
                 />
                 {errors.reason && (
                   <p className="form-error">{errors.reason.message}</p>
@@ -440,7 +440,7 @@ const ApplyLeavePage: React.FC = () => {
                     <ClockIcon className="h-4 w-4" /> Duration
                   </dt>
                   <dd className="font-semibold tabular-nums text-gray-900 dark:text-white">
-                    {dayCount > 0 ? `${dayCount} day${dayCount === 1 ? "" : "s"}` : "—"}
+                    {dayCount > 0 ? `${dayCount} day${dayCount === 1 ? "" : "s"}` : "-"}
                   </dd>
                 </div>
               </dl>
@@ -493,13 +493,13 @@ const ApplyLeavePage: React.FC = () => {
                 <div className="mt-3 flex items-start gap-2 rounded-xl bg-amber-50 px-3 py-2.5 text-xs text-amber-700 ring-1 ring-inset ring-amber-200/60 dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/20">
                   <ExclamationTriangleIcon className="mt-0.5 h-4 w-4 flex-shrink-0" />
                   <span>
-                    This request is more than your remaining balance — it may
+                    This request is more than your remaining balance - it may
                     require special approval.
                   </span>
                 </div>
               )}
 
-              {/* Leave bank — total credit / used / remaining */}
+              {/* Leave bank - total credit / used / remaining */}
               {hasBank && (
                 <div className="mt-5 rounded-xl border border-gray-100 bg-slate-50/60 p-4 dark:border-white/10 dark:bg-white/[0.03]">
                   <div className="flex items-center justify-between">
@@ -554,7 +554,7 @@ const ApplyLeavePage: React.FC = () => {
                   <LoadingButton
                     type="submit"
                     loading={submitMutation.isPending}
-                    loadingText="Submitting…"
+                    loadingText="Submitting..."
                     className="btn-primary w-full justify-center"
                   >
                     <PlusCircleIcon className="h-5 w-5" />

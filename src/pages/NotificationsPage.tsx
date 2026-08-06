@@ -16,7 +16,7 @@ const NotificationsPage: React.FC = () => {
     useNotifications({ limit: 50 });
 
   if (isLoading) {
-    return <LogoLoader label="Loading notifications…" />;
+    return <LogoLoader label="Loading notifications..." />;
   }
 
   return (
@@ -57,7 +57,7 @@ const NotificationsPage: React.FC = () => {
           variants={staggerItem}
           className="surface-card py-16 text-center"
         >
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-700/60">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl text-blue-600 dark:text-blue-400">
             <BellIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
           </div>
           <p className="text-lg font-medium text-gray-600 dark:text-gray-300">

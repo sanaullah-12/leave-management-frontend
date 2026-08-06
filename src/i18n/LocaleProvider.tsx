@@ -1,5 +1,5 @@
 /**
- * i18n — locale context.
+ * i18n - locale context.
  *
  * A deliberately thin layer on top of react-i18next. `useTranslation()` already
  * handles re-rendering on a language change, so this provider does not
@@ -10,8 +10,8 @@
  *  2. Exposing the language registry plus a `setLanguage` action, so UI can
  *     switch languages without importing i18next directly.
  *
- * It mirrors `ThemeContext`'s shape on purpose — same persistence approach,
- * same "write the choice onto <html>" strategy — so the two feel like one
+ * It mirrors `ThemeContext`'s shape on purpose - same persistence approach,
+ * same "write the choice onto <html>" strategy - so the two feel like one
  * system to anyone reading the codebase.
  */
 import React, {

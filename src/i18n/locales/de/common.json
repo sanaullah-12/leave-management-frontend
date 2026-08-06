@@ -30,8 +30,8 @@
     "quickAdd": "Schnell hinzufügen"
   },
   "states": {
-    "loading": "Wird geladen …",
-    "saving": "Wird gespeichert …",
+    "loading": "Wird geladen ...",
+    "saving": "Wird gespeichert ...",
     "noData": "Keine Daten",
     "error": "Etwas ist schiefgelaufen",
     "success": "Erfolg",

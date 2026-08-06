@@ -46,7 +46,7 @@ const LoginPage: React.FC = () => {
   };
 
   const handleSSO = (provider: string) =>
-    showInfoToast(`${provider} sign-in isn't set up yet — use your email below.`);
+    showInfoToast(`${provider} sign-in isn't set up yet - use your email below.`);
 
   return (
     <AuthLayout activeTab="login">

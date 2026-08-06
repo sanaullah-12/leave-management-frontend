@@ -71,7 +71,7 @@ const TABS: { key: Tab; label: string; icon: React.ComponentType<{ className?: s
   { key: "brand", label: "Brand", icon: SwatchIcon },
 ];
 
-/** Right column — placeholders, page setup and branding. */
+/** Right column - placeholders, page setup and branding. */
 const PropertiesPanel: React.FC<Props> = ({
   page,
   setPage,
@@ -228,7 +228,7 @@ const PropertiesPanel: React.FC<Props> = ({
         {tab === "brand" && (
           <div className="space-y-4">
             <div className="rounded-xl border border-gray-200/70 p-4 text-center dark:border-gray-700/50">
-              <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-xl bg-gray-100 dark:bg-gray-700/60">
+              <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-xl text-blue-600 dark:text-blue-400">
                 <PhotoIcon className="h-6 w-6 text-gray-400" />
               </div>
               <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
@@ -254,7 +254,7 @@ const PropertiesPanel: React.FC<Props> = ({
               )}
             </div>
 
-            {/* Future-ready AI slot — intentionally not wired yet. */}
+            {/* Future-ready AI slot - intentionally not wired yet. */}
             <div
               className="relative overflow-hidden rounded-xl border border-dashed p-4"
               style={{
@@ -285,7 +285,8 @@ const PropertiesPanel: React.FC<Props> = ({
                 disabled
                 className="mt-3 w-full cursor-not-allowed rounded-lg border border-white/40 bg-white/50 py-2 text-sm font-medium text-gray-500 dark:bg-gray-900/30"
               >
-                ✨ Draft with AI
+                <SparklesIcon className="h-4 w-4" />
+                Draft with AI
               </button>
             </div>
           </div>

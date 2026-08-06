@@ -2,11 +2,11 @@
 // Public Holidays
 // ----------------------------------------------------------------------------
 // Two sources of truth:
-//   1. RECURRING  — fixed-date holidays that fall on the same Gregorian date
+//   1. RECURRING - fixed-date holidays that fall on the same Gregorian date
 //                   every year (e.g. Labour Day → 1 May). Always accurate.
-//   2. SPECIFIC   — movable / lunar holidays (Eid-ul-Fitr, Eid-ul-Adha, Ashura,
+//   2. SPECIFIC - movable / lunar holidays (Eid-ul-Fitr, Eid-ul-Adha, Ashura,
 //                   Eid Milad-un-Nabi, etc.) whose Gregorian date shifts each
-//                   year. These MUST be maintained per-year — add the confirmed
+//                   year. These MUST be maintained per-year - add the confirmed
 //                   dates as "YYYY-MM-DD" keys. We intentionally do NOT guess
 //                   these, so nothing incorrect is shown.
 //
@@ -37,7 +37,7 @@ const RECURRING: RecurringHoliday[] = [
   { month: 12, day: 25, name: "Quaid-e-Azam Day / Christmas" },
 ];
 
-// Movable (lunar) holidays — keyed by exact "YYYY-MM-DD". Dates shift every year
+// Movable (lunar) holidays - keyed by exact "YYYY-MM-DD". Dates shift every year
 // and are finalised by moon sighting / official government notification, so these
 // MUST be reviewed annually.
 //
@@ -45,21 +45,21 @@ const RECURRING: RecurringHoliday[] = [
 //   2027 → planning estimates (subject to moon sighting); confirm when notified.
 const SPECIFIC: Record<string, Holiday> = {
   // ---- 2026 (official) ----
-  // Eid-ul-Fitr (1 Shawwal 1447) — 21–23 Mar; 23 Mar also falls on Pakistan Day
+  // Eid-ul-Fitr (1 Shawwal 1447) - 21-23 Mar; 23 Mar also falls on Pakistan Day
   // (kept as Pakistan Day via the recurring list so both remain visible).
   "2026-03-21": { name: "Eid-ul-Fitr", type: "public" },
   "2026-03-22": { name: "Eid-ul-Fitr", type: "public" },
-  // Eid-ul-Adha (10 Zil Haj 1447) — 27–29 May
+  // Eid-ul-Adha (10 Zil Haj 1447) - 27-29 May
   "2026-05-27": { name: "Eid-ul-Adha", type: "public" },
   "2026-05-28": { name: "Eid-ul-Adha", type: "public" },
   "2026-05-29": { name: "Eid-ul-Adha", type: "public" },
-  // Ashura (9 & 10 Muharram 1448) — 24–25 Jun
+  // Ashura (9 & 10 Muharram 1448) - 24-25 Jun
   "2026-06-24": { name: "Ashura (9th Muharram)", type: "public" },
   "2026-06-25": { name: "Ashura (10th Muharram)", type: "public" },
-  // Eid Milad-un-Nabi (12 Rabi-ul-Awwal 1448) — 25 Aug
+  // Eid Milad-un-Nabi (12 Rabi-ul-Awwal 1448) - 25 Aug
   "2026-08-25": { name: "Eid Milad-un-Nabi", type: "public" },
 
-  // ---- 2027 (estimated — confirm nearer the date) ----
+  // ---- 2027 (estimated - confirm nearer the date) ----
   "2027-03-10": { name: "Eid-ul-Fitr", type: "public" },
   "2027-03-11": { name: "Eid-ul-Fitr", type: "public" },
   "2027-03-12": { name: "Eid-ul-Fitr", type: "public" },

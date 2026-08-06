@@ -14,6 +14,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Dropdown from "../ui/Dropdown";
 import { CATEGORY_META } from "./constants";
+import { studioIcon } from "./icons";
 import { PANEL, tintFor, relativeTime } from "./ui";
 import type { DocumentTemplate, TemplateCategory } from "./types";
 
@@ -70,9 +71,9 @@ const TemplateCard: React.FC<{
     >
       <div className="flex items-start gap-3">
         <div
-          className={`grid h-10 w-10 flex-shrink-0 place-items-center rounded-lg text-lg ${tint.chip}`}
+          className={`grid h-10 w-10 flex-shrink-0 place-items-center rounded-lg ${tint.chip}`}
         >
-          {tpl.icon}
+          {React.createElement(studioIcon(tpl.icon), { className: "h-5 w-5" })}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
@@ -156,7 +157,7 @@ const TemplateCard: React.FC<{
 };
 
 /**
- * Left column — searchable, category-filtered template library. Purely
+ * Left column - searchable, category-filtered template library. Purely
  * presentational; all mutations bubble up to the page.
  */
 const TemplateLibrary: React.FC<Props> = ({

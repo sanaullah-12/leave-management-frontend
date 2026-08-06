@@ -1,4 +1,12 @@
+import type { ReactElement } from "react";
 import toast from "react-hot-toast";
+import {
+  TOAST_ICON,
+  resolveIcon,
+  type ToastIconName,
+} from "./toastIcons";
+
+export type { ToastIconName };
 
 // Helper function to detect if dark mode is active
 const isDarkMode = () => {
@@ -44,44 +52,44 @@ const getThemedToastStyle = (
 // Custom toast helper functions with consistent theming
 export const showSuccessToast = (
   message: string,
-  options?: { duration?: number; icon?: string }
+  options?: { duration?: number; icon?: ToastIconName | ReactElement }
 ) => {
   return toast.success(message, {
     duration: options?.duration || 5000,
-    icon: options?.icon || "✅",
+    icon: resolveIcon(options?.icon) ?? TOAST_ICON.success,
     style: getThemedToastStyle("success"),
   });
 };
 
 export const showErrorToast = (
   message: string,
-  options?: { duration?: number; icon?: string }
+  options?: { duration?: number; icon?: ToastIconName | ReactElement }
 ) => {
   return toast.error(message, {
     duration: options?.duration || 6000,
-    icon: options?.icon || "❌",
+    icon: resolveIcon(options?.icon) ?? TOAST_ICON.error,
     style: getThemedToastStyle("error"),
   });
 };
 
 export const showWarningToast = (
   message: string,
-  options?: { duration?: number; icon?: string }
+  options?: { duration?: number; icon?: ToastIconName | ReactElement }
 ) => {
   return toast(message, {
     duration: options?.duration || 5000,
-    icon: options?.icon || "⚠️",
+    icon: resolveIcon(options?.icon) ?? TOAST_ICON.warning,
     style: getThemedToastStyle("warning"),
   });
 };
 
 export const showInfoToast = (
   message: string,
-  options?: { duration?: number; icon?: string }
+  options?: { duration?: number; icon?: ToastIconName | ReactElement }
 ) => {
   return toast(message, {
     duration: options?.duration || 4000,
-    icon: options?.icon || "ℹ️",
+    icon: resolveIcon(options?.icon) ?? TOAST_ICON.info,
     style: getThemedToastStyle("info"),
   });
 };
@@ -95,13 +103,12 @@ export const showLoadingToast = (message: string) => {
 // Specialized toast functions for leave management with enhanced theming
 export const showLeaveSubmissionSuccess = (days: number, leaveType: string) => {
   const dayText = days === 1 ? "day" : "days";
-  const typeEmoji = getLeaveTypeEmoji(leaveType);
   const isDark = isDarkMode();
 
   return toast.success(
-    `${typeEmoji} Leave request submitted! ${days} ${dayText} pending approval.`,
+    `${leaveType} leave request submitted. ${days} ${dayText} pending approval.`,
     {
-      icon: "✅",
+      icon: TOAST_ICON.success,
       duration: 6000,
       style: {
         ...getThemedToastStyle("success"),
@@ -123,7 +130,7 @@ export const showLeaveApprovalSuccess = (
   return toast.success(
     `${employeeName}'s ${days} ${dayText} leave request has been approved.`,
     {
-      icon: "✅",
+      icon: TOAST_ICON.success,
       duration: 6000,
       style: {
         ...getThemedToastStyle("success"),
@@ -139,7 +146,7 @@ export const showLeaveRejectionSuccess = (employeeName: string) => {
   const isDark = isDarkMode();
 
   return toast(`${employeeName}'s leave request has been rejected.`, {
-    icon: "❌",
+    icon: TOAST_ICON.error,
     duration: 5000,
     style: {
       ...getThemedToastStyle("warning"),
@@ -156,7 +163,7 @@ export const showInviteSuccess = (employeeName: string, email: string) => {
   return toast.success(
     `Invitation sent to ${employeeName} (${email}) successfully!`,
     {
-      icon: "📧",
+      icon: TOAST_ICON.email,
       duration: 7000,
       style: {
         ...getThemedToastStyle("success"),
@@ -174,7 +181,7 @@ export const showConnectionError = () => {
   return toast.error(
     "Connection error. Please check your internet connection and try again.",
     {
-      icon: "🌐",
+      icon: TOAST_ICON.network,
       duration: 8000,
       style: {
         ...getThemedToastStyle("error"),
@@ -184,26 +191,6 @@ export const showConnectionError = () => {
       },
     }
   );
-};
-
-// Helper function to get emoji for leave types
-const getLeaveTypeEmoji = (leaveType: string): string => {
-  switch (leaveType?.toLowerCase()) {
-    case "annual":
-      return "🏖️";
-    case "sick":
-      return "🏥";
-    case "casual":
-      return "📅";
-    case "maternity":
-      return "👶";
-    case "paternity":
-      return "👨‍👶";
-    case "emergency":
-      return "🚨";
-    default:
-      return "📋";
-  }
 };
 
 // Dismiss all toasts
@@ -216,14 +203,20 @@ export const showActionToast = (
   message: string,
   actionLabel: string,
   _onAction: () => void, // Prefixed with _ to indicate intentionally unused
-  options?: { duration?: number; icon?: string; type?: "info" | "warning" }
+  options?: {
+    duration?: number;
+    icon?: ToastIconName | ReactElement;
+    type?: "info" | "warning";
+  }
 ) => {
   const type = options?.type || "info";
   const isDark = isDarkMode();
 
   return toast(`${message} - ${actionLabel}`, {
     duration: options?.duration || 8000,
-    icon: options?.icon || (type === "warning" ? "⚠️" : "ℹ️"),
+    icon:
+      resolveIcon(options?.icon) ??
+      (type === "warning" ? TOAST_ICON.warning : TOAST_ICON.info),
     style: {
       ...getThemedToastStyle(type),
       background: isDark
@@ -244,11 +237,10 @@ export const showSystemToast = (
   options?: { duration?: number }
 ) => {
   const isDark = isDarkMode();
-  const icons = { maintenance: "🔧", update: "🔄", security: "🔒" };
 
   return toast(message, {
     duration: options?.duration || 10000,
-    icon: icons[type],
+    icon: TOAST_ICON[type],
     style: {
       ...getThemedToastStyle("info"),
       background: isDark
@@ -265,7 +257,7 @@ export const showQuickSuccess = (message: string = "Success!") => {
 
   return toast.success(message, {
     duration: 3000,
-    icon: "🎉",
+    icon: TOAST_ICON.celebrate,
     style: {
       ...getThemedToastStyle("success"),
       background: isDark

@@ -1,9 +1,9 @@
 /**
  * Locale-aware date and number formatting.
  *
- * Translating UI strings is only half of i18n — dates, months and weekday names
+ * Translating UI strings is only half of i18n - dates, months and weekday names
  * are user-visible content too. Before this existed, the app called
- * `toLocaleDateString("en-US", …)` or `toLocaleDateString(undefined, …)` in 35
+ * `toLocaleDateString("en-US", ...)` or `toLocaleDateString(undefined, ...)` in 35
  * places: the first pins output to English regardless of the chosen language,
  * the second follows the *browser's* locale, which has nothing to do with the
  * language the user picked in Nexora. Either way, switching to Urdu or Japanese
@@ -15,7 +15,7 @@
 import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
-/** Cache formatters — constructing `Intl.*` is expensive relative to reuse. */
+/** Cache formatters - constructing `Intl.*` is expensive relative to reuse. */
 const dateCache = new Map<string, Intl.DateTimeFormat>();
 const numberCache = new Map<string, Intl.NumberFormat>();
 
@@ -72,7 +72,7 @@ export const formatDateIn = (
   opts: Intl.DateTimeFormatOptions = { year: "numeric", month: "short", day: "numeric" }
 ): string => {
   const d = asDate(value);
-  return d ? dateFormatter(locale, opts).format(d) : "—";
+  return d ? dateFormatter(locale, opts).format(d) : "-";
 };
 
 /* ------------------------------------------------------------------ */
@@ -82,13 +82,13 @@ export const formatDateIn = (
 export interface Formatters {
   /** Active BCP-47 locale, e.g. "ur". */
   locale: string;
-  /** "12 Aug 2026" — the default medium date. */
+  /** "12 Aug 2026" - the default medium date. */
   date: (value: string | number | Date, opts?: Intl.DateTimeFormatOptions) => string;
   /** "12 August 2026" */
   dateLong: (value: string | number | Date) => string;
   /** "12 Aug 2026, 14:30" */
   dateTime: (value: string | number | Date) => string;
-  /** "Aug" — short month, for chart axes. */
+  /** "Aug" - short month, for chart axes. */
   monthShort: (monthIndex: number) => string;
   /** "August" */
   monthLong: (monthIndex: number) => string;
@@ -102,7 +102,7 @@ export interface Formatters {
  * Locale-bound formatters for the active language.
  *
  * The returned object is memoised on the language, so it is a stable dependency
- * for `useMemo` — and, like `t`, it *changes* when the language changes, which
+ * for `useMemo` - and, like `t`, it *changes* when the language changes, which
  * is what makes dates re-render on a switch.
  */
 export function useFormatters(): Formatters {
@@ -136,10 +136,10 @@ export function useFormatters(): Formatters {
         dateFormatter(locale, { month: "long" }).format(new Date(2000, i, 1)),
       weekday: (v) => {
         const d = asDate(v);
-        return d ? dateFormatter(locale, { weekday: "long" }).format(d) : "—";
+        return d ? dateFormatter(locale, { weekday: "long" }).format(d) : "-";
       },
       number: (v, opts) =>
-        Number.isFinite(v) ? numberFormatter(locale, opts ?? {}).format(v) : "—",
+        Number.isFinite(v) ? numberFormatter(locale, opts ?? {}).format(v) : "-",
     }),
     [locale, date]
   );

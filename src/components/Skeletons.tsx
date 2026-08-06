@@ -269,7 +269,7 @@ export const ReportSkeleton: React.FC = () => (
 /* --------------------------- Route fallback ------------------------------ */
 /**
  * Neutral placeholder shown while a lazily-loaded route chunk downloads.
- * Deliberately generic — a page header, a metric row and a content block —
+ * Deliberately generic - a page header, a metric row and a content block -
  * so it reads as "this page is loading" for any screen in the app rather
  * than promising a layout the real page may not have.
  */

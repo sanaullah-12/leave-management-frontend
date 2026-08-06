@@ -7,8 +7,8 @@ interface InlineLoaderProps {
 }
 
 /**
- * Three bouncing dots in the current text color — for inside buttons, chips,
- * and inline "…in progress" states. No blocking, no browser spinner.
+ * Three bouncing dots in the current text color - for inside buttons, chips,
+ * and inline "...in progress" states. No blocking, no browser spinner.
  */
 const InlineLoader: React.FC<InlineLoaderProps> = ({ label, className = "" }) => (
   <span className={`inline-flex items-center gap-2 ${className}`}>

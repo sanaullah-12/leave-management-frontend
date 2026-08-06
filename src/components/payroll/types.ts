@@ -1,12 +1,12 @@
 /**
- * Payroll — domain types.
+ * Payroll - domain types.
  *
  * The whole module's data model lives here. These shapes are deliberately
  * transport-agnostic: today {@link payrollService} persists them locally, but
  * they map 1:1 onto a future REST/GraphQL payroll API without a single UI
  * change. Anything that would force a schema break later (extra earning kinds,
- * statutory deductions, loans, multi-currency) is expressed as *data* — a
- * salary component — rather than as a new hard-coded field.
+ * statutory deductions, loans, multi-currency) is expressed as *data* - a
+ * salary component - rather than as a new hard-coded field.
  */
 
 /* ------------------------------------------------------------------ */
@@ -21,7 +21,7 @@
 export interface PayrollPeriod {
   /** Four-digit year, e.g. 2026. */
   year: number;
-  /** 1–12. */
+  /** 1-12. */
   month: number;
 }
 
@@ -39,7 +39,7 @@ export type ComponentKind = "earning" | "deduction";
  * How a component's amount is derived.
  *
  * New modes are registered with the engine at runtime
- * (see `registerComputeMode`) — the union is widened, nothing else changes.
+ * (see `registerComputeMode`) - the union is widened, nothing else changes.
  */
 export type ComputeMode = "fixed" | "percentOfBasic" | "percentOfGross";
 
@@ -47,8 +47,8 @@ export type ComputeMode = "fixed" | "percentOfBasic" | "percentOfGross";
  * Where a component's value comes from.
  *
  * V1 only ever produces `manual` and `tax` components. The rest are declared
- * up-front so that future modules (attendance, loans, bonuses…) can emit
- * components the engine already knows how to total, present and audit —
+ * up-front so that future modules (attendance, loans, bonuses...) can emit
+ * components the engine already knows how to total, present and audit -
  * without touching the engine, the tables or the payslip.
  */
 export type ComponentSource =
@@ -72,7 +72,7 @@ export interface SalaryComponent {
   name: string;
   kind: ComponentKind;
   mode: ComputeMode;
-  /** Amount when `mode === "fixed"`, otherwise a percentage (0–100). */
+  /** Amount when `mode === "fixed"`, otherwise a percentage (0-100). */
   value: number;
   /** Counts toward taxable income. Earnings only. */
   taxable: boolean;
@@ -163,7 +163,7 @@ export interface PayslipComputation {
   deductions: PayslipLine[];
   /** Basic + all enabled earnings. */
   grossEarnings: number;
-  /** Gross minus basic — the "Allowances" column. */
+  /** Gross minus basic - the "Allowances" column. */
   totalAllowances: number;
   totalDeductions: number;
   /** Portion of gross flagged taxable (drives the tax line). */
@@ -179,7 +179,7 @@ export interface PayslipComputation {
 export type PayrollRunStatus = "draft" | "processed" | "paid";
 export type PayslipStatus = "generated" | "downloaded" | "printed";
 
-/** A generated payslip — one employee, one period, frozen at generation time. */
+/** A generated payslip - one employee, one period, frozen at generation time. */
 export interface Payslip {
   id: string;
   runId: string;
@@ -216,7 +216,7 @@ export interface PayrollSettings {
   companyName: string;
   /** ISO-4217 code, e.g. "PKR". Single-currency in V1, per-run in the future. */
   currency: string;
-  /** Day of month salaries are paid, 1–31 (clamped to the month's length). */
+  /** Day of month salaries are paid, 1-31 (clamped to the month's length). */
   salaryDate: number;
   /** Percentage applied to taxable earnings, 0 disables the tax line. */
   defaultTaxPercent: number;
@@ -233,7 +233,7 @@ export interface PayrollState {
   runs: PayrollRun[];
   payslips: Payslip[];
   settings: PayrollSettings;
-  /** Schema version — lets `payrollService` migrate old local data safely. */
+  /** Schema version - lets `payrollService` migrate old local data safely. */
   version: number;
 }
 
@@ -242,7 +242,7 @@ export interface PayrollState {
 /* ------------------------------------------------------------------ */
 
 /**
- * An employee joined with their structure and its computed totals — the row
+ * An employee joined with their structure and its computed totals - the row
  * shape every payroll table renders. Built once per data change and memoised,
  * so tables never recompute money while filtering or sorting.
  */

@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import realtimeReducer from "./realtimeSlice";
 
 /**
- * Redux store — dedicated to real-time/derived UI state that Socket.IO events
+ * Redux store - dedicated to real-time/derived UI state that Socket.IO events
  * update (connection status, presence, live badges). REST data stays in React
  * Query; the two are kept in sync by the socket layer (see useSocket).
  */

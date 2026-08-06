@@ -17,7 +17,7 @@ export function voiceIdOf(n: AppNotification): string | null {
 
 /**
  * Live in-app notifications via background polling (no page refresh needed).
- * Shared across the bell, the notifications page and the dashboard toaster —
+ * Shared across the bell, the notifications page and the dashboard toaster -
  * same query key ⇒ one source of truth, optimistic read updates everywhere.
  */
 export function useNotifications(options?: { limit?: number; pollMs?: number }) {
@@ -25,7 +25,7 @@ export function useNotifications(options?: { limit?: number; pollMs?: number }) 
   const qc = useQueryClient();
   const limit = options?.limit ?? 20;
 
-  // Real-time via Socket.IO (see useSocket) — no polling. We keep a light
+  // Real-time via Socket.IO (see useSocket) - no polling. We keep a light
   // refetch-on-focus as a safety net for missed events after sleep/offline.
   const query = useQuery({
     queryKey: [...NOTIF_KEY, limit],

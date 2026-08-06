@@ -1,10 +1,10 @@
 /**
- * Payroll — payslip document composer.
+ * Payroll - payslip document composer.
  *
  * Builds one fully self-contained A4 HTML document from a payslip. The *same*
  * string backs the on-screen preview, the printer and the PDF, which is the
  * only way to guarantee an employee's downloaded payslip matches what HR
- * approved — a second, hand-maintained React rendering would inevitably drift.
+ * approved - a second, hand-maintained React rendering would inevitably drift.
  *
  * Styles are inlined and scoped to the document, so nothing here can be
  * affected by (or leak into) the app's Tailwind layer.
@@ -17,7 +17,7 @@ export interface PayslipRenderOptions {
   settings: PayrollSettings;
   /** Company mark as a data URL, so the document stays portable. */
   logoDataUrl?: string;
-  /** Pay date ISO string — falls back to the payslip's generation date. */
+  /** Pay date ISO string - falls back to the payslip's generation date. */
   payDate?: string;
 }
 
@@ -57,7 +57,7 @@ export function composePayslipHtml(
   const currency = computation.currency;
 
   // Basic is presented as the first earning line so the breakdown sums visibly
-  // to gross — the engine keeps it separate, the document reunites them.
+  // to gross - the engine keeps it separate, the document reunites them.
   const earningRows = [
     lineRow(
       {
@@ -81,7 +81,7 @@ export function composePayslipHtml(
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8" /><title>${esc(
-    `Payslip — ${employee.name} — ${formatPeriod(period)}`
+    `Payslip - ${employee.name} - ${formatPeriod(period)}`
   )}</title>
 <style>
   @page { size: A4; margin: 0; }

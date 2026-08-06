@@ -1,9 +1,9 @@
 /**
- * Payroll — payslip preview.
+ * Payroll - payslip preview.
  *
  * Renders the composed payslip document inside a sandboxed iframe and scales it
  * to fit the modal. Using the real document (rather than a React lookalike)
- * means the preview *is* the PDF — there is no second rendering path that could
+ * means the preview *is* the PDF - there is no second rendering path that could
  * disagree with what the employee receives.
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -18,7 +18,7 @@ import { buildPayslipHtml } from "./exporters";
 import { formatPeriod } from "./formatters";
 import type { PayrollSettings, Payslip } from "./types";
 
-/** A4 width at 96dpi — the natural width of the composed document. */
+/** A4 width at 96dpi - the natural width of the composed document. */
 const A4_WIDTH_PX = 794;
 
 interface Props {
@@ -44,7 +44,7 @@ const PayslipPreviewModal: React.FC<Props> = ({
   const [scale, setScale] = useState(1);
   const shellRef = useRef<HTMLDivElement>(null);
 
-  // Compose only while open — building the document (and inlining the logo)
+  // Compose only while open - building the document (and inlining the logo)
   // has no reason to run for a closed modal.
   useEffect(() => {
     let cancelled = false;
@@ -76,7 +76,7 @@ const PayslipPreviewModal: React.FC<Props> = ({
   const title = useMemo(
     () =>
       payslip
-        ? `${payslip.employee.name} — ${formatPeriod(payslip.period)}`
+        ? `${payslip.employee.name} - ${formatPeriod(payslip.period)}`
         : "Payslip",
     [payslip]
   );
@@ -141,7 +141,7 @@ const PayslipPreviewModal: React.FC<Props> = ({
           </div>
         ) : (
           <div className="flex h-64 items-center justify-center">
-            <InlineLoader label="Preparing payslip…" />
+            <InlineLoader label="Preparing payslip..." />
           </div>
         )}
       </div>

@@ -1,408 +1,573 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import {
-  UserGroupIcon,
-  CalendarDaysIcon,
   BanknotesIcon,
-  CheckCircleIcon,
-  ExclamationCircleIcon,
   ArrowUpRightIcon,
-  PlayCircleIcon,
-  DocumentTextIcon,
+  PlusIcon,
   Cog6ToothIcon,
-  AdjustmentsHorizontalIcon,
+  DocumentTextIcon,
+  ClockIcon,
+  ChartPieIcon,
+  ReceiptPercentIcon,
+  UserGroupIcon,
+  CheckIcon,
 } from "@heroicons/react/24/outline";
 import {
   AreaChart,
   Area,
+  CartesianGrid,
   XAxis,
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
 import { useTheme } from "../../context/ThemeContext";
+import { accentFor, accentSoftFor } from "../../lib/themeTokens";
 import { staggerContainer, staggerItem } from "../../lib/motion";
-import { CARD, relativeTime } from "../../lib/surfaces";
+import { relativeTime } from "../../lib/surfaces";
+import Avatar from "../../components/Avatar";
 import { usePayroll } from "../../components/payroll/PayrollProvider";
-import PayrollStatCards, {
-  type StatTile,
-} from "../../components/payroll/PayrollStatCards";
 import {
   PayrollPageHeader,
-  PayrollSection,
   PayrollEmptyState,
   PayrollStatsSkeleton,
   StatusPill,
 } from "../../components/payroll/PayrollUI";
+import {
+  DASH_CARD,
+  CARD_LINK,
+  AccentEdge,
+  AccentGlow,
+  CardHead,
+  Money,
+  RangeTabs,
+  TrendBadge,
+  SummaryStat,
+  SegmentedGauge,
+  GaugeLegend,
+  CycleCard,
+  type RangeOption,
+} from "../../components/payroll/PayrollDashboardUI";
 import { RUN_STATUS } from "../../components/payroll/constants";
 import {
   formatMoney,
-  formatMoneyCompact,
   formatPeriod,
   formatPeriodShort,
-  ordinal,
+  formatDate,
+  payDateFor,
   periodKey,
   recentPeriods,
 } from "../../components/payroll/formatters";
 import { findRunForPeriod } from "../../components/payroll/payrollService";
 
-/** Theme accent hex — charts are SVG and can't use the themed CSS classes. */
-const THEME_ACCENT: Record<string, string> = {
-  black: "#374151",
-  purple: "#9c5fd1",
-  blue: "#2563eb",
-  pink: "#db2777",
-  violet: "#7c3aed",
-  indigo: "#4f46e5",
-  orange: "#ea580c",
-  teal: "#0d9488",
-  bronze: "#b45309",
-  mint: "#10b981",
-};
+/** Trend windows offered above the cost chart. */
+const RANGES: readonly RangeOption[] = [
+  { label: "3M", months: 3 },
+  { label: "6M", months: 6 },
+  { label: "1Y", months: 12 },
+];
 
-/** How many months of history the trend chart shows. */
-const TREND_MONTHS = 6;
+/** Rows in the transaction list before it defers to the payslips screen. */
+const RECENT_PAYSLIPS = 5;
 
 /**
- * Payroll Dashboard — the health check.
+ * Payroll Dashboard - the health check.
  *
- * Answers four questions at a glance: who is on payroll, what this month costs,
- * whether it has been processed, and what still needs attention. Every figure
- * comes from the shared provider, so it can never disagree with the salary
- * table or the payslips.
+ * Answers four questions at a glance: what payroll costs and how that is
+ * trending, how much of this month is paid, who was paid recently, and what
+ * is due next. Every figure comes from the shared provider, so it can never
+ * disagree with the salary table or the payslips.
  */
 const PayrollDashboardPage: React.FC = () => {
   const { t } = useTranslation("payroll");
   const navigate = useNavigate();
-  const { colorScheme } = useTheme();
-  const accent = THEME_ACCENT[colorScheme] ?? THEME_ACCENT.blue;
+  const { colorScheme, isDark } = useTheme();
+  const accent = accentFor(colorScheme);
+  const accentSoft = accentSoftFor(colorScheme);
 
-  const {
-    state,
-    rows,
-    payableRows,
-    totals,
-    period,
-    employees,
-    employeesLoading,
-  } = usePayroll();
-  const { settings, runs } = state;
+  const { state, rows, payableRows, totals, period, employees, employeesLoading } =
+    usePayroll();
+  const { settings, runs, payslips } = state;
+
+  const [months, setMonths] = useState(6);
 
   const currentRun = useMemo(
     () => findRunForPeriod(runs, period),
     [runs, period]
   );
 
-  const pendingCount = rows.length - payableRows.length;
+  /* ---------------- Cost trend ---------------- */
 
-  /* ---------------- KPI tiles ---------------- */
-
-  const tiles: StatTile[] = useMemo(
-    () => [
-      {
-        label: t("stats.totalEmployees"),
-        value: employees.length,
-        caption: `${payableRows.length} ready for payroll`,
-        icon: <UserGroupIcon className="h-6 w-6" />,
-        gradient: "from-blue-500 to-indigo-600",
-      },
-      {
-        label: "Payroll Month",
-        value: formatPeriod(period),
-        caption: currentRun
-          ? `Processed ${relativeTime(currentRun.generatedAt)}`
-          : "Not processed yet",
-        icon: <CalendarDaysIcon className="h-6 w-6" />,
-        gradient: "from-violet-500 to-purple-600",
-      },
-      {
-        label: t("stats.totalPayroll"),
-        value: formatMoneyCompact(totals.totalNet, settings.currency),
-        caption: `Gross ${formatMoneyCompact(
-          totals.totalGross,
-          settings.currency
-        )} • across ${payableRows.length} employees`,
-        icon: <BanknotesIcon className="h-6 w-6" />,
-        gradient: "from-emerald-500 to-teal-600",
-      },
-      {
-        label: t("stats.processed"),
-        value: currentRun?.employeeCount ?? 0,
-        caption: currentRun
-          ? `Payslips issued for ${formatPeriod(period)}`
-          : "Run payroll to issue payslips",
-        icon: <CheckCircleIcon className="h-6 w-6" />,
-        gradient: "from-cyan-500 to-blue-600",
-      },
-      {
-        label: t("stats.pendingSetup"),
-        value: pendingCount,
-        caption: pendingCount
-          ? "Employees without an active salary"
-          : "Every employee is configured",
-        icon: <ExclamationCircleIcon className="h-6 w-6" />,
-        gradient: "from-amber-500 to-orange-600",
-      },
-    ],
-    [employees.length,
-      payableRows.length,
-      period,
-      currentRun,
-      totals,
-      settings.currency,
-      pendingCount, t]);
-
-  /* ---------------- Trend ---------------- */
-
-  // Net payroll cost per month, oldest first. Months with no run plot as zero
-  // so the gap is visible rather than silently skipped.
+  // Net payroll per month, oldest first. Months with no run plot as zero so a
+  // skipped month is visible rather than silently closing the gap.
   const trend = useMemo(() => {
     const byPeriod = new Map(runs.map((r) => [periodKey(r.period), r]));
-    return recentPeriods(TREND_MONTHS, period)
+    return recentPeriods(months, period)
       .reverse()
       .map((p) => ({
         month: formatPeriodShort(p),
         amount: byPeriod.get(periodKey(p))?.totalNet ?? 0,
       }));
-  }, [runs, period, t]);
+  }, [runs, period, months]);
 
-  const hasTrend = trend.some((t) => t.amount > 0);
-  const recentRuns = useMemo(() => runs.slice(0, 5), [runs]);
+  const hasTrend = trend.some((p) => p.amount > 0);
 
-  /* ---------------- Quick actions ---------------- */
+  // Change against the previous month. Null when there is no prior figure to
+  // compare against, so the badge hides instead of showing a fake 100%.
+  const delta = useMemo(() => {
+    if (trend.length < 2) return null;
+    const prev = trend[trend.length - 2].amount;
+    const curr = trend[trend.length - 1].amount;
+    if (prev <= 0 || curr <= 0) return null;
+    return ((curr - prev) / prev) * 100;
+  }, [trend]);
 
-  const quickActions = [
-    {
-      label: "Run Payroll",
-      description: `Process ${formatPeriod(period)}`,
-      icon: PlayCircleIcon,
-      to: "/payroll/run",
-      tint: "from-emerald-500 to-teal-600",
-    },
-    {
-      label: "Salary Setup",
-      description: `${pendingCount} employee${pendingCount === 1 ? "" : "s"} pending`,
-      icon: AdjustmentsHorizontalIcon,
-      to: "/payroll/salaries",
-      tint: "from-blue-500 to-indigo-600",
-    },
-    {
-      label: "Payslips",
-      description: `${state.payslips.length} issued`,
-      icon: DocumentTextIcon,
-      to: "/payroll/payslips",
-      tint: "from-violet-500 to-purple-600",
-    },
-    {
-      label: "Settings",
-      description: `${settings.currency} • pays on the ${ordinal(
-        settings.salaryDate
-      )}`,
-      icon: Cog6ToothIcon,
-      to: "/payroll/settings",
-      tint: "from-slate-500 to-gray-600",
-    },
-  ];
+  // The headline is the latest month that actually has a figure, falling back
+  // to what this month is projected to cost.
+  const headlineCost = useMemo(() => {
+    const latest = [...trend].reverse().find((p) => p.amount > 0);
+    return latest?.amount ?? totals.totalNet;
+  }, [trend, totals.totalNet]);
+
+  /* ---------------- This month's summary ---------------- */
+
+  const summary = useMemo(() => {
+    const expected = totals.totalNet;
+    const paid = currentRun?.status === "paid" ? currentRun.totalNet : 0;
+    const awaiting =
+      currentRun && currentRun.status !== "paid" ? currentRun.totalNet : 0;
+    const unprocessed = Math.max(0, expected - paid - awaiting);
+    const percentPaid =
+      expected > 0 ? Math.min(100, Math.round((paid / expected) * 100)) : 0;
+    return { expected, paid, awaiting, unprocessed, percentPaid };
+  }, [totals.totalNet, currentRun]);
+
+  const monthLabel = useMemo(() => {
+    const lastDay = new Date(period.year, period.month, 0).getDate();
+    const name = new Date(period.year, period.month - 1, 1).toLocaleDateString(
+      undefined,
+      { month: "long" }
+    );
+    return `From 1-${lastDay} ${name}, ${period.year}`;
+  }, [period]);
+
+  /* ---------------- Recent payslips ---------------- */
+
+  // Payslips freeze an employee snapshot without the avatar, so pull the
+  // current picture from the live employee list by id.
+  const pictureById = useMemo(
+    () => new Map(employees.map((e) => [e.id, e.profilePicture])),
+    [employees]
+  );
+
+  const recentPayslips = useMemo(
+    () => payslips.slice(0, RECENT_PAYSLIPS),
+    [payslips]
+  );
+
+  /* ---------------- Previous / upcoming ---------------- */
+
+  const gaugeSegments = useMemo(
+    () => [
+      { value: summary.paid, color: "#10b981", label: "Paid" },
+      { value: summary.awaiting, color: accent, label: "Processed" },
+      { value: summary.unprocessed, color: accentSoft, label: "Not processed" },
+    ],
+    [summary, accent, accentSoft]
+  );
+
+  const previousRun = runs[0] ?? null;
+  const upcomingPayDate = payDateFor(period, settings.salaryDate);
+  const pendingCount = rows.length - payableRows.length;
+
+  const tooltipStyle: React.CSSProperties = {
+    borderRadius: 12,
+    border: `1px solid ${isDark ? "#374151" : "#e5e7eb"}`,
+    background: isDark ? "#1f2937" : "#ffffff",
+    color: isDark ? "#f3f4f6" : "#111827",
+    fontSize: 12,
+    boxShadow: isDark
+      ? "0 4px 14px rgba(0,0,0,0.45)"
+      : "0 4px 12px rgba(0,0,0,0.08)",
+  };
 
   return (
     <motion.div
       variants={staggerContainer}
       initial="initial"
       animate="animate"
-      className="space-y-6"
+      className="space-y-4"
     >
       <motion.div variants={staggerItem}>
         <PayrollPageHeader
           title={t("dashboard.title")}
           subtitle={t("dashboard.subtitle")}
           actions={
-            <button
-              onClick={() => navigate("/payroll/run")}
-              className="btn-primary inline-flex items-center gap-2"
-            >
-              <PlayCircleIcon className="h-5 w-5" />
-              Run Payroll
-            </button>
+            <>
+              <Link
+                to="/payroll/settings"
+                aria-label="Payroll settings"
+                className="grid h-9 w-9 place-items-center rounded-full border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700/50"
+              >
+                <Cog6ToothIcon className="h-4 w-4" />
+              </Link>
+              <button
+                onClick={() => navigate("/payroll/run")}
+                className="inline-flex items-center gap-2 rounded-full bg-blue-600 py-1.5 pl-4 pr-1.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-colors hover:bg-blue-700"
+              >
+                Run Payroll
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-white/20 text-white">
+                  <PlusIcon className="h-4 w-4" />
+                </span>
+              </button>
+            </>
           }
         />
       </motion.div>
 
-      <motion.div variants={staggerItem}>
-        {employeesLoading ? (
-          <PayrollStatsSkeleton />
-        ) : (
-          <PayrollStatCards tiles={tiles} />
-        )}
-      </motion.div>
-
-      {/* ---- Trend + quick actions ---- */}
-      <motion.div
-        variants={staggerItem}
-        className="grid grid-cols-1 gap-4 lg:grid-cols-3"
-      >
-        <div className="lg:col-span-2">
-          <PayrollSection
-            title="Payroll Cost Trend"
-            description={`Net payroll over the last ${TREND_MONTHS} months`}
-            actions={
-              <span className="text-sm font-semibold tabular-nums text-gray-900 dark:text-white">
-                {formatMoney(totals.totalNet, settings.currency)}
-                <span className="ml-1.5 text-xs font-medium text-gray-400">
-                  this month
-                </span>
-              </span>
-            }
+      {employeesLoading ? (
+        <PayrollStatsSkeleton count={2} />
+      ) : (
+        <>
+          {/* ---- Cost trend + this month's summary ---- */}
+          <motion.div
+            variants={staggerItem}
+            className="grid grid-cols-1 gap-4 lg:grid-cols-3"
           >
-            {hasTrend ? (
-              <div className="h-56">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart
-                    data={trend}
-                    margin={{ top: 10, right: 8, left: 8, bottom: 0 }}
-                  >
-                    <defs>
-                      <linearGradient id="payrollTrend" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={accent} stopOpacity={0.28} />
-                        <stop offset="100%" stopColor={accent} stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis
-                      dataKey="month"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 11, fill: "#9ca3af" }}
-                    />
-                    <Tooltip
-                      cursor={{ stroke: accent, strokeWidth: 1, strokeOpacity: 0.4 }}
-                      contentStyle={{
-                        borderRadius: 12,
-                        border: "1px solid #e5e7eb",
-                        fontSize: 12,
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                      }}
-                      labelStyle={{ fontWeight: 600 }}
-                      formatter={(v: any) => [
-                        formatMoney(Number(v), settings.currency),
-                        "Net payroll",
-                      ]}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="amount"
-                      stroke={accent}
-                      strokeWidth={2.5}
-                      fill="url(#payrollTrend)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+            <section className={`${DASH_CARD} p-5 lg:col-span-2`}>
+              <AccentEdge color={accent} />
+              <AccentGlow color={accent} />
+
+              <div className="relative flex flex-wrap items-start justify-between gap-3">
+                <CardHead
+                  icon={BanknotesIcon}
+                  title="Total Payroll Cost"
+                  subtitle={`Net payout, last ${months} months`}
+                />
+                <RangeTabs
+                  options={RANGES}
+                  value={months}
+                  onChange={setMonths}
+                />
               </div>
-            ) : (
-              <PayrollEmptyState
-                compact
-                headline="No payroll history yet"
-                sub="Process your first month and the cost trend will appear here."
-                ctaLabel="Run payroll"
-                onAction={() => navigate("/payroll/run")}
+
+              <div className="relative mt-3 flex flex-wrap items-center gap-3">
+                <Money amount={headlineCost} currency={settings.currency} />
+                <TrendBadge percent={delta} label="vs last month" />
+              </div>
+
+              <div className="relative mt-4 h-52">
+                {hasTrend ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={trend}
+                      margin={{ top: 8, right: 8, left: 8, bottom: 0 }}
+                    >
+                      <defs>
+                        <linearGradient
+                          id="payrollCost"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor={accent}
+                            stopOpacity={0.30}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor={accent}
+                            stopOpacity={0}
+                          />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid
+                        vertical={false}
+                        stroke={isDark ? "#374151" : "#eef2f6"}
+                        strokeDasharray="4 4"
+                      />
+                      <XAxis
+                        dataKey="month"
+                        axisLine={false}
+                        tickLine={false}
+                        interval="preserveStartEnd"
+                        tick={{ fontSize: 11, fill: "#9ca3af" }}
+                      />
+                      <Tooltip
+                        cursor={{
+                          stroke: accentSoft,
+                          strokeWidth: 1,
+                        }}
+                        contentStyle={tooltipStyle}
+                        labelStyle={{
+                          fontWeight: 600,
+                          color: isDark ? "#f3f4f6" : "#111827",
+                        }}
+                        itemStyle={{ color: accent }}
+                        formatter={(v: any) => [
+                          formatMoney(Number(v), settings.currency),
+                          "Net payroll",
+                        ]}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="amount"
+                        stroke={accent}
+                        strokeWidth={2.5}
+                        fill="url(#payrollCost)"
+                        dot={false}
+                        activeDot={{
+                          r: 5,
+                          strokeWidth: 2,
+                          stroke: isDark ? "#1f2937" : "#fff",
+                          fill: accent,
+                        }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <PayrollEmptyState
+                    compact
+                    headline="No payroll history yet"
+                    sub="Process your first month and the cost trend will appear here."
+                    ctaLabel="Run payroll"
+                    onAction={() => navigate("/payroll/run")}
+                  />
+                )}
+              </div>
+            </section>
+
+            <section className={`${DASH_CARD} flex flex-col p-5`}>
+              <AccentEdge color={accent} />
+              <AccentGlow
+                color={accent}
+                className="-left-20 -bottom-24 h-52 w-52"
               />
-            )}
-          </PayrollSection>
-        </div>
 
-        <div className={`${CARD} p-5`}>
-          <h3 className="text-card-title text-gray-900 dark:text-white">
-            Quick Actions
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Jump straight to what needs doing.
-          </p>
-          <div className="mt-4 space-y-2">
-            {quickActions.map((a) => (
-              <Link
-                key={a.label}
-                to={a.to}
-                className="group flex items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.04]"
-              >
-                <span
-                  className={`grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl bg-gradient-to-br ${a.tint} text-white shadow-sm transition-transform duration-300 group-hover:scale-105`}
-                >
-                  <a.icon className="h-5 w-5" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-semibold text-gray-900 dark:text-white">
-                    {a.label}
-                  </span>
-                  <span className="block truncate text-xs text-gray-500 dark:text-gray-400">
-                    {a.description}
-                  </span>
-                </span>
-                <ArrowUpRightIcon className="h-4 w-4 flex-shrink-0 text-gray-300 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 dark:text-gray-600" />
-              </Link>
-            ))}
-          </div>
-        </div>
-      </motion.div>
+              <div className="relative">
+                <CardHead
+                  icon={ChartPieIcon}
+                  title="Payroll Summary"
+                  subtitle={monthLabel}
+                  action={
+                    <Link to="/payroll/history" className={CARD_LINK}>
+                      View report
+                      <ArrowUpRightIcon className="h-3.5 w-3.5" />
+                    </Link>
+                  }
+                />
+              </div>
 
-      {/* ---- Recent activity ---- */}
-      <motion.div variants={staggerItem}>
-        <PayrollSection
-          title="Recent Payroll Activity"
-          description="The latest runs and what they cost."
-          actions={
-            runs.length > 0 && (
-              <Link
-                to="/payroll/history"
-                className="btn-secondary inline-flex items-center gap-1.5 text-sm"
-              >
-                View history
-                <ArrowUpRightIcon className="h-4 w-4" />
-              </Link>
-            )
-          }
-        >
-          {recentRuns.length === 0 ? (
-            <PayrollEmptyState
-              headline="No payroll has been run yet"
-              sub="Set up salary structures, then process your first payroll month. Every run is recorded here with its full breakdown."
-              ctaLabel="Set up salaries"
-              onAction={() => navigate("/payroll/salaries")}
-            />
-          ) : (
-            <ul className="divide-y divide-gray-100 dark:divide-gray-800">
-              {recentRuns.map((run) => (
-                <li key={run.id}>
-                  <Link
-                    to="/payroll/history"
-                    className="group flex flex-wrap items-center gap-3 rounded-xl px-2 py-3 transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.03]"
-                  >
-                    <span className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl bg-[var(--accent-soft)] text-[var(--accent)]">
-                      <BanknotesIcon className="h-5 w-5" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-semibold text-gray-900 dark:text-white">
-                        {formatPeriod(run.period)} payroll
-                      </span>
-                      <span className="block text-xs text-gray-500 dark:text-gray-400">
-                        {run.employeeCount} employees • by {run.generatedBy} •{" "}
-                        {relativeTime(run.generatedAt)}
-                      </span>
-                    </span>
-                    <span className="text-right">
-                      <span className="block text-sm font-bold tabular-nums text-gray-900 dark:text-white">
-                        {formatMoney(run.totalNet, run.currency)}
-                      </span>
-                      <span className="block text-[11px] text-gray-400">
-                        net payout
-                      </span>
-                    </span>
-                    <StatusPill status={RUN_STATUS[run.status]} />
+              <div className="relative mt-4 flex items-start divide-x divide-gray-200 dark:divide-gray-700">
+                <SummaryStat
+                  label="Payment"
+                  amount={summary.expected}
+                  currency={settings.currency}
+                  tone={accent}
+                />
+                <SummaryStat
+                  label="Pending"
+                  amount={summary.awaiting + summary.unprocessed}
+                  currency={settings.currency}
+                  tone="#f59e0b"
+                />
+                <SummaryStat
+                  label="Paid"
+                  amount={summary.paid}
+                  currency={settings.currency}
+                  tone="#10b981"
+                />
+              </div>
+
+              <div className="relative flex flex-1 flex-col items-center justify-center pt-5">
+                <SegmentedGauge
+                  segments={gaugeSegments}
+                  centerLabel={`${summary.percentPaid}%`}
+                  centerCaption="paid"
+                />
+                <GaugeLegend items={gaugeSegments} />
+              </div>
+            </section>
+          </motion.div>
+
+          {/* ---- Transaction history + payroll cycle ---- */}
+          <motion.div
+            variants={staggerItem}
+            className="grid grid-cols-1 gap-4 lg:grid-cols-3"
+          >
+            <section className={`${DASH_CARD} p-5 lg:col-span-2`}>
+              <AccentEdge color={accent} />
+              <CardHead
+                icon={ReceiptPercentIcon}
+                title="Transaction History"
+                subtitle={`${payslips.length} payslip${
+                  payslips.length === 1 ? "" : "s"
+                } issued to date`}
+                action={
+                  <Link to="/payroll/payslips" className={CARD_LINK}>
+                    See All
+                    <ArrowUpRightIcon className="h-3.5 w-3.5" />
                   </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </PayrollSection>
-      </motion.div>
+                }
+              />
+
+              {recentPayslips.length === 0 ? (
+                <PayrollEmptyState
+                  headline="No payslips issued yet"
+                  sub="Run payroll for this month and every payslip will be listed here with its net payout."
+                  ctaLabel="Run payroll"
+                  onAction={() => navigate("/payroll/run")}
+                />
+              ) : (
+                <ul className="mt-2 divide-y divide-gray-100 dark:divide-gray-700/60">
+                  {recentPayslips.map((slip) => (
+                    <li
+                      key={slip.id}
+                      className="group/row -mx-2 flex flex-wrap items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-gray-50/80 dark:hover:bg-white/[0.04]"
+                    >
+                      <span className="relative flex-shrink-0">
+                        <Avatar
+                          src={pictureById.get(slip.employee.id)}
+                          name={slip.employee.name}
+                          size="md"
+                          className="ring-2 ring-white shadow-sm dark:ring-gray-800"
+                        />
+                        {/* Every listed payslip has been issued, so the marker
+                            is a settled tick rather than a status colour. */}
+                        <span className="absolute -bottom-0.5 -right-0.5 grid h-3.5 w-3.5 place-items-center rounded-full text-blue-600 dark:text-blue-400">
+                          <CheckIcon className="h-2 w-2 text-white" />
+                        </span>
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+                          {slip.employee.name}
+                        </p>
+                        <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+                          {slip.employee.designation ||
+                            slip.employee.department ||
+                            "Employee"}
+                        </p>
+                      </div>
+                      <div className="hidden w-32 sm:block">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {formatDate(slip.generatedAt)}
+                        </p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500">
+                          {formatPeriod(slip.period)}
+                        </p>
+                      </div>
+                      <Money
+                        amount={slip.computation.netSalary}
+                        currency={slip.computation.currency}
+                        size="text-sm"
+                        className="w-28 justify-end"
+                      />
+                      <button
+                        onClick={() => navigate("/payroll/payslips")}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 transition-all hover:border-blue-600/40 hover:bg-blue-600/[0.06] hover:text-blue-700 dark:border-gray-700 dark:bg-transparent dark:text-gray-200 dark:hover:border-blue-400/40 dark:hover:bg-blue-400/10 dark:hover:text-blue-300"
+                      >
+                        <DocumentTextIcon className="h-4 w-4" />
+                        View payslip
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            <div className="space-y-4">
+              {/* Previous payroll */}
+              <CycleCard
+                icon={BanknotesIcon}
+                label="Previous Payroll"
+                meta={previousRun ? formatDate(previousRun.payDate) : "-"}
+                tone={previousRun ? "settled" : "idle"}
+              >
+                {previousRun ? (
+                  <>
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                      <Money
+                        amount={previousRun.totalNet}
+                        currency={previousRun.currency}
+                        size="text-2xl"
+                        compactAbove={100_000_000}
+                      />
+                      <StatusPill status={RUN_STATUS[previousRun.status]} />
+                    </div>
+                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                      {previousRun.employeeCount} employees, processed{" "}
+                      {relativeTime(previousRun.generatedAt)}
+                    </p>
+                  </>
+                ) : (
+                  <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
+                    Nothing processed yet.
+                  </p>
+                )}
+              </CycleCard>
+
+              {/* Upcoming payroll */}
+              <CycleCard
+                icon={ClockIcon}
+                label="Upcoming Payroll"
+                meta={formatDate(upcomingPayDate)}
+                tone={currentRun?.status === "paid" ? "settled" : "due"}
+              >
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                  <Money
+                    amount={totals.totalNet}
+                    currency={settings.currency}
+                    size="text-2xl"
+                    compactAbove={100_000_000}
+                  />
+                  <StatusPill
+                    status={
+                      currentRun ? RUN_STATUS[currentRun.status] : RUN_STATUS.draft
+                    }
+                  />
+                </div>
+
+                {/* Readiness strip. Sits on its own surface so the call to
+                    action reads as the next step, not as more figures. */}
+                <div className="mt-4 rounded-xl border border-gray-200/70 bg-white/70 p-3 backdrop-blur-sm dark:border-gray-700/50 dark:bg-gray-900/30">
+                  <div className="flex items-center gap-2">
+                    <UserGroupIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                      Ready to pay
+                    </p>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+                        {payableRows.length} of {rows.length} employees
+                      </p>
+                      <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+                        {pendingCount > 0
+                          ? `${pendingCount} still need a salary structure`
+                          : "Every employee is configured"}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() =>
+                        navigate(
+                          pendingCount > 0 ? "/payroll/salaries" : "/payroll/run"
+                        )
+                      }
+                      className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-blue-700"
+                    >
+                      {pendingCount > 0 ? "Set up" : "Run now"}
+                      <ArrowUpRightIcon className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </CycleCard>
+            </div>
+          </motion.div>
+        </>
+      )}
     </motion.div>
   );
 };

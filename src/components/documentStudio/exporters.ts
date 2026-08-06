@@ -1,5 +1,5 @@
 /**
- * Document Studio — output pipeline.
+ * Document Studio - output pipeline.
  *
  * Composes the final, standalone A4 HTML (letterhead + body + watermark) and
  * ships it to PDF / DOCX / the printer. All heavy libraries are imported
@@ -130,7 +130,7 @@ async function waitForImages(doc: Document): Promise<void> {
 
 /**
  * Render the exact A4 page (margins baked in) to a canvas, then place it into a
- * true A4 jsPDF — splitting across pages when the content is long. This yields
+ * true A4 jsPDF - splitting across pages when the content is long. This yields
  * a download that matches the on-screen preview pixel-for-pixel, with no edge
  * clipping.
  */
@@ -204,7 +204,7 @@ export async function exportPdf(opts: ComposeOptions): Promise<void> {
 }
 
 /* ------------------------------------------------------------------ */
-/* DOCX (Word-compatible HTML — no extra dependency)                   */
+/* DOCX (Word-compatible HTML - no extra dependency)                   */
 /* ------------------------------------------------------------------ */
 
 export function exportDocx(opts: ComposeOptions): void {

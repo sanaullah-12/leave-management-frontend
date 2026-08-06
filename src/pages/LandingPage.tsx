@@ -10,12 +10,12 @@ import { PricingSection, FaqSection } from "../components/landing/SocialProof";
 import { FinalCTA, LandingFooter } from "../components/landing/FinalCTA";
 
 /**
- * Nexora marketing landing page — the public front door.
+ * Nexora marketing landing page - the public front door.
  *
  * A cinematic, scroll-driven product story built on the Nexora design system
  * (Geist type, theme-aware blue/emerald brand palette, animated brand mark).
  * Every section is composed from the shared landing primitives, so motion,
- * spacing and reveal behaviour stay consistent — and everything degrades
+ * spacing and reveal behaviour stay consistent - and everything degrades
  * gracefully under prefers-reduced-motion.
  */
 const LandingPage: React.FC = () => {

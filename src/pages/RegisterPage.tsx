@@ -9,6 +9,11 @@ import AuthLayout from "../components/AuthLayout";
 import InlineLoader from "../components/InlineLoader";
 import { showInfoToast } from "../utils/toastHelpers";
 import { GoogleIcon, MicrosoftIcon } from "../components/BrandIcons";
+import {
+  PHONE_HINT,
+  PHONE_PLACEHOLDER,
+  phoneValidationRules,
+} from "../utils/phone";
 
 interface RegisterCompanyData {
   companyName: string;
@@ -58,7 +63,7 @@ const RegisterPage: React.FC = () => {
   };
 
   const handleSSO = (provider: string) =>
-    showInfoToast(`${provider} sign-up isn't set up yet — use the form below.`);
+    showInfoToast(`${provider} sign-up isn't set up yet - use the form below.`);
 
   return (
     <AuthLayout activeTab="signup">
@@ -191,11 +196,20 @@ const RegisterPage: React.FC = () => {
         <div>
           <label className={labelClass}>Phone (optional)</label>
           <input
-            {...register("phone")}
+            {...register("phone", phoneValidationRules)}
             type="tel"
-            placeholder="+92 300 0000000"
+            placeholder={PHONE_PLACEHOLDER}
             className={inputClass}
           />
+          {errors.phone ? (
+            <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
+              {errors.phone.message}
+            </p>
+          ) : (
+            <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+              {PHONE_HINT}
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

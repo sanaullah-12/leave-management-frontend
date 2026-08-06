@@ -1,5 +1,5 @@
 /**
- * Document Studio — shared visual tokens.
+ * Document Studio - shared visual tokens.
  *
  * The card surfaces now live in `lib/surfaces` (shared with Payroll and the
  * dashboard) and are re-exported here so existing Studio imports keep working.

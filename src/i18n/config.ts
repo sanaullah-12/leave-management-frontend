@@ -1,5 +1,5 @@
 /**
- * i18n — configuration and language registry.
+ * i18n - configuration and language registry.
  *
  * This file is the single source of truth for *which* languages exist and
  * *which* namespaces a language can provide. Nothing else in the application
@@ -8,8 +8,8 @@
  * ## Adding a language requires no code change
  *
  * The registry is discovered at build time from the filesystem via Vite's
- * `import.meta.glob`. Dropping a new folder under `locales/` — containing a
- * `_meta.json` plus its namespace files — is enough: the language appears in
+ * `import.meta.glob`. Dropping a new folder under `locales/` - containing a
+ * `_meta.json` plus its namespace files - is enough: the language appears in
  * the switcher, gets its own lazily-loaded chunks and inherits English for any
  * key it has not translated yet. No registry edit, no logic edit.
  *
@@ -25,7 +25,7 @@ export interface LanguageMeta {
   code: string;
   /** English name, for developer-facing surfaces and sorting. */
   name: string;
-  /** The language's name in its own script — what users actually recognise. */
+  /** The language's name in its own script - what users actually recognise. */
   nativeName: string;
   dir: TextDirection;
   /** Regional flag emoji used as a lightweight glyph in the switcher. */
@@ -70,7 +70,7 @@ export const SUPPORTED_LANGUAGES: string[] = Object.values(LANGUAGES)
 /** The language every other language falls back to, key by key. */
 export const FALLBACK_LANGUAGE = "en";
 
-/** Safe metadata lookup — unknown codes resolve to the fallback language. */
+/** Safe metadata lookup - unknown codes resolve to the fallback language. */
 export const languageMeta = (code?: string | null): LanguageMeta =>
   (code && LANGUAGES[code]) || LANGUAGES[FALLBACK_LANGUAGE];
 
@@ -91,7 +91,7 @@ export const isRTL = (code?: string | null): boolean =>
  * JSON filenames inside each locale folder.
  */
 export const NAMESPACES = [
-  "common", // buttons, states, validation, units — shared by everything
+  "common", // buttons, states, validation, units - shared by everything
   "nav", // sidebar, rail, header chrome
   "auth", // login, register, invitations, password reset
   "dashboard",
@@ -113,7 +113,7 @@ export type Namespace = (typeof NAMESPACES)[number];
  * Namespaces loaded up-front, before the app renders. Everything else is
  * fetched on demand by the first component that asks for it.
  *
- * Keep this list minimal — it is the only i18n cost on the critical path.
+ * Keep this list minimal - it is the only i18n cost on the critical path.
  * `common` and `nav` qualify because the app shell renders them immediately on
  * every route.
  */
@@ -132,6 +132,6 @@ export const DEFAULT_NAMESPACE: Namespace = "common";
  * Namespaced to match the app's other persisted keys (`nexora.payroll.v1`,
  * `nexora.documentStudio.v1`). To move the preference server-side later,
  * change the detection order in `i18n/index.ts` and hydrate from the user
- * profile — no component needs to change.
+ * profile - no component needs to change.
  */
 export const LANGUAGE_STORAGE_KEY = "nexora.language";

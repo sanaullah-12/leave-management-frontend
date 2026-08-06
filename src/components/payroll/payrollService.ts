@@ -1,5 +1,5 @@
 /**
- * Payroll — persistence & factory service.
+ * Payroll - persistence & factory service.
  *
  * The only seam between the Payroll UI and where its data lives. Today every
  * function reads/writes `localStorage`; replacing the six I/O functions at the
@@ -35,7 +35,7 @@ import type {
 const STORAGE_KEY = "nexora.payroll.v1";
 const SCHEMA_VERSION = 1;
 
-/** Dependency-free id helper — matches the convention used by Document Studio. */
+/** Dependency-free id helper - matches the convention used by Document Studio. */
 export const uid = (prefix = "id"): string =>
   `${prefix}-${Math.random().toString(36).slice(2, 9)}${Date.now()
     .toString(36)
@@ -162,7 +162,7 @@ export interface GeneratedRun {
 /**
  * Turn a set of (employee, structure) pairs into a run plus its payslips.
  *
- * Pure and side-effect free — the store decides whether to persist the result.
+ * Pure and side-effect free - the store decides whether to persist the result.
  * That separation is what will let a future approval workflow preview a run,
  * route it for sign-off, and only then commit it.
  */
@@ -221,14 +221,14 @@ export const findRunForPeriod = (
 export function toPayrollEmployee(raw: any): PayrollEmployee {
   const department =
     typeof raw?.department === "object" && raw?.department
-      ? raw.department.name ?? "—"
-      : raw?.department ?? "—";
+      ? raw.department.name ?? "-"
+      : raw?.department ?? "-";
   return {
     id: String(raw?._id ?? raw?.id ?? ""),
-    employeeCode: raw?.employeeId ?? "—",
+    employeeCode: raw?.employeeId ?? "-",
     name: raw?.name ?? "Unknown",
-    department: department || "—",
-    designation: raw?.position ?? "—",
+    department: department || "-",
+    designation: raw?.position ?? "-",
     email: raw?.email,
     profilePicture: raw?.profilePicture,
   };
@@ -250,7 +250,7 @@ function seed(): PayrollState {
 
 /**
  * Bring a persisted blob up to the current schema. Runs on every load, so a
- * user who hasn't opened Payroll since an older release never sees a crash —
+ * user who hasn't opened Payroll since an older release never sees a crash -
  * they see defaults for anything new.
  */
 function migrate(parsed: Partial<PayrollState>): PayrollState {
@@ -278,7 +278,7 @@ export function saveState(state: PayrollState): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
-    /* quota / private mode — payroll still works for the session in memory */
+    /* quota / private mode - payroll still works for the session in memory */
   }
 }
 

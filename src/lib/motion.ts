@@ -1,6 +1,6 @@
 import type { Variants, Transition } from "framer-motion";
 
-/* Spring tokens — fast but smooth, never bouncy. */
+/* Spring tokens - fast but smooth, never bouncy. */
 export const spring: Transition = {
   type: "spring",
   stiffness: 380,
@@ -14,7 +14,7 @@ export const softSpring: Transition = {
   damping: 30,
 };
 
-/* Page entrance — fade + gentle rise. */
+/* Page entrance - fade + gentle rise. */
 export const pageVariants: Variants = {
   initial: { opacity: 0, y: 10 },
   animate: {

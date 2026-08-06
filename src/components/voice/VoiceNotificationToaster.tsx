@@ -98,11 +98,13 @@ const VoiceNotificationToaster: React.FC = () => {
               className="voice-toast pointer-events-auto relative overflow-hidden rounded-2xl border border-blue-200/60 bg-white/95 p-4 shadow-xl backdrop-blur-xl dark:border-blue-500/20 dark:bg-gray-900/95"
             >
               {/* unread accent bar */}
-              <span className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-blue-500 to-emerald-500" />
+              <span className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-blue-500 to-blue-400" />
 
               <div className="flex items-start gap-3 pl-1.5">
-                <span className="relative mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
-                  <span className="absolute inset-0 animate-ping rounded-xl bg-blue-400/25" />
+                <span className="relative mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-blue-600 dark:text-blue-400">
+                  {/* Attention pulse as an expanding ring rather than a filled
+                      plate, so the icon keeps its bare treatment. */}
+                  <span className="absolute inset-0 animate-ping rounded-xl ring-1 ring-blue-400/40" />
                   <Icon className="relative h-5 w-5" />
                 </span>
                 <div className="min-w-0 flex-1">

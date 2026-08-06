@@ -1,5 +1,5 @@
 /**
- * Payroll — the salary ledger table.
+ * Payroll - the salary ledger table.
  *
  * One table serves both Salary Management and Payroll Processing: they show the
  * identical money columns and differ only in chrome (row selection vs. row
@@ -7,7 +7,7 @@
  * automatically correct on the other, and the money always renders the same way.
  *
  * Rows are individually memoised, so selecting one row in a 2,000-employee
- * roster re-renders one row — not the table.
+ * roster re-renders one row - not the table.
  */
 import React, { useCallback, useMemo, useState } from "react";
 import { motion } from "framer-motion";
@@ -73,7 +73,7 @@ const SalaryLedgerTable: React.FC<Props> = ({
   const sorted = useMemo(() => {
     const cmp = COMPARATORS[sortKey];
     const factor = sortDir === "asc" ? 1 : -1;
-    // Copy before sorting — never mutate the memoised rows from the provider.
+    // Copy before sorting - never mutate the memoised rows from the provider.
     return [...rows].sort((a, b) => cmp(a, b) * factor);
   }, [rows, sortKey, sortDir]);
 
@@ -201,7 +201,7 @@ const LedgerRow: React.FC<RowProps> = React.memo(
   ({ row, currency, selectable, selected, onToggle, onRowClick, actions }) => {
     const { employee, structure, computation, status } = row;
     const money = (v: number | undefined) =>
-      computation ? formatMoney(v ?? 0, currency) : "—";
+      computation ? formatMoney(v ?? 0, currency) : "-";
 
     return (
       <motion.tr
@@ -248,7 +248,7 @@ const LedgerRow: React.FC<RowProps> = React.memo(
           {money(structure?.basicSalary)}
         </td>
         <td className="px-3 py-3 text-right tabular-nums text-emerald-600 dark:text-emerald-400">
-          {computation ? `+${money(computation.totalAllowances)}` : "—"}
+          {computation ? `+${money(computation.totalAllowances)}` : "-"}
         </td>
         <td className="px-3 py-3 text-right tabular-nums text-rose-600 dark:text-rose-400">
           {computation && computation.totalDeductions > 0

@@ -61,7 +61,7 @@ const StudioOverviewCards: React.FC<Props> = ({ stats }) => {
     },
     {
       label: "Most Used Template",
-      value: stats.mostUsedTemplate?.name ?? "—",
+      value: stats.mostUsedTemplate?.name ?? "-",
       caption: stats.mostUsedTemplate
         ? `${stats.mostUsedTemplate.usageCount} generations`
         : "No usage yet",

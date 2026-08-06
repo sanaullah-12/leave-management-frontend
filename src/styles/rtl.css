@@ -10,7 +10,7 @@
      • grid column order
      • `text-align: start/end`, logical properties, scrollbar side
 
-   What the browser does NOT flip is Tailwind's *physical* utilities —
+   What the browser does NOT flip is Tailwind's *physical* utilities -
    `ml-*`, `pl-*`, `left-*`, `text-left`, `origin-left` and friends. The
    codebase uses those extensively, so this file mirrors the handful of
    places where a physical value controls page-level structure. Component
@@ -20,7 +20,7 @@
 
    The long-term fix is Tailwind's logical utilities (`ms-*`, `me-*`,
    `ps-*`, `pe-*`, `start-*`, `end-*`), which flip automatically. Convert
-   opportunistically when touching a component — see
+   opportunistically when touching a component - see
    docs/INTERNATIONALIZATION.md.
    ============================================================ */
 
@@ -108,7 +108,7 @@ html[lang="ur"] {
 
 /* Directional glyphs (chevrons, arrows) point the wrong way when mirrored.
    Opt a specific icon in with `data-flip-rtl`, rather than blanket-flipping
-   every SVG — most icons (search, bell, user) must NOT flip. */
+   every SVG - most icons (search, bell, user) must NOT flip. */
 [dir="rtl"] [data-flip-rtl] {
   transform: scaleX(-1);
 }

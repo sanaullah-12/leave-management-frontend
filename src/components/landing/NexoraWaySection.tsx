@@ -10,10 +10,10 @@ import AppLogo from "../AppLogo";
 import { GradientText, Reveal, GlowOrb } from "./primitives";
 
 /* ============================================================
-   "The Nexora way" — work in context.
+   "The Nexora way" - work in context.
    A pinned scene: the Nexora core sits dead-centre while six real
    HR product cards fly INTO the core as you scroll down (and back
-   OUT as you scroll up) — a scroll-scrubbed radial convergence.
+   OUT as you scroll up) - a scroll-scrubbed radial convergence.
    Everything, unified into one living core.
    ============================================================ */
 
@@ -43,7 +43,7 @@ const LeaveCard = () => (
   <CardShell title="Leave" ic="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z">
     <div className="flex items-center gap-2 rounded-lg bg-gray-50 p-1.5 dark:bg-white/[0.04]">
       <span className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-fuchsia-500 to-pink-500 text-[9px] font-bold text-white">JD</span>
-      <div className="min-w-0 flex-1"><div className="truncate text-[9.5px] font-medium text-gray-800 dark:text-gray-200">Jordan · Annual</div><div className="text-[8px] text-gray-400">Aug 4 – 8</div></div>
+      <div className="min-w-0 flex-1"><div className="truncate text-[9.5px] font-medium text-gray-800 dark:text-gray-200">Jordan · Annual</div><div className="text-[8px] text-gray-400">Aug 4 - 8</div></div>
       <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 text-[8px] font-semibold text-emerald-500">Approved</span>
     </div>
   </CardShell>
@@ -245,7 +245,7 @@ const NexoraWaySection: React.FC = () => {
           <GlowOrb className="right-1/4 top-16" color="rgba(47,201,141,0.12)" size={460} delay={2} />
         </div>
 
-        {/* full-screen scene — everything centres on the middle of the viewport */}
+        {/* full-screen scene - everything centres on the middle of the viewport */}
         <div className="absolute inset-0">
           {CARDS.map((c) => (
             <FloatCard key={c.i} cfg={c} progress={scrollYProgress} reduce={reduce ?? false} />

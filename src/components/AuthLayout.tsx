@@ -248,7 +248,7 @@ const BrandPanel: React.FC = () => {
           The HRMS System
         </p>
         <p className="mt-4 max-w-md text-sm leading-relaxed text-white/60">
-          Manage your workforce smarter, faster, and more efficiently — leave,
+          Manage your workforce smarter, faster, and more efficiently - leave,
           attendance, employee voice and performance, beautifully unified in one
           elegant workspace.
         </p>
@@ -262,7 +262,7 @@ const BrandPanel: React.FC = () => {
               transition={{ delay: 0.5 + i * 0.1, type: "spring", stiffness: 300, damping: 26 }}
               className="rounded-xl border border-white/10 bg-white/[0.05] p-3 backdrop-blur-sm"
             >
-              <div className="mb-2 flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-blue-500 to-emerald-500">
+              <div className="mb-2 flex h-6 w-6 items-center justify-center rounded-md text-blue-600 dark:text-blue-400">
                 <CheckIcon className="h-3.5 w-3.5 text-white" />
               </div>
               <p className="text-xs font-semibold leading-snug text-white/90">{f}</p>

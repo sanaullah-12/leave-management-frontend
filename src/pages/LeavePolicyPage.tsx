@@ -38,7 +38,7 @@ const CORE_TYPES = [
     chip: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400",
     value: "text-emerald-600 dark:text-emerald-400",
     bar: "bg-emerald-500",
-    industry: "10–20",
+    industry: "10-20",
     min: 10,
   },
   {
@@ -49,7 +49,7 @@ const CORE_TYPES = [
     chip: "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400",
     value: "text-blue-600 dark:text-blue-400",
     bar: "bg-blue-500",
-    industry: "10–15",
+    industry: "10-15",
     min: 10,
   },
   {
@@ -60,7 +60,7 @@ const CORE_TYPES = [
     chip: "bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400",
     value: "text-rose-600 dark:text-rose-400",
     bar: "bg-rose-500",
-    industry: "8–12",
+    industry: "8-12",
     min: 8,
   },
 ];
@@ -95,7 +95,7 @@ const LeavePolicyPage: React.FC = () => {
   if (user?.role !== "admin") {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/5">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl text-blue-600 dark:text-blue-400">
           <ShieldCheckIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
         </div>
         <p className="text-lg font-medium text-gray-700 dark:text-gray-200">
@@ -109,7 +109,7 @@ const LeavePolicyPage: React.FC = () => {
   }
 
   if (isLoading) {
-    return <LogoLoader label="Loading leave policies…" />;
+    return <LogoLoader label="Loading leave policies..." />;
   }
 
   // Backend returns { policy: { annual, sick, casual, maternityLeave, paternityLeave } }.
@@ -148,7 +148,7 @@ const LeavePolicyPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-600/25">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl text-blue-600 dark:text-blue-400">
             <ShieldCheckIcon className="h-6 w-6" />
           </span>
           <div>
@@ -358,7 +358,7 @@ const LeavePolicyPage: React.FC = () => {
 
         <div className={`${CARD} p-6`}>
           <div className="flex items-start gap-3">
-            <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+            <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-blue-600 dark:text-blue-400">
               <InformationCircleIcon className="h-5 w-5" />
             </span>
             <div>

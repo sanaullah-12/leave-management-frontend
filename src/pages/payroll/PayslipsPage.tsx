@@ -7,6 +7,7 @@ import {
   PrinterIcon,
   ArrowDownTrayIcon,
   TableCellsIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 import Avatar from "../../components/Avatar";
 import Select from "../../components/ui/Select";
@@ -37,7 +38,7 @@ import {
 import type { Payslip } from "../../components/payroll/types";
 
 /**
- * Payslips — every issued payslip, viewable, printable and downloadable.
+ * Payslips - every issued payslip, viewable, printable and downloadable.
  *
  * Rows render from the frozen computation stored on each payslip, never from
  * the employee's *current* structure: a payslip must show what was actually
@@ -141,7 +142,7 @@ const PayslipsPage: React.FC = () => {
     >
       <motion.div variants={staggerItem}>
         <PayrollPageHeader
-          glyph="📄"
+          icon={DocumentTextIcon}
           title={t("payslips.title")}
           subtitle={t("payslips.subtitle")}
           actions={
@@ -207,7 +208,7 @@ const PayslipsPage: React.FC = () => {
           {payslips.length === 0 ? (
             <PayrollEmptyState
               headline="No payslips yet"
-              sub="Once you process a payroll month, every employee's payslip appears here — ready to view, print or download as a PDF."
+              sub="Once you process a payroll month, every employee's payslip appears here - ready to view, print or download as a PDF."
               ctaLabel="Run payroll"
               onAction={() => navigate("/payroll/run")}
             />

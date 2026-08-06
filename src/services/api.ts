@@ -25,6 +25,8 @@ interface LeaveRequest {
 interface InviteEmployeeData {
   name: string;
   email: string;
+  /** E.164, e.g. "+923001234567". Enables WhatsApp notifications. */
+  phone?: string;
   department: string;
   position: string;
   joinDate: string;
@@ -34,6 +36,8 @@ interface InviteEmployeeData {
 interface InviteAdminData {
   name: string;
   email: string;
+  /** E.164, e.g. "+923001234567". Enables WhatsApp notifications. */
+  phone?: string;
   /** Defaulted by the invite form; the backend accepts them optionally. */
   department?: string;
   position?: string;
@@ -154,7 +158,7 @@ export const authAPI = {
   /* ---------------------------------------------------------------- */
   /* Public (token-based) flows                                        */
   /*                                                                   */
-  /* These need no session — they authenticate via a one-time token in */
+  /* These need no session - they authenticate via a one-time token in */
   /* the URL. They still go through the shared instance so they pick   */
   /* up the base URL, timeout and error shape every other call uses.   */
   /* The backend answers these with 200/400/500 only (never 401), so   */
@@ -284,7 +288,7 @@ export const attendanceAPI = {
 
     // Note: forceSync parameter is ignored for database queries since data is already stored
     if (forceSync) {
-      console.log("⚠️ forceSync parameter ignored for database queries");
+      console.log("forceSync parameter ignored for database queries");
     }
 
     if (params.toString()) {
@@ -292,7 +296,7 @@ export const attendanceAPI = {
     }
 
     console.log(
-      `📊 Fetching attendance from database: ${url} (ip parameter ${ip} ignored)`
+      `Fetching attendance from database: ${url} (ip parameter ${ip} ignored)`
     );
     return attendanceApi.get(url);
   },
@@ -324,7 +328,7 @@ export const attendanceAPI = {
       url += `?${params.toString()}`;
     }
 
-    console.log(`🔧 Fetching attendance from machine: ${url}`);
+    console.log(`Fetching attendance from machine: ${url}`);
     return attendanceApi.get(url);
   },
 
@@ -376,7 +380,7 @@ export const attendanceAPI = {
       url += `?${params.toString()}`;
     }
 
-    console.log(`👤 Employee fetching own attendance: ${url}`);
+    console.log(`Employee fetching own attendance: ${url}`);
     return attendanceApi.get(url);
   },
 };
@@ -399,7 +403,7 @@ export const employeePerformanceAPI = {
     const url = `/employee-performance/leaderboard${
       queryParams.toString() ? `?${queryParams.toString()}` : ""
     }`;
-    console.log(`🏆 Fetching employee leaderboard: ${url}`);
+    console.log(`Fetching employee leaderboard: ${url}`);
     return api.get(url);
   },
 
@@ -415,7 +419,7 @@ export const employeePerformanceAPI = {
     const url = `/employee-performance/department-performance${
       queryParams.toString() ? `?${queryParams.toString()}` : ""
     }`;
-    console.log(`📊 Fetching department performance: ${url}`);
+    console.log(`Fetching department performance: ${url}`);
     return api.get(url);
   },
 
@@ -428,7 +432,7 @@ export const employeePerformanceAPI = {
     const url = `/employee-performance/achievements${
       queryParams.toString() ? `?${queryParams.toString()}` : ""
     }`;
-    console.log(`🎖️ Fetching employee achievements: ${url}`);
+    console.log(`Fetching employee achievements: ${url}`);
     return api.get(url);
   },
 
@@ -441,7 +445,7 @@ export const employeePerformanceAPI = {
     const url = `/employee-performance/overview${
       queryParams.toString() ? `?${queryParams.toString()}` : ""
     }`;
-    console.log(`📈 Fetching performance overview: ${url}`);
+    console.log(`Fetching performance overview: ${url}`);
     return api.get(url);
   },
 };
@@ -465,7 +469,7 @@ export const machinePerformanceAPI = {
     const url = `/machine-performance/machine-leaderboard/${ip}${
       queryParams.toString() ? `?${queryParams.toString()}` : ""
     }`;
-    console.log(`🏆 Fetching machine employee leaderboard: ${url}`);
+    console.log(`Fetching machine employee leaderboard: ${url}`);
     return api.get(url);
   },
 
@@ -484,7 +488,7 @@ export const machinePerformanceAPI = {
     const url = `/machine-performance/machine-analytics/${ip}${
       queryParams.toString() ? `?${queryParams.toString()}` : ""
     }`;
-    console.log(`📊 Fetching machine analytics: ${url}`);
+    console.log(`Fetching machine analytics: ${url}`);
     return api.get(url);
   },
 
@@ -503,7 +507,7 @@ export const machinePerformanceAPI = {
     const url = `/machine-performance/machine-dashboard/${ip}${
       queryParams.toString() ? `?${queryParams.toString()}` : ""
     }`;
-    console.log(`🎯 Fetching machine dashboard: ${url}`);
+    console.log(`Fetching machine dashboard: ${url}`);
     return api.get(url);
   },
 };
@@ -526,13 +530,13 @@ export const realMachinePerformanceAPI = {
     const url = `/real-machine-performance/machine-users-performance/${machineIP}${
       queryParams.toString() ? `?${queryParams.toString()}` : ""
     }`;
-    console.log(`🎯 Fetching real machine users performance: ${url}`);
+    console.log(`Fetching real machine users performance: ${url}`);
     return api.get(url);
   },
 
   getMachineSummary: (machineIP: string) => {
     const url = `/real-machine-performance/machine-summary/${machineIP}`;
-    console.log(`📊 Fetching machine summary: ${url}`);
+    console.log(`Fetching machine summary: ${url}`);
     return api.get(url);
   },
 };

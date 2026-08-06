@@ -17,6 +17,10 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { announcementsAPI } from "../services/api";
 import {
+  categoryIcon,
+  type IconComponent,
+} from "../components/announcements/categoryIcons";
+import {
   showSuccessToast,
   showErrorToast,
 } from "../utils/toastHelpers";
@@ -52,19 +56,22 @@ interface Announcement {
 
 const CATEGORIES: Record<
   string,
-  { label: string; glyph: string; chip: string; bar: string }
+  { label: string; icon: IconComponent; chip: string; bar: string }
 > = {
-  general: { label: "General", glyph: "📌", chip: "bg-gray-100 text-gray-700 dark:bg-gray-700/60 dark:text-gray-300", bar: "from-gray-400 to-gray-500" },
-  event: { label: "Event", glyph: "📅", chip: "bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300", bar: "from-violet-500 to-purple-600" },
-  policy: { label: "Policy", glyph: "📋", chip: "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300", bar: "from-blue-500 to-indigo-600" },
-  celebration: { label: "Celebration", glyph: "🎉", chip: "bg-pink-50 text-pink-700 dark:bg-pink-500/10 dark:text-pink-300", bar: "from-pink-500 to-rose-500" },
-  update: { label: "Update", glyph: "✨", chip: "bg-cyan-50 text-cyan-700 dark:bg-cyan-500/10 dark:text-cyan-300", bar: "from-cyan-500 to-teal-600" },
-  urgent: { label: "Urgent", glyph: "🚨", chip: "bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300", bar: "from-red-500 to-rose-600" },
+  general: { label: "General", icon: categoryIcon("general"), chip: "bg-gray-100 text-gray-700 dark:bg-gray-700/60 dark:text-gray-300", bar: "from-gray-400 to-gray-500" },
+  event: { label: "Event", icon: categoryIcon("event"), chip: "bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300", bar: "from-violet-500 to-purple-600" },
+  policy: { label: "Policy", icon: categoryIcon("policy"), chip: "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300", bar: "from-blue-500 to-indigo-600" },
+  celebration: { label: "Celebration", icon: categoryIcon("celebration"), chip: "bg-pink-50 text-pink-700 dark:bg-pink-500/10 dark:text-pink-300", bar: "from-pink-500 to-rose-500" },
+  update: { label: "Update", icon: categoryIcon("update"), chip: "bg-cyan-50 text-cyan-700 dark:bg-cyan-500/10 dark:text-cyan-300", bar: "from-cyan-500 to-teal-600" },
+  urgent: { label: "Urgent", icon: categoryIcon("urgent"), chip: "bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300", bar: "from-red-500 to-rose-600" },
 };
 const CATEGORY_KEYS = Object.keys(CATEGORIES);
+// Reaction glyphs. These are product data, not decoration: the chosen emoji is
+// stored per reaction and must stay in sync with VALID_EMOJIS in
+// backend/routes/announcements.js.
 const EMOJIS = ["👍", "🎉", "❤️", "👏", "🚀", "👀"];
 
-/** Shared form-field style — matches the app's inputs (accent focus ring). */
+/** Shared form-field style - matches the app's inputs (accent focus ring). */
 const FIELD =
   "w-full rounded-xl bg-[var(--card-surface)] px-4 py-3 text-sm text-gray-900 outline-none ring-1 ring-inset ring-gray-200/70 transition-shadow placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 dark:text-gray-100 dark:placeholder-gray-500 dark:ring-white/10";
 
@@ -200,13 +207,15 @@ const AnnouncementCard: React.FC<{
             )}
             {a.pinned && (
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
-                📌 Pinned
+                <BookmarkIcon className="h-3 w-3" />
+                Pinned
               </span>
             )}
             <span
               className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${meta.chip}`}
             >
-              {meta.glyph} {meta.label}
+              <meta.icon className="h-3 w-3" />
+              {meta.label}
             </span>
             {a.audience === "admins" && (
               <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500 dark:bg-gray-700 dark:text-gray-400">
@@ -342,7 +351,7 @@ const AnnouncementModal: React.FC<{
             disabled={!valid || saving}
             className="btn-primary text-sm disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {saving ? "Posting…" : editing ? "Save changes" : "Post announcement"}
+            {saving ? "Posting..." : editing ? "Save changes" : "Post announcement"}
           </button>
         </div>
       }
@@ -365,7 +374,7 @@ const AnnouncementModal: React.FC<{
           <textarea
             value={draft.body}
             onChange={(e) => setDraft({ ...draft, body: e.target.value })}
-            placeholder="Write the details of your announcement…"
+            placeholder="Write the details of your announcement..."
             rows={6}
             maxLength={8000}
             className={`${FIELD} resize-y leading-relaxed`}
@@ -380,7 +389,7 @@ const AnnouncementModal: React.FC<{
               onChange={(v) => setDraft({ ...draft, category: v })}
               options={CATEGORY_KEYS.map((k) => ({
                 value: k,
-                label: `${CATEGORIES[k].glyph}  ${CATEGORIES[k].label}`,
+                label: CATEGORIES[k].label,
               }))}
             />
           </div>
@@ -390,8 +399,8 @@ const AnnouncementModal: React.FC<{
               value={draft.audience}
               onChange={(v) => setDraft({ ...draft, audience: v as "all" | "admins" })}
               options={[
-                { value: "all", label: "👥  Everyone" },
-                { value: "admins", label: "🔒  HR / Admins only" },
+                { value: "all", label: "Everyone" },
+                { value: "admins", label: "HR / Admins only" },
               ]}
             />
           </div>
@@ -417,7 +426,7 @@ const AnnouncementModal: React.FC<{
               className="flex w-full items-center justify-between rounded-xl bg-[var(--card-surface)] px-4 py-3 text-sm ring-1 ring-inset ring-gray-200/70 transition-shadow dark:ring-white/10"
             >
               <span className="font-medium text-gray-700 dark:text-gray-200">
-                📌 Pin to top
+                Pin to top
               </span>
               <span
                 className={`relative h-6 w-10 flex-shrink-0 rounded-full transition-colors ${
@@ -556,7 +565,8 @@ const AnnouncementsPage: React.FC = () => {
       >
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-white">
-            <span className="text-3xl">📣</span> Announcements
+            <MegaphoneIcon className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+            Announcements
           </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {canManage
@@ -606,18 +616,20 @@ const AnnouncementsPage: React.FC = () => {
         <div className="flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {["all", ...CATEGORY_KEYS].map((c) => {
             const active = category === c;
+            const FilterIcon = c === "all" ? null : CATEGORIES[c].icon;
             return (
               <button
                 key={c}
                 onClick={() => setCategory(c)}
-                className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                   active
                     ? "text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700/60 dark:text-gray-300 dark:hover:bg-gray-700"
                 }`}
                 style={active ? { background: "var(--accent)" } : undefined}
               >
-                {c === "all" ? "All" : `${CATEGORIES[c].glyph} ${CATEGORIES[c].label}`}
+                {FilterIcon && <FilterIcon className="h-3.5 w-3.5" />}
+                {c === "all" ? "All" : CATEGORIES[c].label}
               </button>
             );
           })}
@@ -635,14 +647,14 @@ const AnnouncementsPage: React.FC = () => {
 
       {/* Feed */}
       {isLoading ? (
-        <LogoLoader label="Loading announcements…" minHClass="min-h-[420px]" />
+        <LogoLoader label="Loading announcements..." minHClass="min-h-[420px]" />
       ) : items.length === 0 ? (
         <motion.div
           variants={staggerItem}
           className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 py-16 text-center dark:border-gray-700"
         >
-          <div className="mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-gray-100 text-3xl dark:bg-gray-700/60">
-            📣
+          <div className="mb-4 grid h-16 w-16 place-items-center rounded-2xl text-gray-400 dark:text-gray-500">
+            <MegaphoneIcon className="h-8 w-8" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             {search || category !== "all"
@@ -652,7 +664,7 @@ const AnnouncementsPage: React.FC = () => {
           <p className="mt-1 max-w-sm text-sm text-gray-500 dark:text-gray-400">
             {canManage
               ? "Post your first notice to keep everyone in the loop."
-              : "Check back soon — your HR team hasn't posted anything yet."}
+              : "Check back soon - your HR team hasn't posted anything yet."}
           </p>
           {canManage && !search && category === "all" && (
             <button onClick={openCreate} className="btn-primary mt-5 inline-flex items-center gap-2">

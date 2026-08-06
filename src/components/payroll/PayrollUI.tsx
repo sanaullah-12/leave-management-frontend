@@ -1,5 +1,5 @@
 /**
- * Payroll — small shared presentational pieces.
+ * Payroll - small shared presentational pieces.
  *
  * Status pills, section headers, empty states, loading skeletons and the period
  * picker. Each is presentational and memoised; none of them import the store,
@@ -62,7 +62,8 @@ StatusPill.displayName = "StatusPill";
 interface PageHeaderProps {
   title: string;
   subtitle: string;
-  glyph?: string;
+  /** Page icon. Defaults to the payroll banknotes mark. */
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   actions?: React.ReactNode;
 }
 
@@ -70,13 +71,14 @@ interface PageHeaderProps {
 export const PayrollPageHeader: React.FC<PageHeaderProps> = ({
   title,
   subtitle,
-  glyph = "💰",
+  icon: Icon = BanknotesIcon,
   actions,
 }) => (
   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
       <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-white">
-        <span className="text-3xl">{glyph}</span> {title}
+        <Icon className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+        {title}
       </h1>
       <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>
     </div>
@@ -97,7 +99,7 @@ interface SectionProps {
   children: React.ReactNode;
 }
 
-/** A titled neumorphic card — the container every payroll table sits in. */
+/** A titled neumorphic card - the container every payroll table sits in. */
 export const PayrollSection: React.FC<SectionProps> = ({
   title,
   description,
@@ -235,7 +237,7 @@ interface EmptyProps {
 }
 
 /**
- * Premium empty state — a floating payslip illustration tinted with the active
+ * Premium empty state - a floating payslip illustration tinted with the active
  * theme accent, so payroll never shows a bare table.
  */
 export const PayrollEmptyState: React.FC<EmptyProps> = ({
@@ -255,7 +257,7 @@ export const PayrollEmptyState: React.FC<EmptyProps> = ({
     }`}
   >
     {compact ? (
-      <div className="mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-gray-100 dark:bg-gray-700/60">
+      <div className="mb-3 grid h-14 w-14 place-items-center rounded-2xl text-blue-600 dark:text-blue-400">
         {icon ?? <BanknotesIcon className="h-7 w-7 text-gray-400" />}
       </div>
     ) : (

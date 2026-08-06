@@ -7,11 +7,26 @@ import { attendanceAPI, authAPI } from '../services/api';
 import Modal from './Modal';
 import LoadingSpinner from './LoadingSpinner';
 import Select from './ui/Select';
-import { UserIcon, EnvelopeIcon, BuildingOfficeIcon, BriefcaseIcon, ShieldCheckIcon, HashtagIcon } from '@heroicons/react/24/outline';
+import {
+  UserIcon,
+  EnvelopeIcon,
+  BuildingOfficeIcon,
+  BriefcaseIcon,
+  ShieldCheckIcon,
+  HashtagIcon,
+  ExclamationTriangleIcon,
+  PhoneIcon,
+} from '@heroicons/react/24/outline';
+import {
+  PHONE_HINT,
+  PHONE_PLACEHOLDER,
+  phoneValidationRules,
+} from '../utils/phone';
 
 type InviteAdminData = {
   name: string;
   email: string;
+  phone?: string; // E.164; enables WhatsApp notifications for this admin
   department?: string;
   position?: string;
   employeeId?: string;
@@ -22,7 +37,7 @@ interface AdminInviteModalProps {
   onClose: () => void;
 }
 
-// Shared themed input styling — matches the Select / DatePicker triggers.
+// Shared themed input styling - matches the Select / DatePicker triggers.
 const INPUT =
   "w-full rounded-xl bg-[var(--card-surface)] px-4 py-2.5 text-sm text-gray-900 outline-none ring-1 ring-inset ring-gray-200/70 transition-shadow placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 dark:text-gray-100 dark:placeholder-gray-500 dark:ring-white/10";
 
@@ -122,7 +137,7 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Admin Profile Header */}
         <div className="flex items-center space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-700">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400">
             <ShieldCheckIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
@@ -185,7 +200,8 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
               machineEmployeesList.length === 0 &&
               !useCustomName && (
                 <p className="mt-2 text-sm text-yellow-600 flex items-center">
-                  ⚠ No machine employees found. Using custom name input.
+                  <ExclamationTriangleIcon className="mr-1 h-4 w-4 flex-shrink-0" />
+                  No machine employees found. Using custom name input.
                 </p>
               )}
 
@@ -243,6 +259,30 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
                 {errors.email.message}
+              </p>
+            )}
+          </div>
+
+          {/* Phone - the delivery address for WhatsApp notifications */}
+          <div>
+            <label className="flex items-center text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
+              <PhoneIcon className="w-4 h-4 mr-2 text-gray-400" />
+              Phone Number (Optional)
+            </label>
+            <input
+              type="tel"
+              {...register('phone', phoneValidationRules)}
+              className={INPUT}
+              placeholder={PHONE_PLACEHOLDER}
+            />
+            {errors.phone ? (
+              <p className="mt-2 text-sm text-red-600 flex items-center">
+                <ExclamationTriangleIcon className="mr-1 h-4 w-4 flex-shrink-0" />
+                {errors.phone.message}
+              </p>
+            ) : (
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {PHONE_HINT}
               </p>
             )}
           </div>

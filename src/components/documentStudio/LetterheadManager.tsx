@@ -5,6 +5,11 @@ import {
   TrashIcon,
   PhotoIcon,
   DocumentIcon,
+  BuildingOffice2Icon,
+  SparklesIcon,
+  BeakerIcon,
+  DocumentTextIcon,
+  PencilSquareIcon,
 } from "@heroicons/react/24/outline";
 import Drawer from "../ui/Drawer";
 import { showErrorToast, showSuccessToast } from "../../utils/toastHelpers";
@@ -24,14 +29,14 @@ const SLOTS: {
   slot: AssetSlot;
   label: string;
   hint: string;
-  glyph: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }[] = [
-  { slot: "background", label: "Full-page Template Design", hint: "Your designed A4 template — text is typed on top of it", glyph: "🖼️" },
-  { slot: "header", label: "Company Letterhead / Header", hint: "Full-width banner at the top of every page", glyph: "🏢" },
-  { slot: "logo", label: "Company Logo", hint: "Used when no full header is set", glyph: "🔷" },
-  { slot: "watermark", label: "Watermark", hint: "Faint centered stamp behind the content", glyph: "💧" },
-  { slot: "footer", label: "Footer", hint: "Address / contact strip at the bottom", glyph: "📄" },
-  { slot: "signature", label: "Signature", hint: "Authorised signatory image", glyph: "✍️" },
+  { slot: "background", label: "Full-page Template Design", hint: "Your designed A4 template - text is typed on top of it", icon: PhotoIcon },
+  { slot: "header", label: "Company Letterhead / Header", hint: "Full-width banner at the top of every page", icon: BuildingOffice2Icon },
+  { slot: "logo", label: "Company Logo", hint: "Used when no full header is set", icon: SparklesIcon },
+  { slot: "watermark", label: "Watermark", hint: "Faint centered stamp behind the content", icon: BeakerIcon },
+  { slot: "footer", label: "Footer", hint: "Address / contact strip at the bottom", icon: DocumentTextIcon },
+  { slot: "signature", label: "Signature", hint: "Authorised signatory image", icon: PencilSquareIcon },
 ];
 
 const ACCEPT = "image/png,image/jpeg,image/svg+xml,application/pdf";
@@ -52,8 +57,8 @@ const AssetSlotRow: React.FC<{
     <div className="rounded-xl border border-gray-200/70 p-4 dark:border-gray-700/50">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-gray-100 text-lg dark:bg-gray-700/60">
-            {slot.glyph}
+          <span className="grid h-9 w-9 place-items-center rounded-lg text-gray-500 dark:text-gray-400">
+            <slot.icon className="h-5 w-5" />
           </span>
           <div>
             <p className="text-sm font-semibold text-gray-900 dark:text-white">

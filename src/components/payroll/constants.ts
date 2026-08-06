@@ -1,5 +1,5 @@
 /**
- * Payroll — static domain data.
+ * Payroll - static domain data.
  *
  * Default component blueprints, currency metadata and status vocabularies. All
  * of it is data, not logic: adding a statutory deduction for a new market is a
@@ -25,7 +25,7 @@ export const DEFAULT_SETTINGS: PayrollSettings = {
   defaultTaxPercent: 0,
 };
 
-/** Currencies offered in Settings. Extend freely — nothing else depends on it. */
+/** Currencies offered in Settings. Extend freely - nothing else depends on it. */
 export const CURRENCIES: { code: string; label: string; symbol: string }[] = [
   { code: "PKR", label: "Pakistani Rupee", symbol: "₨" },
   { code: "USD", label: "US Dollar", symbol: "$" },
@@ -48,7 +48,7 @@ export const currencyMeta = (code: string) =>
 
 /**
  * A ready-made component an admin can drop onto a salary structure. These are
- * *suggestions* — the structure editor also accepts fully custom lines, so no
+ * *suggestions* - the structure editor also accepts fully custom lines, so no
  * company is boxed in by this list.
  */
 export interface ComponentBlueprint {
@@ -70,7 +70,7 @@ export const COMPONENT_BLUEPRINTS: ComponentBlueprint[] = [
     mode: "percentOfBasic",
     value: 40,
     taxable: true,
-    hint: "Typically 40–50% of basic salary",
+    hint: "Typically 40-50% of basic salary",
   },
   {
     code: "MED",
@@ -139,11 +139,11 @@ export const COMPONENT_BLUEPRINTS: ComponentBlueprint[] = [
 
 /**
  * Components applied to a brand-new salary structure. Kept intentionally small
- * — a fresh structure should be understandable at a glance.
+ * - a fresh structure should be understandable at a glance.
  */
 export const DEFAULT_COMPONENT_CODES = ["HRA", "MED"] as const;
 
-/** Percent-mode components are entered as 0–100. */
+/** Percent-mode components are entered as 0-100. */
 export const MAX_PERCENT = 100;
 
 export const COMPUTE_MODE_LABEL: Record<ComputeMode, string> = {
@@ -161,7 +161,7 @@ export const COMPUTE_MODE_LABEL: Record<ComputeMode, string> = {
  *
  * The visible text is a *translation key* rather than a literal. These objects
  * live at module scope, so a baked-in English string could never react to a
- * language change — the key is resolved at render time instead. Keys resolve
+ * language change - the key is resolved at render time instead. Keys resolve
  * against the `common` namespace, which already ships all five languages.
  */
 export interface StatusStyle {
