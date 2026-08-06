@@ -19,6 +19,7 @@ import {
   XCircleIcon,
   ClockIcon,
   EyeIcon,
+  CalendarIcon,
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 
@@ -318,7 +319,11 @@ const LeavesPage: React.FC = () => {
   return (
     <div className="space-y-6 fade-in">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div>
+        {/* Hidden on phones: the mobile app bar already shows "Leave Requests",
+            so this block repeated the title and spent ~120px of a 844px screen
+            restating it before any content appeared. Desktop has no app bar
+            title, so it keeps the heading. */}
+        <div className="hidden sm:block">
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
             Leave Requests
           </h1>
@@ -591,29 +596,35 @@ const LeavesPage: React.FC = () => {
             </div>
 
             {/* Mobile Card View - Shown on mobile and tablet */}
-            <div className="lg:hidden space-y-4 p-8">
+            {/* Mobile list.
+                A native list, not a stack of framed cards: rows separated by
+                hairlines inside the surrounding panel. The previous version
+                nested a p-6 card inside a p-8 container, so every request cost
+                56px of padding before any content and one row filled half a
+                phone screen. */}
+            <div className="divide-y divide-gray-100 px-3 dark:divide-gray-700/50 lg:hidden">
               {leaves.map((leave: any) => (
                 <div
                   key={leave._id}
-                  className="rounded-xl p-6 border border-gray-200/30 dark:border-gray-700/30 bg-gradient-to-br from-white/80 to-gray-50/40 dark:from-gray-800/40 dark:to-gray-900/20 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02] cursor-pointer"
+                  className="cursor-pointer py-3 transition-colors active:bg-black/[0.03] dark:active:bg-white/[0.04]"
                 >
                   {/* Header with Type and Status */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-3">
+                  <div className="mb-2 flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-1.5">
                       <span
-                        className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium capitalize ${getLeaveTypeBadge(
+                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${getLeaveTypeBadge(
                           leave.leaveType
                         )}`}
                       >
                         {leave.leaveType}
                       </span>
-                      <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
+                      <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200">
                         {leave.totalDays}{" "}
                         {leave.totalDays === 1 ? "day" : "days"}
                       </span>
                     </div>
 
-                    <div className="flex items-center space-x-2">
+                    <div className="flex shrink-0 items-center space-x-2">
                       <span
                         className={getStatusDisplay(leave.status).className}
                       >
@@ -636,8 +647,8 @@ const LeavesPage: React.FC = () => {
 
                   {/* Employee Info (Admin only) */}
                   {user?.role === "admin" && (
-                    <div className="mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center gap-3">
+                    <div className="mb-2">
+                      <div className="flex items-center gap-2.5">
                         <Avatar
                           src={
                             typeof leave.employee === "object"
@@ -680,75 +691,56 @@ const LeavesPage: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Duration */}
-                  <div className="mb-3">
-                    <div className="text-xs font-medium uppercase tracking-wider mb-2 text-gray-600 dark:text-gray-300">
-                      Duration
-                    </div>
-                    <div className="flex justify-between text-sm text-gray-900 dark:text-gray-100">
-                      <div>
-                        <span className="text-xs text-gray-600 dark:text-gray-300">
-                          From:{" "}
-                        </span>
-                        {new Date(leave.startDate).toLocaleDateString()}
-                      </div>
-                      <div>
-                        <span className="text-xs text-gray-600 dark:text-gray-300">
-                          To:{" "}
-                        </span>
-                        {new Date(leave.endDate).toLocaleDateString()}
-                      </div>
-                    </div>
+                  {/* Dates - one line, no section label. "From/To" headings
+                      cost a whole row each to say what a date range already
+                      communicates. */}
+                  <div className="mb-1.5 flex items-center gap-1.5 text-[13px] text-gray-700 dark:text-gray-300">
+                    <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-gray-400" />
+                    <span className="tabular-nums">
+                      {new Date(leave.startDate).toLocaleDateString()}
+                    </span>
+                    <span className="text-gray-400">&ndash;</span>
+                    <span className="tabular-nums">
+                      {new Date(leave.endDate).toLocaleDateString()}
+                    </span>
                   </div>
 
-                  {/* Expandable Reason Section */}
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-xs font-medium uppercase tracking-wider text-gray-600 dark:text-gray-300">
-                        Reason
-                      </div>
-                      {leave.reason && (
-                        <button
-                          onClick={() => showLeaveReasonPopup(leave.reason)}
-                          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                          title="View full reason"
-                        >
-                          <EyeIcon className="w-4 h-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
-                        </button>
-                      )}
-                    </div>
-                    <div className="text-sm line-clamp-3 bg-gray-50 dark:bg-gray-800 p-3 rounded-md text-gray-900 dark:text-gray-100">
-                      {leave.reason}
-                    </div>
-                  </div>
+                  {/* Reason - a single truncated line that opens the full text
+                      on tap, rather than a labelled, boxed three-line block. */}
+                  {leave.reason && (
+                    <button
+                      onClick={() => showLeaveReasonPopup(leave.reason)}
+                      className="mb-2 flex w-full items-center gap-1.5 text-left text-[13px] text-gray-500 dark:text-gray-400"
+                      title="View full reason"
+                    >
+                      <span className="min-w-0 flex-1 truncate">{leave.reason}</span>
+                      <EyeIcon className="h-3.5 w-3.5 shrink-0 text-gray-400" />
+                    </button>
+                  )}
 
                   {/* Action Buttons (Admin only) */}
                   {user?.role === "admin" && leave.status === "pending" && (
-                    <div className="flex space-x-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                    <div className="mt-2 flex gap-2">
                       <button
                         onClick={() => handleReview(leave._id, "approved")}
                         disabled={reviewLeaveMutation.isPending}
-                        className="btn-success px-4 py-2 text-sm flex-1"
+                        className="btn-success flex-1 px-3 text-sm"
                       >
                         Approve
                       </button>
                       <button
                         onClick={() => handleRejectClick(leave._id)}
                         disabled={reviewLeaveMutation.isPending}
-                        className="btn-danger px-4 py-2 text-sm flex-1"
+                        className="btn-danger flex-1 px-3 text-sm"
                       >
                         Reject
                       </button>
                     </div>
                   )}
-
-                  {user?.role === "admin" && leave.status !== "pending" && (
-                    <div className="pt-3 border-t text-center border-gray-200 dark:border-gray-700">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        Request Reviewed
-                      </span>
-                    </div>
-                  )}
+                  {/* Already-reviewed rows previously carried a full-width
+                      "Request Reviewed" footer. The status pill at the top of
+                      the row already says that, so the footer was a wasted line
+                      on every non-pending request. */}
                 </div>
               ))}
             </div>

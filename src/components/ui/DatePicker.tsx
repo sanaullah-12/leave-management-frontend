@@ -92,7 +92,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
     <Popover className={`relative ${className}`}>
       <PopoverButton
         disabled={disabled}
-        className="flex w-full items-center gap-2.5 rounded-xl bg-[var(--card-surface)] px-4 py-2.5 text-left text-sm font-medium text-gray-800 ring-1 ring-inset ring-gray-200/70 transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60 dark:text-gray-100 dark:ring-white/10"
+        className="flex w-full items-center gap-2.5 rounded-xl bg-[var(--card-surface)] px-4 py-2.5 text-left text-sm font-medium text-gray-800 min-h-[44px] sm:min-h-0 ring-1 ring-inset ring-gray-200/70 transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60 dark:text-gray-100 dark:ring-white/10"
       >
         <CalendarDaysIcon className="h-4 w-4 flex-shrink-0 text-gray-400" />
         <span className={`flex-1 truncate ${selected ? "" : "text-gray-400"}`}>

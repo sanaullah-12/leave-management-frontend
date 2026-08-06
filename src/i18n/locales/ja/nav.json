@@ -17,7 +17,8 @@
     "logout": "ログアウト",
     "openMenu": "メニューを開く",
     "closeMenu": "メニューを閉じる",
-    "manageAccount": "アカウント管理"
+    "manageAccount": "アカウント管理",
+    "more": "その他"
   },
   "header": {
     "welcome": "おかえりなさい、{{name}} さん",

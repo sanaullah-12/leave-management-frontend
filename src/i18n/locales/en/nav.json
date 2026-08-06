@@ -17,7 +17,8 @@
     "logout": "Logout",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "manageAccount": "Manage Account"
+    "manageAccount": "Manage Account",
+    "more": "More"
   },
   "header": {
     "welcome": "Welcome back, {{name}}",
