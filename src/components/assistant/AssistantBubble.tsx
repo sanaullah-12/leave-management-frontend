@@ -29,7 +29,10 @@ const AssistantBubble: React.FC<Props> = ({
   const reduce = useReducedMotion();
 
   return (
-    <div className="pointer-events-none fixed bottom-6 end-6 z-[80] flex flex-col items-end gap-3">
+    // On phones the bubble must clear the bottom tab bar (52px + safe area)
+    // or it sits on top of the Attendance/More tabs and swallows their taps.
+    // From lg up there is no tab bar, so the original offset applies.
+    <div className="pointer-events-none fixed bottom-[calc(6.25rem+env(safe-area-inset-bottom,0px))] end-4 z-[80] flex flex-col items-end gap-3 lg:bottom-6 lg:end-6">
       {/* ---------------- Greeting ---------------- */}
       <AnimatePresence>
         {greetingVisible && !open && (

@@ -17,7 +17,8 @@
     "logout": "Cerrar sesión",
     "openMenu": "Abrir menú",
     "closeMenu": "Cerrar menú",
-    "manageAccount": "Gestionar cuenta"
+    "manageAccount": "Gestionar cuenta",
+    "more": "Más"
   },
   "header": {
     "welcome": "Bienvenido de nuevo, {{name}}",

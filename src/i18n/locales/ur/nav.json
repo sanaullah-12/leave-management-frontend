@@ -17,7 +17,8 @@
     "logout": "لاگ آؤٹ",
     "openMenu": "مینو کھولیں",
     "closeMenu": "مینو بند کریں",
-    "manageAccount": "اکاؤنٹ کا انتظام"
+    "manageAccount": "اکاؤنٹ کا انتظام",
+    "more": "مزید"
   },
   "header": {
     "welcome": "خوش آمدید، {{name}}",

@@ -102,8 +102,19 @@ const Modal: React.FC<ModalProps> = ({
                 ? { opacity: 0 }
                 : { opacity: 0, y: 16, scale: 0.98, transition: { duration: 0.15 } }
             }
-            className={`relative flex max-h-[94vh] w-full flex-col overflow-hidden border border-gray-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-900 shadow-2xl shadow-gray-900/20 rounded-t-3xl sm:rounded-3xl ${SIZES[size]} ${panelClassName}`}
+            /* On phones this is a near-full-height sheet rather than a small
+               centred box: a dialog occupying a third of the screen forces its
+               own content into a nested scroller, which is the usual reason
+               modals feel cramped on mobile. dvh tracks the visible viewport as
+               mobile browser chrome hides and shows. */
+            className={`relative flex max-h-[92dvh] min-h-[40vh] w-full flex-col overflow-hidden border border-gray-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-900 shadow-2xl shadow-gray-900/20 rounded-t-3xl sm:max-h-[94vh] sm:min-h-0 sm:rounded-3xl ${SIZES[size]} ${panelClassName}`}
           >
+            {/* Grab handle - the standard affordance that marks a sheet as
+                dismissible. Sheet-only, so desktop dialogs are unchanged. */}
+            <div className="flex justify-center pt-2.5 sm:hidden" aria-hidden="true">
+              <span className="h-1 w-9 rounded-full bg-gray-300 dark:bg-gray-600" />
+            </div>
+
             {/* Close button */}
             {!hideClose && (
               <motion.button
@@ -112,7 +123,8 @@ const Modal: React.FC<ModalProps> = ({
                 transition={{ type: "spring", stiffness: 500, damping: 24 }}
                 onClick={onClose}
                 aria-label="Close"
-                className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                // 44px hit area on touch, the original 32px box from sm up.
+                className="absolute right-2 top-2 z-10 flex h-11 w-11 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200 sm:right-4 sm:top-4 sm:h-8 sm:w-8"
               >
                 <XMarkIcon className="h-5 w-5" />
               </motion.button>
@@ -120,8 +132,8 @@ const Modal: React.FC<ModalProps> = ({
 
             {/* Standard header */}
             {hasHeader && (
-              <div className="flex-shrink-0 px-6 pt-6 pb-5">
-                <div className="flex items-start gap-4 pr-8">
+              <div className="flex-shrink-0 px-4 pb-4 pt-4 sm:px-6 sm:pb-5 sm:pt-6">
+                <div className="flex items-start gap-3 pr-10 sm:gap-4 sm:pr-8">
                   {icon && (
                     <div
                       className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl ${iconClassName}`}

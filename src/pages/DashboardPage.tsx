@@ -102,7 +102,7 @@ const KpiCard: React.FC<{
 }> = ({ label, value, suffix, caption, icon, accent, onClick }) => (
   <div
     onClick={onClick}
-    className={`group relative overflow-hidden ${CARD} ${CARD_HOVER} flex h-full flex-col p-5 ${
+    className={`group relative overflow-hidden ${CARD} ${CARD_HOVER} flex h-full flex-col p-3.5 sm:p-5 ${
       onClick ? "cursor-pointer" : ""
     }`}
   >
@@ -129,12 +129,12 @@ const KpiCard: React.FC<{
         </p>
       </div>
       {/* Bare icon, no plate. It scales on hover so the tile still responds. */}
-      <div className="flex-shrink-0 grid place-items-center w-11 h-11 text-blue-600 dark:text-blue-400 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110">
+      <div className="hidden sm:grid flex-shrink-0 place-items-center w-11 h-11 text-blue-600 dark:text-blue-400 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110">
         {icon}
       </div>
     </div>
     {/* Pinned to the bottom so captions align across the whole row. */}
-    <p className="mt-auto pt-3 text-xs font-medium text-gray-500 dark:text-gray-400">
+    <p className="mt-auto pt-2 text-[11px] leading-snug sm:pt-3 sm:text-xs font-medium text-gray-500 dark:text-gray-400">
       {caption}
     </p>
   </div>
@@ -530,7 +530,7 @@ const DashboardPage: React.FC = () => {
       ) : (
         <motion.div
           variants={staggerItem}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+          className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4"
         >
           {kpis.map((c, i) => (
             <KpiCard key={i} {...c} accent={accent} />

@@ -17,7 +17,8 @@
     "logout": "Abmelden",
     "openMenu": "Menü öffnen",
     "closeMenu": "Menü schließen",
-    "manageAccount": "Konto verwalten"
+    "manageAccount": "Konto verwalten",
+    "more": "Mehr"
   },
   "header": {
     "welcome": "Willkommen zurück, {{name}}",

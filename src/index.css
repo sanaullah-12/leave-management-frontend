@@ -323,6 +323,56 @@
     color: var(--text-primary);
   }
 
+  /* ============================================================ */
+  /* Touch sizing                                                  */
+  /*                                                               */
+  /* On a coarse pointer every shared control gets a 44px minimum   */
+  /* box - the size a fingertip can hit reliably. The audit found   */
+  /* the buttons, inputs and pickers rendering at 32-40px, which is */
+  /* comfortable with a mouse and fiddly with a thumb.              */
+  /*                                                               */
+  /* Scoped to `pointer: coarse` rather than a width breakpoint so  */
+  /* a touch laptop benefits and a narrow desktop window does not   */
+  /* grow its controls. Nothing changes for mouse users.            */
+  /* ============================================================ */
+  @media (pointer: coarse) {
+    /* Inputs keep the full 44px: they are the primary interaction on forms
+       and a mis-tap costs a keyboard dismissal. Buttons sit at 40px - still
+       comfortably tappable, but 44px full-width buttons visually dominate a
+       phone screen, especially when two sit side by side. Adequate spacing
+       around them does the rest of the work. */
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger,
+    .btn-success {
+      min-height: 40px;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .input-field {
+      min-height: 44px;
+    }
+
+    /* Native controls: 16px is the threshold below which iOS Safari
+       zooms the viewport on focus, which then leaves the page zoomed
+       and horizontally scrollable. */
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+      font-size: max(16px, 0.9375rem);
+    }
+
+    /* 11px eyebrow labels ("TOTAL EMPLOYEES") are legible on a monitor at
+       arm's length and marginal on a phone held in one hand. 12px with a
+       slightly tighter tracking keeps the same visual rhythm. */
+    .text-overline {
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+  }
+
   .input-field::placeholder {
     color: var(--text-tertiary);
   }
@@ -496,4 +546,127 @@
   .hrms-gradient {
     animation: none;
   }
+}
+
+/* ==============================================================
+   MOBILE DENSITY & TYPE SCALE
+   ==============================================================
+   Everything below applies only under 640px (Tailwind's `sm`).
+   Desktop is untouched.
+
+   The app's spacing and type were tuned for a 1440px canvas. Reused
+   verbatim on a 390px screen they produce the "resized desktop site"
+   feel: 24px card padding and 32px headings are a comfortable rhythm
+   on a monitor and a waste of a third of a phone screen.
+
+   These rules retune the shared scale rather than editing the ~135
+   `p-5`/`p-6` and 48 `space-y-6` call sites individually. Because
+   Tailwind emits responsive variants as separate classes (`sm:p-6`
+   is `.sm\:p-6`), a component that already opts into a mobile value
+   -- `p-3 sm:p-6` -- is unaffected: only `.p-3` applies below 640px.
+
+   Written after `@tailwind utilities` so it wins on source order at
+   equal specificity, with no `!important` needed.
+   ============================================================== */
+@media (max-width: 639px) {
+  /* ---- Card and section padding ---- */
+  .p-6 { padding: 1rem; }
+  .p-5 { padding: 0.875rem; }
+  .px-6 { padding-left: 1rem; padding-right: 1rem; }
+  .py-6 { padding-top: 1rem; padding-bottom: 1rem; }
+  .px-5 { padding-left: 0.875rem; padding-right: 0.875rem; }
+  .py-5 { padding-top: 0.875rem; padding-bottom: 0.875rem; }
+  .pt-6 { padding-top: 1rem; }
+  .pb-6 { padding-bottom: 1rem; }
+
+  /* ---- Vertical rhythm between sections ----
+     The single biggest source of scrolling: 24px between every block
+     on a screen that is only 844px tall. */
+  .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem; }
+  .space-y-5 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.875rem; }
+  .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.75rem; }
+
+  .gap-6 { gap: 0.875rem; }
+  .gap-5 { gap: 0.75rem; }
+  .gap-4 { gap: 0.75rem; }
+
+  .mt-6 { margin-top: 1rem; }
+  .mb-6 { margin-bottom: 1rem; }
+  .mt-8 { margin-top: 1.25rem; }
+  .mb-8 { margin-bottom: 1.25rem; }
+
+  /* ---- Mobile type scale ----
+     Derived from the Apply Leave screen, which is the reference for how
+     this app should read on a phone. Measured there at 390px:
+
+       page title    20px / 1.28 / 700
+       card title    14px / 20px / 700
+       label         14px / 20px / 500
+       body          14px / 20px / 400
+       meta          12px / 16px / 400
+       overline      11px / 17.6px / 600
+       button        14px / 600
+
+     14px is the workhorse, not 15px, and headings top out at 20px.
+     That single pair of facts is most of why Apply Leave feels native
+     while screens built on the desktop scale (15px body, 32px h1) feel
+     like a shrunken website. */
+
+  body {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.45;
+  }
+
+  h1 { font-size: 1.25rem; line-height: 1.28; letter-spacing: -0.017em; }
+  h2 { font-size: 1.0625rem; line-height: 1.35; letter-spacing: -0.013em; }
+  h3 { font-size: 0.875rem; line-height: 1.25rem; letter-spacing: -0.006em; }
+  h4, h5, h6 { font-size: 0.8125rem; line-height: 1.15rem; }
+
+  .text-4xl { font-size: 1.375rem; line-height: 1.75rem; }
+  .text-3xl { font-size: 1.25rem; line-height: 1.6rem; }
+  .text-2xl { font-size: 1.25rem; line-height: 1.6rem; }
+  .text-xl  { font-size: 1.0625rem; line-height: 1.45rem; }
+  .text-lg  { font-size: 0.9375rem; line-height: 1.35rem; }
+  .text-base { font-size: 0.875rem; line-height: 1.25rem; }
+
+  .text-display { font-size: 1.375rem; line-height: 1.75rem; }
+  .text-page-heading { font-size: 1.25rem; line-height: 1.6rem; }
+  .text-section-heading { font-size: 1.0625rem; line-height: 1.4rem; }
+  .text-card-title { font-size: 0.875rem; line-height: 1.25rem; }
+  .text-body { font-size: 0.875rem; line-height: 1.25rem; }
+  .text-secondary { font-size: 0.8125rem; line-height: 1.15rem; }
+  .text-caption { font-size: 0.75rem; line-height: 1rem; }
+
+  /* Inputs are the one deliberate exception: below 16px iOS Safari
+     zooms the viewport on focus. Restated here because the body rule
+     above would otherwise cascade into them. */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: max(16px, 0.875rem);
+  }
+
+  /* ---- Charts ----
+     A chart is a glanceable summary on a phone, not an analysis
+     surface. Trimming the plot area keeps the card and the numbers
+     beside it on screen together. */
+  .h-64 { height: 11rem; }
+  .h-60 { height: 10.5rem; }
+  .h-52 { height: 9.5rem; }
+  .h-44 { height: 8.5rem; }
+
+  /* ---- Fixed container heights ----
+     Heights chosen for a desktop viewport become half a phone screen of
+     empty space when the content does not fill them. Loading and empty
+     states are the usual offenders: a 420px reserved block to hold a
+     spinner. Letting them size to content removes the void without
+     changing what is rendered. */
+  .min-h-\[420px\] { min-height: 13rem; }
+  .max-h-\[600px\] { max-height: 60vh; }
+
+  /* Empty-state and loading blocks that pad themselves to desktop
+     proportions. */
+  .py-16 { padding-top: 2rem; padding-bottom: 2rem; }
+  .py-12 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+  .py-10 { padding-top: 1.25rem; padding-bottom: 1.25rem; }
 }

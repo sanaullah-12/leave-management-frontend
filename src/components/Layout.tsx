@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { motion } from "framer-motion";
 import Avatar from "./Avatar";
+import MobileTabBar from "./MobileTabBar";
 import NotificationBell from "./NotificationBell";
 import BrandedLoader from "./BrandedLoader";
 import { RouteFallback } from "./Skeletons";
@@ -32,6 +33,8 @@ import {
   SwatchIcon,
   ArrowRightOnRectangleIcon,
   Bars3Icon,
+  PlusIcon,
+  EllipsisHorizontalIcon,
   XMarkIcon,
   MagnifyingGlassIcon,
   MegaphoneIcon,
@@ -249,6 +252,42 @@ const Layout: React.FC = () => {
   // here (unlike the per-item check) so /payroll/run still highlights Payroll.
   const activeGroup =
     groups.find((g) => g.items.some((i) => isActive(i.href))) ?? groups[0];
+
+  // The specific page within that group, used as the mobile app-bar title.
+  // Falls back to the group label for routes with no exact item match.
+  const activeItem = activeGroup.items.find((i) => itemActive(i));
+
+  // The bar holds three groups plus "More". Slicing the live `groups` array
+  // (rather than hardcoding keys) keeps role-based groups respected: an
+  // employee who never sees Payroll simply gets a different three.
+  const tabGroups = groups.slice(0, 3);
+  // "More" is highlighted when the current screen lives in one of the groups
+  // the bar does not show, so the bar never looks like nothing is selected.
+  const moreHasActive = !tabGroups.some((g) => g.key === activeGroup.key);
+
+  const tabItems = [
+    ...tabGroups.map((g) => ({
+      key: g.key,
+      label: g.short,
+      icon: g.icon,
+      badge:
+        g.items.some((i) => i.badge === "notifications") && unreadCount > 0
+          ? unreadCount > 9
+            ? "9+"
+            : String(unreadCount)
+          : null,
+      active: g.key === activeGroup.key,
+      onClick: () => navigate(g.items[0].href),
+    })),
+    {
+      key: "__more",
+      label: t("actions.more"),
+      icon: EllipsisHorizontalIcon,
+      badge: null,
+      active: mobileOpen || moreHasActive,
+      onClick: () => setMobileOpen(true),
+    },
+  ];
 
   // Global search across all pages.
   const searchResults: PanelItem[] = useMemo(() => {
@@ -512,26 +551,48 @@ const Layout: React.FC = () => {
       </div>
 
       {/* ============ Mobile header ============ */}
-      <header className="fixed left-0 right-0 top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200/70 bg-white/70 px-4 backdrop-blur-xl dark:border-gray-700/60 dark:bg-gray-900/60 lg:hidden">
-        <button onClick={() => setMobileOpen(true)} className="text-gray-600 dark:text-gray-300" aria-label={t("actions.openMenu")}>
-          <Bars3Icon className="h-6 w-6" />
-        </button>
-        <div className="flex items-center gap-2">
-          <AppLogo size={26} />
-          <div className="leading-none">
-            <p className="text-base font-bold tracking-tight text-gray-900 dark:text-gray-100">
-              {t("brand.name")}
-            </p>
-            <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.22em] text-gray-400 dark:text-gray-500">
-              {t("brand.tagline")}
-            </p>
+      {/* Title-first, like a native app bar: the current screen is what a user
+          needs to see, not the brand on every page. The brand mark stays as a
+          compact home affordance. Icon buttons are 44px hit areas (negative
+          margins keep them visually aligned), and the bar reserves the iOS
+          status-bar inset so it is not drawn under the clock. */}
+      <header
+        className="fixed left-0 right-0 top-0 z-30 border-b border-gray-200/70 bg-white/80 backdrop-blur-xl dark:border-gray-700/60 dark:bg-gray-900/70 lg:hidden"
+        style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+      >
+        <div className="flex h-14 items-center gap-2 px-2">
+          <Link
+            to="/"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl active:bg-black/5 dark:active:bg-white/10"
+            aria-label={t("brand.name")}
+          >
+            <AppLogo size={26} />
+          </Link>
+
+          <h1 className="min-w-0 flex-1 truncate text-[17px] font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+            {activeItem?.name || activeGroup.label}
+          </h1>
+
+          <div className="flex shrink-0 items-center">
+            {/* Theme switcher. On desktop this lives in the account dropdown,
+                which has no mobile equivalent - without it, changing theme on a
+                phone meant opening the drawer and finding Settings. */}
+            <button
+              onClick={() => setThemeOpen(true)}
+              className="flex h-11 w-11 items-center justify-center rounded-xl text-gray-600 active:bg-black/5 dark:text-gray-300 dark:active:bg-white/10"
+              aria-label={t("items.theme")}
+            >
+              <SwatchIcon className="h-[22px] w-[22px]" />
+            </button>
+            <NotificationBell />
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="flex h-11 w-11 items-center justify-center rounded-xl text-gray-600 active:bg-black/5 dark:text-gray-300 dark:active:bg-white/10"
+              aria-label={t("actions.openMenu")}
+            >
+              <Bars3Icon className="h-6 w-6" />
+            </button>
           </div>
-        </div>
-        <div className="flex items-center space-x-3">
-          <NotificationBell />
-          <button onClick={logout} className="text-gray-600 dark:text-gray-300" aria-label={t("actions.logout")}>
-            <ArrowRightOnRectangleIcon className="h-5 w-5" />
-          </button>
         </div>
       </header>
 
@@ -596,9 +657,27 @@ const Layout: React.FC = () => {
         </div>
       </header>
 
+      {/* ============ Mobile bottom tabs ============ */}
+      {/* Applying for leave is the single most frequent action in the product
+          and previously sat two taps deep inside the Leave group. Promoting it
+          to the bar's centre action is what the elevated button is for. */}
+      <MobileTabBar
+        items={tabItems}
+        center={{
+          label: t("items.applyLeave"),
+          icon: PlusIcon,
+          onClick: () => navigate("/apply-leave"),
+        }}
+      />
+
       {/* ============ Main content ============ */}
-      <main className={`min-h-screen overflow-y-auto pt-16 transition-[margin] duration-300 ${mainOffset}`}>
-        <div className="p-4 lg:p-8">
+      {/* pt matches the 56px mobile app bar (64px from lg up). The bottom pad
+          clears the tab bar plus the iOS home indicator, so the last row of a
+          list is never trapped underneath it. */}
+      <main
+        className={`min-h-screen overflow-y-auto pt-[calc(3.5rem+env(safe-area-inset-top,0px))] transition-[margin] duration-300 lg:pt-16 ${mainOffset}`}
+      >
+        <div className="px-3 py-4 pb-[calc(5.75rem+env(safe-area-inset-bottom,0px))] sm:px-4 lg:p-8 lg:pb-8">
           <div className="mx-auto max-w-7xl">
             <motion.div key={location.pathname} variants={pageVariants} initial="initial" animate="animate">
               {/* Routes are lazily loaded (see App.tsx). Keeping the boundary

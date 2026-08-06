@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import AppLogo from "../AppLogo";
 import { useTheme } from "../../context/ThemeContext";
-import { isKnownUser } from "../../utils/knownUser";
 import { Magnetic, EASE } from "./primitives";
 import ContactModal from "./ContactModal";
 
@@ -71,12 +70,7 @@ const LandingNav: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
-  const [known, setKnown] = useState(false);
   const reduce = useReducedMotion();
-
-  useEffect(() => {
-    setKnown(isKnownUser());
-  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -121,20 +115,40 @@ const LandingNav: React.FC = () => {
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <ThemeToggle />
-          {known && (
-            <Link
-              to="/login"
-              className="hidden rounded-lg px-4 py-2 text-nav font-medium text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-white sm:block"
+          {/* Log in is unconditional and always mounted.
+              It was previously gated behind isKnownUser(), so anyone arriving
+              for the first time - which is every prospective customer - had no
+              way to reach the login page from the landing header at all. It was
+              also `hidden sm:block`, leaving phones with no entry point.
+
+              Below sm it collapses to an icon so it still fits beside the
+              primary CTA rather than being pushed into the menu; the accessible
+              name is carried by aria-label. */}
+          <Link
+            to="/login"
+            aria-label="Log in to Nexora"
+            className="group grid h-9 shrink-0 place-items-center rounded-lg px-2.5 text-nav font-medium text-gray-700 transition-colors hover:bg-gray-100/70 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/30 active:scale-[0.97] dark:text-gray-200 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:ring-white/40 sm:px-3.5"
+          >
+            <svg
+              className="h-[18px] w-[18px] sm:hidden"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
             >
-              Sign in
-            </Link>
-          )}
+              <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" />
+            </svg>
+            <span className="hidden sm:inline">Log in</span>
+          </Link>
           <Magnetic strength={0.35}>
             <button
               onClick={() => setContactOpen(true)}
-              className="group relative inline-flex items-center gap-1.5 overflow-hidden rounded-lg bg-gray-900 px-4 py-2 text-nav font-semibold text-white shadow-sm transition-shadow hover:shadow-lg dark:bg-white dark:text-gray-900"
+              className="group relative inline-flex items-center gap-1.5 overflow-hidden whitespace-nowrap rounded-lg bg-gray-900 px-3 py-2 text-nav font-semibold text-white shadow-sm transition-shadow hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/40 dark:bg-white dark:text-gray-900 dark:focus-visible:ring-white/40 sm:px-4"
             >
               <span className="relative z-10">Start free</span>
               <svg className="relative z-10 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
@@ -168,6 +182,30 @@ const LandingNav: React.FC = () => {
                 {n.l}
               </a>
             ))}
+
+            {/* Also offered here with a full label. The header keeps an
+                always-visible icon, but a labelled row is easier to find for
+                someone who opened the menu looking for it. */}
+            <div className="my-1.5 h-px bg-gray-200/70 dark:bg-white/10" />
+            <Link
+              to="/login"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-nav font-semibold text-gray-900 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/30 dark:text-white dark:hover:bg-white/5 dark:focus-visible:ring-white/40"
+            >
+              <svg
+                className="h-[18px] w-[18px]"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" />
+              </svg>
+              Log in
+            </Link>
           </motion.div>
         )}
       </AnimatePresence>
