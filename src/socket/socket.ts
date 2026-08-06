@@ -5,7 +5,7 @@ import { io, Socket } from "socket.io-client";
  * ---------
  * A single, lazily-created Socket.IO client for the whole app (never more than
  * one instance). Authenticates with the JWT and reconnects automatically with
- * backoff. UI code should not import this directly — use `useSocket()`.
+ * backoff. UI code should not import this directly - use `useSocket()`.
  */
 
 // Server root = API base without the trailing "/api".
@@ -23,7 +23,7 @@ export function getSocket(): Socket | null {
 
 /**
  * Connect (or reuse) the singleton socket, authenticated with `token`.
- * Safe to call repeatedly — subsequent calls reuse the existing instance.
+ * Safe to call repeatedly - subsequent calls reuse the existing instance.
  */
 export function connectSocket(token: string): Socket {
   if (socket) {

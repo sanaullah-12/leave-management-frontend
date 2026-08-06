@@ -79,7 +79,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
     casual: 10,    // 10 casual leave days
   };
   
-  console.log("🏢 EmployeeLeaveActivity - Company Policy:", companyPolicy);
+  console.log("EmployeeLeaveActivity - Company Policy:", companyPolicy);
   
   // Filter out unwanted leave types (maternity, paternity)
   const allowedLeaveTypes = ['annual', 'sick', 'casual'];
@@ -109,7 +109,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
       casual: companyPolicy.casual,
     };
     
-    console.log("📊 EmployeeLeaveActivity - Policy Mapping:", policyMapping);
+    console.log("EmployeeLeaveActivity - Policy Mapping:", policyMapping);
     
     leaveBalance = {};
     Object.entries(policyMapping).forEach(([type, total]) => {
@@ -121,7 +121,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
       };
     });
     
-    console.log("✅ EmployeeLeaveActivity - Final Leave Balance:", leaveBalance);
+    console.log("EmployeeLeaveActivity - Final Leave Balance:", leaveBalance);
   } else {
     // Filter existing balance data to only include allowed leave types
     const filteredBalance: any = {};
@@ -302,14 +302,14 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
 
                   <div className="flex flex-wrap gap-2 mt-4">
                     <span className={`badge ${(user as any).isActive ? 'badge-success' : 'badge-warning'}`}>
-                      {(user as any).isActive ? '✅ Active' : '⏸️ Inactive'}
+                      {(user as any).isActive ? 'Active' : 'Inactive'}
                     </span>
                     <span className="badge badge-primary">
-                      👤 Employee
+                      Employee
                     </span>
                     {user.joinDate && (
                       <span className="badge badge-gray">
-                        📅 Joined {formatDate(user.joinDate)}
+                        Joined {formatDate(user.joinDate)}
                       </span>
                     )}
                   </div>
@@ -501,7 +501,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <h4 className="font-semibold text-gray-900 dark:text-gray-100">
-                📋 Leave Requests {dateFilter && (dateFilter.dateFrom || dateFilter.dateTo) 
+                Leave Requests {dateFilter && (dateFilter.dateFrom || dateFilter.dateTo) 
                   ? `(${dateFilter.dateFrom ? new Date(dateFilter.dateFrom).toLocaleDateString() : 'All time'} - ${dateFilter.dateTo ? new Date(dateFilter.dateTo).toLocaleDateString() : 'All time'})`
                   : selectedYear}
               </h4>
@@ -511,7 +511,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
             </div>
             {isCurrentUser && (
               <div className="badge badge-primary text-xs">
-                👤 Employee View - Read Only
+                Employee View - Read Only
               </div>
             )}
           </div>
@@ -580,8 +580,11 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
                     {leave.reviewComments && (
                       <div className="p-3 rounded-md bg-gray-50 dark:bg-gray-900">
                         <p className="text-sm font-medium mb-1 text-gray-600 dark:text-gray-300">
-                          {leave.status === 'approved' ? '✅ Approval Comments' : 
-                           leave.status === 'rejected' ? '❌ Rejection Comments' : '💬 Review Comments'}
+                          {leave.status === 'approved'
+                            ? 'Approval Comments'
+                            : leave.status === 'rejected'
+                            ? 'Rejection Comments'
+                            : 'Review Comments'}
                         </p>
                         <p className="text-sm text-gray-900 dark:text-gray-100">
                           {leave.reviewComments}

@@ -8,7 +8,7 @@ import { PayrollProvider } from "../../components/payroll/PayrollProvider";
  *
  * Mounts {@link PayrollProvider} once above all six payroll screens so they
  * share a single store, a single employee fetch and a single set of computed
- * figures — navigating between Dashboard, Salaries and Processing is instant
+ * figures - navigating between Dashboard, Salaries and Processing is instant
  * and never recomputes payroll.
  *
  * It also owns the module's authorization boundary: payroll is admin-only, and

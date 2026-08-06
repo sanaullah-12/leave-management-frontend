@@ -4,10 +4,11 @@ import { useForm } from 'react-hook-form';
 import LoadingSpinner from '../components/LoadingSpinner';
 import PasswordInput from '../components/PasswordInput';
 import { 
-  KeyIcon, 
-  CheckCircleIcon, 
-  XCircleIcon, 
-  ClockIcon 
+  KeyIcon,
+  CheckCircleIcon,
+  CheckIcon,
+  XCircleIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
 import { authAPI } from '../services/api';
 
@@ -225,7 +226,11 @@ const ResetPasswordPage: React.FC = () => {
               <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
                 <li className="flex items-center">
                   <span className={`mr-2 ${password && password.length >= 6 ? 'text-green-500' : 'text-gray-400 dark:text-gray-500'}`}>
-                    {password && password.length >= 6 ? '✓' : '○'}
+                    {password && password.length >= 6 ? (
+                      <CheckIcon className="h-3.5 w-3.5" />
+                    ) : (
+                      <span className="block h-2 w-2 rounded-full border border-current" />
+                    )}
                   </span>
                   At least 6 characters long
                 </li>

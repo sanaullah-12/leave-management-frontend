@@ -16,7 +16,7 @@ interface OrgData {
   teamSize: string;
   country: string;
   timezone: string;
-  workingDays: number[]; // 0=Sun … 6=Sat
+  workingDays: number[]; // 0=Sun ... 6=Sat
   logo: string | null;
 }
 
@@ -290,7 +290,7 @@ const OrganizationProfile: React.FC = () => {
         {/* Status */}
         <div className="rounded-2xl border border-blue-100 dark:border-blue-500/20 bg-blue-50/60 dark:bg-blue-500/10 p-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full text-blue-600 dark:text-blue-400">
               <CheckBadgeIcon className="h-6 w-6" />
             </div>
             <div>

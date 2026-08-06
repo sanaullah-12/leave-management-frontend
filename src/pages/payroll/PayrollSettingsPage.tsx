@@ -7,6 +7,7 @@ import {
   CalendarDaysIcon,
   ReceiptPercentIcon,
   CheckIcon,
+  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import Select from "../../components/ui/Select";
 import { staggerContainer, staggerItem } from "../../lib/motion";
@@ -34,11 +35,11 @@ const DAY_OPTIONS = Array.from({ length: 31 }, (_, i) => ({
 }));
 
 /**
- * Payroll Settings — intentionally minimal for V1.
+ * Payroll Settings - intentionally minimal for V1.
  *
  * Four values, all of which the engine already reads through `PayrollContext`.
  * Anything more (tax slabs, pay cycles, per-company overrides) is a new field
- * here plus a resolver in the engine — no structural change.
+ * here plus a resolver in the engine - no structural change.
  */
 const PayrollSettingsPage: React.FC = () => {
   const { t } = useTranslation("payroll");
@@ -80,7 +81,7 @@ const PayrollSettingsPage: React.FC = () => {
   /* ---------------- effect preview ---------------- */
 
   // A concrete illustration of what the settings do, using this month's real
-  // payroll total — far clearer than describing the fields in prose.
+  // payroll total - far clearer than describing the fields in prose.
   const preview = useMemo(() => {
     const taxOnTotal = (totals.totalGross * (draft.defaultTaxPercent || 0)) / 100;
     return {
@@ -99,7 +100,7 @@ const PayrollSettingsPage: React.FC = () => {
     >
       <motion.div variants={staggerItem}>
         <PayrollPageHeader
-          glyph="⚙️"
+          icon={Cog6ToothIcon}
           title={t("settings.title")}
           subtitle={t("settings.subtitle")}
           actions={
@@ -155,7 +156,7 @@ const PayrollSettingsPage: React.FC = () => {
                 onChange={(v) => patch("currency", v)}
                 options={CURRENCIES.map((c) => ({
                   value: c.code,
-                  label: `${c.code} — ${c.label}`,
+                  label: `${c.code} - ${c.label}`,
                 }))}
               />
             </Field>
@@ -213,7 +214,7 @@ const PayrollSettingsPage: React.FC = () => {
           <dl className="mt-4 space-y-3.5">
             <Row
               label="Payslips issued as"
-              value={draft.companyName || "—"}
+              value={draft.companyName || "-"}
             />
             <Row
               label="Next pay date"

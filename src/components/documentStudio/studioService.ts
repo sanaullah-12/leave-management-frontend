@@ -1,9 +1,9 @@
 /**
- * Document Studio — persistence & domain service.
+ * Document Studio - persistence & domain service.
  *
  * This is the single seam between the UI and where data lives. Today it reads
  * and writes `localStorage`; swapping the body of these functions for `axios`
- * calls (or an AI generation endpoint) is all it takes to move server-side —
+ * calls (or an AI generation endpoint) is all it takes to move server-side -
  * no component needs to change because they only ever import this module.
  */
 import {
@@ -33,7 +33,7 @@ export const DEFAULT_PAGE: PageSettings = {
   showBackground: true,
 };
 
-/** Small id helper — stable, dependency-free. */
+/** Small id helper - stable, dependency-free. */
 export const uid = (prefix = "id"): string =>
   `${prefix}-${Math.random().toString(36).slice(2, 9)}${Date.now()
     .toString(36)
@@ -81,7 +81,7 @@ export function saveState(state: StudioState): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
-    /* quota / private-mode — non-fatal, studio still works in-memory */
+    /* quota / private-mode - non-fatal, studio still works in-memory */
   }
 }
 
@@ -97,7 +97,7 @@ export function createTemplate(
     id: uid("tpl"),
     description: "",
     category: "Custom",
-    icon: "✨",
+    icon: "blank",
     content: BLANK_TEMPLATE.content,
     system: false,
     usageCount: 0,

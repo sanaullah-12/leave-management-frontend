@@ -94,7 +94,7 @@ const ProgressRing: React.FC<{ percent: number; color: string }> = ({
   );
 };
 
-// Glowing leave-balance card — view mode shows the ring + remaining; edit
+// Glowing leave-balance card - view mode shows the ring + remaining; edit
 // mode shows an allocation input. Admin-editable.
 const LeaveBalanceCard: React.FC<{
   leaveKey: LeaveKey;
@@ -200,7 +200,7 @@ const ProfileField: React.FC<{
   value: React.ReactNode;
 }> = ({ icon, label, value }) => (
   <div className="flex items-start gap-3">
-    <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-gray-500 dark:bg-white/5 dark:text-gray-400">
+    <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 dark:bg-white/5 dark:text-gray-400">
       {icon}
     </span>
     <div className="min-w-0">
@@ -372,7 +372,7 @@ const EmployeeDetailPageReal: React.FC = () => {
   );
 
   if (employeesLoading || historyLoading) {
-    return <LogoLoader label="Loading profile…" />;
+    return <LogoLoader label="Loading profile..." />;
   }
 
   if (employeesError || !employee) {
@@ -409,7 +409,7 @@ const EmployeeDetailPageReal: React.FC = () => {
   const departmentName =
     typeof employee.department === "object" && employee.department?.name
       ? employee.department.name
-      : employee.department || "—";
+      : employee.department || "-";
 
   const active = employee.status === "active";
 
@@ -463,7 +463,7 @@ const EmployeeDetailPageReal: React.FC = () => {
   });
   const hasTrend = monthlyData.some((m) => m.leaves > 0);
 
-  // Distribution donut — used days by type.
+  // Distribution donut - used days by type.
   const distribution = LEAVE_ORDER.map((key) => ({
     name: LEAVE_META[key].label.split(" ")[0],
     value: leaveBalance[key].used,
@@ -553,7 +553,7 @@ const EmployeeDetailPageReal: React.FC = () => {
               </span>
             </div>
             <p className="mt-1 text-sm font-medium text-gray-500 dark:text-gray-400">
-              {employee.position || "—"} • {departmentName}
+              {employee.position || "-"} • {departmentName}
             </p>
             <div className="mt-2 inline-flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 ring-1 ring-inset ring-blue-200/60 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20">
               <CalendarDaysIcon className="h-3.5 w-3.5" />
@@ -566,29 +566,31 @@ const EmployeeDetailPageReal: React.FC = () => {
           <ProfileField
             icon={<EnvelopeIcon className="h-4 w-4" />}
             label="Email"
-            value={employee.email || "—"}
+            value={employee.email || "-"}
           />
           <ProfileField
             icon={<IdentificationIcon className="h-4 w-4" />}
             label="Employee ID"
-            value={employee.employeeId || "—"}
+            value={employee.employeeId || "-"}
           />
           <ProfileField
             icon={<BuildingOffice2Icon className="h-4 w-4" />}
             label="Department"
             value={departmentName}
           />
-          {employee.phone && (
-            <ProfileField
-              icon={<PhoneIcon className="h-4 w-4" />}
-              label="Phone"
-              value={employee.phone}
-            />
-          )}
+          {/* Always shown, even when empty: a missing number is the reason an
+              employee receives no WhatsApp notifications, and hiding the field
+              hides the cause. */}
+          <ProfileField
+            icon={<PhoneIcon className="h-4 w-4" />}
+            label="Phone"
+            value={employee.phone || "-"}
+          />
+
           <ProfileField
             icon={<CalendarDaysIcon className="h-4 w-4" />}
             label="Joined"
-            value={employee.joinDate ? formatDate(employee.joinDate) : "—"}
+            value={employee.joinDate ? formatDate(employee.joinDate) : "-"}
           />
           <ProfileField
             icon={<UserIcon className="h-4 w-4" />}
@@ -799,7 +801,7 @@ const EmployeeDetailPageReal: React.FC = () => {
                 className={`${CARD} flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between`}
               >
                 <div className="flex items-center gap-4">
-                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-blue-600 dark:text-blue-400">
                     <ChartBarIcon className="h-5 w-5" />
                   </span>
                   <div>

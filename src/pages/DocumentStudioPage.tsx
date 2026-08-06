@@ -46,7 +46,7 @@ import type {
 } from "../components/documentStudio/types";
 import "../components/documentStudio/studio.css";
 
-/** Editor working session — what's currently loaded into the canvas. */
+/** Editor working session - what's currently loaded into the canvas. */
 interface Session {
   key: string; // forces canvas DOM reset
   html: string;
@@ -158,7 +158,7 @@ const DocumentStudioPage: React.FC = () => {
       name,
       description: "Imported company template",
       category: "Custom",
-      icon: "📁",
+      icon: "policy",
       content: html,
     });
     loadTemplate(tpl);
@@ -174,7 +174,7 @@ const DocumentStudioPage: React.FC = () => {
         name,
         description: "Custom template",
         category: "Custom",
-        icon: "✨",
+        icon: "blank",
         content: BLANK_TEMPLATE.content,
       });
       loadTemplate(tpl);
@@ -193,7 +193,7 @@ const DocumentStudioPage: React.FC = () => {
       name: `${session.templateName} (Template)`,
       description: "Saved from the editor",
       category: "Custom",
-      icon: "📄",
+      icon: "contract",
       content: html,
     });
     showSuccessToast("Saved as a reusable template");
@@ -271,7 +271,8 @@ const DocumentStudioPage: React.FC = () => {
       >
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-white">
-            <span className="text-3xl">📄</span> Document Studio
+            <DocumentTextIcon className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+            Document Studio
           </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Create, manage and generate professional HR documents without
@@ -296,7 +297,7 @@ const DocumentStudioPage: React.FC = () => {
 
       {/* ============ Canvas-first workspace ============ */}
       <motion.div variants={staggerItem} className="space-y-3">
-        {/* Control bar — the only always-visible chrome */}
+        {/* Control bar - the only always-visible chrome */}
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-gray-200/70 bg-white/80 px-2.5 py-2 backdrop-blur-sm dark:border-gray-700/50 dark:bg-gray-800/70">
           <div className="flex min-w-0 items-center gap-2">
             <button
@@ -375,7 +376,7 @@ const DocumentStudioPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Stage — canvas is full-width; panels float in on demand */}
+        {/* Stage - canvas is full-width; panels float in on demand */}
         <div className="relative h-[640px] overflow-hidden rounded-2xl lg:h-[820px]">
           {/* Canvas / empty state (always full width underneath) */}
           <div className="h-full">
@@ -417,7 +418,7 @@ const DocumentStudioPage: React.FC = () => {
             )}
           </AnimatePresence>
 
-          {/* LEFT — Template library overlay */}
+          {/* LEFT - Template library overlay */}
           <AnimatePresence>
             {showLibrary && (
               <motion.aside
@@ -459,7 +460,7 @@ const DocumentStudioPage: React.FC = () => {
             )}
           </AnimatePresence>
 
-          {/* RIGHT — Properties overlay */}
+          {/* RIGHT - Properties overlay */}
           <AnimatePresence>
             {showProps && (
               <motion.aside

@@ -37,7 +37,7 @@ import type {
 type StatusFilter = SalaryStatus | "unconfigured" | "all";
 
 /**
- * Employee Salary Management — the heart of the payroll module.
+ * Employee Salary Management - the heart of the payroll module.
  *
  * Every employee gets a salary profile whose net pay is derived, never typed.
  * Filtering and sorting operate on the memoised rows from the provider, so
@@ -208,7 +208,7 @@ const SalaryManagementPage: React.FC = () => {
     >
       <motion.div variants={staggerItem}>
         <PayrollPageHeader
-          glyph="🧾"
+          icon={BanknotesIcon}
           title={t("salaries.title")}
           subtitle={t("salaries.subtitle")}
         />
@@ -269,7 +269,7 @@ const SalaryManagementPage: React.FC = () => {
               }
               emptySub={
                 rows.length === 0
-                  ? "Invite employees first — their salary profiles will appear here."
+                  ? "Invite employees first - their salary profiles will appear here."
                   : "Try clearing the search or switching the status filter."
               }
             />

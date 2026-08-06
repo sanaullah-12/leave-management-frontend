@@ -1,5 +1,5 @@
 /**
- * Payroll — salary structure editor.
+ * Payroll - salary structure editor.
  *
  * Edits one employee's compensation: basic pay plus an arbitrary list of
  * earning/deduction components. The form holds only *definitions*; every figure
@@ -7,7 +7,7 @@
  * previews here is literally what the payroll run and the payslip will produce.
  *
  * Because components are data, supporting a brand-new pay element later means
- * adding a blueprint — this file already renders, validates and totals it.
+ * adding a blueprint - this file already renders, validates and totals it.
  */
 import React, { useCallback, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";

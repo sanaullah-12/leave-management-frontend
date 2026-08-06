@@ -1,20 +1,20 @@
 /**
- * Payroll — calculation engine.
+ * Payroll - calculation engine.
  *
  * The single place money is computed. Pure functions only: no React, no I/O, no
  * formatting. Give it a salary structure plus a context and it returns an
- * immutable {@link PayslipComputation}. Every screen — dashboard, salary table,
- * processing preview, payslip PDF — reads the *same* numbers from here, so the
+ * immutable {@link PayslipComputation}. Every screen - dashboard, salary table,
+ * processing preview, payslip PDF - reads the *same* numbers from here, so the
  * figure an admin approves is byte-identical to the one the employee receives.
  *
  * ## Extension model
  *
  * Two registries keep the engine closed for modification but open for extension:
  *
- * 1. **Compute modes** — how a component turns into an amount.
+ * 1. **Compute modes** - how a component turns into an amount.
  *    `registerComputeMode("slab", fn)` adds e.g. tax slabs without editing this
  *    file.
- * 2. **Component providers** — where extra components come from. A future
+ * 2. **Component providers** - where extra components come from. A future
  *    attendance module calls `registerComponentProvider({ source: "attendance",
  *    produce })` and its loss-of-pay line flows into totals, tables, payslips
  *    and PDFs automatically, because everything downstream only knows
@@ -71,7 +71,7 @@ const sum = (lines: PayslipLine[]) =>
 export interface PayrollContext {
   settings: PayrollSettings;
   period: PayrollPeriod;
-  /** Employee id — passed to providers that need per-employee data. */
+  /** Employee id - passed to providers that need per-employee data. */
   employeeId?: string;
 }
 
@@ -84,7 +84,7 @@ export interface ComputeBase {
 }
 
 /* ------------------------------------------------------------------ */
-/* Registry 1 — compute modes                                          */
+/* Registry 1 - compute modes                                          */
 /* ------------------------------------------------------------------ */
 
 export type ComputeModeResolver = (
@@ -115,20 +115,20 @@ const GROSS_DEPENDENT: ReadonlySet<string> = new Set(["percentOfGross"]);
 function resolveAmount(component: SalaryComponent, base: ComputeBase): number {
   const resolver = computeModes.get(component.mode);
   // An unknown mode means data from a newer version of the app. Contributing
-  // zero is the only safe answer — never guess at someone's pay.
+  // zero is the only safe answer - never guess at someone's pay.
   if (!resolver) return 0;
   return round2(Math.max(0, resolver(component, base)));
 }
 
 /* ------------------------------------------------------------------ */
-/* Registry 2 — component providers                                    */
+/* Registry 2 - component providers                                    */
 /* ------------------------------------------------------------------ */
 
 /**
  * Produces additional components for a payslip from data the salary structure
  * doesn't hold. This is the seam every future payroll feature plugs into:
  * attendance LOP, leave deductions, overtime, bonuses, loan instalments,
- * reimbursements — each is a provider, none of them touches this file.
+ * reimbursements - each is a provider, none of them touches this file.
  */
 export interface ComponentProvider {
   source: ComponentSource;
@@ -214,7 +214,7 @@ export function computePayslip(
     resolved.set(c.id, resolveAmount(c, firstPass));
   }
 
-  // Gross of the independent lines — the base %-of-gross components apply to.
+  // Gross of the independent lines - the base %-of-gross components apply to.
   const baseGross = round2(
     basicSalary +
       earningDefs.reduce((acc, c) => acc + (resolved.get(c.id) ?? 0), 0)
@@ -276,7 +276,7 @@ export type TaxPolicy = (
 
 /**
  * V1 tax: a flat percentage from settings. Swapping in a slab-based statutory
- * engine later means calling {@link setTaxPolicy} — the payslip, the totals and
+ * engine later means calling {@link setTaxPolicy} - the payslip, the totals and
  * every table already understand a tax deduction line.
  */
 let taxPolicy: TaxPolicy = (taxable, ctx) =>
@@ -342,7 +342,7 @@ export function aggregate(computations: PayslipComputation[]): PayrollTotals {
   };
 }
 
-/** Empty totals — used by loading and empty states so the UI never branches. */
+/** Empty totals - used by loading and empty states so the UI never branches. */
 export const EMPTY_TOTALS: PayrollTotals = {
   employeeCount: 0,
   totalGross: 0,

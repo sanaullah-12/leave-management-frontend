@@ -1,9 +1,9 @@
 /**
- * Payroll — durable state hook.
+ * Payroll - durable state hook.
  *
  * A thin, self-persisting wrapper around {@link payrollService}. It owns the
  * data (structures / runs / payslips / settings) and exposes stable mutators;
- * it deliberately owns *no* derived money figures — those come from the engine
+ * it deliberately owns *no* derived money figures - those come from the engine
  * via `PayrollProvider`, so there is exactly one source of arithmetic truth.
  *
  * Every mutator is `useCallback`-stable and updates via the functional form of
@@ -74,8 +74,8 @@ export function usePayrollStore() {
   /* ---------------- runs & payslips ---------------- */
 
   /**
-   * Commit a generated run. Any previous run for the same period — and its
-   * payslips — is replaced, so re-processing a month can never double-count.
+   * Commit a generated run. Any previous run for the same period - and its
+   * payslips - is replaced, so re-processing a month can never double-count.
    */
   const commitRun = useCallback((run: PayrollRun, payslips: Payslip[]) => {
     setState((s) => {
@@ -134,7 +134,7 @@ export function usePayrollStore() {
 
   /* ---------------- indexes ---------------- */
 
-  /** Payslips grouped by run — built once per change instead of per render. */
+  /** Payslips grouped by run - built once per change instead of per render. */
   const payslipsByRun = useMemo(() => {
     const map = new Map<string, Payslip[]>();
     for (const p of state.payslips) {

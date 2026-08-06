@@ -1,4 +1,4 @@
-/* Document Studio — on-screen styling for the editable A4 body.
+/* Document Studio - on-screen styling for the editable A4 body.
    Kept scoped to .ds-editable / .ds-page so it can never leak into the app. */
 
 .ds-editable h1 {
@@ -60,6 +60,6 @@
 
 /* Empty-body helper text */
 .ds-editable:empty::before {
-  content: "Start typing your document…";
+  content: "Start typing your document...";
   color: #9ca3af;
 }

@@ -15,6 +15,7 @@ import {
   ArrowUturnRightIcon,
   MagnifyingGlassIcon,
   DocumentPlusIcon,
+  PencilIcon,
 } from "@heroicons/react/24/outline";
 
 export interface EditorCommands {
@@ -125,7 +126,7 @@ const ColorPopover: React.FC<{
   );
 };
 
-/** Word-processor style formatting toolbar. Stateless — drives the canvas via `cmd`. */
+/** Word-processor style formatting toolbar. Stateless - drives the canvas via `cmd`. */
 const RichTextToolbar: React.FC<Props> = ({ cmd }) => {
   const [block, setBlockState] = React.useState("p");
 
@@ -170,7 +171,7 @@ const RichTextToolbar: React.FC<Props> = ({ cmd }) => {
       />
       <ColorPopover
         label="Highlight"
-        glyph={<span className="text-sm font-bold leading-none">🖍</span>}
+        glyph={<PencilIcon className="h-4 w-4" />}
         swatch={HIGHLIGHTS[0]}
         colors={HIGHLIGHTS}
         onPick={cmd.setHighlight}

@@ -19,6 +19,7 @@ import {
   DocumentChartBarIcon,
   ShieldCheckIcon,
   ArrowPathIcon,
+  CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 
@@ -209,7 +210,7 @@ const EmployeesPage: React.FC = () => {
   };
 
   if (isLoading) {
-    return <LogoLoader label="Loading team…" />;
+    return <LogoLoader label="Loading team..." />;
   }
 
   const users = currentUsers || [];
@@ -378,7 +379,8 @@ const EmployeesPage: React.FC = () => {
               {searchTerm && <span> matching "{searchTerm}"</span>}
               {(dateFrom || dateTo) && (
                 <span className="block mt-1">
-                  📅 Report will include data{" "}
+                  <CalendarDaysIcon className="mr-1 inline h-4 w-4 align-text-bottom" />
+                Report will include data{" "}
                   {dateFrom &&
                     `from ${new Date(dateFrom).toLocaleDateString()}`}{" "}
                   {dateTo && `to ${new Date(dateTo).toLocaleDateString()}`}
@@ -419,7 +421,10 @@ const EmployeesPage: React.FC = () => {
               </p>
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-md p-3">
                 <div className="text-xs text-red-800 dark:text-red-200">
-                  <strong>⚠️ Warning:</strong>
+                  <strong className="inline-flex items-center gap-1">
+                  <ExclamationTriangleIcon className="h-4 w-4" />
+                  Warning:
+                </strong>
                   <ul className="mt-1 list-disc list-inside space-y-1">
                     <li>This action cannot be undone</li>
                     <li>Employee's account and all data will be removed</li>
@@ -743,7 +748,7 @@ const EmployeesPage: React.FC = () => {
           </>
         ) : (
           <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-100 dark:bg-gray-700/60 flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-400">
               <UserIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
             </div>
             <p className="text-base font-semibold text-gray-900 dark:text-gray-100">

@@ -31,7 +31,7 @@ export interface CanvasHandle {
 }
 
 interface Props {
-  /** Changes whenever a different template/document is loaded — resets the DOM. */
+  /** Changes whenever a different template/document is loaded - resets the DOM. */
   docKey: string;
   initialHtml: string;
   page: PageSettings;
@@ -44,7 +44,7 @@ const assetFor = (assets: BrandingAsset[], slot: BrandingAsset["slot"]) =>
   assets.find((a) => a.slot === slot && a.enabled);
 
 /**
- * The centrepiece — a live, zoomable A4 canvas with a contentEditable body and
+ * The centrepiece - a live, zoomable A4 canvas with a contentEditable body and
  * WYSIWYG letterhead/watermark preview that matches the export pipeline 1:1.
  */
 const DocumentCanvas = forwardRef<CanvasHandle, Props>(
@@ -65,7 +65,7 @@ const DocumentCanvas = forwardRef<CanvasHandle, Props>(
 
     const isEditing = editable && !preview;
 
-    // (Re)hydrate the DOM only when the loaded document changes — never on keystroke.
+    // (Re)hydrate the DOM only when the loaded document changes - never on keystroke.
     useEffect(() => {
       if (bodyRef.current) bodyRef.current.innerHTML = initialHtml;
       setSelectedImg(null);
@@ -113,7 +113,7 @@ const DocumentCanvas = forwardRef<CanvasHandle, Props>(
         try {
           document.execCommand(command, false, value);
         } catch {
-          /* unsupported command — no-op */
+          /* unsupported command - no-op */
         }
         setSelVersion((v) => v + 1);
         sync();
@@ -308,7 +308,7 @@ const DocumentCanvas = forwardRef<CanvasHandle, Props>(
           </div>
         )}
 
-        {/* Picture toolbar — shown while an image is selected */}
+        {/* Picture toolbar - shown while an image is selected */}
         {isEditing && selectedImg && (
           <motion.div
             initial={{ opacity: 0, y: -6 }}

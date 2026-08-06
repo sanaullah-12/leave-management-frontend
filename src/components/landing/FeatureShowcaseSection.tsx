@@ -15,7 +15,7 @@ import {
    Document Studio, Smart Attendance, Leave Management, Role
    Management and Security & Trust used to be five separate
    full-height scroll stops. They're collapsed here into one
-   continuously drifting row of cards instead — the actual idea
+   continuously drifting row of cards instead - the actual idea
    in the reference clip (a row of cards endlessly sliding past,
    looping forever), reused here for feature cards rather than
    testimonials. Unlike a passive marquee, it also pauses on
@@ -275,7 +275,7 @@ const FeatureCard: React.FC<{ cfg: FeatureCardCfg }> = ({ cfg }) => (
  * user the moment they touch it: hovering pauses the auto-drift, and
  * the row can be grabbed with a mouse (or swiped on touch) and scrolled
  * by hand like any native horizontal scroller. The item list is
- * rendered twice back-to-back so the loop point is invisible — once
+ * rendered twice back-to-back so the loop point is invisible - once
  * the scroll position passes the first copy, it's silently rewound by
  * exactly that width.
  */

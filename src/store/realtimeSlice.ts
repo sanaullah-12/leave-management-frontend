@@ -2,11 +2,11 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
 export interface RealtimeState {
-  /** Live socket connection status (drives the "reconnecting…" UI). */
+  /** Live socket connection status (drives the "reconnecting..." UI). */
   connected: boolean;
   /** User ids currently online in the company (presence). */
   online: string[];
-  /** Monotonic counter bumped on any inbound event — handy for subtle
+  /** Monotonic counter bumped on any inbound event - handy for subtle
    *  "live" pulse animations without storing every payload. */
   lastEventAt: number | null;
 }

@@ -20,20 +20,20 @@
     background-color: var(--surface);
     color: var(--text-primary);
     min-height: 100vh;
-    /* Body Text — Geist Regular 15px */
+    /* Body Text - Geist Regular 15px */
     font-size: 0.9375rem;
     line-height: 1.6;
     letter-spacing: -0.006em;
   }
 
   /* ============================================================ */
-  /* 📌 Theme-aware ambient app background                         */
+  /* Theme-aware ambient app background */
   /* A fixed layer behind all content. Soft radial "glows" use the */
   /* active theme's accent scale (--blue-* is remapped per theme), */
-  /* so the background turns blue/green/purple/… with the theme.   */
+  /* so the background turns blue/green/purple/... with the theme.   */
   /* Content surfaces above it are left transparent to reveal it.  */
   /* ============================================================ */
-  /* Coordinated surface palette — background and cards share ONE blue-gray
+  /* Coordinated surface palette - background and cards share ONE blue-gray
      tonal family. The card surface is exactly one gentle elevation step above
      the app background, so cards read as extruded from the same sheet (soft-UI)
      and sit harmoniously on the accent-tinted ambient background. */
@@ -71,7 +71,7 @@
   }
 
   /* ============================================================ */
-  /* 📌 App-wide dark surface unification                          */
+  /* App-wide dark surface unification */
   /* Remap every dark gray-800/900 surface utility to the          */
   /* coordinated blue-gray palette (card = 26 33 48, base = 15 20  */
   /* 32), so all pages/panels/modals match the dashboard + ambient */
@@ -98,7 +98,7 @@
   html.dark .dark\:bg-gray-900\/80    { background-color: rgb(15 20 32 / 0.8); }
   html.dark .dark\:bg-gray-900\/95    { background-color: rgb(15 20 32 / 0.95); }
 
-  /* Gradient card shells — remap the gray-800/900 colour stops to the same
+  /* Gradient card shells - remap the gray-800/900 colour stops to the same
      palette (opacity + gradient positions preserved). */
   html.dark .dark\:from-gray-800      { --tw-gradient-from: #1a2130 var(--tw-gradient-from-position); }
   html.dark .dark\:from-gray-800\/40  { --tw-gradient-from: rgb(26 33 48 / 0.4) var(--tw-gradient-from-position); }
@@ -110,31 +110,31 @@
   html.dark .dark\:to-gray-900\/20    { --tw-gradient-to: rgb(15 20 32 / 0.2) var(--tw-gradient-to-position); }
 
   /* Shared component card classes (use @apply'd dark:bg-gray-800/900 which the
-     utility remap above can't reach) — recolor them explicitly. */
+     utility remap above can't reach) - recolor them explicitly. */
   html.dark .card,
   html.dark .card-elevated,
   html.dark .dashboard-card { background-color: var(--card-surface); }
 
   /* ============================= */
-  /* 📌 Heading hierarchy defaults */
+  /* Heading hierarchy defaults */
   /* Unstyled headings inherit a premium, tightened scale */
   /* ============================= */
   h1 {
-    font-size: 2rem; /* Page Heading — 32px Bold */
+    font-size: 2rem; /* Page Heading - 32px Bold */
     line-height: 1.15;
     letter-spacing: -0.02em;
     font-weight: 700;
   }
 
   h2 {
-    font-size: 1.375rem; /* Section Heading — 22px SemiBold */
+    font-size: 1.375rem; /* Section Heading - 22px SemiBold */
     line-height: 1.25;
     letter-spacing: -0.017em;
     font-weight: 600;
   }
 
   h3 {
-    font-size: 1.125rem; /* Card Title — 18px SemiBold */
+    font-size: 1.125rem; /* Card Title - 18px SemiBold */
     line-height: 1.4;
     letter-spacing: -0.011em;
     font-weight: 600;
@@ -186,7 +186,7 @@
 
 @layer components {
   /* ============================= */
-  /* 📌 Typography Scale — Geist   */
+  /* Typography Scale - Geist */
   /* Semantic, reusable text roles */
   /* ============================= */
   .text-display {
@@ -246,14 +246,14 @@
   }
 
   .text-overline {
-    font-size: 0.6875rem; /* 11px — section labels / eyebrows */
+    font-size: 0.6875rem; /* 11px - section labels / eyebrows */
     line-height: 1rem;
     letter-spacing: 0.06em;
     font-weight: 600;
     text-transform: uppercase;
   }
 
-  /* Legacy button compatibility — Buttons: Geist SemiBold 15px */
+  /* Legacy button compatibility - Buttons: Geist SemiBold 15px */
   .btn-primary {
     @apply text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:shadow-md;
     font-size: 0.9375rem;
@@ -296,7 +296,7 @@
     letter-spacing: -0.006em;
   }
 
-  /* Enhanced input field — Inputs: Geist Regular 15px */
+  /* Enhanced input field - Inputs: Geist Regular 15px */
   .input-field {
     @apply block w-full px-3.5 py-2.5 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:border-transparent shadow-sm;
     font-size: 0.9375rem;
@@ -353,7 +353,7 @@
     @apply bg-gray-50 dark:bg-gray-800;
   }
 
-  /* Table Header — Geist SemiBold, 13px, subtle tracking (no shouty uppercase) */
+  /* Table Header - Geist SemiBold, 13px, subtle tracking (no shouty uppercase) */
   .table-header-cell {
     @apply px-6 py-3.5 text-left font-semibold text-gray-500 dark:text-gray-400;
     font-size: 0.8125rem;
@@ -364,7 +364,7 @@
     @apply bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors;
   }
 
-  /* Table Cell — Geist Regular 14px */
+  /* Table Cell - Geist Regular 14px */
   .table-cell {
     @apply px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100;
     font-size: 0.875rem;
@@ -409,7 +409,7 @@
   }
 
   /* ============================================================ */
-  /* 📌 Unified neumorphic card system (app-wide)                  */
+  /* Unified neumorphic card system (app-wide) */
   /* One soft-UI surface shared by the dashboard, reports, team,   */
   /* and every legacy .card/.card-elevated/.dashboard-card. Use    */
   /* .surface-card on any container to get the dashboard card look;*/
@@ -452,7 +452,7 @@
 }
 
 /* ============================================================ */
-/* 📌 Animated "HRMS" brand gradient text                        */
+/* Animated "HRMS" brand gradient text */
 /* A continuously flowing gradient sheen for the HRMS wordmark.  */
 /* ============================================================ */
 @keyframes hrms-sheen {

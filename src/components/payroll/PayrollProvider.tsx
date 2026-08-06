@@ -1,5 +1,5 @@
 /**
- * Payroll — module context.
+ * Payroll - module context.
  *
  * Wraps every `/payroll/*` route so the six screens share one store instance,
  * one employee fetch and one set of derived figures. Without this each page
@@ -43,7 +43,7 @@ interface PayrollContextValue extends PayrollStore {
   rows: SalaryRow[];
   /** Rows that are ready to be paid (active structure, positive basic). */
   payableRows: SalaryRow[];
-  /** Totals across `payableRows` — the "current payroll cost" figure. */
+  /** Totals across `payableRows` - the "current payroll cost" figure. */
   totals: PayrollTotals;
   /** The period payroll is currently working on. */
   period: PayrollPeriod;
@@ -51,7 +51,7 @@ interface PayrollContextValue extends PayrollStore {
   contextFor: (period: PayrollPeriod) => PayrollContext;
   /** Recompute one row against a specific period (used by the run preview). */
   computeFor: (row: SalaryRow, period: PayrollPeriod) => PayslipComputation | null;
-  /** Display name of the signed-in admin — stamped onto runs. */
+  /** Display name of the signed-in admin - stamped onto runs. */
   actorName: string;
 }
 
@@ -92,7 +92,7 @@ export const PayrollProvider: React.FC<{ children: React.ReactNode }> = ({
 
   /**
    * The join every screen renders from. Recomputed only when the roster,
-   * structures or settings change — not when a filter or sort changes, which
+   * structures or settings change - not when a filter or sort changes, which
    * is what keeps large rosters responsive.
    */
   const rows: SalaryRow[] = useMemo(() => {

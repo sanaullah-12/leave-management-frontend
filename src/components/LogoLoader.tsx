@@ -5,7 +5,7 @@ import NexoraLoaderMark from "./NexoraLoaderMark";
 interface LogoLoaderProps {
   /** Mark size in px. Default 76. */
   size?: number;
-  /** Caption below the mark. Pass null to hide. Default "Loading…". */
+  /** Caption below the mark. Pass null to hide. Default "Loading...". */
   label?: string | null;
   /** Fill the whole viewport instead of a page section. */
   fullScreen?: boolean;
@@ -15,13 +15,13 @@ interface LogoLoaderProps {
 }
 
 /**
- * The canonical Nexora loading state — the animated brand mark, centered, with
+ * The canonical Nexora loading state - the animated brand mark, centered, with
  * an optional caption. Used anywhere the app is fetching a page or section, so
  * every load feels unmistakably Nexora.
  */
 const LogoLoader: React.FC<LogoLoaderProps> = ({
   size = 76,
-  label = "Loading…",
+  label = "Loading...",
   fullScreen = false,
   minHClass = "min-h-[60vh]",
   className = "",

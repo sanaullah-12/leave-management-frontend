@@ -56,7 +56,7 @@
     "pending": "Pending",
     "requests": "Requests"
   },
-  "loading": "Loading your dashboard…",
+  "loading": "Loading your dashboard...",
   "sections": {
     "companyActivity": "Company leave activity across recent requests",
     "current": "Current",

@@ -23,8 +23,8 @@ interface Props {
 }
 
 /**
- * Generic KPI row for Payroll. Renders the exact dashboard tile — neumorphic
- * surface, count-up numbers, hover lift with an icon micro-tilt — so payroll
+ * Generic KPI row for Payroll. Renders the exact dashboard tile - neumorphic
+ * surface, count-up numbers, hover lift with an icon micro-tilt - so payroll
  * reads as part of the same product rather than a bolted-on module. Kept
  * presentational and memoised: it never knows what a payroll is.
  */

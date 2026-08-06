@@ -21,7 +21,7 @@ export interface VoiceFilters {
 /** List of voices for the current viewer (own for employees, all for admins). */
 export function useVoices(filters: VoiceFilters = {}) {
   const { isAuthenticated } = useAuth();
-  // Real-time via Socket.IO (voice:new / voice:updated) — no polling.
+  // Real-time via Socket.IO (voice:new / voice:updated) - no polling.
   return useQuery({
     queryKey: [...VOICES_KEY, filters],
     queryFn: async () => {
@@ -38,7 +38,7 @@ export function useVoices(filters: VoiceFilters = {}) {
 /** Admin dashboard statistics for the Employee Voice module. */
 export function useVoiceStats() {
   const { user, isAuthenticated } = useAuth();
-  // Real-time via Socket.IO — no polling.
+  // Real-time via Socket.IO - no polling.
   return useQuery({
     queryKey: VOICE_STATS_KEY,
     queryFn: async () => {
@@ -54,7 +54,7 @@ export function useVoiceStats() {
 
 /** Single voice detail (with the reply thread). */
 export function useVoice(id: string | null) {
-  // Real-time via Socket.IO (voice:updated) — no polling.
+  // Real-time via Socket.IO (voice:updated) - no polling.
   return useQuery({
     queryKey: [...VOICES_KEY, "detail", id],
     queryFn: async () => {

@@ -30,8 +30,8 @@
     "quickAdd": "Quick add"
   },
   "states": {
-    "loading": "Loading…",
-    "saving": "Saving…",
+    "loading": "Loading...",
+    "saving": "Saving...",
     "noData": "No data",
     "error": "Something went wrong",
     "success": "Success",

@@ -1,5 +1,5 @@
 /**
- * Document Studio — domain types.
+ * Document Studio - domain types.
  *
  * These types describe the whole module's data model. They are intentionally
  * transport-agnostic: today the {@link studioService} persists them to
@@ -28,7 +28,7 @@ export interface PlaceholderDef {
   group: "Employee" | "Company" | "Date" | "Custom";
   /** Short helper describing what it resolves to. */
   hint?: string;
-  /** Heroicon-ish emoji used as a lightweight glyph in the palette. */
+  /** Key into the studio icon registry (see `icons.ts`). */
   glyph: string;
 }
 
@@ -38,7 +38,7 @@ export interface DocumentTemplate {
   name: string;
   description: string;
   category: TemplateCategory;
-  /** Emoji/glyph shown on the template card. */
+  /** Key into the studio icon registry (see `icons.ts`). */
   icon: string;
   /** HTML body of the template (contentEditable-ready). Contains {{placeholders}}. */
   content: string;
@@ -96,7 +96,7 @@ export interface BrandingAsset {
   /** data: URL (png/jpg/svg) or object metadata for pdf. */
   dataUrl: string;
   mime: string;
-  /** 0–100 opacity, primarily for watermark. */
+  /** 0-100 opacity, primarily for watermark. */
   opacity: number;
   /** Scale factor in %. */
   scale: number;

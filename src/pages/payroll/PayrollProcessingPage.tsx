@@ -10,6 +10,7 @@ import {
   CheckBadgeIcon,
   ExclamationTriangleIcon,
   ArrowPathIcon,
+  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import Select from "../../components/ui/Select";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
@@ -45,7 +46,7 @@ import {
 import type { PayrollPeriod, SalaryRow } from "../../components/payroll/types";
 
 /**
- * Payroll Processing — select a month, review, generate.
+ * Payroll Processing - select a month, review, generate.
  *
  * The review table is computed for the *selected* period rather than the live
  * one, so the numbers an admin approves are the numbers that get frozen onto
@@ -103,7 +104,7 @@ const PayrollProcessingPage: React.FC = () => {
     [included]
   );
 
-  /** Structures whose deductions exceed their earnings — worth a warning. */
+  /** Structures whose deductions exceed their earnings - worth a warning. */
   const negativeRows = useMemo(
     () => included.filter((r) => (r.computation?.netSalary ?? 0) < 0),
     [included]
@@ -139,7 +140,7 @@ const PayrollProcessingPage: React.FC = () => {
   /* ---------------- selection ---------------- */
 
   // Selection is stored as *exclusions* so newly-added employees are included
-  // by default — the safe direction for payroll.
+  // by default - the safe direction for payroll.
   const selectedIds = useMemo(
     () =>
       new Set(
@@ -249,7 +250,7 @@ const PayrollProcessingPage: React.FC = () => {
     >
       <motion.div variants={staggerItem}>
         <PayrollPageHeader
-          glyph="⚙️"
+          icon={Cog6ToothIcon}
           title={t("run.title")}
           subtitle={t("run.subtitle")}
           actions={
@@ -318,7 +319,7 @@ const PayrollProcessingPage: React.FC = () => {
 
       <motion.div variants={staggerItem}>
         <PayrollSection
-          title={`Review — ${formatPeriod(period)}`}
+          title={`Review - ${formatPeriod(period)}`}
           description={`${included.length} of ${candidates.length} employees will be processed`}
           actions={
             <>

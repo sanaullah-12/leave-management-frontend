@@ -18,7 +18,7 @@ type ThemeMode = "light" | "dark" | "auto";
 
 export type { ColorScheme, ThemeMode };
 
-// Legacy schemes that may still be in localStorage — cleaned up on load.
+// Legacy schemes that may still be in localStorage - cleaned up on load.
 const LEGACY_CLASSES = ["theme-green", "theme-custom"];
 
 interface ThemeContextType {

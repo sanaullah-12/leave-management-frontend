@@ -94,7 +94,7 @@ export const SolutionSection: React.FC = () => (
                 Everything HR, <GradientText>beautifully unified</GradientText>
               </>
             }
-            description="Nexora replaces the patchwork with a single, elegant system. Every workflow connects — so nothing slips, and everyone stays in sync."
+            description="Nexora replaces the patchwork with a single, elegant system. Every workflow connects - so nothing slips, and everyone stays in sync."
           />
           <motion.ul
             variants={stagger(0.08)}

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../context/AuthContext";
@@ -22,6 +22,11 @@ import {
   showSuccessToast,
   showErrorToast,
 } from "../../utils/toastHelpers";
+import {
+  PHONE_HINT,
+  PHONE_PLACEHOLDER,
+  phoneValidationRules,
+} from "../../utils/phone";
 
 interface ProfileForm {
   name: string;
@@ -122,6 +127,25 @@ const ProfileSettings: React.FC = () => {
     },
   });
   const passwordForm = useForm<PasswordForm>();
+
+  // defaultValues are captured on first render only. The session is validated
+  // against the backend asynchronously at app start, so this component can
+  // mount before `user` is populated - and then the fields would stay empty
+  // even though the values exist. Re-seeding when the user object changes keeps
+  // the form showing what is actually stored.
+  const { reset: resetProfileForm } = profileForm;
+  useEffect(() => {
+    if (!user) return;
+    resetProfileForm({
+      name: user.name || "",
+      phone: user.phone || "",
+      position: user.position || "",
+      bio: prefs.bio,
+    });
+    // `prefs.bio` is local-only and edited in this same form; re-seeding on
+    // every keystroke would fight the user for the cursor.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, resetProfileForm]);
 
   const savePrefs = (next: Prefs) => {
     setPrefs(next);
@@ -262,7 +286,7 @@ const ProfileSettings: React.FC = () => {
             </p>
             <p className="flex items-center gap-2.5 text-gray-600 dark:text-gray-300">
               <PhoneIcon className="h-4 w-4 text-blue-500" />
-              {user?.phone || "—"}
+              {user?.phone || "-"}
             </p>
           </div>
         </div>
@@ -307,7 +331,7 @@ const ProfileSettings: React.FC = () => {
                 {...profileForm.register("position")}
                 disabled={!isAdmin}
                 className={inputClass}
-                placeholder="—"
+                placeholder="-"
               />
             </div>
             <div>
@@ -316,7 +340,21 @@ const ProfileSettings: React.FC = () => {
             </div>
             <div>
               <label className={labelClass}>Phone Number</label>
-              <input {...profileForm.register("phone")} className={inputClass} placeholder="—" />
+              <input
+                type="tel"
+                {...profileForm.register("phone", phoneValidationRules)}
+                className={inputClass}
+                placeholder={PHONE_PLACEHOLDER}
+              />
+              {profileForm.formState.errors.phone ? (
+                <p className="mt-1.5 text-xs text-red-600">
+                  {profileForm.formState.errors.phone.message}
+                </p>
+              ) : (
+                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  {PHONE_HINT}
+                </p>
+              )}
             </div>
           </div>
 
@@ -326,7 +364,7 @@ const ProfileSettings: React.FC = () => {
               {...profileForm.register("bio")}
               rows={3}
               className={inputClass}
-              placeholder="Tell your team a little about yourself…"
+              placeholder="Tell your team a little about yourself..."
             />
           </div>
 
@@ -336,7 +374,7 @@ const ProfileSettings: React.FC = () => {
               disabled={updateMutation.isPending}
               className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition-all hover:bg-blue-700 disabled:opacity-70"
             >
-              {updateMutation.isPending ? <InlineLoader label="Saving…" /> : "Save changes"}
+              {updateMutation.isPending ? <InlineLoader label="Saving..." /> : "Save changes"}
             </button>
           </div>
         </form>
@@ -454,7 +492,7 @@ const ProfileSettings: React.FC = () => {
                 disabled={passwordMutation.isPending}
                 className="rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-70"
               >
-                {passwordMutation.isPending ? <InlineLoader label="Updating…" /> : "Update password"}
+                {passwordMutation.isPending ? <InlineLoader label="Updating..." /> : "Update password"}
               </button>
             </div>
           </form>

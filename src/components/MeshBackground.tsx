@@ -13,9 +13,13 @@ interface Blob {
   dur: number;
 }
 
+// Every blob stays inside the theme accent family. The `blue-*` scale is
+// remapped per theme in design-system.css, so these follow whatever scheme the
+// user picked; a literal hue (emerald, indigo) would not, and would clash on
+// the teal and orange themes. Depth comes from size, opacity and tint step.
 const BLOBS: Blob[] = [
   {
-    color: "bg-blue-400/30 dark:bg-blue-500/20",
+    color: "bg-blue-500/25 dark:bg-blue-500/20",
     size: 340,
     top: "-30%",
     left: "2%",
@@ -24,7 +28,7 @@ const BLOBS: Blob[] = [
     dur: 15,
   },
   {
-    color: "bg-emerald-400/25 dark:bg-emerald-500/15",
+    color: "bg-blue-400/20 dark:bg-blue-400/14",
     size: 300,
     top: "-10%",
     right: "4%",
@@ -33,7 +37,7 @@ const BLOBS: Blob[] = [
     dur: 19,
   },
   {
-    color: "bg-indigo-400/20 dark:bg-indigo-500/15",
+    color: "bg-blue-300/25 dark:bg-blue-600/18",
     size: 280,
     bottom: "-45%",
     left: "34%",

@@ -15,7 +15,7 @@ import { CountUp, GlowOrb, GridBackdrop, Reveal, EASE } from "./primitives";
 /* ============================================================
    Flagship Product Showcase.
    A realistic MacBook mockup whose screen runs a LIVE, fully
-   component-built recreation of the real Nexora app — two-tier
+   component-built recreation of the real Nexora app - two-tier
    sidebar, "Welcome back" header, and faithful Team Management,
    Document Studio and Employee Voice surfaces (violet product
    accent). The lid opens on scroll to boot the dashboard, then
@@ -362,7 +362,7 @@ const DocsScreen: React.FC = () => (
         { l: "Generated", v: "0", s: "Issued", ic: "M9 12l2 2 4-4M12 3a9 9 0 100 18 9 9 0 000-18z", tone: "from-emerald-500 to-teal-500" },
         { l: "Drafts", v: "0", s: "In progress", ic: "M12 20h9M16.5 3.5a2 2 0 013 3L7 19l-4 1 1-4z", tone: "from-orange-500 to-amber-500" },
         { l: "Recent", v: "0", s: "Last 7 days", ic: "M12 3l1.9 5.8H20l-4.9 3.6L17 18l-5-3.6L7 18l1.9-5.6L4 8.8h6.1z", tone: "from-purple-500 to-fuchsia-500" },
-        { l: "Most used", v: "Leave…", s: "48 gens", ic: "M6 2h12v6a6 6 0 01-12 0zM6 22h12v-2a6 6 0 00-12 0z", tone: "from-pink-500 to-rose-500", small: true },
+        { l: "Most used", v: "Leave...", s: "48 gens", ic: "M6 2h12v6a6 6 0 01-12 0zM6 22h12v-2a6 6 0 00-12 0z", tone: "from-pink-500 to-rose-500", small: true },
       ].map((c, i) => (
         <motion.div key={c.l} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} className="rounded-lg border border-white/[0.06] bg-white/[0.03] p-2">
           <div className="flex items-start justify-between">

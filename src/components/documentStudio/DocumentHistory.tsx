@@ -118,7 +118,7 @@ const DocumentHistory: React.FC<Props> = ({
       <div className="mt-4 overflow-x-auto">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-14 text-center">
-            <div className="mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-gray-100 dark:bg-gray-700/60">
+            <div className="mb-3 grid h-14 w-14 place-items-center rounded-2xl text-blue-600 dark:text-blue-400">
               <ClockIcon className="h-7 w-7 text-gray-400" />
             </div>
             <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -171,7 +171,7 @@ const DocumentHistory: React.FC<Props> = ({
                           </span>
                         </div>
                       ) : (
-                        <span className="text-gray-400">—</span>
+                        <span className="text-gray-400">-</span>
                       )}
                     </td>
                     <td className="px-3 py-3 text-gray-600 dark:text-gray-400">

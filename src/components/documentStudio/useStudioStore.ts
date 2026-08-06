@@ -1,5 +1,5 @@
 /**
- * Document Studio — React store hook.
+ * Document Studio - React store hook.
  *
  * Thin, self-persisting wrapper around {@link studioService}. Holds the durable
  * StudioState (templates / documents / assets / page settings) and exposes

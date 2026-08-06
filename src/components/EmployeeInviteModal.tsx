@@ -33,7 +33,7 @@ const POSITION_OPTIONS = [
   "Operations Manager",
 ].map((p) => ({ value: p, label: p }));
 
-// Shared themed input styling — matches the Select / DatePicker triggers.
+// Shared themed input styling - matches the Select / DatePicker triggers.
 const INPUT =
   "w-full rounded-xl bg-[var(--card-surface)] px-4 py-2.5 text-sm text-gray-900 outline-none ring-1 ring-inset ring-gray-200/70 transition-shadow placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 dark:text-gray-100 dark:placeholder-gray-500 dark:ring-white/10";
 import {
@@ -45,11 +45,19 @@ import {
   TagIcon,
   XMarkIcon,
   HashtagIcon,
+  ExclamationTriangleIcon,
+  PhoneIcon,
 } from "@heroicons/react/24/outline";
+import {
+  PHONE_HINT,
+  PHONE_PLACEHOLDER,
+  phoneValidationRules,
+} from "../utils/phone";
 
 type InviteEmployeeData = {
   name: string;
   email: string;
+  phone?: string; // E.164; enables WhatsApp notifications for this employee
   department: string;
   position: string;
   joinDate: string;
@@ -266,13 +274,15 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
               machineEmployeesList.length === 0 &&
               !useCustomName && (
                 <p className="mt-2 text-sm text-yellow-600 flex items-center">
-                  ⚠ No machine employees found. Using custom name input.
+                  <ExclamationTriangleIcon className="mr-1 h-4 w-4 flex-shrink-0" />
+                  No machine employees found. Using custom name input.
                 </p>
               )}
 
             {errors.name && (
               <p className="mt-2 text-sm text-red-600 flex items-center">
-                ⚠ {errors.name.message}
+                <ExclamationTriangleIcon className="mr-1 h-4 w-4 flex-shrink-0" />
+                {errors.name.message}
               </p>
             )}
           </div>
@@ -317,7 +327,32 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
             />
             {errors.email && (
               <p className="mt-2 text-sm text-red-600 flex items-center">
-                ⚠ {errors.email.message}
+                <ExclamationTriangleIcon className="mr-1 h-4 w-4 flex-shrink-0" />
+                {errors.email.message}
+              </p>
+            )}
+          </div>
+
+          {/* Phone - the delivery address for WhatsApp notifications */}
+          <div className="md:col-span-2">
+            <label className="flex items-center text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
+              <PhoneIcon className="w-4 h-4 mr-2 text-gray-400" />
+              Phone Number (Optional)
+            </label>
+            <input
+              type="tel"
+              {...register("phone", phoneValidationRules)}
+              className={INPUT}
+              placeholder={PHONE_PLACEHOLDER}
+            />
+            {errors.phone ? (
+              <p className="mt-2 text-sm text-red-600 flex items-center">
+                <ExclamationTriangleIcon className="mr-1 h-4 w-4 flex-shrink-0" />
+                {errors.phone.message}
+              </p>
+            ) : (
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {PHONE_HINT}
               </p>
             )}
           </div>
@@ -343,7 +378,8 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
             />
             {errors.department && (
               <p className="mt-2 text-sm text-red-600 flex items-center">
-                ⚠ {errors.department.message}
+                <ExclamationTriangleIcon className="mr-1 h-4 w-4 flex-shrink-0" />
+                {errors.department.message}
               </p>
             )}
           </div>
@@ -369,7 +405,8 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
             />
             {errors.position && (
               <p className="mt-2 text-sm text-red-600 flex items-center">
-                ⚠ {errors.position.message}
+                <ExclamationTriangleIcon className="mr-1 h-4 w-4 flex-shrink-0" />
+                {errors.position.message}
               </p>
             )}
           </div>
@@ -394,7 +431,8 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
             />
             {errors.joinDate && (
               <p className="mt-2 text-sm text-red-600 flex items-center">
-                ⚠ {errors.joinDate.message}
+                <ExclamationTriangleIcon className="mr-1 h-4 w-4 flex-shrink-0" />
+                {errors.joinDate.message}
               </p>
             )}
           </div>

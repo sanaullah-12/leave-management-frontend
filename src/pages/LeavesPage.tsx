@@ -47,7 +47,7 @@ const LeavesPage: React.FC = () => {
     }
   }, [searchParams]);
 
-  // Function to get badge colors for leave types — soft tinted pills
+  // Function to get badge colors for leave types - soft tinted pills
   const getLeaveTypeBadge = (leaveType: string) => {
     switch (leaveType.toLowerCase()) {
       case "annual":
@@ -67,7 +67,7 @@ const LeavesPage: React.FC = () => {
     }
   };
 
-  // Function to get status icons and colors — soft tinted pills with a leading dot
+  // Function to get status icons and colors - soft tinted pills with a leading dot
   const getStatusDisplay = (status: string) => {
     const base =
       "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ring-1 ring-inset";
@@ -310,7 +310,7 @@ const LeavesPage: React.FC = () => {
   };
 
   if (isLoading) {
-    return <LogoLoader label="Loading leave requests…" />;
+    return <LogoLoader label="Loading leave requests..." />;
   }
 
   const leaves = leavesData?.data?.leaves || [];
@@ -755,7 +755,7 @@ const LeavesPage: React.FC = () => {
           </>
         ) : (
           <div className="text-center py-16 px-8">
-            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-2xl flex items-center justify-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-400">
               <ClockIcon className="w-10 h-10 text-gray-400 dark:text-gray-500" />
             </div>
             <p className="text-lg font-medium mb-2 text-gray-600 dark:text-gray-300">
@@ -794,7 +794,7 @@ const LeavesPage: React.FC = () => {
               className="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-600/25 transition-all hover:bg-red-700 disabled:opacity-70"
             >
               {reviewLeaveMutation.isPending ? (
-                <InlineLoader label="Rejecting…" />
+                <InlineLoader label="Rejecting..." />
               ) : (
                 "Confirm reject"
               )}
@@ -805,7 +805,7 @@ const LeavesPage: React.FC = () => {
         <textarea
           value={rejectionReason}
           onChange={(e) => setRejectionReason(e.target.value)}
-          placeholder="Enter rejection reason…"
+          placeholder="Enter rejection reason..."
           rows={4}
           maxLength={500}
           className="w-full resize-none rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/40 p-3.5 text-sm text-gray-900 dark:text-gray-100 outline-none transition-all focus:border-red-500 focus:bg-white dark:focus:bg-gray-900 focus:ring-4 focus:ring-red-500/10"

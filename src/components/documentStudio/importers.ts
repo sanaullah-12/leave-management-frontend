@@ -1,5 +1,5 @@
 /**
- * Document Studio — import pipeline.
+ * Document Studio - import pipeline.
  *
  * Turns an admin's existing company template (Word .docx, an .html letter, or
  * plain text/markdown) into editable canvas HTML. Heavy parsers are lazily
@@ -20,7 +20,7 @@ export function sanitizeHtml(html: string): string {
   doc
     .querySelectorAll("script, style, link, meta, iframe, object, embed")
     .forEach((el) => el.remove());
-  // Drop event-handler attributes (onclick, onload, …) and javascript: urls.
+  // Drop event-handler attributes (onclick, onload, ...) and javascript: urls.
   doc.querySelectorAll("*").forEach((el) => {
     [...el.attributes].forEach((attr) => {
       const n = attr.name.toLowerCase();
@@ -94,7 +94,7 @@ export async function importFile(file: File): Promise<ImportResult> {
   if (lower.endsWith(".doc")) {
     // Legacy binary .doc can't be parsed in-browser reliably.
     throw new Error(
-      "Legacy .doc files aren't supported — please re-save as .docx, .html or paste the content."
+      "Legacy .doc files aren't supported - please re-save as .docx, .html or paste the content."
     );
   }
 

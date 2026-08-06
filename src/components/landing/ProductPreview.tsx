@@ -4,7 +4,7 @@ import AppLogo from "../AppLogo";
 import { CountUp, EASE } from "./primitives";
 
 /* ============================================================
-   Animated product preview — a living Nexora dashboard.
+   Animated product preview - a living Nexora dashboard.
    Not a static screenshot: KPIs count up, a leave request
    slides in and gets approved, a realtime toast arrives, and
    the mini analytics chart breathes. Reused in the hero and
@@ -228,7 +228,7 @@ const ProductPreview: React.FC<{ className?: string }> = ({ className = "" }) =>
                   <div className="truncate text-secondary font-medium text-gray-800 dark:text-gray-200">
                     Jordan Diaz · Annual leave
                   </div>
-                  <div className="text-caption text-gray-400">Aug 4 – Aug 8 · 5 days</div>
+                  <div className="text-caption text-gray-400">Aug 4 - Aug 8 · 5 days</div>
                 </div>
                 <AnimatePresence mode="wait">
                   {approved ? (

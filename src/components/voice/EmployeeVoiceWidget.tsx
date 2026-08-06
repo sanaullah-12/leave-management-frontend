@@ -17,7 +17,7 @@ import AnimatedNumber from "../AnimatedNumber";
 import SubmitVoiceModal from "./SubmitVoiceModal";
 import { STATUS_META } from "../../lib/voiceMeta";
 
-// Neumorphic (soft-UI) card surface — matches the dashboard cards. Dual
+// Neumorphic (soft-UI) card surface - matches the dashboard cards. Dual
 // shadows extrude the card from the page; hover deepens them (the lift itself
 // is driven by framer-motion's whileHover below).
 const cardShell =
@@ -61,7 +61,7 @@ const EmployeeVoiceWidget: React.FC = () => {
   const header = (
     <div className="flex items-center justify-between px-5 pt-5 pb-3">
       <div className="flex items-center gap-2.5">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:-rotate-6">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl text-blue-600 dark:text-blue-400 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:-rotate-6">
           <MegaphoneIcon className="h-5 w-5" />
         </span>
         <div>
@@ -120,7 +120,7 @@ const EmployeeVoiceWidget: React.FC = () => {
     );
   }
 
-  // Employee view — quick submit CTA + own open submissions count.
+  // Employee view - quick submit CTA + own open submissions count.
   const openCount = myVoices.filter(
     (v) => v.status !== "resolved" && v.status !== "closed"
   ).length;

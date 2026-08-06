@@ -12,6 +12,7 @@ import AppLogo from "./AppLogo";
 import Dropdown from "./ui/Dropdown";
 import ThemeModal from "./ThemeModal";
 import VoiceNotificationToaster from "./voice/VoiceNotificationToaster";
+import NexoraAssistant from "./assistant/NexoraAssistant";
 import { useNotifications } from "../hooks/useNotifications";
 import { pageVariants } from "../lib/motion";
 import {
@@ -54,7 +55,7 @@ interface PanelItem {
   href: string;
   icon: Icon;
   badge?: "notifications";
-  /** Match the path exactly — for section landing pages that own sub-routes. */
+  /** Match the path exactly - for section landing pages that own sub-routes. */
   exact?: boolean;
 }
 interface NavGroup {
@@ -260,7 +261,7 @@ const Layout: React.FC = () => {
 
   if (isLoading) return <BrandedLoader message="Preparing your workspace..." />;
   if (!isAuthenticated) {
-    // The bare root URL is the public front door — send anonymous visitors to
+    // The bare root URL is the public front door - send anonymous visitors to
     // the marketing site instead of straight to the login form. Deep links
     // into the app (e.g. /leaves) still redirect to /login as before, so the
     // post-login redirect-back behavior is unaffected.
@@ -467,6 +468,9 @@ const Layout: React.FC = () => {
   return (
     <div className="min-h-screen">
       <VoiceNotificationToaster />
+      {/* In-app guide. Mounted here so it exists on every authenticated
+          screen and never on the public marketing or auth pages. */}
+      <NexoraAssistant />
       <ThemeModal open={themeOpen} onClose={() => setThemeOpen(false)} />
 
       {/* ============ Desktop two-pane sidebar ============ */}
@@ -598,7 +602,7 @@ const Layout: React.FC = () => {
           <div className="mx-auto max-w-7xl">
             <motion.div key={location.pathname} variants={pageVariants} initial="initial" animate="animate">
               {/* Routes are lazily loaded (see App.tsx). Keeping the boundary
-                  here means only the content area swaps to a skeleton — the
+                  here means only the content area swaps to a skeleton - the
                   rail, panel and header never unmount during navigation. */}
               <Suspense fallback={<RouteFallback />}>
                 <Outlet />

@@ -162,7 +162,7 @@ const EmployeeVoicePage: React.FC = () => {
           </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {isAdmin
-              ? "Every submission from your team — reports, ideas and appreciation."
+              ? "Every submission from your team - reports, ideas and appreciation."
               : "Report issues, suggest ideas, request support or send appreciation."}
           </p>
         </div>
@@ -259,7 +259,7 @@ const EmployeeVoicePage: React.FC = () => {
           variants={staggerItem}
           className="surface-card py-16 text-center"
         >
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-blue-500 dark:bg-blue-500/10">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl text-blue-500">
             <MegaphoneIcon className="h-8 w-8" />
           </div>
           <p className="text-lg font-medium text-gray-600 dark:text-gray-300">
@@ -268,7 +268,7 @@ const EmployeeVoicePage: React.FC = () => {
           <p className="mt-1 text-sm text-gray-400">
             {isAdmin
               ? "Submissions from your team will appear here."
-              : "Share your first voice — it only takes a minute."}
+              : "Share your first voice - it only takes a minute."}
           </p>
         </motion.div>
       ) : (

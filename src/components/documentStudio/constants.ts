@@ -1,5 +1,5 @@
 /**
- * Document Studio — seed content: the built-in template library and the
+ * Document Studio - seed content: the built-in template library and the
  * placeholder catalogue. Everything here is data, not UI, so it can later be
  * served from the backend (or authored by AI) without touching components.
  */
@@ -34,19 +34,19 @@ export const CATEGORY_META: Record<
 
 /** The catalogue of tokens HR can drop into a document. */
 export const PLACEHOLDERS: PlaceholderDef[] = [
-  { key: "Employee Name", label: "Employee Name", group: "Employee", glyph: "👤", hint: "Full legal name" },
-  { key: "Employee ID", label: "Employee ID", group: "Employee", glyph: "🆔", hint: "Company employee code" },
-  { key: "Department", label: "Department", group: "Employee", glyph: "🏢", hint: "Assigned department" },
-  { key: "Designation", label: "Designation", group: "Employee", glyph: "💼", hint: "Job title / role" },
-  { key: "Joining Date", label: "Joining Date", group: "Employee", glyph: "📅", hint: "Date of joining" },
-  { key: "Salary", label: "Salary", group: "Employee", glyph: "💰", hint: "Monthly / annual salary" },
-  { key: "Manager Name", label: "Manager Name", group: "Employee", glyph: "🧑‍💼", hint: "Reporting manager" },
-  { key: "Email", label: "Email", group: "Employee", glyph: "✉️", hint: "Work email address" },
-  { key: "Phone", label: "Phone", group: "Employee", glyph: "📞", hint: "Contact number" },
-  { key: "Company Name", label: "Company Name", group: "Company", glyph: "🏛️", hint: "Legal company name" },
-  { key: "Address", label: "Address", group: "Company", glyph: "📍", hint: "Registered address" },
-  { key: "Issue Date", label: "Issue Date", group: "Date", glyph: "🗓️", hint: "Date the letter is issued" },
-  { key: "Current Date", label: "Current Date", group: "Date", glyph: "⏱️", hint: "Today's date" },
+  { key: "Employee Name", label: "Employee Name", group: "Employee", glyph: "employee", hint: "Full legal name" },
+  { key: "Employee ID", label: "Employee ID", group: "Employee", glyph: "employeeId", hint: "Company employee code" },
+  { key: "Department", label: "Department", group: "Employee", glyph: "department", hint: "Assigned department" },
+  { key: "Designation", label: "Designation", group: "Employee", glyph: "designation", hint: "Job title / role" },
+  { key: "Joining Date", label: "Joining Date", group: "Employee", glyph: "joiningDate", hint: "Date of joining" },
+  { key: "Salary", label: "Salary", group: "Employee", glyph: "money", hint: "Monthly / annual salary" },
+  { key: "Manager Name", label: "Manager Name", group: "Employee", glyph: "manager", hint: "Reporting manager" },
+  { key: "Email", label: "Email", group: "Employee", glyph: "email", hint: "Work email address" },
+  { key: "Phone", label: "Phone", group: "Employee", glyph: "phone", hint: "Contact number" },
+  { key: "Company Name", label: "Company Name", group: "Company", glyph: "company", hint: "Legal company name" },
+  { key: "Address", label: "Address", group: "Company", glyph: "address", hint: "Registered address" },
+  { key: "Issue Date", label: "Issue Date", group: "Date", glyph: "issueDate", hint: "Date the letter is issued" },
+  { key: "Current Date", label: "Current Date", group: "Date", glyph: "currentDate", hint: "Today's date" },
 ];
 
 const now = "2024-01-01T00:00:00.000Z";
@@ -64,7 +64,7 @@ export const DEFAULT_TEMPLATES: DocumentTemplate[] = [
     name: "Offer Letter",
     description: "Formal employment offer with role, compensation and start date.",
     category: "Onboarding",
-    icon: "📨",
+    icon: "offer",
     system: true,
     createdAt: now,
     updatedAt: now,
@@ -87,7 +87,7 @@ export const DEFAULT_TEMPLATES: DocumentTemplate[] = [
     name: "Appointment Letter",
     description: "Confirms appointment, terms and conditions of employment.",
     category: "Onboarding",
-    icon: "📝",
+    icon: "contract",
     system: true,
     createdAt: now,
     updatedAt: now,
@@ -108,7 +108,7 @@ export const DEFAULT_TEMPLATES: DocumentTemplate[] = [
     name: "Experience Letter",
     description: "Certifies tenure, role and conduct for a departing employee.",
     category: "Offboarding",
-    icon: "🎓",
+    icon: "internship",
     system: true,
     createdAt: now,
     updatedAt: now,
@@ -129,7 +129,7 @@ export const DEFAULT_TEMPLATES: DocumentTemplate[] = [
     name: "Promotion Letter",
     description: "Announces a promotion to a new role and compensation.",
     category: "Recognition",
-    icon: "📈",
+    icon: "promotion",
     system: true,
     createdAt: now,
     updatedAt: now,
@@ -150,7 +150,7 @@ export const DEFAULT_TEMPLATES: DocumentTemplate[] = [
     name: "Salary Certificate",
     description: "Official certification of an employee's salary details.",
     category: "Compensation",
-    icon: "💵",
+    icon: "salary",
     system: true,
     createdAt: now,
     updatedAt: now,
@@ -171,7 +171,7 @@ export const DEFAULT_TEMPLATES: DocumentTemplate[] = [
     name: "Salary Increment Letter",
     description: "Communicates a salary revision and effective date.",
     category: "Compensation",
-    icon: "📊",
+    icon: "appraisal",
     system: true,
     createdAt: now,
     updatedAt: now,
@@ -191,7 +191,7 @@ export const DEFAULT_TEMPLATES: DocumentTemplate[] = [
     name: "Warning Letter",
     description: "Formal disciplinary warning documenting a concern.",
     category: "Disciplinary",
-    icon: "⚠️",
+    icon: "warning",
     system: true,
     createdAt: now,
     updatedAt: now,
@@ -213,7 +213,7 @@ export const DEFAULT_TEMPLATES: DocumentTemplate[] = [
     name: "Termination Letter",
     description: "Formally ends the employment relationship.",
     category: "Offboarding",
-    icon: "📕",
+    icon: "policy",
     system: true,
     createdAt: now,
     updatedAt: now,
@@ -234,7 +234,7 @@ export const DEFAULT_TEMPLATES: DocumentTemplate[] = [
     name: "Leave Approval Letter",
     description: "Confirms approval of a leave request.",
     category: "Leave",
-    icon: "✅",
+    icon: "approval",
     system: true,
     createdAt: now,
     updatedAt: now,
@@ -254,13 +254,13 @@ export const DEFAULT_TEMPLATES: DocumentTemplate[] = [
     name: "Leave Rejection Letter",
     description: "Communicates that a leave request cannot be granted.",
     category: "Leave",
-    icon: "🚫",
+    icon: "termination",
     system: true,
     createdAt: now,
     updatedAt: now,
     usageCount: 7,
     content: letter(`
-      <h1 style="text-align:center;">Leave Request — Update</h1>
+      <h1 style="text-align:center;">Leave Request - Update</h1>
       <p style="text-align:right;">Date: {{Issue Date}}</p>
       <p>Dear {{Employee Name}},</p>
       <p>Thank you for your leave request. After careful consideration, we regret to inform you that we are unable to approve your leave for the requested dates due to [operational reasons / business requirements].</p>
@@ -275,7 +275,7 @@ export const DEFAULT_TEMPLATES: DocumentTemplate[] = [
     name: "Resignation Acceptance",
     description: "Acknowledges and accepts an employee's resignation.",
     category: "Offboarding",
-    icon: "🤝",
+    icon: "agreement",
     system: true,
     createdAt: now,
     updatedAt: now,
@@ -296,7 +296,7 @@ export const DEFAULT_TEMPLATES: DocumentTemplate[] = [
     name: "No Objection Certificate",
     description: "States the company has no objection (travel, visa, etc.).",
     category: "Verification",
-    icon: "🛂",
+    icon: "visa",
     system: true,
     createdAt: now,
     updatedAt: now,
@@ -306,7 +306,7 @@ export const DEFAULT_TEMPLATES: DocumentTemplate[] = [
       <p style="text-align:right;">Date: {{Issue Date}}</p>
       <p><strong>TO WHOM IT MAY CONCERN</strong></p>
       <p>This is to certify that {{Employee Name}} (Employee ID: {{Employee ID}}) is currently employed with {{Company Name}} as <strong>{{Designation}}</strong> in the {{Department}} department since {{Joining Date}}.</p>
-      <p>The company has <strong>no objection</strong> to the employee's application for [purpose — e.g. travel visa, higher studies]. This certificate is issued upon their request.</p>
+      <p>The company has <strong>no objection</strong> to the employee's application for [purpose - e.g. travel visa, higher studies]. This certificate is issued upon their request.</p>
       <p>Sincerely,</p>
       <p><br/>_____________________<br/>Human Resources<br/>{{Company Name}}</p>
     `),
@@ -316,7 +316,7 @@ export const DEFAULT_TEMPLATES: DocumentTemplate[] = [
     name: "Internship Certificate",
     description: "Certifies completion of an internship programme.",
     category: "Certificate",
-    icon: "🏅",
+    icon: "award",
     system: true,
     createdAt: now,
     updatedAt: now,
@@ -336,7 +336,7 @@ export const DEFAULT_TEMPLATES: DocumentTemplate[] = [
     name: "Employment Verification Letter",
     description: "Verifies current employment status for third parties.",
     category: "Verification",
-    icon: "🔎",
+    icon: "verification",
     system: true,
     createdAt: now,
     updatedAt: now,
@@ -359,7 +359,7 @@ export const BLANK_TEMPLATE: DocumentTemplate = {
   name: "Blank Document",
   description: "Start from a clean page and build your own layout.",
   category: "Custom",
-  icon: "✨",
+  icon: "blank",
   system: true,
   createdAt: now,
   updatedAt: now,

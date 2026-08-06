@@ -2,7 +2,7 @@ import React from "react";
 import Modal from "./ui/Modal";
 import { useTheme, COLOR_SCHEMES } from "../context/ThemeContext";
 import type { ThemeMode } from "../context/ThemeContext";
-// Accent hex per scheme — single source in lib/themeTokens.
+// Accent hex per scheme - single source in lib/themeTokens.
 import { ACCENT_HEX as ACCENT } from "../lib/themeTokens";
 import {
   SwatchIcon,

@@ -1,12 +1,12 @@
 /**
- * Payroll — output pipeline.
+ * Payroll - output pipeline.
  *
  * Ships the composed payslip HTML to the printer, a PDF or a CSV extract. The
  * heavy PDF libraries are imported lazily so they never weigh down the payroll
  * bundle for admins who only ever look at the dashboard.
  *
  * The PDF path renders the real A4 page and slices it across pages, matching
- * the approach already proven in Document Studio — same fidelity, same
+ * the approach already proven in Document Studio - same fidelity, same
  * behaviour, no second rendering engine to reason about.
  */
 import logoUrl from "../../assets/nexora-logo.png";
@@ -23,7 +23,7 @@ let logoPromise: Promise<string | undefined> | null = null;
 /**
  * The brand mark as a data URL. Inlining it keeps the exported document
  * self-contained (and keeps html2canvas from tainting the canvas). Cached for
- * the session — the fetch happens at most once.
+ * the session - the fetch happens at most once.
  */
 export function getLogoDataUrl(): Promise<string | undefined> {
   if (logoPromise) return logoPromise;
@@ -208,7 +208,7 @@ const csvCell = (v: unknown): string => {
 
 /**
  * Export a set of payslips as a bank/accounting-friendly CSV. Deliberately flat
- * and boring — this is the file a finance team opens in Excel.
+ * and boring - this is the file a finance team opens in Excel.
  */
 export function exportPayslipsCsv(payslips: Payslip[], filename: string): void {
   const headers = [

@@ -1,6 +1,7 @@
 import React from "react";
 import { CARD, CARD_HOVER } from "../lib/surfaces";
-import { accentFor } from "../lib/themeTokens";
+import { accentFor, accentSoftFor } from "../lib/themeTokens";
+import { AccentEdge } from "../components/ui/CardAccents";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
@@ -37,26 +38,55 @@ import {
   Area,
   BarChart,
   Bar,
-  Cell,
   XAxis,
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
 import "../styles/design-system.css";
 
+/*
+ * Dashboard layout: 4-up KPI row, hero + gauges, chart + breakdown, then
+ * activity and timeline.
+ *
+ * Colour rules for this screen - only two families:
+ *   1. The theme accent. `blue-*` utilities recolour per theme via
+ *      design-system.css; `accentFor()` gives the matching hex for SVG.
+ *      Carries all data viz, icon chips, gauges and links.
+ *   2. emerald / amber / red, only where the colour means something
+ *      (approved / pending / rejected) and only on pills and dots.
+ *
+ * Everything else is neutral gray. Don't add a third decorative hue.
+ */
+
+// Status → pill classes. One source of truth so the activity list, the
+// badges and any future status chip can never drift apart.
+const STATUS_PILL: Record<string, string> = {
+  approved:
+    "bg-emerald-50 text-emerald-700 ring-emerald-200/70 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/25",
+  pending:
+    "bg-amber-50 text-amber-700 ring-amber-200/70 dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/25",
+  rejected:
+    "bg-red-50 text-red-700 ring-red-200/70 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/25",
+};
+const NEUTRAL_PILL =
+  "bg-gray-100 text-gray-600 ring-gray-200 dark:bg-gray-700/50 dark:text-gray-300 dark:ring-gray-600/50";
+
+const StatusPill: React.FC<{ status?: string; label: string }> = ({
+  status,
+  label,
+}) => (
+  <span
+    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium capitalize ring-1 ring-inset ${
+      STATUS_PILL[status ?? ""] ?? NEUTRAL_PILL
+    }`}
+  >
+    {status === "approved" && <CheckCircleIcon className="w-3 h-3" />}
+    {label}
+  </span>
+);
+
 /* ------------------------------------------------------------------ */
-/*  The layout/UX below adopts the structure of a modern analytics     */
-/*  dashboard (4-up KPI row → hero + gauges → chart + breakdown →       */
-/*  activity + timeline). Colours follow the app's theme system via     */
-/*  blue-* utilities (which recolour per theme) + the accent hex; the   */
-/*  Geist type scale comes from the semantic .text-* classes.           */
-/* ------------------------------------------------------------------ */
-
-
-
-
-/* ------------------------------------------------------------------ */
-/*  Presentational helpers — visual only, data is passed in            */
+/*  Presentational helpers - visual only, data is passed in            */
 /* ------------------------------------------------------------------ */
 
 // Compact KPI tile: label + big value on the left, accent icon chip on
@@ -67,15 +97,17 @@ const KpiCard: React.FC<{
   suffix?: string;
   caption: string;
   icon: React.ReactNode;
+  accent: string;
   onClick?: () => void;
-}> = ({ label, value, suffix, caption, icon, onClick }) => (
+}> = ({ label, value, suffix, caption, icon, accent, onClick }) => (
   <div
     onClick={onClick}
-    className={`group ${CARD} ${CARD_HOVER} flex h-full flex-col p-5 ${
+    className={`group relative overflow-hidden ${CARD} ${CARD_HOVER} flex h-full flex-col p-5 ${
       onClick ? "cursor-pointer" : ""
     }`}
   >
-    <div className="flex items-start justify-between gap-3">
+    <AccentEdge color={accent} />
+    <div className="relative flex items-start justify-between gap-3">
       <div className="min-w-0 flex-1">
         <p
           className="text-overline truncate text-gray-400 dark:text-gray-500"
@@ -96,7 +128,8 @@ const KpiCard: React.FC<{
           )}
         </p>
       </div>
-      <div className="flex-shrink-0 grid place-items-center w-11 h-11 rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-600/20 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:-rotate-3">
+      {/* Bare icon, no plate. It scales on hover so the tile still responds. */}
+      <div className="flex-shrink-0 grid place-items-center w-11 h-11 text-blue-600 dark:text-blue-400 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110">
         {icon}
       </div>
     </div>
@@ -107,7 +140,7 @@ const KpiCard: React.FC<{
   </div>
 );
 
-// Semicircle gauge card — replaces the reference "Satisfaction / Referral"
+// Semicircle gauge card - replaces the reference "Satisfaction / Referral"
 // gauges with a real leave metric. pathLength normalises the arc to 0..100.
 const SemiGauge: React.FC<{
   label: string;
@@ -115,7 +148,10 @@ const SemiGauge: React.FC<{
   big: React.ReactNode;
   small?: string;
   accent: string;
-}> = ({ label, percent, big, small, accent }) => {
+  accentSoft: string;
+  /** Unique per instance - SVG gradient ids are global. */
+  gradientId: string;
+}> = ({ label, percent, big, small, accent, accentSoft, gradientId }) => {
   const p = Math.max(0, Math.min(100, percent));
   const ARC = "M8 52 A 42 42 0 0 1 92 52";
   return (
@@ -123,19 +159,27 @@ const SemiGauge: React.FC<{
       <p className="text-overline text-gray-500 dark:text-gray-400">{label}</p>
       <div className="relative mt-3 flex-1">
         <svg viewBox="0 0 100 58" className="w-full">
+          <defs>
+            {/* Light → full accent along the arc. Same hue at two
+                brightnesses, so it reads as depth, not as a second colour. */}
+            <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor={accentSoft} />
+              <stop offset="100%" stopColor={accent} />
+            </linearGradient>
+          </defs>
           <path
-            className="stroke-gray-100 dark:stroke-gray-700"
+            className="stroke-gray-200/70 dark:stroke-gray-700/70"
             d={ARC}
             fill="none"
-            strokeWidth="9"
+            strokeWidth="7"
             strokeLinecap="round"
             pathLength={100}
           />
           <path
             d={ARC}
             fill="none"
-            stroke={accent}
-            strokeWidth="9"
+            stroke={`url(#${gradientId})`}
+            strokeWidth="7"
             strokeLinecap="round"
             pathLength={100}
             strokeDasharray={`${p} 100`}
@@ -157,28 +201,29 @@ const SemiGauge: React.FC<{
   );
 };
 
-// Small mini-stat tile used in the "Leave by Type" panel footer — mirrors
+// Small mini-stat tile used in the "Leave by Type" panel footer - mirrors
 // the reference "Active Users" stat row.
 const MiniStat: React.FC<{
   label: string;
   value: number;
   icon: React.ReactNode;
-  accent: string;
-}> = ({ label, value, icon, accent }) => (
+  /** Largest value in the group - the bars are relative to it. */
+  max: number;
+}> = ({ label, value, icon, max }) => (
   <div>
     <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
-      <span style={{ color: accent }}>{icon}</span>
+      <span className="text-blue-600 dark:text-blue-400">{icon}</span>
       <span className="text-[11px] font-medium">{label}</span>
     </div>
     <p className="mt-1 text-lg font-bold tabular-nums text-gray-900 dark:text-white">
       <AnimatedNumber value={value} />
     </p>
+    {/* Width is the value's share of the largest tile in the group. */}
     <div className="mt-1.5 h-1.5 rounded-full bg-gray-200/70 dark:bg-gray-900/60 overflow-hidden shadow-[inset_1px_1px_2px_rgba(0,0,0,0.12),inset_-1px_-1px_2px_rgba(255,255,255,0.7)] dark:shadow-[inset_1px_1px_2px_rgba(0,0,0,0.5)]">
       <div
-        className="h-full rounded-full"
+        className="h-full rounded-full bg-blue-600 dark:bg-blue-500 transition-[width] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
         style={{
-          width: `${Math.min(100, value === 0 ? 6 : 40 + (value % 60))}%`,
-          backgroundColor: accent,
+          width: value <= 0 || max <= 0 ? "6%" : `${Math.max(6, (value / max) * 100)}%`,
         }}
       />
     </div>
@@ -190,10 +235,12 @@ const PanelCard: React.FC<{
   title: string;
   action?: React.ReactNode;
   children: React.ReactNode;
+  accent: string;
   className?: string;
-}> = ({ title, action, children, className = "" }) => (
-  <div className={`${CARD} ${CARD_HOVER} ${className}`}>
-    <div className="flex items-center justify-between px-5 pt-5 pb-3">
+}> = ({ title, action, children, accent, className = "" }) => (
+  <div className={`relative overflow-hidden ${CARD} ${CARD_HOVER} ${className}`}>
+    <AccentEdge color={accent} />
+    <div className="relative flex items-center justify-between px-5 pt-5 pb-3">
       <h3 className="text-card-title text-gray-900 dark:text-gray-100">{title}</h3>
       {action}
     </div>
@@ -204,14 +251,28 @@ const PanelCard: React.FC<{
 const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { colorScheme } = useTheme();
+  const { colorScheme, isDark } = useTheme();
   const { t } = useTranslation("dashboard");
   // Dates follow the chosen language, not the browser locale.
   const fmt = useFormatters();
   const accent = accentFor(colorScheme);
+  const accentSoft = accentSoftFor(colorScheme);
+
+  // Recharts styles tooltips inline, so they can't pick up the dark-mode
+  // classes. Build the palette here and hand it to every chart on the page.
+  const tooltipStyle: React.CSSProperties = {
+    borderRadius: 12,
+    border: `1px solid ${isDark ? "#374151" : "#e5e7eb"}`,
+    background: isDark ? "#1f2937" : "#ffffff",
+    color: isDark ? "#f3f4f6" : "#111827",
+    fontSize: 12,
+    boxShadow: isDark
+      ? "0 4px 14px rgba(0,0,0,0.45)"
+      : "0 4px 12px rgba(0,0,0,0.08)",
+  };
 
   /* ------------------------------------------------------------------ */
-  /*  DATA WIRING — unchanged from the original dashboard                */
+  /*  DATA WIRING - unchanged from the original dashboard                */
   /*  Same three queries, same role gating, same response shapes.        */
   /* ------------------------------------------------------------------ */
 
@@ -254,7 +315,7 @@ const DashboardPage: React.FC = () => {
   const isAdmin = user?.role === "admin";
 
   /* ------------------------------------------------------------------ */
-  /*  DERIVED VIEW DATA — computed only from the data already fetched.   */
+  /*  DERIVED VIEW DATA - computed only from the data already fetched.   */
   /*  No new network calls, no backend changes.                          */
   /* ------------------------------------------------------------------ */
 
@@ -306,7 +367,7 @@ const DashboardPage: React.FC = () => {
   );
   const remainingTotal = Math.max(0, quotaTotal - usedTotal);
 
-  // Two gauge metrics — role aware.
+  // Two gauge metrics - role aware.
   const gauges = isAdmin
     ? [
         {
@@ -339,7 +400,7 @@ const DashboardPage: React.FC = () => {
         },
       ];
 
-  // "Leave by Type" bar chart data — role aware.
+  // "Leave by Type" bar chart data - role aware.
   const typeData = isAdmin
     ? (adminStats.leavesByType || []).map((t: any) => ({
         name: (t?._id || "other").replace(/^\w/, (c: string) => c.toUpperCase()),
@@ -365,7 +426,10 @@ const DashboardPage: React.FC = () => {
         { label: t("labels.pending"), value: recent.filter((l) => l?.status === "pending").length, icon: <ClockIcon className="w-4 h-4" /> },
       ];
 
-  // Team members for the availability widget — reuse the employees found in
+  // Bars in the mini-stat row are drawn relative to the biggest tile.
+  const miniStatMax = Math.max(...miniStats.map((m) => m.value), 1);
+
+  // Team members for the availability widget - reuse the employees found in
   // the recent leaves payload (admin view has employee objects populated).
   const teamFromLeaves = Array.from(
     new Map(
@@ -385,7 +449,7 @@ const DashboardPage: React.FC = () => {
     })
   );
 
-  // The four top KPI tiles — role aware.
+  // The four top KPI tiles - role aware.
   const kpis = isAdmin
     ? [
         {
@@ -469,7 +533,7 @@ const DashboardPage: React.FC = () => {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
         >
           {kpis.map((c, i) => (
-            <KpiCard key={i} {...c} />
+            <KpiCard key={i} {...c} accent={accent} />
           ))}
         </motion.div>
       )}
@@ -538,7 +602,13 @@ const DashboardPage: React.FC = () => {
 
         {/* Two gauges */}
         {gauges.map((g, i) => (
-          <SemiGauge key={i} {...g} accent={accent} />
+          <SemiGauge
+            key={i}
+            {...g}
+            accent={accent}
+            accentSoft={accentSoft}
+            gradientId={`gaugeArc${i}`}
+          />
         ))}
       </motion.div>
 
@@ -589,14 +659,13 @@ const DashboardPage: React.FC = () => {
                   interval={1}
                 />
                 <Tooltip
-                  cursor={{ stroke: "#c7d2fe", strokeWidth: 1 }}
-                  contentStyle={{
-                    borderRadius: 12,
-                    border: "1px solid #e5e7eb",
-                    fontSize: 12,
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                  cursor={{ stroke: accentSoft, strokeWidth: 1 }}
+                  contentStyle={tooltipStyle}
+                  labelStyle={{
+                    fontWeight: 600,
+                    color: isDark ? "#f3f4f6" : "#111827",
                   }}
-                  labelStyle={{ fontWeight: 600 }}
+                  itemStyle={{ color: accent }}
                   formatter={(v: any) => [`${v} requests`, "Leaves"]}
                 />
                 <Area
@@ -606,14 +675,19 @@ const DashboardPage: React.FC = () => {
                   strokeWidth={3}
                   fill="url(#leaveTrend)"
                   dot={false}
-                  activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
+                  activeDot={{
+                    r: 5,
+                    strokeWidth: 2,
+                    stroke: isDark ? "#1f2937" : "#fff",
+                    fill: accent,
+                  }}
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Leave by Type — bar chart + mini stats */}
+        {/* Leave by Type - bar chart + mini stats */}
         <div className={`${CARD} ${CARD_HOVER} p-5 flex flex-col`}>
           <h3 className="text-card-title text-gray-900 dark:text-gray-100">
             {t("sections.leaveByType")}
@@ -630,6 +704,12 @@ const DashboardPage: React.FC = () => {
                   data={typeData}
                   margin={{ top: 4, right: 4, left: 4, bottom: 0 }}
                 >
+                  <defs>
+                    <linearGradient id="leaveTypeBar" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={accent} />
+                      <stop offset="100%" stopColor={accentSoft} />
+                    </linearGradient>
+                  </defs>
                   <XAxis
                     dataKey="name"
                     axisLine={false}
@@ -638,18 +718,18 @@ const DashboardPage: React.FC = () => {
                   />
                   <Tooltip
                     cursor={{ fill: "rgba(148,163,184,0.12)" }}
-                    contentStyle={{
-                      borderRadius: 12,
-                      border: "1px solid #e5e7eb",
-                      fontSize: 12,
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                    }}
+                    contentStyle={tooltipStyle}
+                    labelStyle={{ color: isDark ? "#f3f4f6" : "#111827" }}
+                    itemStyle={{ color: accent }}
                   />
-                  <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={26}>
-                    {typeData.map((_: any, i: number) => (
-                      <Cell key={i} fill={accent} fillOpacity={0.55 + (i % 3) * 0.15} />
-                    ))}
-                  </Bar>
+                  {/* One gradient for every bar: leave types aren't ranked,
+                      so per-bar shading would imply an order. */}
+                  <Bar
+                    dataKey="value"
+                    radius={[6, 6, 0, 0]}
+                    maxBarSize={26}
+                    fill="url(#leaveTypeBar)"
+                  />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -660,7 +740,7 @@ const DashboardPage: React.FC = () => {
           </div>
           <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700/60 grid grid-cols-2 gap-4">
             {miniStats.map((m, i) => (
-              <MiniStat key={i} {...m} accent={accent} />
+              <MiniStat key={i} {...m} max={miniStatMax} />
             ))}
           </div>
         </div>
@@ -673,6 +753,7 @@ const DashboardPage: React.FC = () => {
       >
         {/* Recent Activity (spans 2) */}
         <PanelCard
+          accent={accent}
           title={t("sections.recentActivity")}
           className="lg:col-span-2"
           action={
@@ -691,23 +772,15 @@ const DashboardPage: React.FC = () => {
           ) : recent.length > 0 ? (
             <ul className="space-y-4">
               {recent.map((leave: any) => {
-                const dotColor =
-                  leave.status === "approved"
-                    ? "bg-emerald-500"
-                    : leave.status === "rejected"
-                    ? "bg-red-500"
-                    : leave.status === "pending"
-                    ? "bg-amber-500"
-                    : "bg-blue-500";
                 const empName =
                   typeof leave.employee === "object" && leave.employee?.name
                     ? leave.employee.name
                     : null;
                 return (
                   <li key={leave._id} className="flex gap-3">
-                    <span
-                      className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${dotColor}`}
-                    />
+                    {/* Neutral marker. The status colour lives on the pill
+                        below so each row carries exactly one colour. */}
+                    <span className="mt-2 w-1.5 h-1.5 rounded-full flex-shrink-0 bg-gray-300 dark:bg-gray-600" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-3">
                         <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 capitalize">
@@ -719,19 +792,23 @@ const DashboardPage: React.FC = () => {
                             : ""}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {isAdmin && empName ? `${empName} • ` : ""}
-                        {leave.totalDays}{" "}
-                        {leave.totalDays === 1 ? "day" : "days"}
-                        {" • "}
-                        <span className="capitalize">{leave.status}</span>
-                      </p>
-                      {leave.status === "approved" && (
-                        <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 ring-1 ring-inset ring-emerald-200/60 dark:ring-emerald-500/20">
-                          <CheckCircleIcon className="w-3 h-3" />
-                          {t("labels.approved")}
+                      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                        <StatusPill
+                          status={leave.status}
+                          label={
+                            leave.status === "approved"
+                              ? t("labels.approved")
+                              : leave.status === "pending"
+                              ? t("labels.pending")
+                              : leave.status || "-"
+                          }
+                        />
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {isAdmin && empName ? `${empName} • ` : ""}
+                          {leave.totalDays}{" "}
+                          {leave.totalDays === 1 ? "day" : "days"}
                         </span>
-                      )}
+                      </div>
                     </div>
                   </li>
                 );
@@ -756,6 +833,7 @@ const DashboardPage: React.FC = () => {
         <div className="space-y-5">
           {/* Public Holidays */}
           <PanelCard
+            accent={accent}
             title={t("sections.publicHolidays")}
             action={
               <GlobeAltIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
@@ -796,6 +874,7 @@ const DashboardPage: React.FC = () => {
 
           {/* Team Availability */}
           <PanelCard
+            accent={accent}
             title={t("sections.teamAvailability")}
             action={<SunIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />}
           >

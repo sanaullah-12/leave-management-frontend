@@ -1,14 +1,14 @@
 /**
- * i18n — runtime initialisation.
+ * i18n - runtime initialisation.
  *
  * Wires i18next with three plugins:
  *
- *  1. `resourcesToBackend` — resolves a (language, namespace) pair to a dynamic
+ *  1. `resourcesToBackend` - resolves a (language, namespace) pair to a dynamic
  *     `import()`. Vite turns every locale JSON into its own chunk, so a visitor
  *     downloads only the languages *and* the modules they actually open.
- *  2. `LanguageDetector` — reads the stored preference, then the browser's
+ *  2. `LanguageDetector` - reads the stored preference, then the browser's
  *     language, then falls back to English.
- *  3. `initReactI18next` — the React bindings.
+ *  3. `initReactI18next` - the React bindings.
  *
  * Importing this module has the side effect of initialising i18next. It is
  * imported once from `main.tsx`, before the app renders.
@@ -115,7 +115,7 @@ export const i18nReady: Promise<unknown> = i18n
     },
 
     // Keys are human-readable English sentences in `common`, but module
-    // namespaces use dotted paths — keep the separators standard.
+    // namespaces use dotted paths - keep the separators standard.
     keySeparator: ".",
     nsSeparator: ":",
 
@@ -127,7 +127,7 @@ export const i18nReady: Promise<unknown> = i18n
         }
       : undefined,
   })
-  // Warm the shell namespaces. A failure here must not block boot — i18next
+  // Warm the shell namespaces. A failure here must not block boot - i18next
   // falls back to the key name, which is still a usable (if ugly) screen.
   .then(() => i18n.loadNamespaces(PRELOADED_NAMESPACES as unknown as string[]))
   .catch(() => undefined);

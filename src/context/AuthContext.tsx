@@ -138,7 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           localStorage.removeItem('user');
           dispatch({ type: 'LOGOUT' });
         } else if (cachedUser) {
-          // Backend unreachable (network/CORS/5xx) but we have a cached session —
+          // Backend unreachable (network/CORS/5xx) but we have a cached session -
           // keep the user signed in instead of punishing a server blip.
           dispatch({ type: 'LOGIN_SUCCESS', payload: { user: cachedUser, token } });
         } else {

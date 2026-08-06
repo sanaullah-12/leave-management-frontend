@@ -19,7 +19,7 @@ interface Props {
 type Mode = "upload" | "paste";
 
 /**
- * Bring an existing company template into the editor — upload a Word/HTML/text
+ * Bring an existing company template into the editor - upload a Word/HTML/text
  * file or paste content. The result becomes a fully editable Studio template.
  */
 const ImportTemplateModal: React.FC<Props> = ({ open, onClose, onImport }) => {
@@ -156,7 +156,7 @@ const ImportTemplateModal: React.FC<Props> = ({ open, onClose, onImport }) => {
                 <ArrowUpTrayIcon className="h-7 w-7 text-gray-400" />
               )}
               <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                {busy ? "Converting…" : "Drop or click to upload"}
+                {busy ? "Converting..." : "Drop or click to upload"}
               </span>
               <span className="text-xs text-gray-400">
                 Word (.docx) · HTML · TXT · Markdown
@@ -177,7 +177,7 @@ const ImportTemplateModal: React.FC<Props> = ({ open, onClose, onImport }) => {
             <textarea
               value={paste}
               onChange={(e) => applyPaste(e.target.value)}
-              placeholder="Paste your letter here — rich text or HTML both work…"
+              placeholder="Paste your letter here - rich text or HTML both work..."
               className="h-48 w-full resize-none rounded-xl border border-gray-200 bg-white p-3 text-sm outline-none focus:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
             />
           )}
@@ -211,7 +211,7 @@ const ImportTemplateModal: React.FC<Props> = ({ open, onClose, onImport }) => {
             {html.trim() ? (
               <div
                 className="ds-editable text-sm text-gray-900 dark:text-gray-100"
-                // Preview only — content is sanitized in importers before it lands here.
+                // Preview only - content is sanitized in importers before it lands here.
                 dangerouslySetInnerHTML={{ __html: html }}
               />
             ) : (

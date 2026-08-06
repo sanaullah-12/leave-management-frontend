@@ -9,8 +9,15 @@ import LogoLoader from "../components/LogoLoader";
 import StepProgress, { type ProgressStep } from "../components/StepProgress";
 import Avatar from "../components/Avatar";
 import {
+  exportReportExcel,
+  exportReportPdf,
+  withInlinedImages,
+} from "../components/reports/exporters";
+import type { ReportModel } from "../components/reports/reportModel";
+import {
   DocumentChartBarIcon,
-  ArrowDownTrayIcon,
+  TableCellsIcon,
+  DocumentArrowDownIcon,
   ArrowLeftIcon,
   CalendarDaysIcon,
   EnvelopeIcon,
@@ -121,7 +128,7 @@ const InfoCard: React.FC<{
   value: string;
 }> = ({ icon, label, value }) => (
   <div className={`group ${CARD} ${CARD_HOVER} flex h-full flex-col p-5`}>
-    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:-rotate-3 dark:bg-blue-500/10 dark:text-blue-400">
+    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-blue-600 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:-rotate-3 dark:text-blue-400">
       {icon}
     </span>
     {/* Label + value pinned to the bottom so they align across the row even
@@ -142,7 +149,7 @@ const ProfileField: React.FC<{
   value: React.ReactNode;
 }> = ({ icon, label, value }) => (
   <div className="flex items-start gap-3">
-    <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-gray-500 dark:bg-white/5 dark:text-gray-400">
+    <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 dark:bg-white/5 dark:text-gray-400">
       {icon}
     </span>
     <div className="min-w-0">
@@ -190,7 +197,7 @@ const ProgressRing: React.FC<{ percent: number; color: string }> = ({
   );
 };
 
-// One of the three leave-summary cards — glowing colour border, watermark
+// One of the three leave-summary cards - glowing colour border, watermark
 // icon, hollow accent ring + percent label, and the big remaining count.
 const LeaveSummaryCard: React.FC<{
   leaveKey: LeaveKey;
@@ -308,7 +315,7 @@ const ActivityTimeline: React.FC<{
   const subtitleFor = (l: any) => {
     const days = l.totalDays || 1;
     if (l.startDate && l.endDate && l.startDate !== l.endDate)
-      return `For period ${fmt(l.startDate)} – ${fmt(l.endDate)} (${days} days)`;
+      return `For period ${fmt(l.startDate)} - ${fmt(l.endDate)} (${days} days)`;
     if (l.startDate)
       return `${fmt(l.startDate)} · ${days} day${days > 1 ? "s" : ""}`;
     return `${days} day${days > 1 ? "s" : ""}`;
@@ -409,24 +416,36 @@ const ReportsPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [reportData, setReportData] = useState<EmployeeReportData | null>(null);
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [pdfStep, setPdfStep] = useState(0); // 1..4 active, 5 = complete
+  // Which export is running (if any) and how far along it is.
+  const [exportKind, setExportKind] = useState<"pdf" | "excel" | null>(null);
+  const [exportStep, setExportStep] = useState(0); // 1..n active, n+1 = complete
+  const [exportError, setExportError] = useState<string | null>(null);
 
-  const PDF_STEP_LABELS = [
-    "Preparing report layout",
-    "Rendering content",
-    "Building PDF pages",
-    "Saving your file",
-  ];
-  const pdfSteps: ProgressStep[] = PDF_STEP_LABELS.map((label, i) => {
+  const STEP_LABELS: Record<"pdf" | "excel", string[]> = {
+    pdf: [
+      "Composing the report document",
+      "Rendering pages",
+      "Building the PDF",
+      "Saving your file",
+    ],
+    excel: ["Collecting report data", "Building worksheets", "Saving your file"],
+  };
+  const activeLabels = STEP_LABELS[exportKind ?? "pdf"];
+  const exportSteps: ProgressStep[] = activeLabels.map((label, i) => {
     const stepNum = i + 1;
     return {
       label,
       status:
-        pdfStep > stepNum ? "done" : pdfStep === stepNum ? "active" : "pending",
+        exportStep > stepNum
+          ? "done"
+          : exportStep === stepNum
+          ? "active"
+          : "pending",
     };
   });
-  const yieldFrame = () => new Promise((r) => setTimeout(r, 350));
+  const isExporting = exportKind !== null;
+  // A short pause lets the overlay actually paint between steps.
+  const yieldFrame = () => new Promise((r) => setTimeout(r, 220));
 
   useEffect(() => {
     const storedData = localStorage.getItem("selectedEmployeeReport");
@@ -456,95 +475,13 @@ const ReportsPage: React.FC = () => {
     enabled: !!employeeId,
   });
 
-  const handleDownloadPDF = async () => {
-    setIsGeneratingPDF(true);
-    setPdfStep(1);
-    await yieldFrame();
-
-    try {
-      const jsPDF = (await import("jspdf")).default;
-      const html2canvas = (await import("html2canvas")).default;
-
-      const element = document.getElementById("report-content");
-      if (!element) throw new Error("Report content not found");
-
-      setPdfStep(2);
-      await yieldFrame();
-
-      // Render a CLONE (never the live DOM) at a fixed desktop width in light
-      // theme, so the PDF layout is always the full multi-column desktop design
-      // with correct colours — regardless of the user's screen size or theme.
-      const PDF_WIDTH = 1024;
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#eef1f7",
-        scrollX: 0,
-        scrollY: 0,
-        windowWidth: 1120, // >1024 so Tailwind's lg: breakpoints apply
-        onclone: (doc) => {
-          // Force light theme for consistent, print-friendly colours.
-          doc.documentElement.classList.remove("dark");
-          const el = doc.getElementById("report-content") as HTMLElement | null;
-          if (el) {
-            el.style.width = `${PDF_WIDTH}px`;
-            el.style.maxWidth = "none";
-            el.style.margin = "0 auto";
-            el.style.padding = "28px";
-            el.style.background = "#eef1f7";
-            el.style.borderRadius = "0";
-          }
-        },
-      });
-
-      setPdfStep(3);
-      await yieldFrame();
-
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210; // A4 width (mm)
-      const pageHeight = 295; // slightly < 297 to overlap page seams
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      const fileName = `employee-report-${reportData?.employee?.name?.replace(
-        /\s+/g,
-        "-"
-      )}-${new Date().toISOString().split("T")[0]}.pdf`;
-
-      setPdfStep(4);
-      await yieldFrame();
-      pdf.save(fileName);
-
-      setPdfStep(5);
-      await new Promise((r) => setTimeout(r, 700));
-    } catch (error) {
-      console.error("Failed to generate PDF:", error);
-      alert("Failed to generate PDF. Please try again.");
-    } finally {
-      setIsGeneratingPDF(false);
-      setPdfStep(0);
-    }
-  };
-
   const handleBackToEmployees = () => {
     localStorage.removeItem("selectedEmployeeReport");
     navigate("/employees");
   };
 
   if (!reportData) {
-    return <LogoLoader label="Building your reports…" />;
+    return <LogoLoader label="Building your reports..." />;
   }
 
   /* ---------------- Derived view data ---------------- */
@@ -555,7 +492,7 @@ const ReportsPage: React.FC = () => {
   const departmentName =
     typeof employee.department === "object" && employee.department?.name
       ? employee.department.name
-      : employee.department || "—";
+      : employee.department || "-";
 
   const generatedDate = new Date(generatedAt);
   const monthYear = generatedDate.toLocaleDateString("en-US", {
@@ -580,7 +517,7 @@ const ReportsPage: React.FC = () => {
   });
   const totalRemaining = leaveRows.reduce((s, r) => s + r.remaining, 0);
 
-  // Distribution donut — used days per type (only types with usage).
+  // Distribution donut - used days per type (only types with usage).
   const distribution = leaveRows
     .filter((r) => r.used > 0)
     .map((r) => ({
@@ -589,7 +526,7 @@ const ReportsPage: React.FC = () => {
       hex: LEAVE_META[r.key].hex,
     }));
 
-  // Monthly usage — trailing 6 months of approved leave days.
+  // Monthly usage - trailing 6 months of approved leave days.
   const monthly = Array.from({ length: 6 }).map((_, i) => {
     const d = new Date(
       generatedDate.getFullYear(),
@@ -611,19 +548,160 @@ const ReportsPage: React.FC = () => {
 
   const statusActive = employee.status === "active";
 
+  /* ---------------- Exports ---------------- */
+
+  const shortDate = (value?: string) =>
+    value
+      ? new Date(value).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : "-";
+
+  /**
+   * One model, both exports. The PDF and the workbook are rendered from this
+   * rather than from the live DOM, which is what keeps them consistent with
+   * each other and with the page.
+   */
+  const buildModel = (): ReportModel => ({
+    employee: {
+      name: employee.name || "-",
+      email: employee.email || "",
+      employeeId: employee.employeeId || "",
+      position: employee.position || "",
+      department: departmentName,
+      status: statusActive ? "Active" : employee.status || "Inactive",
+      joinDate: shortDate(employee.joinDate),
+      tenureYears,
+    },
+    period: monthYear,
+    generatedAt: generatedDate.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    }),
+    generatedBy: `${user?.name ?? "-"}${user?.email ? ` (${user.email})` : ""}`,
+    balance: leaveRows.map((r) => ({
+      label: LEAVE_META[r.key].label,
+      hex: LEAVE_META[r.key].hex,
+      allocated: r.allocated,
+      used: r.used,
+      remaining: r.remaining,
+    })),
+    monthly,
+    history: [...history]
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt || b.startDate || 0).getTime() -
+          new Date(a.createdAt || a.startDate || 0).getTime()
+      )
+      .map((l) => ({
+        type: String(l.leaveType || "leave").replace(/^\w/, (c: string) =>
+          c.toUpperCase()
+        ),
+        from: shortDate(l.startDate),
+        to: shortDate(l.endDate || l.startDate),
+        days: l.totalDays || 0,
+        status: l.status || "-",
+        reason: l.reason || "-",
+        appliedOn: shortDate(l.createdAt),
+      })),
+    totals: {
+      allocated: leaveRows.reduce((s, r) => s + r.allocated, 0),
+      used: leaveRows.reduce((s, r) => s + r.used, 0),
+      remaining: totalRemaining,
+    },
+  });
+
+  const runExport = async (
+    kind: "pdf" | "excel",
+    steps: number,
+    job: (advance: (step: number) => Promise<void>) => Promise<void>
+  ) => {
+    setExportError(null);
+    setExportKind(kind);
+    setExportStep(1);
+    await yieldFrame();
+
+    const advance = async (step: number) => {
+      setExportStep(step);
+      await yieldFrame();
+    };
+
+    try {
+      await job(advance);
+      setExportStep(steps + 1);
+      await new Promise((r) => setTimeout(r, 700));
+    } catch (error) {
+      console.error(`Failed to generate ${kind}:`, error);
+      setExportError(
+        `We couldn't build the ${
+          kind === "pdf" ? "PDF" : "Excel file"
+        }. Please try again.`
+      );
+    } finally {
+      setExportKind(null);
+      setExportStep(0);
+    }
+  };
+
+  const handleDownloadPDF = () =>
+    runExport("pdf", 4, async (advance) => {
+      const model = await withInlinedImages(buildModel(), employee.profilePicture);
+      await advance(2);
+      await exportReportPdf(model, {
+        onPage: (done, total) => setExportStep(done >= total ? 4 : 3),
+      });
+    });
+
+  const handleDownloadExcel = () =>
+    runExport("excel", 3, async (advance) => {
+      const model = buildModel();
+      await advance(2);
+      await exportReportExcel(model);
+      await advance(3);
+    });
+
   return (
     <div className="space-y-6 fade-in">
-      {/* PDF export progress overlay */}
-      {isGeneratingPDF && (
+      {/* Export progress overlay - shared by both download paths */}
+      {isExporting && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/40 p-4 backdrop-blur-sm">
           <div className="animate-pop-in">
             <StepProgress
-              title={pdfStep >= 5 ? "Report ready 🎉" : "Generating your report…"}
-              steps={pdfSteps}
-              progress={(pdfStep / PDF_STEP_LABELS.length) * 100}
-              eta={pdfStep >= 5 ? "Completed" : "This usually takes a few seconds"}
+              title={
+                exportStep > activeLabels.length
+                  ? exportKind === "excel"
+                    ? "Workbook ready"
+                    : "Report ready"
+                  : exportKind === "excel"
+                  ? "Building your workbook..."
+                  : "Generating your report..."
+              }
+              steps={exportSteps}
+              progress={(exportStep / activeLabels.length) * 100}
+              eta={
+                exportStep > activeLabels.length
+                  ? "Completed"
+                  : "This usually takes a few seconds"
+              }
             />
           </div>
+        </div>
+      )}
+
+      {exportError && (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300">
+          <span>{exportError}</span>
+          <button
+            onClick={() => setExportError(null)}
+            className="text-xs font-semibold underline underline-offset-2"
+          >
+            Dismiss
+          </button>
         </div>
       )}
 
@@ -643,32 +721,52 @@ const ReportsPage: React.FC = () => {
           </h1>
         </div>
 
-        <button
-          onClick={handleDownloadPDF}
-          disabled={isGeneratingPDF}
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-md disabled:opacity-70"
-        >
-          {isGeneratingPDF ? (
-            <>
-              <LoadingSpinner size="sm" />
-              <span>Generating…</span>
-            </>
-          ) : (
-            <>
-              <ArrowDownTrayIcon className="h-4 w-4" />
-              Download PDF
-            </>
-          )}
-        </button>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            onClick={handleDownloadExcel}
+            disabled={isExporting}
+            className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-all hover:-translate-y-0.5 hover:bg-emerald-100 disabled:translate-y-0 disabled:opacity-60 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
+          >
+            {exportKind === "excel" ? (
+              <>
+                <LoadingSpinner size="sm" />
+                <span>Building...</span>
+              </>
+            ) : (
+              <>
+                <TableCellsIcon className="h-4 w-4" />
+                Download Excel
+              </>
+            )}
+          </button>
+
+          <button
+            onClick={handleDownloadPDF}
+            disabled={isExporting}
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-md disabled:translate-y-0 disabled:opacity-70"
+          >
+            {exportKind === "pdf" ? (
+              <>
+                <LoadingSpinner size="sm" />
+                <span>Generating...</span>
+              </>
+            ) : (
+              <>
+                <DocumentArrowDownIcon className="h-4 w-4" />
+                Download PDF
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* ---------------- Report content (captured for PDF) ---------------- */}
-      <div id="report-content" className="space-y-6">
+      {/* ---------------- Report content (on-screen view) ---------------- */}
+      <div className="space-y-6">
         {/* Hero */}
         <div className={`${CARD} p-6 sm:p-7`}>
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-start gap-4">
-              <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-600/25">
+              <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl text-blue-600 dark:text-blue-400">
                 <DocumentChartBarIcon className="h-7 w-7" />
               </span>
               <div>
@@ -729,7 +827,7 @@ const ReportsPage: React.FC = () => {
                   {employee.name}
                 </h3>
                 <p className="mt-1 text-sm font-medium text-gray-500 dark:text-gray-400">
-                  {employee.position || "—"} • {departmentName}
+                  {employee.position || "-"} • {departmentName}
                 </p>
                 <span
                   className={`mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
@@ -758,12 +856,12 @@ const ReportsPage: React.FC = () => {
             <ProfileField
               icon={<EnvelopeIcon className="h-4 w-4" />}
               label="Email"
-              value={employee.email || "—"}
+              value={employee.email || "-"}
             />
             <ProfileField
               icon={<BriefcaseIcon className="h-4 w-4" />}
               label="Position"
-              value={employee.position || "—"}
+              value={employee.position || "-"}
             />
             <ProfileField
               icon={<BuildingOffice2Icon className="h-4 w-4" />}
@@ -778,7 +876,7 @@ const ReportsPage: React.FC = () => {
             <ProfileField
               icon={<ClockIcon className="h-4 w-4" />}
               label="Tenure"
-              value={tenureYears ? `${tenureYears} Years` : "—"}
+              value={tenureYears ? `${tenureYears} Years` : "-"}
             />
           </div>
         </div>
@@ -788,7 +886,7 @@ const ReportsPage: React.FC = () => {
           <InfoCard
             icon={<IdentificationIcon className="h-5 w-5" />}
             label="Employee ID"
-            value={employee.employeeId || "—"}
+            value={employee.employeeId || "-"}
           />
           <InfoCard
             icon={<CalendarDaysIcon className="h-5 w-5" />}
@@ -800,7 +898,7 @@ const ReportsPage: React.FC = () => {
                     month: "short",
                     day: "numeric",
                   })
-                : "—"
+                : "-"
             }
           />
           <InfoCard

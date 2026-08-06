@@ -2,20 +2,22 @@
  * Theme tokens that CSS can't reach.
  *
  * Most theming happens through CSS custom properties and the `html.theme-*`
- * classes in `styles/design-system.css`. But SVG-based UI — Recharts strokes
- * and gradients, gauge arcs, canvas fills — needs a real hex value at render
+ * classes in `styles/design-system.css`. But SVG-based UI - Recharts strokes
+ * and gradients, gauge arcs, canvas fills - needs a real hex value at render
  * time, and swatch pickers need to paint the colour directly.
  *
- * This map was previously copy-pasted into five files, which meant adding a
- * colour scheme required finding all five. It now lives here, keyed by the
- * `ColorScheme` union so TypeScript fails the build if a scheme is missing.
+ * Keyed by the `ColorScheme` union so the build fails if a scheme is missing
+ * an entry.
  *
- * Keep these in sync with the `*-600` values in `tailwind.config.js`.
+ * Keep these EXACTLY in sync with the `--blue-600` value each `html.theme-*`
+ * block sets at the bottom of `styles/design-system.css`. That variable is what
+ * every `blue-*` utility resolves to, so any drift here means an SVG chart sits
+ * next to a button in a visibly different shade of the "same" accent.
  */
 import type { ColorScheme } from "../context/ThemeContext";
 
 export const ACCENT_HEX: Record<ColorScheme, string> = {
-  black: "#374151",
+  black: "#475569",
   purple: "#9c5fd1",
   blue: "#2563eb",
   pink: "#db2777",
@@ -23,8 +25,26 @@ export const ACCENT_HEX: Record<ColorScheme, string> = {
   indigo: "#4f46e5",
   orange: "#ea580c",
   teal: "#0d9488",
-  bronze: "#b45309",
-  mint: "#10b981",
+  bronze: "#d97706",
+  mint: "#059669",
+};
+
+/**
+ * Softer accent (the theme's `--blue-400`) for the second stop of chart
+ * gradients and arc strokes. Same hue, so a gradient reads as depth rather
+ * than as a second colour.
+ */
+export const ACCENT_SOFT_HEX: Record<ColorScheme, string> = {
+  black: "#94a3b8",
+  purple: "#d49eff",
+  blue: "#60a5fa",
+  pink: "#f472b6",
+  violet: "#a78bfa",
+  indigo: "#818cf8",
+  orange: "#fb923c",
+  teal: "#2dd4bf",
+  bronze: "#fbbf24",
+  mint: "#34d399",
 };
 
 /** Human labels for the colour schemes, used by the theme pickers. */
@@ -47,3 +67,7 @@ export const SCHEME_LABEL: Record<ColorScheme, string> = {
  */
 export const accentFor = (scheme: string): string =>
   ACCENT_HEX[scheme as ColorScheme] ?? ACCENT_HEX.blue;
+
+/** Lighter companion to {@link accentFor}, same fallback behaviour. */
+export const accentSoftFor = (scheme: string): string =>
+  ACCENT_SOFT_HEX[scheme as ColorScheme] ?? ACCENT_SOFT_HEX.blue;
