@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { usersAPI } from "../services/api";
 import LogoLoader from "../components/LogoLoader";
+import MobileTeamList from "../components/team/MobileTeamList";
 import Avatar from "../components/Avatar";
 import Dropdown from "../components/ui/Dropdown";
 import {
@@ -100,7 +101,7 @@ const MyTeamPage: React.FC = () => {
   const [dept, setDept] = useState("All Departments");
   const [sortBy, setSortBy] = useState<SortKey>("name");
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ["employees"],
     queryFn: () => usersAPI.getEmployees(1, 100),
     enabled: isAdmin,
@@ -216,6 +217,21 @@ const MyTeamPage: React.FC = () => {
         )}
       </div>
 
+      {/* Mobile: index rows plus a detail sheet, matching Leave Requests.
+          It renders its own empty state, so it sits outside the branch below
+          rather than being wired into every arm of it. */}
+      {isAdmin && !isLoading && (
+        <MobileTeamList
+          members={members}
+          onRefresh={() => refetch()}
+          isRefreshing={isLoading}
+          onViewProfile={(id) => navigate(`/employees/${id}`)}
+          deptName={deptName}
+          formatJoin={formatJoin}
+          formatTenure={formatTenure}
+        />
+      )}
+
       {!isAdmin ? (
         <EmptyState
           title="Team directory is managed by admins"
@@ -224,16 +240,19 @@ const MyTeamPage: React.FC = () => {
       ) : isLoading ? (
         <LogoLoader label="Loading your team..." minHClass="min-h-[420px]" />
       ) : members.length === 0 ? (
-        <EmptyState
-          title="No team members found"
-          subtitle={
-            search || dept !== "All Departments"
-              ? "Try a different search or filter."
-              : "Invite employees to get started."
-          }
-        />
+        // Desktop-only: the mobile list shows its own empty state.
+        <div className="hidden lg:block">
+          <EmptyState
+            title="No team members found"
+            subtitle={
+              search || dept !== "All Departments"
+                ? "Try a different search or filter."
+                : "Invite employees to get started."
+            }
+          />
+        </div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 stagger-children">
+        <div className="hidden grid-cols-1 gap-5 sm:grid-cols-2 lg:grid lg:grid-cols-3 stagger-children">
           {members.map((m: any) => {
             const dName = deptName(m);
             const active = m.status === "active";

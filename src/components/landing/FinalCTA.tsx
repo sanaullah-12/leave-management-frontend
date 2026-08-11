@@ -1,19 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import AppLogo from "../AppLogo";
-import { isKnownUser } from "../../utils/knownUser";
 import { Magnetic, Reveal, GridBackdrop } from "./primitives";
 import ContactModal from "./ContactModal";
 
 export const FinalCTA: React.FC = () => {
   const reduce = useReducedMotion();
   const [contactOpen, setContactOpen] = useState(false);
-  const [known, setKnown] = useState(false);
-
-  useEffect(() => {
-    setKnown(isKnownUser());
-  }, []);
 
   return (
     <section className="relative px-5 py-24 sm:py-32">
@@ -66,14 +60,16 @@ export const FinalCTA: React.FC = () => {
                   <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
                 </button>
               </Magnetic>
-              {known && (
-                <Link
-                  to="/login"
-                  className="rounded-xl border border-white/20 px-6 py-3.5 text-[1rem] font-semibold text-white transition-colors hover:bg-white/10"
-                >
-                  Sign in
-                </Link>
-              )}
+              {/* Shown to everyone, not just returning visitors. This was
+                  gated behind isKnownUser(), so a first-time visitor reaching
+                  the bottom of the page had "Start free" as their only option
+                  and no way to reach an existing account. */}
+              <Link
+                to="/login"
+                className="rounded-xl border border-white/20 px-6 py-3.5 text-[1rem] font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 active:scale-[0.98]"
+              >
+                Log in
+              </Link>
             </div>
           </Reveal>
           <Reveal delay={0.24}>
