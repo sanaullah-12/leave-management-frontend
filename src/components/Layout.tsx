@@ -35,6 +35,7 @@ import {
   Bars3Icon,
   PlusIcon,
   EllipsisHorizontalIcon,
+  PaintBrushIcon,
   XMarkIcon,
   MagnifyingGlassIcon,
   MegaphoneIcon,
@@ -574,15 +575,20 @@ const Layout: React.FC = () => {
           </h1>
 
           <div className="flex shrink-0 items-center">
-            {/* Theme switcher. On desktop this lives in the account dropdown,
-                which has no mobile equivalent - without it, changing theme on a
-                phone meant opening the drawer and finding Settings. */}
+            {/* Language. The `menu` variant already drops its label below sm,
+                so it renders icon-only here and keeps the row within 320px. */}
+            <LanguageSwitcher />
+
+            {/* Appearance. On desktop this sits in the account dropdown beside
+                the word "Theme"; here it stands alone with no label, so it uses
+                a paint brush rather than the swatch icon - a swatch on its own
+                reads as a tag or a bookmark, not as "change how this looks". */}
             <button
               onClick={() => setThemeOpen(true)}
               className="flex h-11 w-11 items-center justify-center rounded-xl text-gray-600 active:bg-black/5 dark:text-gray-300 dark:active:bg-white/10"
               aria-label={t("items.theme")}
             >
-              <SwatchIcon className="h-[22px] w-[22px]" />
+              <PaintBrushIcon className="h-[21px] w-[21px]" />
             </button>
             <NotificationBell />
             <button

@@ -15,6 +15,7 @@ import {
   subMonths,
 } from "date-fns";
 import LogoLoader from "../components/LogoLoader";
+import MobileLeaveCalendar from "../components/calendar/MobileLeaveCalendar";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -87,8 +88,15 @@ const LeaveCalendarPage: React.FC = () => {
 
   return (
     <div className="space-y-6 fade-in">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+      {/* Mobile: month grid + agenda, in the Leave Requests design language. */}
+      <MobileLeaveCalendar
+        leaves={leaves as any}
+        cursor={cursor}
+        onCursorChange={setCursor}
+      />
+
+      {/* Header (desktop) */}
+      <div className="hidden flex-col gap-4 lg:flex lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
             Leave Calendar
@@ -125,7 +133,7 @@ const LeaveCalendarPage: React.FC = () => {
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500 dark:text-gray-400">
+      <div className="hidden flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500 dark:text-gray-400 lg:flex">
         {Object.keys(TYPE_DOT).map((t) => (
           <span key={t} className="inline-flex items-center gap-1.5 capitalize">
             <span className={`h-2.5 w-2.5 rounded-full ${TYPE_DOT[t]}`} />
@@ -138,8 +146,8 @@ const LeaveCalendarPage: React.FC = () => {
         </span>
       </div>
 
-      {/* Calendar grid */}
-      <div className="surface-card overflow-hidden">
+      {/* Calendar grid (desktop) */}
+      <div className="hidden surface-card overflow-hidden lg:block">
         <div className="grid grid-cols-7 border-b border-gray-100 dark:border-gray-700/60">
           {WEEKDAYS.map((d) => (
             <div
