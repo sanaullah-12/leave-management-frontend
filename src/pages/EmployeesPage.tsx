@@ -10,6 +10,7 @@ import EmployeeInviteModal from "../components/EmployeeInviteModal";
 import AdminInviteModal from "../components/AdminInviteModal";
 import Avatar from "../components/Avatar";
 import DatePicker from "../components/ui/DatePicker";
+import MobileEmployeeList from "../components/employees/MobileEmployeeList";
 import {
   PlusIcon,
   UserIcon,
@@ -478,8 +479,16 @@ const EmployeesPage: React.FC = () => {
         </div>
       )}
 
-      {/* Employees Section */}
-      <div className="mt-8 surface-card backdrop-blur-sm overflow-hidden">
+      {/* Mobile: index rows plus a detail sheet, matching Leave Requests. */}
+      <MobileEmployeeList
+        employees={filteredUsers}
+        onRefresh={() => refetchEmployees()}
+        isRefreshing={employeesLoading}
+        onViewProfile={(id) => navigate(`/employees/${id}`)}
+      />
+
+      {/* Employees Section (desktop) */}
+      <div className="mt-8 hidden surface-card backdrop-blur-sm overflow-hidden lg:block">
         {filteredUsers.length > 0 ? (
           <>
             {/* Desktop Table */}
@@ -634,117 +643,6 @@ const EmployeesPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Mobile Cards */}
-            <div
-              className={`lg:hidden space-y-4 p-4 sm:p-6 ${
-                filteredUsers.length > 10 ? "max-h-[600px] overflow-y-auto" : ""
-              }`}
-            >
-              {filteredUsers.map((employee: any) => (
-                <div
-                  key={employee._id}
-                  className="rounded-xl p-6 border border-gray-200/30 dark:border-gray-700/30 bg-gradient-to-br from-white/80 to-gray-50/40 dark:from-gray-800/40 dark:to-gray-900/20 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
-                >
-                  <div className="flex items-center gap-3 mb-4">
-                    <Avatar
-                      src={employee.profilePicture}
-                      name={employee.name}
-                      size="md"
-                      showErrorHint={true}
-                    />
-                    <div>
-                      <button
-                        onClick={() => navigate(`/employees/${employee._id}`)}
-                        className="text-left font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer underline-offset-2 hover:underline"
-                      >
-                        {employee.name}
-                      </button>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {employee.employeeId}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-sm mb-4">
-                    <div>
-                      <p className="text-gray-500 dark:text-gray-400">
-                        Department
-                      </p>
-                      <p className="text-gray-900 dark:text-gray-100">
-                        {employee.department}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500 dark:text-gray-400">
-                        Position
-                      </p>
-                      <p className="text-gray-900 dark:text-gray-100">
-                        {employee.position}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500 dark:text-gray-400">
-                        Join Date
-                      </p>
-                      <p className="text-gray-900 dark:text-gray-100">
-                        {employee.joinDate
-                          ? new Date(employee.joinDate).toLocaleDateString()
-                          : "N/A"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-500 dark:text-gray-400">Status</p>
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          employee.status === "active"
-                            ? "badge-success"
-                            : employee.status === "pending"
-                            ? "badge-warning"
-                            : "badge-error"
-                        }`}
-                      >
-                        {employee.status === "active"
-                          ? "Active"
-                          : employee.status === "pending"
-                          ? "Pending"
-                          : "Inactive"}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex justify-end space-x-2">
-                    {activeTab === "employees" && (
-                      <button
-                        onClick={() =>
-                          handleToggleStatus(employee._id, employee.isActive)
-                        }
-                        className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-lg ring-1 ring-inset transition-colors ${
-                          employee.isActive
-                            ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 ring-red-200/70 dark:ring-red-500/30 hover:bg-red-100 dark:hover:bg-red-500/20"
-                            : "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 ring-emerald-200/70 dark:ring-emerald-500/30 hover:bg-emerald-100 dark:hover:bg-emerald-500/20"
-                        }`}
-                      >
-                        {employee.isActive ? "Deactivate" : "Activate"}
-                      </button>
-                    )}
-                    <button
-                      onClick={() => handleGenerateReport(employee)}
-                      className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 ring-1 ring-inset ring-blue-200/70 dark:ring-blue-500/30 hover:bg-blue-100 dark:hover:bg-blue-500/20"
-                    >
-                      <DocumentChartBarIcon className="h-4 w-4 mr-1" />
-                      Report
-                    </button>
-                    {activeTab === "employees" && (
-                      <button
-                        onClick={() => showDeleteConfirm(employee)}
-                        className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/40 ring-1 ring-inset ring-gray-200/70 dark:ring-gray-600/40 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:ring-red-200/70 dark:hover:ring-red-500/30"
-                      >
-                        <TrashIcon className="h-4 w-4 mr-1" />
-                        Delete
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
           </>
         ) : (
           <div className="flex flex-col items-center justify-center py-16 px-8 text-center">

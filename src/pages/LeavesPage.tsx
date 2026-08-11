@@ -10,6 +10,9 @@ import {
 } from "../utils/toastHelpers";
 import Avatar from "../components/Avatar";
 import Modal from "../components/ui/Modal";
+import MobileLeaveList from "../components/leaves/MobileLeaveList";
+import LeaveDetailSheet from "../components/leaves/LeaveDetailSheet";
+import type { LeaveRow } from "../components/leaves/leaveParts";
 import InlineLoader from "../components/InlineLoader";
 import LogoLoader from "../components/LogoLoader";
 import {
@@ -19,7 +22,6 @@ import {
   XCircleIcon,
   ClockIcon,
   EyeIcon,
-  CalendarIcon,
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 
@@ -34,6 +36,8 @@ const LeavesPage: React.FC = () => {
   const [selectedLeaveId, setSelectedLeaveId] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
   const [showCommentsPopup, setShowCommentsPopup] = useState(false);
+  /** The request shown in the mobile detail sheet. */
+  const [detailLeave, setDetailLeave] = useState<LeaveRow | null>(null);
   const [popupContent, setPopupContent] = useState({
     title: "",
     content: "",
@@ -318,7 +322,10 @@ const LeavesPage: React.FC = () => {
 
   return (
     <div className="space-y-6 fade-in">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+      {/* Desktop chrome. The mobile list carries its own header, refresh
+          control and filter chips, so this whole block would otherwise be
+          shown twice on a phone. */}
+      <div className="hidden flex-col gap-4 lg:flex lg:flex-row lg:items-center lg:justify-between">
         {/* Hidden on phones: the mobile app bar already shows "Leave Requests",
             so this block repeated the title and spent ~120px of a 844px screen
             restating it before any content appeared. Desktop has no app bar
@@ -360,8 +367,8 @@ const LeavesPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Status Filter */}
-      <div className="inline-flex flex-wrap gap-1 p-1 bg-gray-100 dark:bg-gray-800/80 rounded-xl border border-gray-200/60 dark:border-gray-700/60">
+      {/* Status Filter (desktop only - the mobile list renders chips) */}
+      <div className="hidden flex-wrap gap-1 rounded-xl border border-gray-200/60 bg-gray-100 p-1 dark:border-gray-700/60 dark:bg-gray-800/80 lg:inline-flex">
         {[
           { key: "", label: "All", active: "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm" },
           { key: "pending", label: "Pending", active: "bg-white dark:bg-gray-700 text-amber-600 dark:text-amber-400 shadow-sm" },
@@ -383,8 +390,30 @@ const LeavesPage: React.FC = () => {
       </div>
 
 
+      {/* Mobile: the table becomes one card per request. It is a separate
+          component rather than a restyled table because the phone layout
+          shares no markup with the desktop one - it owns its own header,
+          filters and empty state. */}
+      <MobileLeaveList
+        leaves={leaves}
+        selectedStatus={selectedStatus}
+        onSelectStatus={setSelectedStatus}
+        onRefresh={handleRefresh}
+        isRefreshing={isLoading}
+        onOpen={(leave) => setDetailLeave(leave)}
+      />
+
+      {/* Everything needed to decide lives here rather than in every row. */}
+      <LeaveDetailSheet
+        leave={detailLeave}
+        onClose={() => setDetailLeave(null)}
+        isAdmin={user?.role === "admin"}
+        onApprove={(id) => handleReview(id, "approved")}
+        onReject={(id) => handleRejectClick(id)}
+      />
+
       {/* Leave Requests Section */}
-      <div className="mt-8 backdrop-blur-sm surface-card overflow-hidden">
+      <div className="mt-8 hidden backdrop-blur-sm surface-card overflow-hidden lg:block">
         {leaves.length > 0 ? (
           <>
             {/* Desktop Table View - Hidden on mobile */}
@@ -602,148 +631,6 @@ const LeavesPage: React.FC = () => {
                 nested a p-6 card inside a p-8 container, so every request cost
                 56px of padding before any content and one row filled half a
                 phone screen. */}
-            <div className="divide-y divide-gray-100 px-3 dark:divide-gray-700/50 lg:hidden">
-              {leaves.map((leave: any) => (
-                <div
-                  key={leave._id}
-                  className="cursor-pointer py-3 transition-colors active:bg-black/[0.03] dark:active:bg-white/[0.04]"
-                >
-                  {/* Header with Type and Status */}
-                  <div className="mb-2 flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-1.5">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${getLeaveTypeBadge(
-                          leave.leaveType
-                        )}`}
-                      >
-                        {leave.leaveType}
-                      </span>
-                      <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200">
-                        {leave.totalDays}{" "}
-                        {leave.totalDays === 1 ? "day" : "days"}
-                      </span>
-                    </div>
-
-                    <div className="flex shrink-0 items-center space-x-2">
-                      <span
-                        className={getStatusDisplay(leave.status).className}
-                      >
-                        {getStatusDisplay(leave.status).icon}
-                        {getStatusDisplay(leave.status).text}
-                      </span>
-                      {leave.status === "rejected" && leave.reviewComments && (
-                        <button
-                          onClick={() =>
-                            showRejectionCommentsPopup(leave.reviewComments)
-                          }
-                          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                          title="View rejection reason"
-                        >
-                          <EyeIcon className="w-4 h-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Employee Info (Admin only) */}
-                  {user?.role === "admin" && (
-                    <div className="mb-2">
-                      <div className="flex items-center gap-2.5">
-                        <Avatar
-                          src={
-                            typeof leave.employee === "object"
-                              ? leave.employee?.profilePicture
-                              : null
-                          }
-                          name={
-                            typeof leave.employee === "object" &&
-                            leave.employee?.name
-                              ? leave.employee.name
-                              : "Unknown"
-                          }
-                          size="sm"
-                        />
-                        <div>
-                          <button
-                            onClick={() => {
-                              if (
-                                typeof leave.employee === "object" &&
-                                leave.employee?._id
-                              ) {
-                                navigate(`/employees/${leave.employee._id}`);
-                              }
-                            }}
-                            className="text-left text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer underline-offset-2 hover:underline"
-                          >
-                            {typeof leave.employee === "object" &&
-                            leave.employee?.name
-                              ? leave.employee.name
-                              : "Unknown"}
-                          </button>
-                          <div className="text-xs text-gray-600 dark:text-gray-300">
-                            {typeof leave.employee === "object" &&
-                            leave.employee?.employeeId
-                              ? leave.employee.employeeId
-                              : "N/A"}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Dates - one line, no section label. "From/To" headings
-                      cost a whole row each to say what a date range already
-                      communicates. */}
-                  <div className="mb-1.5 flex items-center gap-1.5 text-[13px] text-gray-700 dark:text-gray-300">
-                    <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-gray-400" />
-                    <span className="tabular-nums">
-                      {new Date(leave.startDate).toLocaleDateString()}
-                    </span>
-                    <span className="text-gray-400">&ndash;</span>
-                    <span className="tabular-nums">
-                      {new Date(leave.endDate).toLocaleDateString()}
-                    </span>
-                  </div>
-
-                  {/* Reason - a single truncated line that opens the full text
-                      on tap, rather than a labelled, boxed three-line block. */}
-                  {leave.reason && (
-                    <button
-                      onClick={() => showLeaveReasonPopup(leave.reason)}
-                      className="mb-2 flex w-full items-center gap-1.5 text-left text-[13px] text-gray-500 dark:text-gray-400"
-                      title="View full reason"
-                    >
-                      <span className="min-w-0 flex-1 truncate">{leave.reason}</span>
-                      <EyeIcon className="h-3.5 w-3.5 shrink-0 text-gray-400" />
-                    </button>
-                  )}
-
-                  {/* Action Buttons (Admin only) */}
-                  {user?.role === "admin" && leave.status === "pending" && (
-                    <div className="mt-2 flex gap-2">
-                      <button
-                        onClick={() => handleReview(leave._id, "approved")}
-                        disabled={reviewLeaveMutation.isPending}
-                        className="btn-success flex-1 px-3 text-sm"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => handleRejectClick(leave._id)}
-                        disabled={reviewLeaveMutation.isPending}
-                        className="btn-danger flex-1 px-3 text-sm"
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  )}
-                  {/* Already-reviewed rows previously carried a full-width
-                      "Request Reviewed" footer. The status pill at the top of
-                      the row already says that, so the footer was a wasted line
-                      on every non-pending request. */}
-                </div>
-              ))}
-            </div>
           </>
         ) : (
           <div className="text-center py-16 px-8">
