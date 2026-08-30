@@ -9,7 +9,7 @@ import {
   CheckCircleIcon,
   ClockIcon,
 } from "@heroicons/react/24/outline";
-import AuthLayout from "../components/AuthLayout";
+import AuthLayout from "../components/auth/AuthLayout";
 import InlineLoader from "../components/InlineLoader";
 
 interface ForgotPasswordForm {

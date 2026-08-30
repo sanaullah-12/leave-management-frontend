@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { markKnownUser } from "../utils/knownUser";
 import PasswordInput from "../components/PasswordInput";
-import AuthLayout from "../components/AuthLayout";
+import AuthLayout from "../components/auth/AuthLayout";
 import InlineLoader from "../components/InlineLoader";
 import {
   CheckCircleIcon,

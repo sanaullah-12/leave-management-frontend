@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import PasswordInput from "../components/PasswordInput";
 import BrandedLoader from "../components/BrandedLoader";
-import AuthLayout from "../components/AuthLayout";
+import AuthLayout from "../components/auth/AuthLayout";
 import InlineLoader from "../components/InlineLoader";
 import { showInfoToast } from "../utils/toastHelpers";
 import { GoogleIcon, MicrosoftIcon } from "../components/BrandIcons";
