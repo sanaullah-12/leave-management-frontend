@@ -1,0 +1,219 @@
+/* ==============================================================
+   AUTH HERO - Nexora ecosystem visualisation
+   ==============================================================
+   Ships with the lazily-loaded hero chunk, so no visitor on a
+   phone (where the visualisation never mounts) pays for it.
+
+   Colour, border and shadow stay in Tailwind on the components.
+   Everything in here is *size*, and size has to be measured
+   against the stage rather than the viewport: the stage is a
+   square whose side is min(panel width, available height), so on
+   a 13" laptop it can be 400px and on a large monitor 560px. If
+   the cards did not shrink with it the composition would collide
+   at the small end and float apart at the large one.
+
+   Container query units do that in one declaration. The plain
+   pixel values are the base, so a browser without `cqi` support
+   still gets a sane fixed-size composition.
+   ============================================================== */
+
+.nx-stage {
+  container-type: inline-size;
+}
+
+/* --- core assembly ------------------------------------------ */
+/* 21 stage units across, so it always sits inside CORE_RADIUS
+   (13 units) and the connectors leave from its rim. */
+
+.nx-core {
+  width: 118px;
+  height: 118px;
+}
+
+/* The brand mark carries its own width/height attributes; override
+   them so it tracks the disc instead of a fixed pixel size. */
+.nx-core > svg {
+  width: 53%;
+  height: 53%;
+}
+
+.nx-core-glow {
+  width: 300px;
+  height: 300px;
+  filter: blur(64px);
+}
+
+.nx-core-ring {
+  will-change: transform;
+}
+
+.nx-core-ring--outer {
+  width: 262px;
+  height: 262px;
+}
+
+.nx-core-ring--inner {
+  width: 188px;
+  height: 188px;
+}
+
+/* --- module card ------------------------------------------- */
+
+.nx-module-card {
+  width: 132px;
+  padding: 11px;
+}
+
+.nx-module-card__icon {
+  width: 22px;
+  height: 22px;
+}
+
+.nx-module-card__icon > svg {
+  width: 12px;
+  height: 12px;
+}
+
+.nx-module-card__name {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+.nx-module-card__value {
+  margin-top: 9px;
+  font-size: 15px;
+}
+
+.nx-module-card__caption {
+  margin-top: 3px;
+  font-size: 10px;
+}
+
+/* --- notification pill -------------------------------------- */
+
+.nx-notification {
+  padding: 5px 13px 5px 5px;
+  font-size: 10.5px;
+}
+
+.nx-notification__icon {
+  width: 23px;
+  height: 23px;
+}
+
+.nx-notification__icon > svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* --- stage-relative sizing ---------------------------------- */
+
+@supports (width: 1cqi) {
+  .nx-core {
+    width: 21cqi;
+    height: 21cqi;
+  }
+
+  .nx-core-glow {
+    width: 54cqi;
+    height: 54cqi;
+    filter: blur(clamp(44px, 11cqi, 64px));
+  }
+
+  .nx-core-ring--outer {
+    width: 47cqi;
+    height: 47cqi;
+  }
+
+  .nx-core-ring--inner {
+    width: 33.5cqi;
+    height: 33.5cqi;
+  }
+
+  .nx-module-card {
+    width: clamp(100px, 27cqi, 152px);
+    padding: clamp(8px, 2cqi, 11px);
+  }
+
+  .nx-module-card__icon {
+    width: clamp(17px, 4cqi, 22px);
+    height: clamp(17px, 4cqi, 22px);
+  }
+
+  .nx-module-card__icon > svg {
+    width: clamp(9px, 2.2cqi, 12px);
+    height: clamp(9px, 2.2cqi, 12px);
+  }
+
+  .nx-module-card__name {
+    font-size: clamp(7px, 1.65cqi, 9px);
+  }
+
+  .nx-module-card__value {
+    margin-top: clamp(6px, 1.7cqi, 9px);
+    font-size: clamp(11.5px, 2.75cqi, 15px);
+  }
+
+  .nx-module-card__caption {
+    margin-top: clamp(2px, 0.6cqi, 3px);
+    font-size: clamp(8px, 1.85cqi, 10px);
+  }
+
+  .nx-notification {
+    padding: clamp(3px, 0.9cqi, 5px) clamp(9px, 2.4cqi, 13px)
+      clamp(3px, 0.9cqi, 5px) clamp(3px, 0.9cqi, 5px);
+    font-size: clamp(8px, 1.9cqi, 10.5px);
+  }
+
+  .nx-notification__icon {
+    width: clamp(17px, 4.2cqi, 23px);
+    height: clamp(17px, 4.2cqi, 23px);
+  }
+
+  .nx-notification__icon > svg {
+    width: clamp(10px, 2.4cqi, 13px);
+    height: clamp(10px, 2.4cqi, 13px);
+  }
+}
+
+/* --- activity indicator ------------------------------------- */
+/* Two rings, one expanding. A keyframe costs nothing per frame
+   that a tween would not, and keeps the timeline to one concern. */
+
+.nx-activity-dot,
+.nx-activity-dot::after {
+  border-radius: 9999px;
+  background: currentColor;
+}
+
+.nx-activity-dot {
+  position: relative;
+  display: block;
+  width: 5px;
+  height: 5px;
+}
+
+.nx-activity-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  animation: nx-activity-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes nx-activity-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  70%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nx-activity-dot::after {
+    animation: none;
+  }
+}
