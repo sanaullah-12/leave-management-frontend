@@ -1,5 +1,4 @@
-import React, { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   MagnifyingGlassIcon,
   UserIcon,
@@ -14,15 +13,21 @@ import Avatar from "../Avatar";
 import { showSuccessToast } from "../../utils/toastHelpers";
 import {
   buildResolutionMap,
+  formatDocumentDate,
   resolvePlaceholders,
   findUnresolved,
 } from "./studioService";
-import { composeDocumentHtml, exportPdf, exportDocx, printDocument } from "./exporters";
+import { exportPdf, exportDocx, printDocument } from "./exporters";
+import DocumentPreview from "./DocumentPreview";
 import type {
+  BrandSettings,
   BrandingAsset,
+  CompanyProfile,
   DocumentSubject,
   PageSettings,
   StudioDocument,
+  TemplateField,
+  TemplateVariant,
 } from "./types";
 
 /** Minimal employee shape used by generation (superset-safe). */
@@ -39,18 +44,38 @@ export interface StudioEmployee {
   profilePicture?: string;
 }
 
+/** Fields every document can use, when a template declares none of its own. */
+export const BASE_FIELDS: TemplateField[] = [
+  {
+    key: "Salary",
+    label: "Gross salary",
+    type: "text",
+    placeholder: "e.g. PKR 250,000 per month",
+    source: "salary",
+  },
+  {
+    key: "Manager Name",
+    label: "Reporting manager",
+    type: "text",
+    placeholder: "Full name",
+  },
+];
+
 interface Props {
   open: boolean;
   onClose: () => void;
   content: string;
   templateId: string | null;
   templateName: string;
+  variant: TemplateVariant;
+  fields: TemplateField[];
+  referenceNo: string;
   page: PageSettings;
   assets: BrandingAsset[];
+  company: CompanyProfile;
+  brand: BrandSettings;
   employees: StudioEmployee[];
   employeesLoading: boolean;
-  companyName: string;
-  companyAddress: string;
   createdBy: string;
   /** Persist a generated document via the store; returns the stored doc (with its id). */
   onGenerate: (payload: {
@@ -59,22 +84,35 @@ interface Props {
     templateName: string;
     subject: DocumentSubject | null;
     content: string;
+    variant: TemplateVariant;
+    referenceNo: string;
     createdBy: string;
   }) => StudioDocument;
   onStatusChange: (docId: string, status: StudioDocument["status"]) => void;
 }
 
-const fmtDate = (v?: string) => {
-  if (!v) return "";
-  const d = new Date(v);
-  return Number.isNaN(d.getTime())
-    ? v
-    : d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+const prefillFor = (
+  field: TemplateField,
+  employee: StudioEmployee
+): string => {
+  switch (field.source) {
+    case "salary":
+      return employee.salary != null ? String(employee.salary) : "";
+    case "joinDate":
+      return formatDocumentDate(employee.joinDate);
+    case "designation":
+      return employee.position ?? "";
+    case "department":
+      return employee.department ?? "";
+    default:
+      return "";
+  }
 };
 
 /**
- * Generation flow: pick employee → fields auto-resolve → live A4 preview →
- * generate + export (PDF / DOCX / Print). No copy-paste anywhere.
+ * Generation flow: pick the employee, fill only what the template actually
+ * needs, watch it merge into a live A4 preview, then export. The field list is
+ * whatever the template declares, so a new document type brings its own form.
  */
 const GenerateDocumentModal: React.FC<Props> = ({
   open,
@@ -82,21 +120,39 @@ const GenerateDocumentModal: React.FC<Props> = ({
   content,
   templateId,
   templateName,
+  variant,
+  fields,
+  referenceNo,
   page,
   assets,
+  company,
+  brand,
   employees,
   employeesLoading,
-  companyName,
-  companyAddress,
   createdBy,
   onGenerate,
   onStatusChange,
 }) => {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<StudioEmployee | null>(null);
-  const [salary, setSalary] = useState("");
-  const [manager, setManager] = useState("");
+  const [values, setValues] = useState<Record<string, string>>({});
   const [generatedDoc, setGeneratedDoc] = useState<StudioDocument | null>(null);
+
+  const activeFields = fields.length ? fields : BASE_FIELDS;
+
+  // Pull whatever the employee record already knows into the form.
+  useEffect(() => {
+    if (!selected) return;
+    setValues((current) => {
+      const next = { ...current };
+      activeFields.forEach((f) => {
+        const prefill = prefillFor(f, selected);
+        if (prefill && !next[f.key]) next[f.key] = prefill;
+      });
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -122,43 +178,43 @@ const GenerateDocumentModal: React.FC<Props> = ({
       }
     : null;
 
-  const resolvedBody = useMemo(() => {
-    const map = buildResolutionMap({
-      subject,
-      companyName,
-      companyAddress,
-      managerName: manager,
-      salary: salary || (selected?.salary != null ? String(selected.salary) : ""),
-      phone: selected?.phone,
-      overrides: { "Joining Date": fmtDate(selected?.joinDate) },
+  const overrides = useMemo(() => {
+    const map: Record<string, string> = {
+      "Joining Date": formatDocumentDate(selected?.joinDate),
+    };
+    activeFields.forEach((f) => {
+      const raw = values[f.key];
+      if (!raw) return;
+      map[f.key] = f.type === "date" ? formatDocumentDate(raw) : raw;
     });
-    return resolvePlaceholders(content, map, { highlightMissing: true });
-  }, [content, subject, companyName, companyAddress, manager, salary, selected]);
+    return map;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values, selected, fields]);
 
-  const previewHtml = useMemo(
+  const resolutionMap = useMemo(
     () =>
-      composeDocumentHtml({
-        title: templateName,
-        bodyHtml: resolvedBody,
-        page,
-        assets,
+      buildResolutionMap({
+        subject,
+        company,
+        referenceNo,
+        phone: selected?.phone,
+        managerName: values["Manager Name"],
+        salary: values.Salary,
+        overrides,
       }),
-    [resolvedBody, templateName, page, assets]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [subject, company, referenceNo, selected, overrides]
   );
 
-  const cleanBody = useMemo(() => {
-    // Same resolution but without the missing-token highlight, for saving/export.
-    const map = buildResolutionMap({
-      subject,
-      companyName,
-      companyAddress,
-      managerName: manager,
-      salary: salary || (selected?.salary != null ? String(selected.salary) : ""),
-      phone: selected?.phone,
-      overrides: { "Joining Date": fmtDate(selected?.joinDate) },
-    });
-    return resolvePlaceholders(content, map);
-  }, [content, subject, companyName, companyAddress, manager, salary, selected]);
+  const previewBody = useMemo(
+    () => resolvePlaceholders(content, resolutionMap, { highlightMissing: true }),
+    [content, resolutionMap]
+  );
+
+  const cleanBody = useMemo(
+    () => resolvePlaceholders(content, resolutionMap),
+    [content, resolutionMap]
+  );
 
   const unresolved = useMemo(() => findUnresolved(cleanBody), [cleanBody]);
 
@@ -172,6 +228,8 @@ const GenerateDocumentModal: React.FC<Props> = ({
       templateName,
       subject,
       content: cleanBody,
+      variant,
+      referenceNo,
       createdBy,
     });
     setGeneratedDoc(doc);
@@ -180,7 +238,7 @@ const GenerateDocumentModal: React.FC<Props> = ({
 
   const handleGenerate = () => {
     ensureGenerated();
-    showSuccessToast("Document generated & saved to history");
+    showSuccessToast("Document generated and saved to history");
   };
 
   const exportOpts = () => ({
@@ -188,6 +246,9 @@ const GenerateDocumentModal: React.FC<Props> = ({
     bodyHtml: cleanBody,
     page,
     assets,
+    company,
+    brand,
+    variant,
   });
 
   const handlePdf = async () => {
@@ -212,8 +273,7 @@ const GenerateDocumentModal: React.FC<Props> = ({
     setGeneratedDoc(null);
     setSelected(null);
     setQuery("");
-    setSalary("");
-    setManager("");
+    setValues({});
     onClose();
   };
 
@@ -223,7 +283,7 @@ const GenerateDocumentModal: React.FC<Props> = ({
       onClose={reset}
       size="2xl"
       title="Generate Document"
-      description={templateName}
+      description={`${templateName} - ${referenceNo}`}
       icon={<DocumentTextIcon className="h-5 w-5" />}
       footer={
         <div className="flex w-full flex-wrap items-center justify-between gap-3">
@@ -258,7 +318,7 @@ const GenerateDocumentModal: React.FC<Props> = ({
       }
     >
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Left: employee + fields */}
+        {/* Left: employee + the fields this template needs */}
         <div className="space-y-4">
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-gray-500 dark:text-gray-400">
@@ -274,7 +334,7 @@ const GenerateDocumentModal: React.FC<Props> = ({
               />
             </div>
 
-            <div className="mt-2 max-h-52 space-y-1 overflow-y-auto rounded-lg border border-gray-100 p-1 dark:border-gray-700/50">
+            <div className="mt-2 max-h-44 space-y-1 overflow-y-auto rounded-lg border border-gray-100 p-1 dark:border-gray-700/50">
               {employeesLoading ? (
                 <div className="space-y-1 p-1">
                   {[0, 1, 2, 3].map((i) => (
@@ -313,7 +373,7 @@ const GenerateDocumentModal: React.FC<Props> = ({
                             active ? "text-white/80" : "text-gray-400 dark:text-gray-500"
                           }`}
                         >
-                          {e.position || "-"} · {e.department || "-"}
+                          {[e.position, e.department].filter(Boolean).join(" - ") || "-"}
                         </span>
                       </span>
                       {active && <CheckCircleIcon className="h-4 w-4" />}
@@ -324,36 +384,50 @@ const GenerateDocumentModal: React.FC<Props> = ({
             </div>
           </div>
 
-          {/* Manual fields not stored on the employee record */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1 block text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Salary <span className="font-normal text-gray-400">(optional)</span>
-              </label>
-              <input
-                value={salary}
-                onChange={(e) => setSalary(e.target.value)}
-                placeholder="e.g. $6,500 / mo"
-                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs font-semibold text-gray-500 dark:text-gray-400">
-                Manager <span className="font-normal text-gray-400">(optional)</span>
-              </label>
-              <input
-                value={manager}
-                onChange={(e) => setManager(e.target.value)}
-                placeholder="Reporting manager"
-                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-              />
+          {/* Fields declared by the template */}
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-gray-500 dark:text-gray-400">
+              Document details
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              {activeFields.map((f) => (
+                <div key={f.key} className={f.wide ? "col-span-2" : undefined}>
+                  <label className="mb-1 block text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                    {f.label}
+                  </label>
+                  {f.type === "textarea" ? (
+                    <textarea
+                      rows={3}
+                      value={values[f.key] ?? ""}
+                      onChange={(e) =>
+                        setValues((v) => ({ ...v, [f.key]: e.target.value }))
+                      }
+                      placeholder={f.placeholder}
+                      className="w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                    />
+                  ) : (
+                    <input
+                      type={f.type === "number" ? "number" : f.type === "date" ? "date" : "text"}
+                      value={values[f.key] ?? ""}
+                      onChange={(e) =>
+                        setValues((v) => ({ ...v, [f.key]: e.target.value }))
+                      }
+                      placeholder={f.placeholder}
+                      className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                    />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 
           {selected ? (
             <div className="rounded-lg bg-gray-50 p-3 text-xs text-gray-500 dark:bg-gray-800/50 dark:text-gray-400">
-              Resolving fields for <strong className="text-gray-700 dark:text-gray-200">{selected.name}</strong>.
-              Empty tokens are highlighted in the preview.
+              Employee details are read from the record of{" "}
+              <strong className="text-gray-700 dark:text-gray-200">
+                {selected.name}
+              </strong>
+              . Anything still highlighted in the preview needs a value above.
             </div>
           ) : (
             <div className="flex items-center gap-2 rounded-lg bg-gray-50 p-3 text-xs text-gray-500 dark:bg-gray-800/50 dark:text-gray-400">
@@ -364,29 +438,20 @@ const GenerateDocumentModal: React.FC<Props> = ({
         </div>
 
         {/* Right: live preview */}
-        <div>
-          <label className="mb-1.5 block text-xs font-semibold text-gray-500 dark:text-gray-400">
-            Live preview
-          </label>
-          <motion.div
-            key={selected?._id ?? "none"}
-            initial={{ opacity: 0.4 }}
-            animate={{ opacity: 1 }}
-            className="h-[420px] overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-gray-900/40"
-          >
-            {/* A4 at 96dpi ≈ 794×1123px, scaled to fit the preview pane. */}
-            <iframe
-              title="Document preview"
-              srcDoc={previewHtml}
-              className="origin-top-left"
-              style={{
-                width: "794px",
-                height: "1123px",
-                transform: "scale(0.5)",
-                border: "0",
-              }}
-            />
-          </motion.div>
+        <div className="h-[460px]">
+          <DocumentPreview
+            title={docName}
+            bodyHtml={previewBody}
+            page={page}
+            assets={assets}
+            company={company}
+            brand={brand}
+            variant={variant}
+            unresolved={unresolved}
+            subjectLabel={
+              selected ? `Resolved for ${selected.name}` : undefined
+            }
+          />
         </div>
       </div>
     </Modal>

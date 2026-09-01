@@ -5,20 +5,33 @@ import {
   AdjustmentsHorizontalIcon,
   SwatchIcon,
   SparklesIcon,
-  PhotoIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Select from "../ui/Select";
 import PlaceholderPanel from "./PlaceholderPanel";
-import { PAGE_FONT_FAMILIES } from "./constants";
+import { BRAND_ACCENTS, PAGE_FONT_FAMILIES, VARIANT_META } from "./constants";
 import { PANEL } from "./ui";
-import type { PageSettings } from "./types";
+import type {
+  BrandSettings,
+  CompanyProfile,
+  PageSettings,
+  TemplateField,
+  TemplateVariant,
+} from "./types";
 
 type Tab = "insert" | "page" | "brand";
 
 interface Props {
   page: PageSettings;
   setPage: (patch: Partial<PageSettings>) => void;
+  company: CompanyProfile;
+  brand: BrandSettings;
+  setBrand: (patch: Partial<BrandSettings>) => void;
+  /** Layout family of the loaded document. */
+  variant: TemplateVariant;
+  onVariantChange: (variant: TemplateVariant) => void;
+  /** Merge fields declared by the loaded template. */
+  templateFields?: TemplateField[];
   onInsertToken: (key: string) => void;
   onOpenLetterhead: () => void;
   assetCount: number;
@@ -75,6 +88,12 @@ const TABS: { key: Tab; label: string; icon: React.ComponentType<{ className?: s
 const PropertiesPanel: React.FC<Props> = ({
   page,
   setPage,
+  company,
+  brand,
+  setBrand,
+  variant,
+  onVariantChange,
+  templateFields,
   onInsertToken,
   onOpenLetterhead,
   assetCount,
@@ -133,11 +152,32 @@ const PropertiesPanel: React.FC<Props> = ({
       {/* Body */}
       <div className="flex-1 overflow-y-auto p-4">
         {tab === "insert" && (
-          <PlaceholderPanel onInsert={onInsertToken} disabled={!editable} />
+          <PlaceholderPanel
+            onInsert={onInsertToken}
+            templateFields={templateFields}
+            disabled={!editable}
+          />
         )}
 
         {tab === "page" && (
           <div className="space-y-5">
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold text-gray-500 dark:text-gray-400">
+                Document layout
+              </label>
+              <Select
+                value={variant}
+                onChange={(v) => onVariantChange(v as TemplateVariant)}
+                options={Object.entries(VARIANT_META).map(([value, meta]) => ({
+                  value,
+                  label: meta.label,
+                }))}
+              />
+              <p className="mt-1 text-[11px] text-gray-400 dark:text-gray-500">
+                {VARIANT_META[variant]?.hint}
+              </p>
+            </div>
+
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-gray-500 dark:text-gray-400">
                 Font family
@@ -205,9 +245,15 @@ const PropertiesPanel: React.FC<Props> = ({
               />
               <Toggle
                 label="Show letterhead"
-                hint="Header, logo & footer branding"
+                hint="Company header at the top of the page"
                 checked={page.showLetterhead}
                 onChange={(v) => setPage({ showLetterhead: v })}
+              />
+              <Toggle
+                label="Show footer"
+                hint="Address and contact strip at the bottom"
+                checked={page.showFooter}
+                onChange={(v) => setPage({ showFooter: v })}
               />
               <Toggle
                 label="Show watermark"
@@ -217,7 +263,7 @@ const PropertiesPanel: React.FC<Props> = ({
               />
               <Toggle
                 label="Page numbers"
-                hint="On printed / PDF output"
+                hint="Stamped on PDF output"
                 checked={page.showPageNumbers}
                 onChange={(v) => setPage({ showPageNumbers: v })}
               />
@@ -227,31 +273,78 @@ const PropertiesPanel: React.FC<Props> = ({
 
         {tab === "brand" && (
           <div className="space-y-4">
-            <div className="rounded-xl border border-gray-200/70 p-4 text-center dark:border-gray-700/50">
-              <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-xl text-blue-600 dark:text-blue-400">
-                <PhotoIcon className="h-6 w-6 text-gray-400" />
-              </div>
-              <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                {assetCount > 0
-                  ? `${assetCount} brand asset${assetCount > 1 ? "s" : ""}`
-                  : "No branding yet"}
+            <div className="rounded-xl border border-gray-200/70 p-3 dark:border-gray-700/50">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+                Company on the letterhead
               </p>
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Upload a letterhead, logo, watermark, footer or signature and
-                position them visually.
+              <p className="mt-1.5 text-sm font-semibold text-gray-900 dark:text-white">
+                {company.name || "No company details yet"}
+              </p>
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                {company.name
+                  ? [company.city, company.email, company.phone]
+                      .filter(Boolean)
+                      .join(" - ") || "Add an address and contact details"
+                  : "Add your company name, address and logo once - every document picks it up."}
+              </p>
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                {assetCount > 0
+                  ? `${assetCount} brand asset${assetCount > 1 ? "s" : ""} uploaded`
+                  : "No logo uploaded yet"}
               </p>
               <button
                 onClick={onOpenLetterhead}
                 disabled={!canManage}
                 className="btn-secondary mt-3 w-full justify-center text-sm disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Manage letterhead & branding
+                Manage branding & letterhead
               </button>
               {!canManage && (
                 <p className="mt-2 text-[11px] text-gray-400">
                   Only HR/Admins can edit branding.
                 </p>
               )}
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold text-gray-500 dark:text-gray-400">
+                Letterhead layout
+              </label>
+              <Select
+                value={brand.letterhead}
+                onChange={(v) =>
+                  setBrand({ letterhead: v as BrandSettings["letterhead"] })
+                }
+                disabled={!canManage}
+                options={[
+                  { value: "classic", label: "Classic" },
+                  { value: "modern", label: "Modern" },
+                  { value: "minimal", label: "Minimal" },
+                  { value: "banner", label: "Banner" },
+                ]}
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-semibold text-gray-500 dark:text-gray-400">
+                Document accent
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {BRAND_ACCENTS.map((a) => (
+                  <button
+                    key={a.value}
+                    onClick={() => canManage && setBrand({ accent: a.value })}
+                    title={a.label}
+                    disabled={!canManage}
+                    className={`h-7 w-7 rounded-full border-2 transition-transform hover:scale-110 disabled:cursor-not-allowed ${
+                      brand.accent === a.value
+                        ? "border-gray-900 dark:border-white"
+                        : "border-transparent"
+                    }`}
+                    style={{ background: a.value }}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Future-ready AI slot - intentionally not wired yet. */}

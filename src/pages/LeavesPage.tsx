@@ -104,18 +104,33 @@ const LeavesPage: React.FC = () => {
     }
   };
 
+  // One unfiltered page backs every tab. Keying the query by the status filter
+  // meant each chip click created a query with no cached data, so `isLoading`
+  // flipped true and the full-page loader below replaced the entire screen -
+  // chips included - until the round trip finished. Filtering client-side makes
+  // switching instant and lets every chip carry a real count.
   const {
     data: leavesData,
     isLoading,
+    isFetching,
     refetch,
   } = useQuery({
-    queryKey: ["leaves", selectedStatus],
-    queryFn: () => leavesAPI.getLeaves(1, 20, selectedStatus),
-    refetchInterval: false, // Disabled auto-refresh - only manual refresh
-    refetchIntervalInBackground: false, // Disabled background refresh
-    refetchOnWindowFocus: false, // Only refetch on manual action
-    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+    queryKey: ["leaves"],
+    queryFn: () => leavesAPI.getLeaves(1, 200),
+    refetchInterval: false, // Real-time via Socket.IO (see useSocket) - no polling.
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
   });
+
+  const allLeaves: any[] = leavesData?.data?.leaves || [];
+  const leaves = React.useMemo(
+    () =>
+      selectedStatus
+        ? allLeaves.filter((l: any) => l.status === selectedStatus)
+        : allLeaves,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [leavesData, selectedStatus]
+  );
 
   const handleRefresh = () => {
     refetch();
@@ -140,68 +155,45 @@ const LeavesPage: React.FC = () => {
         showLeaveRejectionSuccess(empName);
       }
 
-      // Optimistically update the cache without refetching
-      const updateLeaveInQuery = (queryKey: string) => {
-        queryClient.setQueryData(["leaves", queryKey], (oldData: any) => {
-          if (oldData?.data?.leaves) {
+      // Flip the row instantly; the invalidation below reconciles with the
+      // server. One list now backs every tab, so this is a single patch.
+      queryClient.setQueryData(["leaves"], (oldData: any) => {
+        if (!oldData?.data?.leaves) return oldData;
+        return {
+          ...oldData,
+          data: {
+            ...oldData.data,
+            leaves: oldData.data.leaves.map((leave: any) =>
+              leave._id === id
+                ? { ...leave, status: newStatus, reviewComments }
+                : leave
+            ),
+          },
+        };
+      });
+
+      // Patch the employee's own activity list. That query is keyed by employee
+      // alone now, so this is one write rather than a guess across four status
+      // variants and a hardcoded year - none of which matched a real key.
+      const updateEmployeeLeaveQueries = (employeeId: string) => {
+        queryClient.setQueryData(
+          ["employee-leave-requests", employeeId],
+          (oldData: any) => {
+            if (!oldData?.data?.leaves) return oldData;
             return {
               ...oldData,
               data: {
                 ...oldData.data,
                 leaves: oldData.data.leaves.map((leave: any) =>
                   leave._id === id
-                    ? {
-                        ...leave,
-                        status: newStatus,
-                        reviewComments: reviewComments,
-                      }
+                    ? { ...leave, status: newStatus, reviewComments }
                     : leave
                 ),
               },
             };
           }
-          return oldData;
-        });
+        );
       };
-
-      // Update employee-specific queries
-      const updateEmployeeLeaveQueries = (employeeId: string) => {
-        const currentYear = new Date().getFullYear();
-
-        // Update all employee status queries
-        ["", "pending", "approved", "rejected"].forEach((status) => {
-          queryClient.setQueryData(
-            ["employee-leave-requests", employeeId, status, currentYear],
-            (oldData: any) => {
-              if (oldData?.data?.leaves) {
-                return {
-                  ...oldData,
-                  data: {
-                    ...oldData.data,
-                    leaves: oldData.data.leaves.map((leave: any) =>
-                      leave._id === id
-                        ? {
-                            ...leave,
-                            status: newStatus,
-                            reviewComments: reviewComments,
-                          }
-                        : leave
-                    ),
-                  },
-                };
-              }
-              return oldData;
-            }
-          );
-        });
-      };
-
-      // Update all admin view queries
-      updateLeaveInQuery(selectedStatus);
-      updateLeaveInQuery("");
-      updateLeaveInQuery("pending");
-      updateLeaveInQuery("approved");
-      updateLeaveInQuery("rejected");
 
       // If we have employee ID from the updated leave, update their queries too
       if (
@@ -314,11 +306,10 @@ const LeavesPage: React.FC = () => {
     setPopupContent({ title: "", content: "", type: "" });
   };
 
+  // Only the very first load reaches this now - tab switches never refetch.
   if (isLoading) {
     return <LogoLoader label="Loading leave requests..." />;
   }
-
-  const leaves = leavesData?.data?.leaves || [];
 
   return (
     <div className="space-y-6 fade-in">
@@ -344,10 +335,10 @@ const LeavesPage: React.FC = () => {
         <div className="flex space-x-3">
           <button
             onClick={handleRefresh}
-            disabled={isLoading}
+            disabled={isFetching}
             className="btn-secondary inline-flex items-center"
           >
-            {isLoading ? (
+            {isFetching ? (
               <ArrowPathIcon className="h-5 w-5 mr-2 animate-spin" />
             ) : (
               <ArrowPathIcon className="h-5 w-5 mr-2" />
@@ -396,10 +387,11 @@ const LeavesPage: React.FC = () => {
           filters and empty state. */}
       <MobileLeaveList
         leaves={leaves}
+        allLeaves={allLeaves}
         selectedStatus={selectedStatus}
         onSelectStatus={setSelectedStatus}
         onRefresh={handleRefresh}
-        isRefreshing={isLoading}
+        isRefreshing={isFetching}
         onOpen={(leave) => setDetailLeave(leave)}
       />
 

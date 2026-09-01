@@ -9,10 +9,14 @@
 import {
   DEFAULT_TEMPLATES,
   BLANK_TEMPLATE,
+  BUILTIN_REVISION,
   PLACEHOLDERS,
 } from "./constants";
+import { companyAddressLine } from "./letterhead";
 import type {
+  BrandSettings,
   BrandingAsset,
+  CompanyProfile,
   DocumentTemplate,
   PageSettings,
   StudioDocument,
@@ -28,9 +32,46 @@ export const DEFAULT_PAGE: PageSettings = {
   fontSize: 12,
   lineHeight: 1.6,
   showLetterhead: true,
+  showFooter: true,
   showWatermark: false,
   showPageNumbers: false,
   showBackground: true,
+};
+
+/**
+ * An empty company card. HR fills this in once from Branding & Letterhead and
+ * every document issued afterwards carries it.
+ */
+export const DEFAULT_COMPANY: CompanyProfile = {
+  name: "",
+  legalName: "",
+  tagline: "",
+  addressLine1: "",
+  addressLine2: "",
+  city: "",
+  state: "",
+  postalCode: "",
+  country: "",
+  email: "",
+  phone: "",
+  website: "",
+  registrationNo: "",
+  taxId: "",
+  signatoryName: "",
+  signatoryDesignation: "Head of Human Resources",
+  referencePrefix: "HR",
+  footerNote: "",
+};
+
+export const DEFAULT_BRAND: BrandSettings = {
+  accent: "#2563eb",
+  letterhead: "classic",
+  footer: "line",
+  headingFont: "'Geist', ui-sans-serif, system-ui, sans-serif",
+  showLogo: true,
+  showTagline: true,
+  showRegistration: false,
+  showReference: true,
 };
 
 /** Small id helper - stable, dependency-free. */
@@ -46,8 +87,47 @@ function seed(): StudioState {
     templates: DEFAULT_TEMPLATES.map((t) => ({ ...t })),
     documents: [],
     assets: [],
+    company: { ...DEFAULT_COMPANY },
+    brand: { ...DEFAULT_BRAND },
     page: { ...DEFAULT_PAGE },
   };
+}
+
+/**
+ * Bring stored templates up to the shipped revision.
+ *
+ * System templates are never edited in place by the UI - editing one and
+ * saving produces a new custom template - so refreshing their markup is safe.
+ * The name and usage counter are the user's, and are kept.
+ */
+function reconcileTemplates(
+  stored: DocumentTemplate[] | undefined
+): DocumentTemplate[] {
+  const list = stored ?? [];
+  const builtIns = new Map(DEFAULT_TEMPLATES.map((t) => [t.id, t]));
+  const merged = list.map((tpl) => {
+    const builtIn = builtIns.get(tpl.id);
+    if (!builtIn || !tpl.system) {
+      // Custom templates keep their markup; only fill in fields added later.
+      return { ...tpl, variant: tpl.variant ?? "letter" };
+    }
+    if (tpl.revision === builtIn.revision) return tpl;
+    return {
+      ...builtIn,
+      name: tpl.name,
+      usageCount: tpl.usageCount ?? builtIn.usageCount,
+      archived: tpl.archived,
+      createdAt: tpl.createdAt ?? builtIn.createdAt,
+      updatedAt: isoNow(),
+    };
+  });
+  const existing = new Set(merged.map((t) => t.id));
+  return [
+    ...merged,
+    ...DEFAULT_TEMPLATES.filter((t) => !existing.has(t.id)).map((t) => ({
+      ...t,
+    })),
+  ];
 }
 
 /** Load the full studio state, seeding built-ins on first ever run. */
@@ -60,16 +140,12 @@ export function loadState(): StudioState {
       return fresh;
     }
     const parsed = JSON.parse(raw) as Partial<StudioState>;
-    // Merge in any newly-shipped built-in templates the user hasn't seen yet.
-    const existingIds = new Set((parsed.templates ?? []).map((t) => t.id));
-    const mergedTemplates = [
-      ...(parsed.templates ?? []),
-      ...DEFAULT_TEMPLATES.filter((t) => !existingIds.has(t.id)),
-    ];
     return {
-      templates: mergedTemplates,
+      templates: reconcileTemplates(parsed.templates),
       documents: parsed.documents ?? [],
       assets: parsed.assets ?? [],
+      company: { ...DEFAULT_COMPANY, ...(parsed.company ?? {}) },
+      brand: { ...DEFAULT_BRAND, ...(parsed.brand ?? {}) },
       page: { ...DEFAULT_PAGE, ...(parsed.page ?? {}) },
     };
   } catch {
@@ -98,8 +174,11 @@ export function createTemplate(
     description: "",
     category: "Custom",
     icon: "blank",
+    variant: "letter",
+    refCode: "DOC",
     content: BLANK_TEMPLATE.content,
     system: false,
+    revision: BUILTIN_REVISION,
     usageCount: 0,
     createdAt: ts,
     updatedAt: ts,
@@ -132,6 +211,8 @@ export function createDocument(partial: {
   content: string;
   subject: DocumentSubject | null;
   createdBy: string;
+  variant?: StudioDocument["variant"];
+  referenceNo?: string;
   status?: StudioDocument["status"];
 }): StudioDocument {
   const ts = isoNow();
@@ -142,6 +223,28 @@ export function createDocument(partial: {
     updatedAt: ts,
     ...partial,
   };
+}
+
+/**
+ * Mint the next reference number, in the shape PREFIX/CODE/YEAR/0001.
+ *
+ * The sequence counts documents issued in the current year, which is stable
+ * for a single HR team and moves to a server-side counter the day this service
+ * talks to an API.
+ */
+export function nextReferenceNumber(
+  company: CompanyProfile,
+  refCode: string | undefined,
+  documents: StudioDocument[]
+): string {
+  const year = new Date().getFullYear();
+  const issuedThisYear = documents.filter(
+    (d) => new Date(d.createdAt).getFullYear() === year
+  ).length;
+  const seq = String(issuedThisYear + 1).padStart(4, "0");
+  return [company.referencePrefix || "HR", refCode || "DOC", year, seq]
+    .filter(Boolean)
+    .join("/");
 }
 
 /* ------------------------------------------------------------------ */
@@ -170,13 +273,18 @@ export function createAsset(partial: {
 /** Source values used to resolve {{tokens}} at generation time. */
 export interface ResolutionContext {
   subject?: DocumentSubject | null;
+  /** The stored company card - fills every {{Company ...}} token. */
+  company?: CompanyProfile;
+  /** Reference number minted for this document. */
+  referenceNo?: string;
+  /** Values collected from the template's own fields, keyed by placeholder. */
+  overrides?: Record<string, string>;
+  /** Direct scalars, used when no company card is available. */
   companyName?: string;
   companyAddress?: string;
   managerName?: string;
   salary?: string;
   phone?: string;
-  /** Overrides keyed by placeholder key, win over everything else. */
-  overrides?: Record<string, string>;
 }
 
 const fmtDate = (iso?: string) => {
@@ -190,11 +298,15 @@ const fmtDate = (iso?: string) => {
   });
 };
 
-/** Build the token → value map for a given context. */
+/** Format an ISO date, passing through anything that is not one. */
+export const formatDocumentDate = fmtDate;
+
+/** Build the token -> value map for a given context. */
 export function buildResolutionMap(
   ctx: ResolutionContext
 ): Record<string, string> {
   const s = ctx.subject ?? undefined;
+  const c = ctx.company;
   const today = fmtDate(isoNow());
   const map: Record<string, string> = {
     "Employee Name": s?.name ?? "",
@@ -205,13 +317,25 @@ export function buildResolutionMap(
     Phone: ctx.phone ?? "",
     Salary: ctx.salary ?? "",
     "Manager Name": ctx.managerName ?? "",
-    "Company Name": ctx.companyName ?? "",
-    Address: ctx.companyAddress ?? "",
-    "Joining Date": "", // filled by override/subject below if available
+    "Company Name": c?.name || ctx.companyName || "",
+    "Company Address": c ? companyAddressLine(c) : ctx.companyAddress ?? "",
+    "Company Email": c?.email ?? "",
+    "Company Phone": c?.phone ?? "",
+    "Company Website": c?.website ?? "",
+    "Signatory Name": c?.signatoryName ?? "",
+    "Signatory Designation": c?.signatoryDesignation ?? "",
+    // Retained so documents authored against the older catalogue keep resolving.
+    Address: c ? companyAddressLine(c) : ctx.companyAddress ?? "",
+    "Reference No": ctx.referenceNo ?? "",
+    "Joining Date": "",
     "Issue Date": today,
     "Current Date": today,
   };
-  if (ctx.overrides) Object.assign(map, ctx.overrides);
+  if (ctx.overrides) {
+    Object.entries(ctx.overrides).forEach(([key, value]) => {
+      if (value !== undefined && value !== "") map[key] = value;
+    });
+  }
   return map;
 }
 

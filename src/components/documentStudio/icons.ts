@@ -2,7 +2,10 @@ import type { ComponentType, SVGProps } from "react";
 import {
   AcademicCapIcon,
   ArrowTrendingUpIcon,
+  ArrowRightCircleIcon,
+  ArrowLeftOnRectangleIcon,
   BanknotesIcon,
+  BellAlertIcon,
   BriefcaseIcon,
   BuildingLibraryIcon,
   BuildingOffice2Icon,
@@ -23,6 +26,8 @@ import {
   PencilSquareIcon,
   PhoneIcon,
   PhotoIcon,
+  GlobeAltIcon,
+  HashtagIcon,
   SparklesIcon,
   TrophyIcon,
   UserCircleIcon,
@@ -54,6 +59,9 @@ const ICONS: Record<string, IconComponent> = {
   visa: IdentificationIcon,
   award: TrophyIcon,
   verification: MagnifyingGlassIcon,
+  transfer: ArrowRightCircleIcon,
+  relieving: ArrowLeftOnRectangleIcon,
+  notice: BellAlertIcon,
   blank: SparklesIcon,
 
   // Placeholder icons
@@ -68,6 +76,9 @@ const ICONS: Record<string, IconComponent> = {
   phone: PhoneIcon,
   company: BuildingLibraryIcon,
   address: MapPinIcon,
+  website: GlobeAltIcon,
+  signature: PencilSquareIcon,
+  reference: HashtagIcon,
   issueDate: CalendarDaysIcon,
   currentDate: ClockIcon,
 

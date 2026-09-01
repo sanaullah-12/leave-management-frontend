@@ -9,6 +9,7 @@
 
 export type TemplateCategory =
   | "Onboarding"
+  | "Employment"
   | "Compensation"
   | "Recognition"
   | "Disciplinary"
@@ -18,18 +19,50 @@ export type TemplateCategory =
   | "Certificate"
   | "Custom";
 
+/**
+ * The four document shapes the studio knows how to lay out. The variant drives
+ * typography, the title treatment and the decorative frame - it is the reason
+ * a certificate does not look like a disciplinary notice while both still read
+ * as the same company's stationery.
+ */
+export type TemplateVariant = "letter" | "certificate" | "notice" | "memo";
+
+/** Letterhead compositions available to the company branding. */
+export type LetterheadLayout = "classic" | "modern" | "minimal" | "banner";
+
+/** Footer strip compositions available to the company branding. */
+export type FooterLayout = "none" | "line" | "columns" | "bar";
+
 /** A field that is resolved from employee/company data at generation time. */
 export interface PlaceholderDef {
-  /** The token used inside the document, e.g. "Employee Name" → {{Employee Name}} */
+  /** The token used inside the document, e.g. "Employee Name" -> {{Employee Name}} */
   key: string;
   /** Human label shown in the placeholder palette. */
   label: string;
   /** Grouping in the palette. */
-  group: "Employee" | "Company" | "Date" | "Custom";
+  group: "Employee" | "Company" | "Document" | "Date" | "Custom";
   /** Short helper describing what it resolves to. */
   hint?: string;
   /** Key into the studio icon registry (see `icons.ts`). */
   glyph: string;
+}
+
+/**
+ * An extra merge field a template needs that no employee record can supply -
+ * a revised salary, an incident date, a transfer location. Declaring it on the
+ * template is what makes the generation form build itself: adding a new
+ * template never means touching the generate modal.
+ */
+export interface TemplateField {
+  /** Placeholder key this field fills, e.g. "Effective Date". */
+  key: string;
+  label: string;
+  type: "text" | "date" | "number" | "textarea";
+  placeholder?: string;
+  /** Pre-fill from the selected employee record where one exists. */
+  source?: "salary" | "joinDate" | "designation" | "department";
+  /** Rendered full-width in the generation form. */
+  wide?: boolean;
 }
 
 /** A reusable document blueprint. */
@@ -40,10 +73,22 @@ export interface DocumentTemplate {
   category: TemplateCategory;
   /** Key into the studio icon registry (see `icons.ts`). */
   icon: string;
+  /** Layout family used for the page frame and typography. */
+  variant: TemplateVariant;
   /** HTML body of the template (contentEditable-ready). Contains {{placeholders}}. */
   content: string;
+  /** Extra merge fields the generation form should collect. */
+  fields?: TemplateField[];
+  /** Short code used when a reference number is minted, e.g. "OFR". */
+  refCode?: string;
   /** Whether this is a built-in system template (cannot be deleted, only duplicated). */
   system: boolean;
+  /**
+   * Bumped whenever a built-in's markup is reworked. Stored copies with an
+   * older revision are refreshed on load so shipped improvements reach HR
+   * teams that already have studio state.
+   */
+  revision?: number;
   archived?: boolean;
   createdAt: string;
   updatedAt: string;
@@ -71,6 +116,10 @@ export interface StudioDocument {
   subject: DocumentSubject | null;
   /** Rendered HTML with placeholders already resolved (for generated docs). */
   content: string;
+  /** Layout family the document was composed with. */
+  variant?: TemplateVariant;
+  /** Reference number minted at generation time. */
+  referenceNo?: string;
   status: DocumentStatus;
   createdBy: string;
   createdAt: string;
@@ -103,6 +152,49 @@ export interface BrandingAsset {
   enabled: boolean;
 }
 
+/**
+ * The company's own details. Captured once by HR/Admin and merged into every
+ * letterhead, footer and {{Company ...}} placeholder from then on.
+ */
+export interface CompanyProfile {
+  name: string;
+  legalName: string;
+  tagline: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  email: string;
+  phone: string;
+  website: string;
+  registrationNo: string;
+  taxId: string;
+  /** Who signs off documents by default. */
+  signatoryName: string;
+  signatoryDesignation: string;
+  /** Reference numbers are minted as PREFIX/CODE/YEAR/0001. */
+  referencePrefix: string;
+  /** Small print rendered under the footer rule. */
+  footerNote: string;
+}
+
+/** How the company's stationery is drawn. Applies to every document. */
+export interface BrandSettings {
+  /** Hex colour used for rules, titles and accents on the page. */
+  accent: string;
+  letterhead: LetterheadLayout;
+  footer: FooterLayout;
+  /** Heading font stack for document titles. */
+  headingFont: string;
+  showLogo: boolean;
+  showTagline: boolean;
+  showRegistration: boolean;
+  /** Print the reference number / date meta row above the title. */
+  showReference: boolean;
+}
+
 /** Page-level presentation settings for the canvas. */
 export interface PageSettings {
   margin: number; // mm
@@ -110,6 +202,7 @@ export interface PageSettings {
   fontSize: number; // pt
   lineHeight: number;
   showLetterhead: boolean;
+  showFooter: boolean;
   showWatermark: boolean;
   showPageNumbers: boolean;
   /** Render an uploaded full-page design behind the text. */
@@ -120,6 +213,8 @@ export interface StudioState {
   templates: DocumentTemplate[];
   documents: StudioDocument[];
   assets: BrandingAsset[];
+  company: CompanyProfile;
+  brand: BrandSettings;
   page: PageSettings;
 }
 

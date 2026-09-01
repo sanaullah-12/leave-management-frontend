@@ -27,6 +27,7 @@ export function useSocket() {
   const qc = useQueryClient();
   const dispatch = useAppDispatch();
   const boundRef = useRef(false);
+  const hadConnectedRef = useRef(false);
 
   useEffect(() => {
     // Not signed in → make sure the socket is closed.
@@ -51,8 +52,27 @@ export function useSocket() {
       keys.forEach((queryKey) => qc.invalidateQueries({ queryKey }));
     };
 
+    // Every query kept fresh by a realtime event. Events emitted while we were
+    // offline are gone for good, so a reconnect refetches the whole set rather
+    // than trusting a cache that silently drifted.
+    const REALTIME_KEYS: unknown[][] = [
+      NOTIF_KEY as unknown as unknown[],
+      VOICES_KEY as unknown as unknown[],
+      VOICE_STATS_KEY as unknown as unknown[],
+      ["recent-leaves"],
+      ["leaves"],
+      ["leave-balance"],
+      ["announcements"],
+      ["attendance"],
+      ["dashboard-stats"],
+    ];
+
     // -- Connection lifecycle ----------------------------------------------
-    const onConnect = () => dispatch(setConnected(true));
+    const onConnect = () => {
+      dispatch(setConnected(true));
+      if (hadConnectedRef.current) invalidate(REALTIME_KEYS);
+      hadConnectedRef.current = true;
+    };
     const onDisconnect = () => dispatch(setConnected(false));
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
@@ -107,9 +127,22 @@ export function useSocket() {
     socket.on(SOCKET_EVENTS.ATTENDANCE_UPDATE, () =>
       invalidate([["attendance"], ["dashboard-stats"]])
     );
-    socket.on(SOCKET_EVENTS.STATS_UPDATE, () =>
-      invalidate([["dashboard-stats"], ["recent-leaves"], ["leave-balance"]])
-    );
+    socket.on(SOCKET_EVENTS.STATS_UPDATE, (p: { scope?: string }) => {
+      const keys: unknown[][] = [
+        ["dashboard-stats"],
+        ["recent-leaves"],
+        ["leave-balance"],
+      ];
+      // The Employee Voice counters live under their own keys, so a "voice"
+      // scope has to name them explicitly or the stat chips stay stale.
+      if (p?.scope === "voice") {
+        keys.push(
+          VOICES_KEY as unknown as unknown[],
+          VOICE_STATS_KEY as unknown as unknown[]
+        );
+      }
+      invalidate(keys);
+    });
 
     // -- Cleanup: remove only our listeners (keep the socket for reuse) -----
     return () => {

@@ -15,6 +15,7 @@ import {
   FaceSmileIcon,
 } from "@heroicons/react/24/outline";
 import { useAuth } from "../context/AuthContext";
+import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { announcementsAPI } from "../services/api";
 import {
   categoryIcon,
@@ -462,16 +463,21 @@ const AnnouncementsPage: React.FC = () => {
   const [editing, setEditing] = useState<Announcement | null>(null);
   const [confirmDel, setConfirmDel] = useState<Announcement | null>(null);
 
+  // The input stays bound to `search` so typing is instant; only the query key
+  // trails it. Keying directly off `search` fired one request per keystroke.
+  const debouncedSearch = useDebouncedValue(search.trim(), 300);
+
   const { data, isLoading } = useQuery({
-    queryKey: ["announcements", category, search],
+    queryKey: ["announcements", category, debouncedSearch],
     queryFn: async () => {
       const res = await announcementsAPI.getAnnouncements({
         category: category === "all" ? undefined : category,
-        search: search.trim() || undefined,
+        search: debouncedSearch || undefined,
       });
       return res.data as { announcements: Announcement[]; pagination: any };
     },
     staleTime: 30 * 1000,
+    placeholderData: (prev) => prev,
   });
 
   const items = data?.announcements ?? [];

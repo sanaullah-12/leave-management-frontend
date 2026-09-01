@@ -39,10 +39,14 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
   const [selectedStatus, setSelectedStatus] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
 
-  // Fetch employee's leave requests - no automatic polling to prevent rate limiting
+  // One unfiltered fetch per employee backs every status tab and year. Status
+  // and year are both applied client-side in `filteredRequests` below, so
+  // keying the query by them only bought a refetch and a skeleton per click -
+  // and in the year's case a refetch of byte-identical data, since the request
+  // never sent the year at all.
   const { data: leaveRequestsData, isLoading } = useQuery({
-    queryKey: ['employee-leave-requests', employeeId, selectedStatus, selectedYear],
-    queryFn: () => leavesAPI.getLeaves(1, 100, selectedStatus, employeeId),
+    queryKey: ['employee-leave-requests', employeeId],
+    queryFn: () => leavesAPI.getLeaves(1, 100, undefined, employeeId),
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchInterval: false, // Disabled to prevent rate limiting
     refetchIntervalInBackground: false,
@@ -138,7 +142,10 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
     // First filter out unwanted leave types (maternity, paternity)
     const isAllowedLeaveType = allowedLeaveTypes.includes(leave.leaveType.toLowerCase());
     if (!isAllowedLeaveType) return false;
-    
+
+    // Status tab. The server no longer filters this, so it is applied here.
+    if (selectedStatus && leave.status !== selectedStatus) return false;
+
     // If date filter is provided (for reports), use custom date range
     if (dateFilter && (dateFilter.dateFrom || dateFilter.dateTo)) {
       const leaveStartDate = new Date(leave.startDate);

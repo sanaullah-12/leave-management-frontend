@@ -21,7 +21,22 @@ import {
   Bars3BottomRightIcon,
 } from "@heroicons/react/24/outline";
 import RichTextToolbar, { type EditorCommands } from "./RichTextToolbar";
-import type { BrandingAsset, PageSettings } from "./types";
+import { documentCss } from "./documentStyles";
+import {
+  assetFor,
+  renderFooter,
+  renderFrame,
+  renderLetterhead,
+  renderWatermark,
+  signaturePreviewCss,
+} from "./letterhead";
+import type {
+  BrandSettings,
+  BrandingAsset,
+  CompanyProfile,
+  PageSettings,
+  TemplateVariant,
+} from "./types";
 
 export interface CanvasHandle {
   /** Insert a {{Token}} at the current caret. */
@@ -36,19 +51,33 @@ interface Props {
   initialHtml: string;
   page: PageSettings;
   assets: BrandingAsset[];
+  company: CompanyProfile;
+  brand: BrandSettings;
+  /** Layout family - drives the page frame and typography. */
+  variant: TemplateVariant;
   editable: boolean;
   onChange: (html: string) => void;
 }
-
-const assetFor = (assets: BrandingAsset[], slot: BrandingAsset["slot"]) =>
-  assets.find((a) => a.slot === slot && a.enabled);
 
 /**
  * The centrepiece - a live, zoomable A4 canvas with a contentEditable body and
  * WYSIWYG letterhead/watermark preview that matches the export pipeline 1:1.
  */
 const DocumentCanvas = forwardRef<CanvasHandle, Props>(
-  ({ docKey, initialHtml, page, assets, editable, onChange }, ref) => {
+  (
+    {
+      docKey,
+      initialHtml,
+      page,
+      assets,
+      company,
+      brand,
+      variant,
+      editable,
+      onChange,
+    },
+    ref
+  ) => {
     const bodyRef = useRef<HTMLDivElement>(null);
     const [zoom, setZoom] = useState(1);
     const [selVersion, setSelVersion] = useState(0);
@@ -288,13 +317,27 @@ const DocumentCanvas = forwardRef<CanvasHandle, Props>(
       sync();
     };
 
-    const header = page.showLetterhead ? assetFor(assets, "header") : undefined;
-    const logo = page.showLetterhead ? assetFor(assets, "logo") : undefined;
-    const footer = page.showLetterhead ? assetFor(assets, "footer") : undefined;
-    const signature = assetFor(assets, "signature");
-    const watermark = page.showWatermark
-      ? assetFor(assets, "watermark")
-      : undefined;
+    // The stationery, the stylesheet and the frame all come from the same
+    // modules the export pipeline uses, so the canvas is a true preview.
+    const stationery = { company, brand, assets, page };
+    const pageCss = useMemo(
+      () =>
+        `${documentCss({ page, brand })}
+${signaturePreviewCss(
+          assetFor(assets, "signature")
+        )}`,
+      [page, brand, assets]
+    );
+    const letterheadHtml = useMemo(
+      () => renderLetterhead(stationery),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [company, brand, assets, page.showLetterhead]
+    );
+    const footerHtml = useMemo(
+      () => renderFooter(stationery),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [company, brand, assets, page.showFooter]
+    );
     const background = page.showBackground
       ? assetFor(assets, "background")
       : undefined;
@@ -424,14 +467,11 @@ const DocumentCanvas = forwardRef<CanvasHandle, Props>(
               <div
                 onDrop={onDrop}
                 onDragOver={(e) => e.preventDefault()}
-                className="ds-page relative bg-white text-gray-900 shadow-[0_10px_40px_rgba(0,0,0,0.14)] ring-1 ring-black/5"
+                className={`ds-page ds-doc ds-doc--${variant} relative flex flex-col bg-white shadow-[0_10px_40px_rgba(0,0,0,0.14)] ring-1 ring-black/5`}
                 style={{
                   width: "210mm",
                   minHeight: "297mm",
                   padding: `${page.margin}mm`,
-                  fontFamily: page.fontFamily,
-                  fontSize: `${page.fontSize}pt`,
-                  lineHeight: page.lineHeight,
                   ...(background
                     ? {
                         backgroundImage: `url(${background.dataUrl})`,
@@ -442,50 +482,27 @@ const DocumentCanvas = forwardRef<CanvasHandle, Props>(
                     : {}),
                 }}
               >
-                {/* Watermark */}
-                {watermark && (
-                  <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center">
-                    <img
-                      src={watermark.dataUrl}
-                      alt=""
-                      style={{
-                        maxWidth: "60%",
-                        opacity: watermark.opacity / 100,
-                        transform: `scale(${watermark.scale / 100})`,
-                      }}
-                    />
-                  </div>
-                )}
+                {/* The printed stylesheet, scoped to .ds-doc */}
+                <style>{pageCss}</style>
 
-                <div className="relative z-10">
-                  {/* Header / logo */}
-                  {header ? (
-                    <div className="mb-4 text-center">
-                      <img
-                        src={header.dataUrl}
-                        alt="Letterhead"
-                        style={{
-                          maxWidth: "100%",
-                          transform: `scale(${header.scale / 100})`,
-                          transformOrigin: "top center",
-                        }}
-                      />
-                    </div>
-                  ) : logo ? (
-                    <div className="mb-4">
-                      <img
-                        src={logo.dataUrl}
-                        alt="Logo"
-                        style={{
-                          maxHeight: 64,
-                          transform: `scale(${logo.scale / 100})`,
-                          transformOrigin: "top left",
-                        }}
-                      />
-                    </div>
-                  ) : null}
+                {/* Watermark and certificate frame */}
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: `${renderWatermark({ assets, page })}${renderFrame(
+                      variant,
+                      brand
+                    )}`,
+                  }}
+                />
 
-                  {/* Editable body */}
+                {/* Company letterhead */}
+                <div
+                  className="relative z-10"
+                  dangerouslySetInnerHTML={{ __html: letterheadHtml }}
+                />
+
+                {/* Editable body */}
+                <div className="relative z-10 flex-1">
                   <div
                     ref={bodyRef}
                     className="ds-editable outline-none"
@@ -533,37 +550,13 @@ const DocumentCanvas = forwardRef<CanvasHandle, Props>(
                       ))}
                     </div>
                   )}
-
-                  {/* Signature */}
-                  {signature && (
-                    <div className="mt-5">
-                      <img
-                        src={signature.dataUrl}
-                        alt="Signature"
-                        style={{
-                          maxHeight: 80,
-                          transform: `scale(${signature.scale / 100})`,
-                          transformOrigin: "top left",
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  {/* Footer */}
-                  {footer && (
-                    <div className="mt-6 text-center">
-                      <img
-                        src={footer.dataUrl}
-                        alt="Footer"
-                        style={{
-                          maxWidth: "100%",
-                          transform: `scale(${footer.scale / 100})`,
-                          transformOrigin: "bottom center",
-                        }}
-                      />
-                    </div>
-                  )}
                 </div>
+
+                {/* Company footer */}
+                <div
+                  className="relative z-10 mt-4"
+                  dangerouslySetInnerHTML={{ __html: footerHtml }}
+                />
               </div>
             </div>
           </div>
@@ -599,7 +592,7 @@ const DocumentCanvas = forwardRef<CanvasHandle, Props>(
           </div>
 
           <div className="text-[11px] font-medium text-gray-400 dark:text-gray-500">
-            A4 · 210 × 297 mm
+            A4 - 210 x 297 mm
           </div>
 
           {editable && (
