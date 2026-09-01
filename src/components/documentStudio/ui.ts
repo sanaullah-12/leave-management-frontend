@@ -42,6 +42,11 @@ export const TINT: Record<
     ring: "ring-violet-200/60 dark:ring-violet-500/20",
     icon: "bg-violet-500",
   },
+  teal: {
+    chip: "bg-teal-50 text-teal-700 dark:bg-teal-500/10 dark:text-teal-300",
+    ring: "ring-teal-200/60 dark:ring-teal-500/20",
+    icon: "bg-teal-500",
+  },
   cyan: {
     chip: "bg-cyan-50 text-cyan-700 dark:bg-cyan-500/10 dark:text-cyan-300",
     ring: "ring-cyan-200/60 dark:ring-cyan-500/20",

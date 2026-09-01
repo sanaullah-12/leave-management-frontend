@@ -80,14 +80,15 @@ const documents: KnowledgeModule = {
       module: "documents",
       question: "How do I add our letterhead or logo?",
       aliases: ["company branding on documents", "add signature to letters"],
-      keywords: ["letterhead", "logo", "branding", "signature", "stamp", "header"],
+      keywords: ["letterhead", "logo", "branding", "signature", "stamp", "header", "company details"],
       answer:
-        "Branding assets are uploaded once in the studio and applied to every document.",
+        "Company details and branding are entered once and applied to every document.",
       steps: [
-        "Open Documents → Document Studio and go to the letterhead manager.",
-        "Upload your header, footer, logo, signature or stamp.",
-        "Toggle the letterhead on in the page settings to see it behind the document.",
-        "It is included in the PDF export.",
+        "Open Documents → Document Studio and click Branding.",
+        "On the Company tab, fill in your name, address, contact details and default signatory.",
+        "On Logo & assets, upload your logo and signature (a designed letterhead banner is optional).",
+        "On Layout, pick the letterhead and footer style and the document accent colour.",
+        "Every new document picks this up automatically, including the PDF and print output.",
       ],
       actions: [
         { label: "Open Document Studio", to: "/document-studio", icon: "settings", roles: ["admin"] },

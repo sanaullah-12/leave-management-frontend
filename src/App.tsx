@@ -16,6 +16,7 @@ import RealtimeProvider from "./providers/RealtimeProvider";
 import "./styles/themes.css";
 import Layout from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
+import LogoLoader from "./components/LogoLoader";
 import PWAManager from "./components/pwa/PWAManager";
 
 /* ------------------------------------------------------------------ */
@@ -141,7 +142,7 @@ const App: React.FC = () => {
               {/* One boundary for the public routes. The authenticated routes
                   have their own boundary inside <Layout>, so the sidebar and
                   header stay painted while a page chunk downloads. */}
-              <React.Suspense fallback={null}>
+              <React.Suspense fallback={<LogoLoader fullScreen />}>
               <Routes>
                 <Route path="/landing" element={<LandingPage />} />
                 <Route path="/login" element={<LoginPage />} />

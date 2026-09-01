@@ -23,8 +23,11 @@ import { InitialsTile, employeeOf, toneFor, type LeaveRow } from "./leaveParts";
  */
 
 interface Props {
+  /** Rows to render - already filtered by `selectedStatus`. */
   leaves: LeaveRow[];
-  /** Server-side status filter currently applied ("" = all). */
+  /** Every request, unfiltered. The chip counts are derived from this. */
+  allLeaves: LeaveRow[];
+  /** Status filter currently applied ("" = all). */
   selectedStatus: string;
   onSelectStatus: (status: string) => void;
   onRefresh: () => void;
@@ -41,23 +44,22 @@ const EMPTY_COPY: Record<string, [string, string]> = {
 
 const MobileLeaveList: React.FC<Props> = ({
   leaves,
+  allLeaves,
   selectedStatus,
   onSelectStatus,
   onRefresh,
   isRefreshing,
   onOpen,
 }) => {
-  // Counts are only trustworthy when the server returned an unfiltered page.
-  // Under an active filter the list holds a single status, so the other chips
-  // would read zero - a badge there would be inventing a number.
+  // Derived from the unfiltered list, so every chip keeps a real number
+  // whatever tab is active.
   const counts = useMemo(() => {
-    if (selectedStatus !== "") return null;
-    const by: Record<string, number> = { "": leaves.length };
-    for (const l of leaves) by[l.status] = (by[l.status] || 0) + 1;
+    const by: Record<string, number> = { "": allLeaves.length };
+    for (const l of allLeaves) by[l.status] = (by[l.status] || 0) + 1;
     return by;
-  }, [leaves, selectedStatus]);
+  }, [allLeaves]);
 
-  const pendingCount = counts ? counts.pending || 0 : null;
+  const pendingCount = counts.pending || 0;
 
   const filters = [
     { key: "", label: "All" },
@@ -77,20 +79,18 @@ const MobileLeaveList: React.FC<Props> = ({
           <h2 className="text-[22px] font-extrabold leading-tight tracking-[-0.02em] text-gray-900 dark:text-white">
             Leave requests
           </h2>
-          {pendingCount !== null && (
-            <div className="mt-1.5 flex items-center gap-2 text-[13px] text-gray-500 dark:text-gray-400">
-              <span
-                className={`h-[7px] w-[7px] rounded-full ${
-                  pendingCount > 0
-                    ? "bg-amber-500 ring-4 ring-amber-500/15"
-                    : "bg-emerald-500 ring-4 ring-emerald-500/15"
-                }`}
-              />
-              {pendingCount > 0
-                ? `${pendingCount} waiting on you`
-                : "Nothing waiting on you"}
-            </div>
-          )}
+          <div className="mt-1.5 flex items-center gap-2 text-[13px] text-gray-500 dark:text-gray-400">
+            <span
+              className={`h-[7px] w-[7px] rounded-full ${
+                pendingCount > 0
+                  ? "bg-amber-500 ring-4 ring-amber-500/15"
+                  : "bg-emerald-500 ring-4 ring-emerald-500/15"
+              }`}
+            />
+            {pendingCount > 0
+              ? `${pendingCount} waiting on you`
+              : "Nothing waiting on you"}
+          </div>
         </div>
 
         <button
@@ -110,7 +110,7 @@ const MobileLeaveList: React.FC<Props> = ({
       <div className="-mx-3 mb-3.5 flex gap-2 overflow-x-auto px-3 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {filters.map((f) => {
           const active = selectedStatus === f.key;
-          const count = counts ? counts[f.key] ?? 0 : null;
+          const count = counts[f.key] ?? 0;
           return (
             <button
               key={f.key}
@@ -124,17 +124,15 @@ const MobileLeaveList: React.FC<Props> = ({
               style={active ? { backgroundColor: "var(--accent)" } : undefined}
             >
               {f.label}
-              {count !== null && (
-                <span
-                  className={`rounded-md px-1.5 py-px text-[11px] font-bold tabular-nums ${
-                    active
-                      ? "bg-black/20 text-white"
-                      : "bg-black/5 text-gray-400 dark:bg-white/10 dark:text-gray-500"
-                  }`}
-                >
-                  {count}
-                </span>
-              )}
+              <span
+                className={`rounded-md px-1.5 py-px text-[11px] font-bold tabular-nums ${
+                  active
+                    ? "bg-black/20 text-white"
+                    : "bg-black/5 text-gray-400 dark:bg-white/10 dark:text-gray-500"
+                }`}
+              >
+                {count}
+              </span>
             </button>
           );
         })}

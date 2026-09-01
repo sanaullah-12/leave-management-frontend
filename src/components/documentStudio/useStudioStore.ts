@@ -16,7 +16,9 @@ import {
   createAsset as makeAsset,
 } from "./studioService";
 import type {
+  BrandSettings,
   BrandingAsset,
+  CompanyProfile,
   DocumentTemplate,
   PageSettings,
   StudioDocument,
@@ -157,6 +159,15 @@ export function useStudioStore() {
     setState((s) => ({ ...s, assets: s.assets.filter((a) => a.id !== id) }));
   }, []);
 
+  /* ---------------- company & branding ---------------- */
+  const setCompany = useCallback((patch: Partial<CompanyProfile>) => {
+    setState((s) => ({ ...s, company: { ...s.company, ...patch } }));
+  }, []);
+
+  const setBrand = useCallback((patch: Partial<BrandSettings>) => {
+    setState((s) => ({ ...s, brand: { ...s.brand, ...patch } }));
+  }, []);
+
   /* ---------------- page settings ---------------- */
   const setPage = useCallback((patch: Partial<PageSettings>) => {
     setState((s) => ({ ...s, page: { ...s.page, ...patch } }));
@@ -200,6 +211,9 @@ export function useStudioStore() {
     addAsset,
     updateAsset,
     deleteAsset,
+    // company & branding
+    setCompany,
+    setBrand,
     // page
     setPage,
   };

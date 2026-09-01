@@ -1,97 +1,88 @@
 /**
  * Document Studio - output pipeline.
  *
- * Composes the final, standalone A4 HTML (letterhead + body + watermark) and
- * ships it to PDF / DOCX / the printer. All heavy libraries are imported
- * lazily so they never weigh down the initial Studio bundle.
+ * Composes the final, standalone A4 page (letterhead + body + footer) and
+ * ships it to PDF / DOCX / the printer. The page is assembled from the same
+ * stationery and stylesheet modules the canvas uses, so the export is not a
+ * second rendering of the document - it is the same one. All heavy libraries
+ * are imported lazily so they never weigh down the initial Studio bundle.
  */
-import type { BrandingAsset, PageSettings } from "./types";
+import { documentCss } from "./documentStyles";
+import {
+  assetFor,
+  injectSignature,
+  renderFooter,
+  renderFrame,
+  renderLetterhead,
+  renderWatermark,
+} from "./letterhead";
+import type {
+  BrandSettings,
+  BrandingAsset,
+  CompanyProfile,
+  PageSettings,
+  TemplateVariant,
+} from "./types";
 
-interface ComposeOptions {
+export interface ComposeOptions {
   title: string;
   bodyHtml: string;
   page: PageSettings;
   assets: BrandingAsset[];
+  company: CompanyProfile;
+  brand: BrandSettings;
+  variant?: TemplateVariant;
 }
 
-const assetFor = (assets: BrandingAsset[], slot: BrandingAsset["slot"]) =>
-  assets.find((a) => a.slot === slot && a.enabled);
+/**
+ * Build a fully self-contained HTML string sized to A4 (210 x 297mm) so it
+ * renders identically inside the app, a PDF, Word and the printer.
+ */
+export function composeDocumentHtml(opts: ComposeOptions): string {
+  return `<!DOCTYPE html>
+<html><head><meta charset="utf-8" /><title>${escapeAttr(opts.title)}</title>
+<style>
+  @page { size: A4; margin: 0; }
+  html, body { margin: 0; padding: 0; background: #ffffff; }
+  ${documentCss({ page: opts.page, brand: opts.brand })}
+</style></head>
+<body>${composePageMarkup(opts)}</body></html>`;
+}
 
 /**
- * Build a fully self-contained HTML string sized to A4 (210×297mm) with inline
- * styles so it renders identically inside the app, a PDF, Word and the printer.
+ * The page element on its own, without a document wrapper. The canvas mounts
+ * this markup directly, which is what keeps the editor and the export honest
+ * about looking the same.
  */
-export function composeDocumentHtml({
-  title,
+export function composePageMarkup({
   bodyHtml,
   page,
   assets,
+  company,
+  brand,
+  variant,
 }: ComposeOptions): string {
-  const header = page.showLetterhead ? assetFor(assets, "header") : undefined;
-  const footer = page.showLetterhead ? assetFor(assets, "footer") : undefined;
-  const logo = page.showLetterhead ? assetFor(assets, "logo") : undefined;
-  const watermark = page.showWatermark ? assetFor(assets, "watermark") : undefined;
   const background = page.showBackground ? assetFor(assets, "background") : undefined;
-  const signature = assetFor(assets, "signature");
+  const stationery = { company, brand, assets, page };
+  const body = injectSignature(bodyHtml, assetFor(assets, "signature"));
 
-  const watermarkLayer = watermark
-    ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:0;">
-         <img src="${watermark.dataUrl}" style="max-width:60%;opacity:${watermark.opacity / 100};transform:scale(${watermark.scale / 100});" />
-       </div>`
+  const backgroundStyle = background
+    ? `background-image:url(${background.dataUrl});background-size:cover;background-position:center;background-repeat:no-repeat;`
     : "";
 
-  const headerLayer = header
-    ? `<div style="margin-bottom:16px;text-align:center;"><img src="${header.dataUrl}" style="max-width:100%;transform:scale(${header.scale / 100});transform-origin:top center;" /></div>`
-    : logo
-    ? `<div style="margin-bottom:16px;"><img src="${logo.dataUrl}" style="max-height:64px;transform:scale(${logo.scale / 100});transform-origin:top left;" /></div>`
-    : "";
-
-  const footerLayer = footer
-    ? `<div style="margin-top:24px;text-align:center;"><img src="${footer.dataUrl}" style="max-width:100%;transform:scale(${footer.scale / 100});transform-origin:bottom center;" /></div>`
-    : "";
-
-  const signatureLayer = signature
-    ? `<div style="margin-top:20px;"><img src="${signature.dataUrl}" style="max-height:80px;transform:scale(${signature.scale / 100});transform-origin:top left;" /></div>`
-    : "";
-
-  return `<!DOCTYPE html>
-<html><head><meta charset="utf-8" /><title>${escapeAttr(title)}</title>
-<style>
-  @page { size: A4; margin: 0; }
-  * { box-sizing: border-box; }
-  body { margin: 0; }
-  .ds-page {
-    position: relative;
-    width: 210mm;
-    min-height: 297mm;
-    padding: ${page.margin}mm;
-    background: #ffffff;
-    ${background ? `background-image: url(${background.dataUrl}); background-size: cover; background-position: center; background-repeat: no-repeat;` : ""}
-    color: #111827;
-    font-family: ${page.fontFamily};
-    font-size: ${page.fontSize}pt;
-    line-height: ${page.lineHeight};
-  }
-  .ds-body { position: relative; z-index: 1; }
-  .ds-body h1 { font-size: ${page.fontSize + 8}pt; margin: 0 0 12px; }
-  .ds-body h2 { font-size: ${page.fontSize + 4}pt; margin: 18px 0 8px; }
-  .ds-body p { margin: 0 0 10px; }
-  .ds-body table { border-collapse: collapse; width: 100%; margin: 12px 0; }
-  .ds-body td, .ds-body th { border: 1px solid #d1d5db; padding: 6px 10px; }
-  .ds-body ul, .ds-body ol { margin: 0 0 10px 22px; }
-  .ds-body img { max-width: 100%; }
-</style></head>
-<body>
-  <div class="ds-page">
-    ${watermarkLayer}
-    <div class="ds-body">
-      ${headerLayer}
-      ${bodyHtml}
-      ${signatureLayer}
-      ${footerLayer}
-    </div>
-  </div>
-</body></html>`;
+  return `<div class="ds-page ds-doc ds-doc--${variant ?? "letter"}" style="position:relative;width:210mm;min-height:297mm;padding:${
+    page.margin
+  }mm;background:#ffffff;${backgroundStyle}display:flex;flex-direction:column;">
+  ${renderWatermark({ assets, page })}
+  ${renderFrame(variant, brand)}
+  <div class="ds-header" style="position:relative;z-index:1;">${renderLetterhead(
+    stationery
+  )}</div>
+  <div class="ds-body" style="position:relative;z-index:1;flex:1 1 auto;">${body}</div>
+  <div class="ds-footer" style="position:relative;z-index:1;margin-top:18px;">${renderFooter(
+    stationery
+  )}</div>
+</div>`;
 }
 
 function escapeAttr(v: string): string {
@@ -131,13 +122,12 @@ async function waitForImages(doc: Document): Promise<void> {
 /**
  * Render the exact A4 page (margins baked in) to a canvas, then place it into a
  * true A4 jsPDF - splitting across pages when the content is long. This yields
- * a download that matches the on-screen preview pixel-for-pixel, with no edge
- * clipping.
+ * a download that matches the on-screen preview, with no edge clipping.
  */
 export async function exportPdf(opts: ComposeOptions): Promise<void> {
   const html = composeDocumentHtml(opts);
 
-  // Render inside an isolated, correctly-sized iframe (A4 width @96dpi ≈ 794px).
+  // Render inside an isolated, correctly-sized iframe (A4 width at 96dpi).
   const iframe = document.createElement("iframe");
   iframe.style.cssText =
     "position:fixed;left:-10000px;top:0;width:820px;height:1200px;border:0;background:#fff;";
@@ -169,7 +159,7 @@ export async function exportPdf(opts: ComposeOptions): Promise<void> {
     const JsPDF = (jspdf as any).jsPDF || (jspdf as any).default;
 
     const canvas = await html2canvas(pageEl, {
-      scale: 2.5, // higher sampling → crisp text in the PDF
+      scale: 2.5, // higher sampling keeps text crisp in the PDF
       backgroundColor: "#ffffff",
       useCORS: true,
       logging: false,
@@ -184,7 +174,7 @@ export async function exportPdf(opts: ComposeOptions): Promise<void> {
     const pageH = 297;
     const imgW = pageW;
     const imgH = (canvas.height * pageW) / canvas.width;
-    const imgData = canvas.toDataURL("image/png"); // lossless → sharp text
+    const imgData = canvas.toDataURL("image/png"); // lossless, so text stays sharp
 
     let heightLeft = imgH;
     let position = 0;
@@ -195,6 +185,20 @@ export async function exportPdf(opts: ComposeOptions): Promise<void> {
       pdf.addPage();
       pdf.addImage(imgData, "PNG", 0, position, imgW, imgH, undefined, "FAST");
       heightLeft -= pageH;
+    }
+
+    // Page numbers are stamped by jsPDF rather than drawn in CSS: browsers do
+    // not expose paged-media counters to a captured canvas.
+    if (opts.page.showPageNumbers) {
+      const total = pdf.getNumberOfPages();
+      for (let i = 1; i <= total; i += 1) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(130, 130, 130);
+        pdf.text(`Page ${i} of ${total}`, pageW / 2, pageH - 8, {
+          align: "center",
+        });
+      }
     }
 
     pdf.save(`${slugifyFileName(opts.title)}.pdf`);

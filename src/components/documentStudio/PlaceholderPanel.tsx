@@ -3,17 +3,23 @@ import { motion } from "framer-motion";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { PLACEHOLDERS } from "./constants";
 import { studioIcon } from "./icons";
-import type { PlaceholderDef } from "./types";
+import type { PlaceholderDef, TemplateField } from "./types";
 
 interface Props {
   /** Insert the token at the caret (click). Drag is handled inline. */
   onInsert: (key: string) => void;
+  /**
+   * Extra fields declared by the loaded template. They appear as their own
+   * group so a template's own merge fields are one click away.
+   */
+  templateFields?: TemplateField[];
   disabled?: boolean;
 }
 
 const GROUP_ORDER: PlaceholderDef["group"][] = [
   "Employee",
   "Company",
+  "Document",
   "Date",
   "Custom",
 ];
@@ -22,19 +28,33 @@ const GROUP_ORDER: PlaceholderDef["group"][] = [
  * Draggable placeholder palette. Each chip can be dragged onto the canvas or
  * clicked to insert at the caret - HR never types a {{token}} by hand.
  */
-const PlaceholderPanel: React.FC<Props> = ({ onInsert, disabled }) => {
+const PlaceholderPanel: React.FC<Props> = ({
+  onInsert,
+  templateFields,
+  disabled,
+}) => {
   const [query, setQuery] = useState("");
 
   const grouped = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const items = PLACEHOLDERS.filter(
+    const known = new Set(PLACEHOLDERS.map((p) => p.key));
+    const fromTemplate: PlaceholderDef[] = (templateFields ?? [])
+      .filter((f) => !known.has(f.key))
+      .map((f) => ({
+        key: f.key,
+        label: f.label,
+        group: "Custom",
+        glyph: f.type === "date" ? "issueDate" : "reference",
+        hint: "Filled in when you generate",
+      }));
+    const items = [...PLACEHOLDERS, ...fromTemplate].filter(
       (p) => !q || p.label.toLowerCase().includes(q)
     );
     return GROUP_ORDER.map((g) => ({
-      group: g,
+      group: g === "Custom" ? "This document" : g,
       items: items.filter((p) => p.group === g),
     })).filter((x) => x.items.length);
-  }, [query]);
+  }, [query, templateFields]);
 
   return (
     <div className="flex h-full flex-col">

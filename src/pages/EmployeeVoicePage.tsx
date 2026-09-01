@@ -119,9 +119,10 @@ const EmployeeVoicePage: React.FC = () => {
   const [submitOpen, setSubmitOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const { data: voices = [], isLoading } = useVoices(
-    filter === "all" ? {} : { status: filter }
-  );
+  // One unfiltered fetch backs both the list and the tab counts. Filtering
+  // client-side keeps every badge accurate whatever tab is active, and avoids
+  // a refetch (and a skeleton flash) on every tab click.
+  const { data: voices = [], isLoading } = useVoices();
   const { data: stats } = useVoiceStats();
 
   // Deep-link support: /employee-voice?voice=<id> (from a notification click).
@@ -142,6 +143,12 @@ const EmployeeVoicePage: React.FC = () => {
     });
     return map;
   }, [voices]);
+
+  const visible = useMemo(
+    () =>
+      filter === "all" ? voices : voices.filter((v) => v.status === filter),
+    [voices, filter]
+  );
 
   return (
     <motion.div
@@ -176,10 +183,18 @@ const EmployeeVoicePage: React.FC = () => {
         </motion.button>
       </motion.div>
 
+      {/* Anything below here mounts only AFTER a query resolves, by which time
+          the page-level stagger has already finished. An inherited variant is
+          not replayed for a late child, so these blocks would sit at
+          staggerItem's initial state - opacity 0 - and render as blank space
+          holding real content. Each one drives its own initial/animate. */}
+
       {/* Admin stat chips */}
       {isAdmin && stats && (
         <motion.div
           variants={staggerItem}
+          initial="initial"
+          animate="animate"
           className="grid grid-cols-2 gap-4 lg:grid-cols-4"
         >
           <StatChip
@@ -254,9 +269,11 @@ const EmployeeVoicePage: React.FC = () => {
             />
           ))}
         </div>
-      ) : voices.length === 0 ? (
+      ) : visible.length === 0 ? (
         <motion.div
           variants={staggerItem}
+          initial="initial"
+          animate="animate"
           className="surface-card py-16 text-center"
         >
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl text-blue-500">
@@ -272,8 +289,13 @@ const EmployeeVoicePage: React.FC = () => {
           </p>
         </motion.div>
       ) : (
-        <motion.div variants={staggerContainer} className="space-y-3">
-          {voices.map((v) => (
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          className="space-y-3"
+        >
+          {visible.map((v) => (
             <VoiceCard key={v._id} voice={v} onOpen={() => setSelectedId(v._id)} />
           ))}
         </motion.div>

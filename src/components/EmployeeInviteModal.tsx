@@ -53,6 +53,65 @@ import {
   PHONE_PLACEHOLDER,
   phoneValidationRules,
 } from "../utils/phone";
+import {
+  showInviteSuccess,
+  showErrorToast,
+  showActionToast,
+} from "../utils/toastHelpers";
+
+/**
+ * Follow a queued invitation email to its outcome and tell the admin what
+ * actually happened. The invite response only confirms the employee record was
+ * saved and a job was queued; delivery succeeds or fails seconds later, and
+ * without this the UI reported "invited" either way.
+ */
+const reportInviteDelivery = async (
+  jobId: string,
+  name: string,
+  email: string
+) => {
+  const deadline = Date.now() + 20000;
+
+  while (Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, 1200));
+    try {
+      const { data } = await authAPI.getEmailJobStatus(jobId);
+      const job = data?.job;
+      if (!job) continue;
+
+      if (job.status === "completed") {
+        showInviteSuccess(name, email);
+        return;
+      }
+      if (job.status === "failed") {
+        const reason = job.diagnosis?.title || job.error || "Email delivery failed";
+        if (job.fallbackUrl) {
+          showActionToast(
+            `${name} was added, but the invitation email could not be sent (${reason}). Copy the invite link and send it to them directly`,
+            "link copied",
+            () => {},
+            { type: "warning", duration: 12000 }
+          );
+          navigator.clipboard?.writeText(job.fallbackUrl).catch(() => {});
+        } else {
+          showErrorToast(`${name} was added, but the invitation email failed: ${reason}`);
+        }
+        return;
+      }
+    } catch {
+      // Transient poll failure - keep trying until the deadline.
+    }
+  }
+
+  // Still queued when we stopped looking. Say exactly that rather than claiming
+  // it was delivered.
+  showActionToast(
+    `${name} was added. The invitation email to ${email} is still sending`,
+    "check back shortly",
+    () => {},
+    { type: "info", duration: 8000 }
+  );
+};
 
 type InviteEmployeeData = {
   name: string;
@@ -133,50 +192,20 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
       setTags([]);
       onClose();
 
-      // Check email delivery status from updated backend response
-      if (response.data.emailSent === false) {
-        console.warn(
-          "Employee invitation created but email failed:",
-          response.data.emailError
-        );
-        console.warn("Warning:", response.data.warning);
-        // addNotification({
-        //   type: "warning",
-        //   title: "Employee Added - Email Failed",
-        //   message: `Employee ${variables.name} added but invitation email failed: ${response.data.emailError}`,
-        // });
-      } else if (response.data.emailSent === true) {
-        console.log(
-          "Employee invitation email sent successfully to",
-          variables.email
-        );
-        console.log("Email Message ID:", response.data.emailMessageId);
-        // addNotification({
-        //   type: "success",
-        //   title: "Employee Invited Successfully",
-        //   message: `Invitation email sent to ${variables.email} successfully!`,
-        // });
+      // The employee record is saved, but the email is only QUEUED at this
+      // point - the response cannot know whether it was delivered. Follow the
+      // job to its outcome so a failed send is never reported as a success.
+      const jobId = response.data?.emailJobId;
+      if (jobId) {
+        reportInviteDelivery(jobId, variables.name, variables.email);
       } else {
-        // Fallback for any other response format
-        console.log("Employee invitation processed for", variables.email);
-        // addNotification({
-        //   type: "success",
-        //   title: "Employee Invited",
-        //   message: `Invitation processed for ${variables.email}.`,
-        // });
+        showInviteSuccess(variables.name, variables.email);
       }
     },
     onError: (error: any) => {
-      // addNotification({
-      //   type: "error",
-      //   title: "Invitation Failed",
-      //   message:
-      //     error?.response?.data?.message ||
-      //     "Failed to send employee invitation. Please try again.",
-      // });
-      console.error(
-        "Employee invitation failed:",
-        error?.response?.data?.message || error.message
+      showErrorToast(
+        error?.response?.data?.message ||
+          "Failed to invite employee. Please try again."
       );
     },
   });

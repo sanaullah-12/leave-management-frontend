@@ -66,6 +66,7 @@ const DocumentHistory: React.FC<Props> = ({
         (d) =>
           !q ||
           d.name.toLowerCase().includes(q) ||
+          d.referenceNo?.toLowerCase().includes(q) ||
           d.subject?.name?.toLowerCase().includes(q) ||
           d.subject?.department?.toLowerCase().includes(q) ||
           d.templateName.toLowerCase().includes(q) ||
@@ -161,6 +162,11 @@ const DocumentHistory: React.FC<Props> = ({
                       <p className="truncate font-medium text-gray-900 dark:text-white">
                         {d.name}
                       </p>
+                      {d.referenceNo && (
+                        <p className="truncate font-mono text-[11px] text-gray-400 dark:text-gray-500">
+                          {d.referenceNo}
+                        </p>
+                      )}
                     </td>
                     <td className="px-3 py-3">
                       {d.subject ? (
