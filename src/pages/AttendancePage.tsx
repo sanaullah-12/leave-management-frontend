@@ -116,8 +116,8 @@ const AttendancePage: React.FC = () => {
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalEmployee, setModalEmployee] = useState<Employee | null>(null);
-  const [_isLoadingModalData, setIsLoadingModalData] = useState(false);
-  const [_modalAttendanceData, setModalAttendanceData] = useState<any>(null);
+  const [isLoadingModalData, setIsLoadingModalData] = useState(false);
+  const [modalAttendanceData, setModalAttendanceData] = useState<any>(null);
 
   // Employee inline attendance state
   const [showEmployeeAttendance, setShowEmployeeAttendance] = useState(false);
@@ -379,8 +379,13 @@ const AttendancePage: React.FC = () => {
 
   const fetchAttendanceRecords = async (
     employee: Employee,
-    forceSync = false
+    forceSync = false,
+    range?: { startDate: string; endDate: string }
   ) => {
+    // The modal carries its own from/to pickers; when it supplies a range use
+    // that, otherwise fall back to the page-level filter.
+    const fromDate = range?.startDate || startDate;
+    const toDate = range?.endDate || endDate;
     setIsFetchingAttendance(true);
 
     // If modal is open for this employee, also update modal loading state
@@ -396,8 +401,8 @@ const AttendancePage: React.FC = () => {
       const response = await attendanceAPI.getEmployeeAttendance(
         currentIP,
         employee.employeeId, // FIXED: Use employeeId (UserID) instead of machineId (UID)
-        startDate,
-        endDate,
+        fromDate,
+        toDate,
         7,
         forceSync
       );
@@ -1338,7 +1343,13 @@ const AttendancePage: React.FC = () => {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         employee={modalEmployee}
-        onFetchRecords={(employee) => fetchAttendanceRecords(employee, false)}
+        data={modalAttendanceData}
+        isLoading={isLoadingModalData}
+        defaultStartDate={startDate}
+        defaultEndDate={endDate}
+        onFetchRecords={(employee, forceRefresh, range) =>
+          fetchAttendanceRecords(employee, forceRefresh ?? false, range)
+        }
       />
     </div>
   );
