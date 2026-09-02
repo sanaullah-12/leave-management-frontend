@@ -35,7 +35,15 @@ export function connectSocket(token: string): Socket {
 
   socket = io(SOCKET_URL, {
     auth: { token },
-    transports: ["websocket", "polling"],
+    // Poll first, then upgrade - Socket.IO's default order.
+    //
+    // Listing "websocket" first makes the client open a raw WebSocket before
+    // any session exists. When the server is not listening for a moment (a dev
+    // restart, a redeploy) the browser itself logs "WebSocket connection to
+    // ws://.../socket.io/ failed", which no application code can catch or
+    // suppress. Handshaking over HTTP first avoids that line and still upgrades
+    // to a WebSocket immediately afterwards, so nothing is lost but the noise.
+    transports: ["polling", "websocket"],
     withCredentials: true,
     autoConnect: true,
     reconnection: true,
