@@ -201,10 +201,46 @@ export default defineConfig({
   // and template literals they build — cheaper than a runtime `if (DEV)` guard
   // and it removes the arguments too.
   //
-  // console.error/warn are deliberately preserved: they are the only signal
-  // available when diagnosing a customer issue from a browser console.
+  // console.error is the only one preserved: an error is the single thing a
+  // user or support engineer needs to see in a browser console. Warnings were
+  // dropped too - in a shipped build nobody acts on them, and they bury the
+  // errors that matter.
   esbuild: {
-    pure: ["console.log", "console.debug", "console.info", "console.trace"],
+    pure: [
+      "console.log",
+      "console.debug",
+      "console.info",
+      "console.trace",
+      "console.warn",
+    ],
+  },
+
+  build: {
+    rollupOptions: {
+      output: {
+        /**
+         * Split the vendor bundle by library family.
+         *
+         * Everything shared landed in one 812 kB entry chunk, so a one-line app
+         * change invalidated React and every other dependency in the browser
+         * cache along with it. These groups change on different schedules, so
+         * splitting them means a deploy only busts what actually moved, and the
+         * pieces download in parallel on a cold visit.
+         */
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+          if (/[\/]node_modules[\/](react|react-dom|scheduler)[\/]/.test(id))
+            return "vendor-react";
+          if (id.includes("react-router")) return "vendor-router";
+          if (id.includes("framer-motion") || id.includes("popmotion"))
+            return "vendor-motion";
+          if (id.includes("recharts") || id.includes("d3-"))
+            return "vendor-charts";
+          if (id.includes("i18next")) return "vendor-i18n";
+          if (id.includes("date-fns")) return "vendor-date";
+        },
+      },
+    },
   },
 
   server: {

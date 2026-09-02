@@ -272,12 +272,17 @@ export const attendanceAPI = {
     startDate?: string,
     endDate?: string,
     days = 7,
-    forceSync = false
+    forceSync = false,
+    policy?: "flexible" | "strict"
   ) => {
     // NEW: Use database endpoint instead of machine endpoint
     // Note: ip parameter kept for backwards compatibility but not used
     let url = `/attendance/db/frontend/${employeeId}`;
     const params = new URLSearchParams();
+
+    // Recalculates the response against the other office time. It is a view
+    // only: the admin's saved policy stays the official rule.
+    if (policy) params.append("policy", policy);
 
     if (startDate && endDate) {
       params.append("startDate", startDate);
@@ -347,13 +352,33 @@ export const attendanceAPI = {
       endDate,
     }),
 
+  // Organisation-wide daily totals. Already served by the backend; this is the
+  // read the dashboard needs so it has figures before anyone is selected.
+  getAttendanceStats: (startDate: string, endDate: string) =>
+    attendanceApi.get(
+      `/attendance/db/stats?startDate=${startDate}&endDate=${endDate}`
+    ),
+
+  // Workforce split into on-time / late / absent employee-days for a range.
+  // Computed server-side in one read; the alternative was one request per
+  // employee from the dashboard.
+  getAttendanceStatusSummary: (startDate: string, endDate: string) =>
+    attendanceApi.get(
+      `/attendance/db/status-summary?startDate=${startDate}&endDate=${endDate}`
+    ),
+
   // Late time settings
   getLateTimeSettings: () =>
     attendanceApi.get("/attendance/settings/late-time"),
 
+  // Admin only. Sending just `policy` switches the active rule without
+  // disturbing the configured preset times.
   updateLateTimeSettings: (settings: {
+    policy?: "flexible" | "strict" | "custom";
+    flexibleCutoff?: string;
+    strictCutoff?: string;
     cutoffTime?: string;
-    useCustomCutoff: boolean;
+    useCustomCutoff?: boolean;
   }) => attendanceApi.put("/attendance/settings/late-time", settings),
 
   // Sync management endpoints

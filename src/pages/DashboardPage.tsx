@@ -3,6 +3,7 @@ import { CARD, CARD_HOVER } from "../lib/surfaces";
 import { accentFor, accentSoftFor } from "../lib/themeTokens";
 import { AccentEdge } from "../components/ui/CardAccents";
 import { useAuth } from "../context/AuthContext";
+import AttendancePieCard from "../components/dashboard/AttendancePieCard";
 import { useTheme } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
 import { useFormatters } from "../i18n/useFormatters";
@@ -352,7 +353,6 @@ const DashboardPage: React.FC = () => {
   const approved = statusMap.approved || 0;
   const pending = statusMap.pending || adminStats.pendingLeaves || 0;
   const rejected = statusMap.rejected || 0;
-  const decided = approved + rejected;
   const totalReq = approved + pending + rejected;
 
   // Employee balance totals.
@@ -368,14 +368,9 @@ const DashboardPage: React.FC = () => {
   const remainingTotal = Math.max(0, quotaTotal - usedTotal);
 
   // Two gauge metrics - role aware.
+  // One gauge per role now: the attendance donut takes the first slot.
   const gauges = isAdmin
     ? [
-        {
-          label: t("gauges.approvalRate"),
-          percent: decided ? (approved / decided) * 100 : 0,
-          big: `${decided ? Math.round((approved / decided) * 100) : 0}%`,
-          small: t("gauges.ofDecidedRequests"),
-        },
         {
           label: t("gauges.pendingLoad"),
           percent: totalReq ? (pending / totalReq) * 100 : 0,
@@ -384,12 +379,6 @@ const DashboardPage: React.FC = () => {
         },
       ]
     : [
-        {
-          label: t("gauges.leaveUtilization"),
-          percent: quotaTotal ? (usedTotal / quotaTotal) * 100 : 0,
-          big: `${quotaTotal ? Math.round((usedTotal / quotaTotal) * 100) : 0}%`,
-          small: `${usedTotal} of ${quotaTotal} days used`,
-        },
         {
           label: t("gauges.annualBalance"),
           percent: balance.annual?.total
@@ -600,7 +589,9 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Two gauges */}
+        {/* Attendance donut, then the remaining gauge. */}
+        <AttendancePieCard role={user?.role} employeeId={user?.employeeId} />
+
         {gauges.map((g, i) => (
           <SemiGauge
             key={i}

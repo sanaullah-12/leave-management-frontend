@@ -60,7 +60,20 @@ const VoiceNotificationToaster: React.FC = () => {
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
-      return next.slice(0, MAX_VISIBLE);
+      const capped = next.slice(0, MAX_VISIBLE);
+
+      // Bail out when nothing actually changed.
+      //
+      // This always built a fresh array, so every run produced a new state
+      // reference even when the same toasts were showing. Paired with a
+      // `notifications` array whose identity changes on each poll, the two kept
+      // re-triggering each other - React reported "Maximum update depth
+      // exceeded" and the component re-rendered in a tight loop.
+      const unchanged =
+        capped.length === current.length &&
+        capped.every((n, i) => n._id === current[i]._id);
+
+      return unchanged ? current : capped;
     });
   }, [notifications, isAdmin]);
 
@@ -82,7 +95,12 @@ const VoiceNotificationToaster: React.FC = () => {
   if (!isAdmin) return null;
 
   return createPortal(
-    <div className="pointer-events-none fixed bottom-5 right-5 z-[90] flex w-[22rem] max-w-[calc(100vw-2.5rem)] flex-col gap-3">
+    // Stacked ABOVE the assistant launcher, not over it. Both sit bottom-right,
+    // and at bottom-5 the toast cards covered the launcher entirely - the
+    // assistant could not be clicked at all while a toast was showing. The
+    // offsets clear the launcher (56px) plus its own bottom inset, and on
+    // phones the mobile tab bar underneath it as well.
+    <div className="pointer-events-none fixed bottom-[calc(11rem+env(safe-area-inset-bottom,0px))] right-5 z-[90] flex w-[22rem] max-w-[calc(100vw-2.5rem)] flex-col gap-3 lg:bottom-24">
       <AnimatePresence>
         {visible.map((n) => {
           const meta = NOTIFICATION_META[n.type];

@@ -670,3 +670,38 @@
   .py-12 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
   .py-10 { padding-top: 1.25rem; padding-bottom: 1.25rem; }
 }
+
+/* ---------------------------------------------------------------------------
+   Attendance dashboard surface
+   ---------------------------------------------------------------------------
+   The attendance page uses the softer card treatment from the dashboard design:
+   a larger corner radius, a hairline border carrying the edge instead of a
+   shadow, and a single quiet elevation step on hover.
+
+   Scoped to .attendance-dashboard on purpose. The same classes are used on every
+   other screen, so restyling .card globally would silently redesign pages this
+   change was never reviewed against.
+--------------------------------------------------------------------------- */
+.attendance-dashboard .card,
+.attendance-dashboard .surface-card {
+  border-radius: 1rem;
+  border: 1px solid rgb(243 244 246);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  transition: box-shadow 150ms ease;
+}
+
+.attendance-dashboard .card:hover {
+  box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.06);
+}
+
+html.dark .attendance-dashboard .card,
+html.dark .attendance-dashboard .surface-card {
+  border-color: rgb(55 65 81);
+  box-shadow: none;
+}
+
+/* Section headings inside the dashboard sit closer in weight to the tiles than
+   the old page-level heading scale did. */
+.attendance-dashboard .card h3 {
+  letter-spacing: -0.01em;
+}

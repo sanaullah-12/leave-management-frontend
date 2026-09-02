@@ -7,6 +7,7 @@
  * dismissal - the rules for when it may appear live in `assistantService`.
  */
 import React from "react";
+import { useDraggableWidget } from "../../hooks/useDraggableWidget";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChatBubbleLeftRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { STRINGS } from "./config";
@@ -27,12 +28,16 @@ const AssistantBubble: React.FC<Props> = ({
   onDismissGreeting,
 }) => {
   const reduce = useReducedMotion();
+  const drag = useDraggableWidget("assistantLauncherPosition");
 
   return (
     // On phones the bubble must clear the bottom tab bar (52px + safe area)
     // or it sits on top of the Attendance/More tabs and swallows their taps.
     // From lg up there is no tab bar, so the original offset applies.
-    <div className="pointer-events-none fixed bottom-[calc(6.25rem+env(safe-area-inset-bottom,0px))] end-4 z-[80] flex flex-col items-end gap-3 lg:bottom-6 lg:end-6">
+    <motion.div
+      {...drag.containerProps}
+      className="pointer-events-none fixed bottom-[calc(6.25rem+env(safe-area-inset-bottom,0px))] end-4 z-[80] flex flex-col items-end gap-3 lg:bottom-6 lg:end-6"
+    >
       {/* ---------------- Greeting ---------------- */}
       <AnimatePresence>
         {greetingVisible && !open && (
@@ -70,16 +75,22 @@ const AssistantBubble: React.FC<Props> = ({
       </AnimatePresence>
 
       {/* ---------------- Launcher ---------------- */}
+      <div className="pointer-events-auto" {...drag.handleProps}>
       <motion.button
         type="button"
-        onClick={onOpen}
+        onClick={() => {
+          // Releasing after a drag must not also open the panel.
+          if (drag.didDrag()) return;
+          onOpen();
+        }}
         aria-label={STRINGS.launcherLabel}
         aria-expanded={open}
+        title="Drag to move"
         initial={reduce ? false : { opacity: 0, scale: 0.6 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ type: "spring", stiffness: 340, damping: 22, delay: 0.4 }}
-        whileHover={{ scale: 1.06 }}
-        whileTap={{ scale: 0.94 }}
+        whileHover={drag.dragging ? undefined : { scale: 1.06 }}
+        whileTap={drag.dragging ? undefined : { scale: 0.94 }}
         className="pointer-events-auto relative grid h-14 w-14 place-items-center rounded-full text-white shadow-lg shadow-black/20 focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--accent-soft)]"
         style={{ backgroundColor: "var(--accent)" }}
       >
@@ -99,7 +110,8 @@ const AssistantBubble: React.FC<Props> = ({
         </AnimatePresence>
         <ChatBubbleLeftRightIcon className="relative h-6 w-6" />
       </motion.button>
-    </div>
+      </div>
+    </motion.div>
   );
 };
 
