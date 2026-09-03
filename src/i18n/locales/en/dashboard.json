@@ -18,7 +18,8 @@
     "leaveUtilization": "Leave Utilization",
     "ofDecidedRequests": "of decided requests",
     "pendingLoad": "Pending Load",
-    "remaining": "Remaining"
+    "remaining": "Remaining",
+    "totalBalance": "Total Balance"
   },
   "greeting": {
     "afternoon": "Good afternoon",

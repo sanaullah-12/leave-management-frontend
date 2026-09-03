@@ -4,6 +4,7 @@ import {
   ClockIcon,
   XCircleIcon,
   CalendarDaysIcon,
+  HomeIcon,
 } from "@heroicons/react/24/solid";
 
 /**
@@ -14,7 +15,16 @@ import {
  * reinforcement, never the only carrier.
  */
 
-type Status = "On time" | "Late" | "No record" | "Present" | "On leave";
+type Status =
+  | "On time"
+  | "Late"
+  | "No record"
+  | "Absent"
+  | "Weekend"
+  | "Work from home"
+  | "On leave"
+  | "Present"
+  | "On leave";
 
 interface Props {
   status: Status | string;
@@ -49,11 +59,34 @@ const META: Record<
     border: "#f3c6c3",
     Icon: XCircleIcon,
   },
+  // A working day with no punch. Same red as "no record" - it is the same
+  // fact - but the word is the one a day-by-day list needs.
+  Absent: {
+    fg: "#b42318",
+    bg: "#fbeaea",
+    border: "#f3c6c3",
+    Icon: XCircleIcon,
+  },
+  // Neutral on purpose: the office was shut, so nothing is being judged.
+  Weekend: {
+    fg: "#5c6470",
+    bg: "#f1f3f6",
+    border: "#dde1e7",
+    Icon: CalendarDaysIcon,
+  },
   "On leave": {
+    fg: "#0e7490",
+    bg: "#e6f4f7",
+    border: "#bfe0e8",
+    Icon: CalendarDaysIcon,
+  },
+  // A working day, not an absence - so it gets its own colour rather than
+  // borrowing either the present green or the absent red.
+  "Work from home": {
     fg: "#4c3fc7",
     bg: "#eeeefb",
     border: "#d3d1f5",
-    Icon: CalendarDaysIcon,
+    Icon: HomeIcon,
   },
 };
 

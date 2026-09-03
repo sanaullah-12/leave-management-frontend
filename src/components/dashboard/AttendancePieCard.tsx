@@ -6,17 +6,24 @@ import { useThemeAccent } from "../../hooks/useThemeAccent";
 import { attendanceAPI } from "../../services/api";
 
 /**
- * This month's attendance, as a donut.
+ * This month's attendance so far, as a donut.
  *
  * What it counts depends on who is looking:
- *   employee - their own days, split Present / Late / Absent
+ *   employee - their own days, split On time / Late / Work from home /
+ *              On leave / Absent
  *   admin    - the whole workforce, as employee-days recorded against
  *              employee-days expected over the days the device was active
  *
  * Both views count employee-DAYS, not people, so a month reads as a workload
- * rather than a headcount. "Absent" means no punch on a day the device saw
- * others; it is a gap in the record, not a claim about leave - the device
- * cannot tell leave from another site or an unenrolled worker.
+ * rather than a headcount.
+ *
+ * The four work modes come from the server's work-mode service, so a day the
+ * device never saw is only "Absent" once approved work from home and approved
+ * leave have been ruled out. What remains is a genuine gap in the record - the
+ * device still cannot tell another site or an unenrolled worker from an
+ * absence, and nothing here claims otherwise.
+ *
+ * The range runs from the first of the month to today, never past it.
  *
  * Each slice is labelled in the legend and named in the tooltip, so the split
  * is never carried by colour alone.
@@ -30,18 +37,27 @@ interface Props {
 
 const LATE = "#b5650a";
 const ABSENT = "#b42318";
+const WFH = "#4c3fc7";
+const ON_LEAVE = "#0e7490";
 
-/** First and last day of the current month, as YYYY-MM-DD. */
-function currentMonthRange() {
+/**
+ * The first of the current month through today, as YYYY-MM-DD.
+ *
+ * Month-to-date on purpose. Running to the end of the month made the backend
+ * count every working day still to come as a day with no punch, so the donut
+ * showed a month of absences that have not happened yet. A day nobody has
+ * lived through cannot be attended or missed.
+ */
+function monthToDateRange() {
   const now = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
   const y = now.getFullYear();
   const m = now.getMonth();
-  const last = new Date(y, m + 1, 0).getDate();
   return {
     from: `${y}-${pad(m + 1)}-01`,
-    to: `${y}-${pad(m + 1)}-${pad(last)}`,
+    to: `${y}-${pad(m + 1)}-${pad(now.getDate())}`,
     label: now.toLocaleDateString(undefined, { month: "long", year: "numeric" }),
+    today: now.toLocaleDateString(undefined, { day: "numeric", month: "long" }),
   };
 }
 
@@ -54,7 +70,7 @@ const AttendancePieCard: React.FC<Props> = ({ role, employeeId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const range = useMemo(currentMonthRange, []);
+  const range = useMemo(monthToDateRange, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -82,6 +98,8 @@ const AttendancePieCard: React.FC<Props> = ({ role, employeeId }) => {
           if (!s) throw new Error("No attendance summary returned");
 
           if (cancelled) return;
+          // presentDays counts device punches; wfhDays and onLeaveDays come
+          // from the approved schedule, and absentDays already excludes both.
           setSlices([
             {
               name: "On time",
@@ -89,9 +107,11 @@ const AttendancePieCard: React.FC<Props> = ({ role, employeeId }) => {
               color: accent,
             },
             { name: "Late", value: s.lateDays || 0, color: LATE },
+            { name: "Work from home", value: s.wfhDays || 0, color: WFH },
+            { name: "On leave", value: s.onLeaveDays || 0, color: ON_LEAVE },
             { name: "Absent", value: s.absentDays || 0, color: ABSENT },
           ]);
-          setCaption(`Your working days in ${range.label}`);
+          setCaption(`Your working days in ${range.label}, to ${range.today}`);
         } else {
           // One aggregate for the whole workforce, split the same way an
           // individual's is: on-time days, late days, and days with no punch.
@@ -112,10 +132,16 @@ const AttendancePieCard: React.FC<Props> = ({ role, employeeId }) => {
           setSlices([
             { name: "On time", value: d.onTime || 0, color: accent },
             { name: "Late", value: d.late || 0, color: LATE },
+            {
+              name: "Work from home",
+              value: d.workFromHome || 0,
+              color: WFH,
+            },
+            { name: "On leave", value: d.onLeave || 0, color: ON_LEAVE },
             { name: "Absent", value: d.absent || 0, color: ABSENT },
           ]);
           setCaption(
-            `${d.totalEmployees} people over ${d.activeDays} working days, against ${d.cutoffTime}`
+            `${d.totalEmployees} people over ${d.activeDays} working days to ${range.today}, against ${d.cutoffTime}`
           );
         }
       } catch (err: any) {
@@ -137,9 +163,12 @@ const AttendancePieCard: React.FC<Props> = ({ role, employeeId }) => {
     };
   }, [role, employeeId, range.from, range.to, accent]);
 
-  const total = slices.reduce((sum, s) => sum + s.value, 0);
-  const headline = slices.length
-    ? Math.round(((slices[0]?.value || 0) / (total || 1)) * 100)
+  // A zero slice draws nothing but still adds a legend row, so it is dropped
+  // rather than listed as a category nobody was in.
+  const shown = slices.filter((s) => s.value > 0);
+  const total = shown.reduce((sum, s) => sum + s.value, 0);
+  const headline = shown.length
+    ? Math.round(((shown[0]?.value || 0) / (total || 1)) * 100)
     : 0;
 
   return (
@@ -173,7 +202,7 @@ const AttendancePieCard: React.FC<Props> = ({ role, employeeId }) => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={slices}
+                  data={shown}
                   dataKey="value"
                   nameKey="name"
                   innerRadius={58}
@@ -181,7 +210,7 @@ const AttendancePieCard: React.FC<Props> = ({ role, employeeId }) => {
                   paddingAngle={2}
                   stroke="none"
                 >
-                  {slices.map((s) => (
+                  {shown.map((s) => (
                     <Cell key={s.name} fill={s.color} />
                   ))}
                 </Pie>
@@ -205,13 +234,13 @@ const AttendancePieCard: React.FC<Props> = ({ role, employeeId }) => {
                 {headline}%
               </span>
               <span className="text-[11px] text-gray-400">
-                {slices[0]?.name}
+                {shown[0]?.name}
               </span>
             </div>
           </div>
 
           <div className="mt-3 space-y-1.5">
-            {slices.map((s) => (
+            {shown.map((s) => (
               <div
                 key={s.name}
                 className="flex items-center justify-between text-[13px]"

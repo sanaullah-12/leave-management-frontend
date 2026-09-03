@@ -68,6 +68,8 @@
     "documentStudio": "Estudio de documentos",
     "employeeVoice": "Voz del empleado",
     "profileSettings": "Perfil y ajustes",
-    "theme": "Tema"
+    "theme": "Tema",
+    "wfhRequests": "Solicitudes de teletrabajo",
+    "workFromHome": "Teletrabajo"
   }
 }

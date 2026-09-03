@@ -68,6 +68,8 @@
     "documentStudio": "Dokumentenstudio",
     "employeeVoice": "Mitarbeiterstimme",
     "profileSettings": "Profil & Einstellungen",
-    "theme": "Design"
+    "theme": "Design",
+    "wfhRequests": "Homeoffice-Anträge",
+    "workFromHome": "Homeoffice"
   }
 }

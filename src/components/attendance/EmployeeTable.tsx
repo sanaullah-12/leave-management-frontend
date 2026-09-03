@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -15,10 +15,10 @@ import { CARD } from "../../lib/surfaces";
  * The employee roster with its filters, sorting and pagination.
  *
  * The status column reports whether the device recorded that person inside the
- * selected range - which is a fact this page already holds. It deliberately does
- * not claim "absent": a person with no punch may be on leave, on another site,
- * or simply not enrolled on this device, and the data cannot tell those apart.
- * Open a row to see that employee's actual punches.
+ * selected range. "Absent" there means no punch was recorded, not that the
+ * person was proven away: they may be on leave, on another site, or not
+ * enrolled on this device, and the data cannot tell those apart. Open a row to
+ * see that employee's actual punches.
  */
 
 export interface RosterEmployee {
@@ -47,6 +47,13 @@ interface Props {
    * where every filter can only ever hide the one row there is.
    */
   showFilters?: boolean;
+  /**
+   * The status filter, when the page drives it - clicking the breakdown panel
+   * has to land somewhere the reader can see and undo, and that is this
+   * select. Left out, the table keeps its own.
+   */
+  statusFilter?: string;
+  onStatusFilterChange?: (status: string) => void;
 }
 
 const PAGE_SIZE = 8;
@@ -66,10 +73,17 @@ const EmployeeTable: React.FC<Props> = ({
   loading = false,
   onSelect,
   showFilters = true,
+  statusFilter,
+  onStatusFilterChange,
 }) => {
   const [search, setSearch] = useState("");
   const [department, setDepartment] = useState("All");
-  const [status, setStatus] = useState("All");
+  const [ownStatus, setOwnStatus] = useState("All");
+  const status = statusFilter ?? ownStatus;
+  const setStatus = (next: string) => {
+    if (onStatusFilterChange) onStatusFilterChange(next);
+    else setOwnStatus(next);
+  };
   // Default to User ID ascending. The roster arrives in device-enrolment
   // order, which reads as random; people look someone up by the number on
   // their badge, so 1, 2, 3 is the order that matches how the list is used.
@@ -78,6 +92,10 @@ const EmployeeTable: React.FC<Props> = ({
     dir: "asc",
   });
   const [page, setPage] = useState(1);
+
+  // A filter change can shorten the list past the page being viewed, and the
+  // filter can now be set from outside this component.
+  useEffect(() => setPage(1), [status]);
 
   const departments = useMemo(
     () =>
@@ -222,17 +240,14 @@ const EmployeeTable: React.FC<Props> = ({
 
         <select
           value={status}
-          onChange={(e) => {
-            setStatus(e.target.value);
-            setPage(1);
-          }}
+          onChange={(e) => setStatus(e.target.value)}
           aria-label="Filter by status"
           className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
         >
           <option value="All">All statuses</option>
           <option value="On time">On time</option>
           <option value="Late">Late</option>
-          <option value="No record">No record</option>
+          <option value="Absent">Absent</option>
         </select>
 
         {filtersActive && (
@@ -242,7 +257,6 @@ const EmployeeTable: React.FC<Props> = ({
               setSearch("");
               setDepartment("All");
               setStatus("All");
-              setPage(1);
             }}
             className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
           >

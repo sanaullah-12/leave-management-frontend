@@ -18,7 +18,8 @@
     "leaveUtilization": "休暇取得率",
     "ofDecidedRequests": "決定済み申請のうち",
     "pendingLoad": "保留中の負荷",
-    "remaining": "残り"
+    "remaining": "残り",
+    "totalBalance": "総残高"
   },
   "greeting": {
     "afternoon": "こんにちは",

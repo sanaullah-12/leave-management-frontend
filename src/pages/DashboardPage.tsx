@@ -380,12 +380,13 @@ const DashboardPage: React.FC = () => {
       ]
     : [
         {
-          label: t("gauges.annualBalance"),
-          percent: balance.annual?.total
-            ? (balance.annual.remaining / balance.annual.total) * 100
-            : 0,
-          big: balance.annual?.remaining ?? 0,
-          small: "days remaining",
+          // Every quota type together, not just annual - the number an
+          // employee actually plans against is what is left of the whole
+          // allowance.
+          label: t("gauges.totalBalance"),
+          percent: quotaTotal ? (remainingTotal / quotaTotal) * 100 : 0,
+          big: remainingTotal,
+          small: `of ${quotaTotal} days remaining`,
         },
       ];
 

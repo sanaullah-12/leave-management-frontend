@@ -40,6 +40,7 @@ import {
   MagnifyingGlassIcon,
   MegaphoneIcon,
   HomeIcon,
+  HomeModernIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
   DocumentDuplicateIcon,
@@ -121,6 +122,7 @@ const Layout: React.FC = () => {
           items: [
             { name: t("items.leaveRequests"), href: "/leaves", icon: ClipboardDocumentListIcon },
             { name: t("items.leaveCalendar"), href: "/leave-calendar", icon: CalendarDaysIcon },
+            { name: t("items.wfhRequests"), href: "/work-from-home", icon: HomeModernIcon },
           ],
         },
         {
@@ -208,6 +210,7 @@ const Layout: React.FC = () => {
           { name: t("items.applyLeave"), href: "/apply-leave", icon: PlusCircleIcon },
           { name: t("items.leaveCalendar"), href: "/leave-calendar", icon: CalendarDaysIcon },
           { name: t("items.myLeaveActivity"), href: "/my-leave-activity", icon: ClipboardDocumentCheckIcon },
+          { name: t("items.workFromHome"), href: "/work-from-home", icon: HomeModernIcon },
         ],
       },
       {

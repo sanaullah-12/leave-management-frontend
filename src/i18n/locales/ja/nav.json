@@ -68,6 +68,8 @@
     "documentStudio": "ドキュメントスタジオ",
     "employeeVoice": "従業員の声",
     "profileSettings": "プロフィールと設定",
-    "theme": "テーマ"
+    "theme": "テーマ",
+    "wfhRequests": "在宅勤務申請",
+    "workFromHome": "在宅勤務"
   }
 }

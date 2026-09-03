@@ -12,6 +12,7 @@ export const notificationTarget = (n: AppNotification): string => {
     const id = voiceIdOf(n);
     return id ? `/employee-voice?voice=${id}` : "/employee-voice";
   }
+  if (n.type && n.type.startsWith("wfh_")) return "/work-from-home";
   return "/leaves";
 };
 
