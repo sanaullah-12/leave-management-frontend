@@ -544,6 +544,24 @@ const AttendancePage: React.FC = () => {
     }
   }, [startDate, endDate, currentUser]);
 
+  /**
+   * Switch which office time the figures are measured against.
+   *
+   * A view only: the server recalculates from its own stored policy on every
+   * request, so this cannot change anyone's official record. The choice is
+   * remembered per user for convenience.
+   */
+  const applyViewPolicy = (policy: "flexible" | "strict" | null) => {
+    setViewPolicy(policy);
+    try {
+      const key = `attendanceViewPolicy_${currentUser?.id}`;
+      if (policy) localStorage.setItem(key, policy);
+      else localStorage.removeItem(key);
+    } catch {
+      // A blocked localStorage must not stop the view from switching.
+    }
+  };
+
   /** Which range chip is highlighted; null when the dates were set by hand. */
   const [activeRangeDays, setActiveRangeDays] = useState<number | null>(null);
 
@@ -643,6 +661,28 @@ const AttendancePage: React.FC = () => {
     };
   }, [modalAttendanceData, lateTimeSettings.cutoffTime]);
 
+  const isAdmin = !currentUser || currentUser.role === "admin";
+
+  /**
+   * Who this page reports on.
+   *
+   * Admins get the device roster. An employee gets only themselves - the
+   * roster endpoint is admin-only, and their own record is the only one they
+   * are allowed to read anyway.
+   */
+  const rosterTargets = useMemo<any[]>(() => {
+    if (isAdmin) return employees;
+    if (!currentUser?.employeeId) return [];
+    return [
+      {
+        employeeId: currentUser.employeeId,
+        machineId: currentUser.employeeId,
+        name: currentUser.name,
+        department: currentUser.department,
+      },
+    ];
+  }, [isAdmin, employees, currentUser]);
+
   /** employeeId -> that person's attendance response for the active range. */
   const [rosterAttendance, setRosterAttendance] = useState<Record<string, any>>({});
   const [rosterLoading, setRosterLoading] = useState(false);
@@ -668,17 +708,17 @@ const AttendancePage: React.FC = () => {
   const rosterRunRef = useRef(0);
 
   const loadRosterAttendance = async () => {
-    if (!employees.length || rosterLoading) return;
+    if (!rosterTargets.length || rosterLoading) return;
 
     const run = ++rosterRunRef.current;
     const CONCURRENCY = 4;
-    const total = employees.length;
+    const total = rosterTargets.length;
 
     setRosterLoading(true);
     setRosterProgress({ done: 0, total });
 
     const collected: Record<string, any> = {};
-    const queue = [...employees];
+    const queue = [...rosterTargets];
     let done = 0;
 
     const worker = async () => {
@@ -770,7 +810,7 @@ const AttendancePage: React.FC = () => {
   /** Latest punch per employee, for the roster table's time columns. */
   const rosterRows = useMemo(
     () =>
-      employees.map((emp: any) => {
+      rosterTargets.map((emp: any) => {
         const data = rosterAttendance[String(emp.employeeId)];
         const latest = data?.records?.[0] || null;
         return {
@@ -787,7 +827,7 @@ const AttendancePage: React.FC = () => {
             : "No record",
         };
       }),
-    [employees, rosterAttendance]
+    [rosterTargets, rosterAttendance]
   );
 
   /** Counts behind the summary cards and the breakdown panel. */
@@ -881,12 +921,50 @@ const AttendancePage: React.FC = () => {
             ))}
           </div>
 
+          {/* Which office time this view is measured against.
+              Employees only: the admin's official rule lives in Device and
+              settings, and a second control beside it would read as a rival
+              setting rather than a comparison. */}
+          {!isAdmin && (
+            <div className="flex gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-700/50">
+              {[
+                { key: null as null, label: "Official" },
+                {
+                  key: "flexible" as const,
+                  label: formatCutoff(lateTimeSettings.flexibleCutoff || "09:15"),
+                },
+                {
+                  key: "strict" as const,
+                  label: formatCutoff(lateTimeSettings.strictCutoff || "09:30"),
+                },
+              ].map((option) => (
+                <button
+                  key={option.label}
+                  type="button"
+                  onClick={() => applyViewPolicy(option.key)}
+                  title={
+                    option.key
+                      ? `Measure your record against ${option.label}`
+                      : "Use the arrival time your administrator set"
+                  }
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                    viewPolicy === option.key
+                      ? "bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-gray-100"
+                      : "text-gray-600 hover:text-gray-900 dark:text-gray-300"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          )}
+
           <button
             type="button"
             onClick={loadRosterAttendance}
-            disabled={rosterLoading || !employees.length}
+            disabled={rosterLoading || !rosterTargets.length}
             title={
-              employees.length
+              rosterTargets.length
                 ? "Load attendance for the selected range"
                 : "Connect to the device to load the roster first"
             }
@@ -949,12 +1027,12 @@ const AttendancePage: React.FC = () => {
         loading={rosterLoading && !Object.keys(rosterAttendance).length}
         items={[
           {
-            label: "Employees",
+            label: isAdmin ? "Employees" : "You",
             icon: <UserGroupIcon className="h-7 w-7" />,
-            value: employees.length || null,
-            caption: `Enrolled on ${
-              selectedIP === "custom" ? customIP : selectedIP
-            }`,
+            value: rosterTargets.length || null,
+            caption: isAdmin
+              ? `Enrolled on ${selectedIP === "custom" ? customIP : selectedIP}`
+              : "Your own attendance",
           },
           {
             label: "On time",
@@ -963,9 +1041,9 @@ const AttendancePage: React.FC = () => {
             accent: themeAccent,
             caption: !rosterFetchedFor
               ? "Not fetched yet"
-              : employees.length
+              : rosterTargets.length
               ? `${Math.round(
-                  (statusCounts.onTime / employees.length) * 100
+                  (statusCounts.onTime / rosterTargets.length) * 100
                 )}% of workforce`
               : undefined,
           },
@@ -976,9 +1054,9 @@ const AttendancePage: React.FC = () => {
             accent: "#b5650a",
             caption: !rosterFetchedFor
               ? "Not fetched yet"
-              : employees.length
+              : rosterTargets.length
               ? `${Math.round(
-                  (statusCounts.late / employees.length) * 100
+                  (statusCounts.late / rosterTargets.length) * 100
                 )}% of workforce`
               : undefined,
           },
@@ -989,9 +1067,9 @@ const AttendancePage: React.FC = () => {
             accent: "#b42318",
             caption: !rosterFetchedFor
               ? "Not fetched yet"
-              : employees.length
+              : rosterTargets.length
               ? `${Math.round(
-                  (statusCounts.noRecord / employees.length) * 100
+                  (statusCounts.noRecord / rosterTargets.length) * 100
                 )}% of workforce`
               : undefined,
           },
@@ -1020,7 +1098,7 @@ const AttendancePage: React.FC = () => {
               )}`
             : "Press Fetch attendance to load the workforce"
         }
-        breakdownTotal={employees.length}
+        breakdownTotal={rosterTargets.length}
         breakdown={[
           { label: "On time", count: statusCounts.onTime, tone: themeAccent },
           { label: "Late", count: statusCounts.late, tone: "#b5650a" },
@@ -1030,6 +1108,7 @@ const AttendancePage: React.FC = () => {
 
       {/* Toolbar */}
       <section aria-label="Actions" className="flex flex-wrap items-center gap-2">
+        {isAdmin && (
         <button
           type="button"
           onClick={() => setShowDevicePanel((v) => !v)}
@@ -1040,10 +1119,11 @@ const AttendancePage: React.FC = () => {
             ? `Connected to ${machineStatus.ip}`
             : "Device not connected"}
         </button>
+        )}
 
         <div className="flex-1" />
 
-        {(!currentUser || currentUser.role === "admin") && (
+        {isAdmin && (
           <>
             <button
               type="button"
@@ -1067,6 +1147,7 @@ const AttendancePage: React.FC = () => {
             </button>
           </>
         )}
+        {isAdmin && (
         <button
           type="button"
           onClick={() =>
@@ -1080,6 +1161,7 @@ const AttendancePage: React.FC = () => {
           />
           Refresh
         </button>
+        )}
         <button
           type="button"
           onClick={exportRoster}
@@ -1092,7 +1174,7 @@ const AttendancePage: React.FC = () => {
       </section>
 
       <DeviceSettingsPanel
-        open={showDevicePanel || showSettings}
+        open={isAdmin && (showDevicePanel || showSettings)}
         onClose={() => {
           setShowDevicePanel(false);
           setShowSettings(false);
@@ -1116,6 +1198,7 @@ const AttendancePage: React.FC = () => {
 
       {/* Roster */}
       <EmployeeTable
+        showFilters={isAdmin}
         rows={rosterRows as any}
         loading={isFetchingEmployees || rosterLoading}
         onSelect={(emp) => handleEmployeeClick(emp as any)}

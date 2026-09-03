@@ -26,19 +26,20 @@ const META: Record<
   string,
   { fg: string; bg: string; border: string; Icon: typeof CheckCircleIcon }
 > = {
-  // The good state wears the active theme accent, so it recolours with the
-  // app. Late and No record keep fixed warning tones - a warning that follows
-  // a colour picker stops reading as a warning.
+  // Green for the good state, amber for late, red for no record: the three
+  // read as a scale at a glance, which a themed accent for "on time" did not.
+  // These stay fixed rather than following the theme picker - they carry
+  // meaning, and "on time" turning pink would stop meaning anything.
   "On time": {
-    fg: "rgb(var(--blue-700))",
-    bg: "rgb(var(--blue-50))",
-    border: "rgb(var(--blue-200))",
+    fg: "#0f7a4c",
+    bg: "#e4f5ec",
+    border: "#bfe6d3",
     Icon: CheckCircleIcon,
   },
   Present: {
-    fg: "rgb(var(--blue-700))",
-    bg: "rgb(var(--blue-50))",
-    border: "rgb(var(--blue-200))",
+    fg: "#0f7a4c",
+    bg: "#e4f5ec",
+    border: "#bfe6d3",
     Icon: CheckCircleIcon,
   },
   Late: { fg: "#b5650a", bg: "#fdf0df", border: "#f5d9ae", Icon: ClockIcon },
