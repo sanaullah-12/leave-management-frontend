@@ -42,6 +42,11 @@ interface Props {
   rows: RosterRow[];
   loading?: boolean;
   onSelect: (employee: RosterEmployee) => void;
+  /**
+   * Search and the department/status filters. Off for a single-person view,
+   * where every filter can only ever hide the one row there is.
+   */
+  showFilters?: boolean;
 }
 
 const PAGE_SIZE = 8;
@@ -60,6 +65,7 @@ const EmployeeTable: React.FC<Props> = ({
   rows: allRows,
   loading = false,
   onSelect,
+  showFilters = true,
 }) => {
   const [search, setSearch] = useState("");
   const [department, setDepartment] = useState("All");
@@ -181,6 +187,7 @@ const EmployeeTable: React.FC<Props> = ({
   return (
     <div className={`overflow-hidden ${CARD}`}>
       {/* Toolbar */}
+      {showFilters && (
       <div className="flex flex-wrap items-center gap-2 border-b border-gray-200/70 p-4 dark:border-gray-700">
         <div className="relative min-w-[180px] flex-1 max-w-xs">
           <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -246,6 +253,7 @@ const EmployeeTable: React.FC<Props> = ({
         <div className="flex-1" />
 
       </div>
+      )}
 
       {/* Table */}
       <div className="overflow-x-auto">
@@ -361,7 +369,7 @@ const EmployeeTable: React.FC<Props> = ({
       </div>
 
       {/* Pagination */}
-      {!loading && rows.length > 0 && (
+      {!loading && rows.length > PAGE_SIZE && (
         <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 dark:border-gray-700">
           <p className="text-xs text-gray-500 dark:text-gray-400">
             Showing {(safePage - 1) * PAGE_SIZE + 1} to{" "}
