@@ -619,6 +619,53 @@ export const employeeVoiceAPI = {
   getStats: () => api.get("/employee-voice/stats/dashboard"),
 };
 
+// Work From Home (request -> review -> approved working day)
+export const workFromHomeAPI = {
+  submitRequest: (data: {
+    startDate: string;
+    endDate?: string;
+    reason: string;
+    note?: string;
+  }) => api.post("/work-from-home", data),
+
+  getRequests: (params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    employeeId?: string;
+    from?: string;
+    to?: string;
+  }) => {
+    const q = new URLSearchParams();
+    q.append("page", String(params?.page ?? 1));
+    q.append("limit", String(params?.limit ?? 100));
+    if (params?.status) q.append("status", params.status);
+    if (params?.employeeId) q.append("employeeId", params.employeeId);
+    if (params?.from) q.append("from", params.from);
+    if (params?.to) q.append("to", params.to);
+    return api.get(`/work-from-home?${q.toString()}`);
+  },
+
+  getRequest: (id: string) => api.get(`/work-from-home/${id}`),
+
+  reviewRequest: (
+    id: string,
+    data: { status: "approved" | "rejected"; reviewComments?: string }
+  ) => api.put(`/work-from-home/${id}/review`, data),
+
+  cancelRequest: (id: string) => api.put(`/work-from-home/${id}/cancel`),
+
+  getStats: () => api.get("/work-from-home/stats"),
+
+  getPolicy: () => api.get("/work-from-home/policy"),
+
+  /** The resolved work-mode schedule for a range, not the raw requests. */
+  getSchedule: (startDate: string, endDate: string) =>
+    api.get(
+      `/work-from-home/schedule?startDate=${startDate}&endDate=${endDate}`
+    ),
+};
+
 // Announcements (company notice board)
 export const announcementsAPI = {
   getAnnouncements: (params?: {

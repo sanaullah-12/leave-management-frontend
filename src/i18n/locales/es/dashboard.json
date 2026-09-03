@@ -18,7 +18,8 @@
     "leaveUtilization": "Uso de ausencias",
     "ofDecidedRequests": "de solicitudes resueltas",
     "pendingLoad": "Carga pendiente",
-    "remaining": "Restante"
+    "remaining": "Restante",
+    "totalBalance": "Saldo total"
   },
   "greeting": {
     "afternoon": "Buenas tardes",

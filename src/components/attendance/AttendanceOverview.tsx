@@ -27,6 +27,10 @@ export interface DayBar {
   full: string;
   onTime: number;
   late: number;
+  /** Earliest arrival recorded that day, as office wall-clock time. */
+  firstTime?: string | null;
+  /** Latest arrival recorded that day. Equals firstTime for a single person. */
+  lastTime?: string | null;
 }
 
 export interface BreakdownRow {
@@ -40,6 +44,16 @@ interface Props {
   breakdown: BreakdownRow[];
   breakdownTotal: number;
   chartCaption: string;
+  /** What the breakdown percentages are a share of. */
+  breakdownCaption?: string;
+  /** The breakdown label the list below the chart is filtered to, if any. */
+  selected?: string | null;
+  /**
+   * Called with a breakdown label when its bar or row is clicked. Supplying it
+   * is what makes the breakdown interactive; without it the panel is a
+   * read-only summary as before.
+   */
+  onSelect?: (label: string) => void;
   loading?: boolean;
   /** Shown in place of the chart and breakdown before anything is loaded. */
   emptyMessage?: string;
@@ -67,6 +81,13 @@ const TooltipCard = ({ active, payload }: any) => {
         <span className="h-2 w-2 rounded-sm" style={{ background: LATE }} />
         Late: {row.late}
       </div>
+      {row.firstTime && (
+        <div className="mt-1 border-t border-gray-100 pt-1 text-gray-500 dark:border-gray-700 dark:text-gray-400">
+          {row.lastTime && row.lastTime !== row.firstTime
+            ? `Arrivals ${row.firstTime} - ${row.lastTime}`
+            : `Arrival ${row.firstTime}`}
+        </div>
+      )}
     </div>
   );
 };
@@ -76,6 +97,9 @@ const AttendanceOverview: React.FC<Props> = ({
   breakdown,
   breakdownTotal,
   chartCaption,
+  breakdownCaption = "Share of the enrolled workforce",
+  selected = null,
+  onSelect,
   loading = false,
   emptyMessage,
 }) => {
@@ -163,7 +187,7 @@ const AttendanceOverview: React.FC<Props> = ({
           Current breakdown
         </p>
         <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">
-          Share of the enrolled workforce
+          {breakdownCaption}
         </p>
       </div>
 
@@ -178,13 +202,32 @@ const AttendanceOverview: React.FC<Props> = ({
           const pct = breakdownTotal
             ? (row.count / breakdownTotal) * 100
             : 0;
-          return pct > 0 ? (
+          if (pct <= 0) return null;
+          const title = `${row.label}: ${row.count}`;
+          return onSelect ? (
+            <button
+              key={row.label}
+              type="button"
+              onClick={() => onSelect(row.label)}
+              aria-pressed={selected === row.label}
+              aria-label={`Show ${row.label}`}
+              title={title}
+              className="transition-opacity hover:opacity-80"
+              style={{
+                width: `${pct}%`,
+                background: row.tone,
+                // The unselected slices dim so the chosen one reads as chosen
+                // without moving or resizing anything.
+                opacity: selected && selected !== row.label ? 0.35 : 1,
+              }}
+            />
+          ) : (
             <div
               key={row.label}
               style={{ width: `${pct}%`, background: row.tone }}
-              title={`${row.label}: ${row.count}`}
+              title={title}
             />
-          ) : null;
+          );
         })}
       </div>
 
@@ -192,11 +235,9 @@ const AttendanceOverview: React.FC<Props> = ({
         const pct = breakdownTotal
           ? Math.round((row.count / breakdownTotal) * 100)
           : 0;
-        return (
-          <div
-            key={row.label}
-            className="flex items-center justify-between border-b border-gray-100 py-2.5 last:border-b-0 dark:border-gray-700"
-          >
+        const active = selected === row.label;
+        const body = (
+          <>
             <div className="flex items-center gap-2.5 text-[13px] text-gray-900 dark:text-gray-100">
               <span
                 className="h-2 w-2 shrink-0 rounded-sm"
@@ -212,9 +253,37 @@ const AttendanceOverview: React.FC<Props> = ({
                 {pct}%
               </span>
             </div>
+          </>
+        );
+        const shell =
+          "flex items-center justify-between border-b border-gray-100 py-2.5 last:border-b-0 dark:border-gray-700";
+
+        return onSelect ? (
+          <button
+            key={row.label}
+            type="button"
+            onClick={() => onSelect(row.label)}
+            aria-pressed={active}
+            className={`${shell} w-full px-2 -mx-2 text-left rounded-md transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/40 ${
+              active ? "bg-gray-50 dark:bg-gray-700/40" : ""
+            }`}
+          >
+            {body}
+          </button>
+        ) : (
+          <div key={row.label} className={shell}>
+            {body}
           </div>
         );
         })}
+
+        {onSelect && (
+          <p className="pt-3 text-xs text-gray-400 dark:text-gray-500">
+            {selected
+              ? `Showing ${selected} below. Click again to clear.`
+              : "Click a segment to list them below."}
+          </p>
+        )}
         </>
       )}
       </div>

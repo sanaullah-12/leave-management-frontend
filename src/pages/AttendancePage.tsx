@@ -9,6 +9,9 @@ import AttendanceOverview from "../components/attendance/AttendanceOverview";
 import DeviceSettingsPanel from "../components/attendance/DeviceSettingsPanel";
 import EmployeeTable from "../components/attendance/EmployeeTable";
 import EmployeeDrawer from "../components/attendance/EmployeeDrawer";
+import DayTable from "../components/attendance/DayTable";
+import type { DayRow } from "../components/attendance/DayTable";
+import DayDrawer from "../components/attendance/DayDrawer";
 import {
   CheckCircleIcon,
   ArrowPathIcon,
@@ -20,6 +23,7 @@ import {
   ClockIcon,
   LockOpenIcon,
   CalendarDaysIcon,
+  HomeIcon,
 } from "@heroicons/react/24/outline";
 import { attendanceAPI } from "../services/api";
 import AttendanceModal from "../components/AttendanceModal";
@@ -137,7 +141,6 @@ const AttendancePage: React.FC = () => {
   const [showDevicePanel, setShowDevicePanel] = useState(false);
   // Organisation-wide totals for the dashboard, so it has figures before any
   // individual is chosen.
-  const [orgStats, setOrgStats] = useState<any>(null);
 
   // Date range state for attendance fetching (DEFAULT: last 2 months)
   const [startDate, setStartDate] = useState(() => {
@@ -527,23 +530,6 @@ const AttendancePage: React.FC = () => {
   };
 
 
-  const loadOrgStats = async (from: string, to: string) => {
-    try {
-      const response = await attendanceAPI.getAttendanceStats(from, to);
-      if (response.data?.success) setOrgStats(response.data);
-    } catch (err) {
-      // The dashboard degrades to dashes rather than blocking the page.
-      console.error("Failed to load attendance statistics:", err);
-    }
-  };
-
-  // Organisation-wide totals are admin-only on the server; see above.
-  useEffect(() => {
-    if (!currentUser || currentUser.role === "admin") {
-      loadOrgStats(startDate, endDate);
-    }
-  }, [startDate, endDate, currentUser]);
-
   /**
    * Switch which office time the figures are measured against.
    *
@@ -772,15 +758,53 @@ const AttendancePage: React.FC = () => {
       rosterFetchedFor.to !== endDate ||
       rosterFetchedFor.policy !== (viewPolicy || "official"));
 
-  /** Per-day on-time and late counts, for the stacked chart. */
+  /**
+   * Per-day on-time and late counts, for the stacked chart.
+   *
+   * The arrival times ride along so the tooltip can name the clock time behind
+   * a bar. Each employee contributes one record per day - their earliest punch
+   * - so the earliest and latest of those are the first and last arrival that
+   * day. For a single employee the two coincide and the tooltip says so.
+   */
   const dayBars = useMemo(() => {
-    const byDate: Record<string, { onTime: number; late: number }> = {};
+    const byDate: Record<
+      string,
+      {
+        onTime: number;
+        late: number;
+        firstAt: string | null;
+        firstTime: string | null;
+        lastAt: string | null;
+        lastTime: string | null;
+      }
+    > = {};
 
     Object.values(rosterAttendance).forEach((data: any) => {
       (data?.records || []).forEach((r: any) => {
-        const bucket = (byDate[r.date] ||= { onTime: 0, late: 0 });
+        const bucket = (byDate[r.date] ||= {
+          onTime: 0,
+          late: 0,
+          firstAt: null,
+          firstTime: null,
+          lastAt: null,
+          lastTime: null,
+        });
         if (r.isLate) bucket.late += 1;
         else bucket.onTime += 1;
+
+        // ISO strings sort chronologically, so no Date objects are needed.
+        const at: string | null = r.fullTimestamp || r.timestamp || null;
+        const shown: string | null = r.timeDisplay || r.time || null;
+        if (at && shown) {
+          if (!bucket.firstAt || at < bucket.firstAt) {
+            bucket.firstAt = at;
+            bucket.firstTime = shown;
+          }
+          if (!bucket.lastAt || at > bucket.lastAt) {
+            bucket.lastAt = at;
+            bucket.lastTime = shown;
+          }
+        }
       });
     });
 
@@ -802,7 +826,10 @@ const AttendancePage: React.FC = () => {
             month: "short",
             year: "numeric",
           }),
-          ...counts,
+          onTime: counts.onTime,
+          late: counts.late,
+          firstTime: counts.firstTime,
+          lastTime: counts.lastTime,
         };
       });
   }, [rosterAttendance]);
@@ -819,12 +846,12 @@ const AttendancePage: React.FC = () => {
           lateDisplay: latest?.lateDisplay || null,
           presentDays: data?.summary?.presentDays ?? null,
           status: !data
-            ? "No record"
+            ? "Absent"
             : latest
             ? latest.isLate
               ? "Late"
               : "On time"
-            : "No record",
+            : "Absent",
         };
       }),
     [rosterTargets, rosterAttendance]
@@ -832,14 +859,172 @@ const AttendancePage: React.FC = () => {
 
   /** Counts behind the summary cards and the breakdown panel. */
   const statusCounts = useMemo(() => {
-    const counts = { onTime: 0, late: 0, noRecord: 0 };
+    const counts = { onTime: 0, late: 0, absent: 0 };
     rosterRows.forEach((r) => {
       if (r.status === "Late") counts.late += 1;
       else if (r.status === "On time") counts.onTime += 1;
-      else counts.noRecord += 1;
+      else counts.absent += 1;
     });
     return counts;
   }, [rosterRows]);
+
+  /**
+   * Approved work-from-home days across the whole roster for this range.
+   *
+   * A count of employee-DAYS, not people: the other admin cards report who is
+   * in today, but a WFH day has no punch to be "latest", so counting people
+   * would report nobody. The summary each employee's response already carries
+   * is the honest figure.
+   */
+  const rosterWfhDays = useMemo(
+    () =>
+      Object.values(rosterAttendance).reduce(
+        (sum: number, data: any) => sum + (data?.summary?.wfhDays || 0),
+        0
+      ),
+    [rosterAttendance]
+  );
+
+  /**
+   * The employee's own figures for the active range.
+   *
+   * An employee sees their attendance over the range, not a snapshot of the
+   * workforce: the roster counts above describe one person's latest punch and
+   * say nothing useful when the roster is a single row. The backend already
+   * reports working days, present days, absent days and late days for the
+   * range, so those are used directly rather than recounted here.
+   */
+  const selfSummary = useMemo(() => {
+    if (isAdmin) return null;
+    const data = rosterAttendance[String(currentUser?.employeeId)];
+    const summary = data?.summary;
+    if (!summary) return null;
+
+    const presentDays = summary.presentDays ?? 0;
+    const lateDays = summary.lateDays ?? 0;
+    const wfhDays = summary.wfhDays ?? 0;
+    return {
+      workingDays: summary.totalDays ?? 0,
+      presentDays,
+      lateDays,
+      onTimeDays: Math.max(presentDays - lateDays, 0),
+      wfhDays,
+      onLeaveDays: summary.onLeaveDays ?? 0,
+      // A work from home day is a working day, so it counts as attended.
+      attendedDays: presentDays + wfhDays,
+      absentDays: summary.absentDays ?? 0,
+    };
+  }, [isAdmin, rosterAttendance, currentUser]);
+
+  /** The day an employee is looking at in the side panel, or null. */
+  const [selectedDay, setSelectedDay] = useState<DayRow | null>(null);
+
+  /**
+   * The breakdown segment the list below is filtered to, or null for all.
+   *
+   * Clicking "Late" in the breakdown is a question - who are they - and the
+   * answer is the list that is already on the page. So the click filters that
+   * list rather than opening a second view of the same rows.
+   */
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const handleBreakdownSelect = (label: string) => {
+    const next = statusFilter === label ? null : label;
+    setStatusFilter(next);
+    // The list can be below the fold; a filter nobody sees applied reads as a
+    // dead click.
+    if (next) {
+      listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  /** The employee's own response for the active range, or null. */
+  const selfData = isAdmin
+    ? null
+    : rosterAttendance[String(currentUser?.employeeId)] || null;
+
+  /**
+   * Every day of the range as its own row, newest first.
+   *
+   * Built from the calendar rather than from the punches, so a day with no
+   * record still appears - an absence is only visible if the day is listed.
+   * Days after today are left out: a day nobody has lived through cannot be
+   * attended or missed.
+   */
+  const dayRows = useMemo<DayRow[]>(() => {
+    if (isAdmin || !selfData) return [];
+
+    const byDate = new Map<string, any>();
+    (selfData.records || []).forEach((r: any) => {
+      // The backend already reduces a day to its arrival punch.
+      if (!byDate.has(r.date)) byDate.set(r.date, r);
+    });
+
+    // The approved schedule, as the server resolved it: an approved work from
+    // home or leave day is labelled as such rather than counted as an absence.
+    const scheduled: Record<string, string> = selfData.workModes || {};
+
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const now = new Date();
+    const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
+      now.getDate()
+    )}`;
+
+    const [sy, sm, sd] = startDate.split("-").map(Number);
+    const [ey, em, ed] = endDate.split("-").map(Number);
+    if ([sy, sm, sd, ey, em, ed].some(Number.isNaN)) return [];
+
+    // Walked in UTC so a negative-offset browser cannot shift a weekday.
+    const cursor = new Date(Date.UTC(sy, sm - 1, sd));
+    const last = new Date(Date.UTC(ey, em - 1, ed));
+    const rows: DayRow[] = [];
+
+    while (cursor <= last) {
+      const iso = `${cursor.getUTCFullYear()}-${pad(
+        cursor.getUTCMonth() + 1
+      )}-${pad(cursor.getUTCDate())}`;
+      if (iso > today) break;
+
+      const day = cursor.getUTCDay();
+      const isWeekend = day === 0 || day === 6;
+      const record = byDate.get(iso) || null;
+
+      rows.push({
+        date: iso,
+        dateDisplay: cursor.toLocaleDateString(undefined, {
+          timeZone: "UTC",
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        }),
+        weekday: cursor.toLocaleDateString(undefined, {
+          timeZone: "UTC",
+          weekday: "long",
+        }),
+        isWeekend,
+        arrival: record?.timeDisplay || record?.time || null,
+        lateDisplay: record?.lateDisplay || null,
+        status: record
+          ? record.isLate
+            ? "Late"
+            : "On time"
+          : scheduled[iso] === "work_from_home"
+          ? "Work from home"
+          : scheduled[iso] === "on_leave"
+          ? "On leave"
+          : isWeekend
+          ? "Weekend"
+          : "Absent",
+        workMode: scheduled[iso] || null,
+        record,
+      });
+
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    }
+
+    return rows.reverse();
+  }, [isAdmin, selfData, startDate, endDate]);
 
 
 
@@ -1022,69 +1207,130 @@ const AttendancePage: React.FC = () => {
           </div>
         )}
 
-      {/* Summary */}
+      {/* Summary. Two different questions: an admin asks who is in today,
+          an employee asks how their own range went. */}
       <AttendanceSummary
         loading={rosterLoading && !Object.keys(rosterAttendance).length}
-        items={[
-          {
-            label: isAdmin ? "Employees" : "You",
-            icon: <UserGroupIcon className="h-7 w-7" />,
-            value: rosterTargets.length || null,
-            caption: isAdmin
-              ? `Enrolled on ${selectedIP === "custom" ? customIP : selectedIP}`
-              : "Your own attendance",
-          },
-          {
-            label: "On time",
-            icon: <CheckCircleIcon className="h-7 w-7" />,
-            value: rosterFetchedFor ? statusCounts.onTime : null,
-            accent: themeAccent,
-            caption: !rosterFetchedFor
-              ? "Not fetched yet"
-              : rosterTargets.length
-              ? `${Math.round(
-                  (statusCounts.onTime / rosterTargets.length) * 100
-                )}% of workforce`
-              : undefined,
-          },
-          {
-            label: "Late",
-            icon: <ClockIcon className="h-7 w-7" />,
-            value: rosterFetchedFor ? statusCounts.late : null,
-            accent: "#b5650a",
-            caption: !rosterFetchedFor
-              ? "Not fetched yet"
-              : rosterTargets.length
-              ? `${Math.round(
-                  (statusCounts.late / rosterTargets.length) * 100
-                )}% of workforce`
-              : undefined,
-          },
-          {
-            label: "No record",
-            icon: <XCircleIcon className="h-7 w-7" />,
-            value: rosterFetchedFor ? statusCounts.noRecord : null,
-            accent: "#b42318",
-            caption: !rosterFetchedFor
-              ? "Not fetched yet"
-              : rosterTargets.length
-              ? `${Math.round(
-                  (statusCounts.noRecord / rosterTargets.length) * 100
-                )}% of workforce`
-              : undefined,
-          },
-          {
-            label: "Punches",
-            icon: <CalendarDaysIcon className="h-7 w-7" />,
-            value: orgStats ? orgStats.totalRecords : null,
-            accent: themeAccent,
-            caption: "Recorded in this range",
-          },
-        ]}
+        items={
+          isAdmin
+            ? [
+                {
+                  label: "Employees",
+                  icon: <UserGroupIcon className="h-7 w-7" />,
+                  value: rosterTargets.length || null,
+                  caption: `Enrolled on ${
+                    selectedIP === "custom" ? customIP : selectedIP
+                  }`,
+                },
+                {
+                  label: "On time",
+                  icon: <CheckCircleIcon className="h-7 w-7" />,
+                  value: rosterFetchedFor ? statusCounts.onTime : null,
+                  accent: themeAccent,
+                  caption: !rosterFetchedFor
+                    ? "Not fetched yet"
+                    : rosterTargets.length
+                    ? `${Math.round(
+                        (statusCounts.onTime / rosterTargets.length) * 100
+                      )}% of workforce`
+                    : undefined,
+                },
+                {
+                  label: "Late",
+                  icon: <ClockIcon className="h-7 w-7" />,
+                  value: rosterFetchedFor ? statusCounts.late : null,
+                  accent: "#b5650a",
+                  caption: !rosterFetchedFor
+                    ? "Not fetched yet"
+                    : rosterTargets.length
+                    ? `${Math.round(
+                        (statusCounts.late / rosterTargets.length) * 100
+                      )}% of workforce`
+                    : undefined,
+                },
+                {
+                  label: "Absent",
+                  icon: <XCircleIcon className="h-7 w-7" />,
+                  value: rosterFetchedFor ? statusCounts.absent : null,
+                  accent: "#b42318",
+                  caption: !rosterFetchedFor
+                    ? "Not fetched yet"
+                    : rosterTargets.length
+                    ? `${Math.round(
+                        (statusCounts.absent / rosterTargets.length) * 100
+                      )}% of workforce`
+                    : undefined,
+                },
+                {
+                  label: "Work from home",
+                  icon: <HomeIcon className="h-7 w-7" />,
+                  value: rosterFetchedFor ? rosterWfhDays : null,
+                  accent: "#4c3fc7",
+                  caption: !rosterFetchedFor
+                    ? "Not fetched yet"
+                    : "Approved days in this range",
+                },
+              ]
+            : [
+                {
+                  label: "Attendance days",
+                  icon: <CalendarDaysIcon className="h-7 w-7" />,
+                  value: selfSummary ? selfSummary.attendedDays : null,
+                  accent: themeAccent,
+                  caption: selfSummary
+                    ? `of ${selfSummary.workingDays} working days in this range`
+                    : "Not fetched yet",
+                },
+                {
+                  label: "On time",
+                  icon: <CheckCircleIcon className="h-7 w-7" />,
+                  value: selfSummary ? selfSummary.onTimeDays : null,
+                  accent: themeAccent,
+                  caption: selfSummary
+                    ? `Arrived by ${formatCutoff(
+                        lateTimeSettings.effectiveCutoffTime ||
+                          lateTimeSettings.cutoffTime
+                      )}`
+                    : "Not fetched yet",
+                },
+                {
+                  label: "Late",
+                  icon: <ClockIcon className="h-7 w-7" />,
+                  value: selfSummary ? selfSummary.lateDays : null,
+                  accent: "#b5650a",
+                  caption: selfSummary
+                    ? `Arrived after ${formatCutoff(
+                        lateTimeSettings.effectiveCutoffTime ||
+                          lateTimeSettings.cutoffTime
+                      )}`
+                    : "Not fetched yet",
+                },
+                {
+                  label: "Absent",
+                  icon: <XCircleIcon className="h-7 w-7" />,
+                  value: selfSummary ? selfSummary.absentDays : null,
+                  accent: "#b42318",
+                  caption: selfSummary
+                    ? "Working days with no punch"
+                    : "Not fetched yet",
+                },
+                {
+                  label: "Work from home",
+                  icon: <HomeIcon className="h-7 w-7" />,
+                  value: selfSummary ? selfSummary.wfhDays : null,
+                  accent: "#4c3fc7",
+                  caption: selfSummary
+                    ? "Approved days worked remotely"
+                    : "Not fetched yet",
+                },
+              ]
+        }
       />
 
       {/* Overview: trend beside the current split */}
       <AttendanceOverview
+        selected={statusFilter}
+        onSelect={handleBreakdownSelect}
         loading={rosterLoading && !dayBars.length}
         emptyMessage={
           rosterFetchedFor ? undefined : "Press Fetch attendance to load"
@@ -1096,14 +1342,56 @@ const AttendancePage: React.FC = () => {
                 lateTimeSettings.effectiveCutoffTime ||
                   lateTimeSettings.cutoffTime
               )}`
-            : "Press Fetch attendance to load the workforce"
+            : isAdmin
+            ? "Press Fetch attendance to load the workforce"
+            : "Press Fetch attendance to load your record"
         }
-        breakdownTotal={rosterTargets.length}
-        breakdown={[
-          { label: "On time", count: statusCounts.onTime, tone: themeAccent },
-          { label: "Late", count: statusCounts.late, tone: "#b5650a" },
-          { label: "No record", count: statusCounts.noRecord, tone: "#b42318" },
-        ]}
+        breakdownCaption={
+          isAdmin
+            ? "Share of the enrolled workforce"
+            : "Share of your working days in this range"
+        }
+        breakdownTotal={
+          isAdmin ? rosterTargets.length : selfSummary?.workingDays ?? 0
+        }
+        breakdown={
+          isAdmin
+            ? [
+                {
+                  label: "On time",
+                  count: statusCounts.onTime,
+                  tone: themeAccent,
+                },
+                { label: "Late", count: statusCounts.late, tone: "#b5650a" },
+                {
+                  label: "Absent",
+                  count: statusCounts.absent,
+                  tone: "#b42318",
+                },
+              ]
+            : [
+                {
+                  label: "On time",
+                  count: selfSummary?.onTimeDays ?? 0,
+                  tone: themeAccent,
+                },
+                {
+                  label: "Late",
+                  count: selfSummary?.lateDays ?? 0,
+                  tone: "#b5650a",
+                },
+                {
+                  label: "Work from home",
+                  count: selfSummary?.wfhDays ?? 0,
+                  tone: "#4c3fc7",
+                },
+                {
+                  label: "Absent",
+                  count: selfSummary?.absentDays ?? 0,
+                  tone: "#b42318",
+                },
+              ]
+        }
       />
 
       {/* Toolbar */}
@@ -1196,13 +1484,39 @@ const AttendancePage: React.FC = () => {
         formatCutoff={formatCutoff}
       />
 
-      {/* Roster */}
-      <EmployeeTable
-        showFilters={isAdmin}
-        rows={rosterRows as any}
-        loading={isFetchingEmployees || rosterLoading}
-        onSelect={(emp) => handleEmployeeClick(emp as any)}
-      />
+      {/* The roster for an admin; an employee's own days for everyone else.
+          Both are what the breakdown panel filters. */}
+      <div ref={listRef} className="scroll-mt-4">
+        {isAdmin ? (
+          <EmployeeTable
+            rows={rosterRows as any}
+            loading={isFetchingEmployees || rosterLoading}
+            onSelect={(emp) => handleEmployeeClick(emp as any)}
+            statusFilter={statusFilter ?? "All"}
+            onStatusFilterChange={(next) =>
+              setStatusFilter(next === "All" ? null : next)
+            }
+          />
+        ) : (
+          <DayTable
+            rows={dayRows}
+            loading={rosterLoading}
+            onSelect={setSelectedDay}
+            statusFilter={statusFilter}
+            onClearFilter={() => setStatusFilter(null)}
+          />
+        )}
+      </div>
+
+      {/* One day, in full */}
+      {selectedDay && (
+        <DayDrawer
+          row={selectedDay}
+          policy={selfData?.lateTimePolicy}
+          source={selfData?.source}
+          onClose={() => setSelectedDay(null)}
+        />
+      )}
 
       {/* Employee detail panel */}
       {modalEmployee && (

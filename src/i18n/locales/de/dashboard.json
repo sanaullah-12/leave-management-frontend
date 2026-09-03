@@ -18,7 +18,8 @@
     "leaveUtilization": "Urlaubsnutzung",
     "ofDecidedRequests": "der entschiedenen Anträge",
     "pendingLoad": "Offene Last",
-    "remaining": "Verbleibend"
+    "remaining": "Verbleibend",
+    "totalBalance": "Gesamtsaldo"
   },
   "greeting": {
     "afternoon": "Guten Tag",

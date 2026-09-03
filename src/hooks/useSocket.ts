@@ -8,6 +8,7 @@ import { useAppDispatch } from "../store/hooks";
 import { setConnected, setPresence, markEvent } from "../store/realtimeSlice";
 import { NOTIF_KEY } from "./useNotifications";
 import { VOICES_KEY, VOICE_STATS_KEY } from "./useEmployeeVoice";
+import { WFH_KEY, WFH_STATS_KEY } from "./useWorkFromHome";
 
 /**
  * useSocket
@@ -59,6 +60,8 @@ export function useSocket() {
       NOTIF_KEY as unknown as unknown[],
       VOICES_KEY as unknown as unknown[],
       VOICE_STATS_KEY as unknown as unknown[],
+      WFH_KEY as unknown as unknown[],
+      WFH_STATS_KEY as unknown as unknown[],
       ["recent-leaves"],
       ["leaves"],
       ["leave-balance"],
@@ -105,6 +108,19 @@ export function useSocket() {
       ])
     );
 
+    // -- Work From Home ----------------------------------------------------
+    // An approved day changes what attendance reports, so the attendance and
+    // dashboard caches go with the request lists.
+    const invalidateWfh = () =>
+      invalidate([
+        WFH_KEY as unknown as unknown[],
+        WFH_STATS_KEY as unknown as unknown[],
+        ["attendance"],
+        ["dashboard-stats"],
+      ]);
+    socket.on(SOCKET_EVENTS.WFH_NEW, invalidateWfh);
+    socket.on(SOCKET_EVENTS.WFH_REVIEWED, invalidateWfh);
+
     // -- Employee Voice ----------------------------------------------------
     socket.on(SOCKET_EVENTS.VOICE_NEW, () =>
       invalidate([
@@ -139,6 +155,13 @@ export function useSocket() {
         keys.push(
           VOICES_KEY as unknown as unknown[],
           VOICE_STATS_KEY as unknown as unknown[]
+        );
+      }
+      if (p?.scope === "wfh") {
+        keys.push(
+          WFH_KEY as unknown as unknown[],
+          WFH_STATS_KEY as unknown as unknown[],
+          ["attendance"]
         );
       }
       invalidate(keys);

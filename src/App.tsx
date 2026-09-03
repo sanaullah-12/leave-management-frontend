@@ -63,6 +63,7 @@ const ReportsPage = React.lazy(() => import("./pages/ReportsPage"));
 const NotificationsPage = React.lazy(() => import("./pages/NotificationsPage"));
 const AnnouncementsPage = React.lazy(() => import("./pages/AnnouncementsPage"));
 const EmployeeVoicePage = React.lazy(() => import("./pages/EmployeeVoicePage"));
+const WorkFromHomePage = React.lazy(() => import("./pages/WorkFromHomePage"));
 const DocumentStudioPage = React.lazy(
   () => import("./pages/DocumentStudioPage")
 );
@@ -182,6 +183,7 @@ const App: React.FC = () => {
                   <Route path="notifications" element={<NotificationsPage />} />
                   <Route path="announcements" element={<AnnouncementsPage />} />
                   <Route path="employee-voice" element={<EmployeeVoicePage />} />
+                  <Route path="work-from-home" element={<WorkFromHomePage />} />
                   <Route path="document-studio" element={<DocumentStudioPage />} />
                   <Route path="payroll" element={<PayrollLayout />}>
                     <Route index element={<PayrollDashboardPage />} />

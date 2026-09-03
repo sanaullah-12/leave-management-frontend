@@ -8,6 +8,8 @@ export const SOCKET_EVENTS = {
   NOTIFICATION_NEW: "notification:new",
   LEAVE_NEW: "leave:new",
   LEAVE_REVIEWED: "leave:reviewed",
+  WFH_NEW: "wfh:new",
+  WFH_REVIEWED: "wfh:reviewed",
   VOICE_NEW: "voice:new",
   VOICE_UPDATED: "voice:updated",
   ANNOUNCEMENT_NEW: "announcement:new",

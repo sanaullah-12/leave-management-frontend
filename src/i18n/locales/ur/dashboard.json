@@ -18,7 +18,8 @@
     "leaveUtilization": "چھٹیوں کا استعمال",
     "ofDecidedRequests": "فیصلہ شدہ درخواستوں میں سے",
     "pendingLoad": "زیر التوا بوجھ",
-    "remaining": "باقی"
+    "remaining": "باقی",
+    "totalBalance": "کل بیلنس"
   },
   "greeting": {
     "afternoon": "سہ پہر بخیر",
