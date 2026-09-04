@@ -10,13 +10,21 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
 
 /**
- * The overview pair: a stacked bar chart of the last days beside the current
- * split by status.
+ * The overview pair: a chart of the range beside the split by status.
  *
- * Two series, so a legend is always present and each is named in the tooltip -
+ * The chart takes one of two forms, because the two readers are asking
+ * different questions. A workforce reader asks "how did the days go" and gets
+ * a stacked bar per day. One person asks "how did my range go" - a per-day bar
+ * chart of a single employee is a row of bars of height one, which says
+ * nothing - so they get a donut of the same range instead.
+ *
+ * Either way every series is named in the tooltip and repeated in a legend;
  * identity never rests on the fill colour alone.
  */
 
@@ -46,6 +54,15 @@ interface Props {
   chartCaption: string;
   /** What the breakdown percentages are a share of. */
   breakdownCaption?: string;
+  /**
+   * "bars" - one stacked bar per day, for a workforce.
+   * "pie"  - a donut of the range's composition, for one person.
+   */
+  chart?: "bars" | "pie";
+  /** Big reading in the middle of the donut, e.g. "86%". */
+  centerValue?: string;
+  /** What that reading is, e.g. "Attended". */
+  centerLabel?: string;
   /** The breakdown label the list below the chart is filtered to, if any. */
   selected?: string | null;
   /**
@@ -98,12 +115,20 @@ const AttendanceOverview: React.FC<Props> = ({
   breakdownTotal,
   chartCaption,
   breakdownCaption = "Share of the enrolled workforce",
+  chart = "bars",
+  centerValue,
+  centerLabel,
   selected = null,
   onSelect,
   loading = false,
   emptyMessage,
 }) => {
   const accent = useThemeAccent(600);
+
+  // A zero slice draws nothing but still adds a legend entry, so it is dropped
+  // rather than listed as a category the reader was never in.
+  const pieSlices = breakdown.filter((row) => row.count > 0);
+  const pieTotal = pieSlices.reduce((sum, row) => sum + row.count, 0);
 
   return (
   <section className="grid grid-cols-1 gap-3 lg:grid-cols-[1.6fr_1fr]">
@@ -119,13 +144,76 @@ const AttendanceOverview: React.FC<Props> = ({
         </p>
       </div>
 
-      <div style={{ width: "100%", height: 220 }}>
-        {loading || !days.length ? (
+      <div style={{ width: "100%", height: 220 }} className="relative">
+        {loading || (chart === "pie" ? !pieSlices.length : !days.length) ? (
           <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-gray-200 text-sm text-gray-400 dark:border-gray-700">
             {loading
               ? "Loading attendance..."
               : emptyMessage || "No attendance in this range."}
           </div>
+        ) : chart === "pie" ? (
+          <>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieSlices}
+                  dataKey="count"
+                  nameKey="label"
+                  innerRadius={58}
+                  outerRadius={84}
+                  paddingAngle={2}
+                  stroke="none"
+                  onClick={(slice: any) => {
+                    const label = slice?.label || slice?.payload?.label;
+                    if (onSelect && label) onSelect(label);
+                  }}
+                  className={onSelect ? "cursor-pointer" : undefined}
+                >
+                  {pieSlices.map((slice) => (
+                    <Cell
+                      key={slice.label}
+                      fill={slice.tone}
+                      // The chosen slice keeps its colour and the rest recede,
+                      // so the selection reads without anything moving.
+                      opacity={
+                        selected && selected !== slice.label ? 0.35 : 1
+                      }
+                    />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value: any, name: any) => [
+                    `${value} day${Number(value) === 1 ? "" : "s"}${
+                      pieTotal
+                        ? ` (${Math.round((Number(value) / pieTotal) * 100)}%)`
+                        : ""
+                    }`,
+                    name,
+                  ]}
+                  contentStyle={{
+                    borderRadius: 8,
+                    border: "1px solid rgb(229 232 237)",
+                    fontSize: 12.5,
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+
+            {(centerValue || centerLabel) && (
+              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                {centerValue && (
+                  <span className="text-2xl font-bold tabular-nums text-gray-900 dark:text-white">
+                    {centerValue}
+                  </span>
+                )}
+                {centerLabel && (
+                  <span className="text-[11px] text-gray-400">
+                    {centerLabel}
+                  </span>
+                )}
+              </div>
+            )}
+          </>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
@@ -165,17 +253,34 @@ const AttendanceOverview: React.FC<Props> = ({
       </div>
 
       <div className="mt-2 flex flex-wrap gap-4">
-        <span className="flex items-center gap-1.5 text-[12.5px] text-gray-600 dark:text-gray-300">
-          <span
-            className="h-2 w-2 rounded-sm"
-            style={{ background: ON_TIME }}
-          />
-          On time
-        </span>
-        <span className="flex items-center gap-1.5 text-[12.5px] text-gray-600 dark:text-gray-300">
-          <span className="h-2 w-2 rounded-sm" style={{ background: LATE }} />
-          Late
-        </span>
+        {chart === "pie" ? (
+          pieSlices.map((slice) => (
+            <span
+              key={slice.label}
+              className="flex items-center gap-1.5 text-[12.5px] text-gray-600 dark:text-gray-300"
+            >
+              <span
+                className="h-2 w-2 rounded-sm"
+                style={{ background: slice.tone }}
+              />
+              {slice.label}
+            </span>
+          ))
+        ) : (
+          <>
+            <span className="flex items-center gap-1.5 text-[12.5px] text-gray-600 dark:text-gray-300">
+              <span
+                className="h-2 w-2 rounded-sm"
+                style={{ background: ON_TIME }}
+              />
+              On time
+            </span>
+            <span className="flex items-center gap-1.5 text-[12.5px] text-gray-600 dark:text-gray-300">
+              <span className="h-2 w-2 rounded-sm" style={{ background: LATE }} />
+              Late
+            </span>
+          </>
+        )}
       </div>
     </div>
 

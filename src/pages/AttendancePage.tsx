@@ -1331,6 +1331,17 @@ const AttendancePage: React.FC = () => {
       <AttendanceOverview
         selected={statusFilter}
         onSelect={handleBreakdownSelect}
+        // One person's days per day is a row of bars of height one; the same
+        // range as a donut is the reading that means something.
+        chart={isAdmin ? "bars" : "pie"}
+        centerValue={
+          !isAdmin && selfSummary && selfSummary.workingDays
+            ? `${Math.round(
+                (selfSummary.attendedDays / selfSummary.workingDays) * 100
+              )}%`
+            : undefined
+        }
+        centerLabel={!isAdmin && selfSummary ? "Attended" : undefined}
         loading={rosterLoading && !dayBars.length}
         emptyMessage={
           rosterFetchedFor ? undefined : "Press Fetch attendance to load"
@@ -1338,10 +1349,15 @@ const AttendancePage: React.FC = () => {
         days={dayBars}
         chartCaption={
           rosterFetchedFor
-            ? `On-time and late arrivals per day, measured against ${formatCutoff(
-                lateTimeSettings.effectiveCutoffTime ||
-                  lateTimeSettings.cutoffTime
-              )}`
+            ? isAdmin
+              ? `On-time and late arrivals per day, measured against ${formatCutoff(
+                  lateTimeSettings.effectiveCutoffTime ||
+                    lateTimeSettings.cutoffTime
+                )}`
+              : `How each of your working days was worked, measured against ${formatCutoff(
+                  lateTimeSettings.effectiveCutoffTime ||
+                    lateTimeSettings.cutoffTime
+                )}`
             : isAdmin
             ? "Press Fetch attendance to load the workforce"
             : "Press Fetch attendance to load your record"
