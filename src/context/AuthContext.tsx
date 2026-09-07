@@ -2,6 +2,8 @@ import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { authAPI } from '../services/api';
 import { markKnownUser } from '../utils/knownUser';
 import { detachOnLogout } from '../services/pushNotifications';
+import { useQueryClient } from '@tanstack/react-query';
+import { clearAttendanceCache } from '../lib/attendanceCache';
 
 // Inline type definitions
 interface User {
@@ -96,6 +98,7 @@ const initialState: AuthState = {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
+  const queryClient = useQueryClient();
 
   // Validate the stored session against the backend on app start.
   // Trusting localStorage blindly makes the app *look* logged in with a stale/expired
@@ -191,6 +194,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    // Attendance is mirrored into localStorage so it survives a reload. That
+    // makes it outlive the session too, so it has to go on the way out: the
+    // next person to sign in on this browser must not find the previous one's
+    // roster sitting on the attendance screen.
+    clearAttendanceCache(queryClient);
+
     // A push subscription belongs to a person, not to a machine. Left in place,
     // the next person to log into this browser would be pushed the previous
     // one's attendance and leave notifications.

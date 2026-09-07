@@ -3,8 +3,10 @@ import AppLogo from "../components/AppLogo";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   employeeAttendanceKey,
+  loadAttendanceView,
   machineEmployeesKey,
   rosterAttendanceKey,
+  saveAttendanceView,
 } from "../lib/attendanceCache";
 import DatePicker from "../components/ui/DatePicker";
 import { useThemeAccent } from "../hooks/useThemeAccent";
@@ -153,17 +155,30 @@ const AttendancePage: React.FC = () => {
   // Organisation-wide totals for the dashboard, so it has figures before any
   // individual is chosen.
 
-  // Date range state for attendance fetching (DEFAULT: last 2 months)
-  const [startDate, setStartDate] = useState(() => {
-    // Default to 2 months ago
-    const date = new Date();
-    date.setMonth(date.getMonth() - 2);
-    return date.toISOString().split("T")[0];
-  });
-  const [endDate, setEndDate] = useState(() => {
-    // Default to today
-    return new Date().toISOString().split("T")[0];
-  });
+  /**
+   * The range being reported on. Restored from the last visit before falling
+   * back to the default two months.
+   *
+   * Restoring it is not a convenience - the attendance cache is keyed by this
+   * range, so a page that comes back on its default range looks up a question
+   * nobody asked, misses, and draws an empty table. An empty table renders as
+   * every employee absent, which is how a cache hit and a bad day look
+   * identical to whoever is reading it.
+   */
+  const [startDate, setStartDate] = useState(
+    () =>
+      loadAttendanceView(currentUser?.id)?.startDate ??
+      (() => {
+        const date = new Date();
+        date.setMonth(date.getMonth() - 2);
+        return date.toISOString().split("T")[0];
+      })()
+  );
+  const [endDate, setEndDate] = useState(
+    () =>
+      loadAttendanceView(currentUser?.id)?.endDate ??
+      new Date().toISOString().split("T")[0]
+  );
 
   // Modal state
   // Retained so the existing open/close flow is untouched; the slide-over is
@@ -194,6 +209,12 @@ const AttendancePage: React.FC = () => {
       loadMachineStatus(selectedIP);
     }
   }, [selectedIP, currentUser]);
+
+  /** Remember which question this screen is asking, for the next visit. */
+  useEffect(() => {
+    saveAttendanceView(currentUser?.id, { startDate, endDate, policy: viewPolicy });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startDate, endDate, viewPolicy]);
 
   /**
    * Put the device roster back after a navigation.
