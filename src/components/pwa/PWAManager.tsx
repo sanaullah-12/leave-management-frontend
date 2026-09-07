@@ -1,6 +1,6 @@
 import React from "react";
 import { AnimatePresence } from "framer-motion";
-import usePWA from "../../hooks/usePWA";
+import { usePWAState } from "../../providers/PWAProvider";
 import InstallPrompt from "./InstallPrompt";
 import UpdateNotice from "./UpdateNotice";
 import OfflineIndicator from "./OfflineIndicator";
@@ -10,15 +10,19 @@ import OfflineIndicator from "./OfflineIndicator";
  * ----------
  * The single mount point for everything progressive-web-app related.
  *
- * It is the only place that calls usePWA(), and therefore the only place that
- * registers the service worker: useRegisterSW registers once per call site, so
- * a second consumer anywhere in the tree would register a second worker.
- * Components below receive state as props instead of reaching for the hook.
+ * The single usePWA() call - and therefore the single service-worker
+ * registration - now lives in PWAProvider, because the "Get app" button in
+ * the header needs the same state and useRegisterSW registers once per call
+ * site. This reads that shared state; components below still receive it as
+ * props rather than reaching for it themselves.
  *
  * Mounted once, near the root, outside the router - installation and updates
  * are app-wide concerns and must not unmount on navigation.
  */
 const PWAManager: React.FC = () => {
+  const pwa = usePWAState();
+  if (!pwa) return null;
+
   const {
     canInstall,
     isInstalled,
@@ -28,7 +32,7 @@ const PWAManager: React.FC = () => {
     promptInstall,
     dismiss,
     applyUpdate,
-  } = usePWA();
+  } = pwa;
 
   // Chrome and Firefox on iOS cannot add to the home screen at all - only
   // Safari can - so the manual instructions would be a dead end there.

@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import Avatar from "./Avatar";
 import MobileTabBar from "./MobileTabBar";
 import NotificationBell from "./NotificationBell";
+import GetAppButton from "./pwa/GetAppButton";
 import BrandedLoader from "./BrandedLoader";
 import { RouteFallback } from "./Skeletons";
 import AppLogo from "./AppLogo";
@@ -601,6 +602,8 @@ const Layout: React.FC = () => {
               <PaintBrushIcon className="h-[21px] w-[21px]" />
             </button>
             <NotificationBell />
+            {/* Icon only here: the mobile header has to stay within 320px. */}
+            <GetAppButton compact className="ml-1 !px-2.5 !py-2" />
             <button
               onClick={() => setMobileOpen(true)}
               className="flex h-11 w-11 items-center justify-center rounded-xl text-gray-600 active:bg-black/5 dark:text-gray-300 dark:active:bg-white/10"
@@ -628,6 +631,9 @@ const Layout: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center space-x-4">
+          {/* Renders nothing once installed, or where the browser cannot
+              install at all. */}
+          <GetAppButton />
           <LanguageSwitcher />
           <NotificationBell />
           <div className="h-8 w-px bg-gray-200 dark:bg-gray-700" />
