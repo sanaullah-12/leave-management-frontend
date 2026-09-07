@@ -6,7 +6,11 @@ import {
   Navigate,
 } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { configureAttendanceCache } from "./lib/attendanceCache";
+import {
+  configureAttendanceCache,
+  hydrateAttendanceCache,
+  startAttendanceCachePersistence,
+} from "./lib/attendanceCache";
 import { MotionConfig } from "framer-motion";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
@@ -107,6 +111,11 @@ const queryClient = new QueryClient({
 // is one request per employee, and the default would discard it the moment
 // somebody looked at another page. See lib/attendanceCache.ts.
 configureAttendanceCache(queryClient);
+
+// Put the last session's attendance back before the first render, and keep
+// mirroring it, so a reload does not start from an empty table either.
+hydrateAttendanceCache(queryClient);
+startAttendanceCachePersistence(queryClient);
 
 const App: React.FC = () => {
   return (
