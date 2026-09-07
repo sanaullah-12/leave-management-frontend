@@ -23,6 +23,7 @@ import Layout from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
 import LogoLoader from "./components/LogoLoader";
 import PWAManager from "./components/pwa/PWAManager";
+import PWAProvider from "./providers/PWAProvider";
 
 /* ------------------------------------------------------------------ */
 /*  Route-level code splitting                                         */
@@ -127,6 +128,10 @@ const App: React.FC = () => {
         <AuthProvider>
           <RealtimeProvider>
           <MotionConfig reducedMotion="user">
+            {/* Wraps the router as well as the surfaces below, so the header's
+                "Get app" button reads the same install state without a second
+                usePWA() call registering a second service worker. */}
+            <PWAProvider>
             <Router>
             <div className="App">
               <Toaster
@@ -226,6 +231,7 @@ const App: React.FC = () => {
                 they are app-wide and must not remount on navigation. This is
                 also the only place the service worker is registered. */}
             <PWAManager />
+            </PWAProvider>
           </MotionConfig>
           </RealtimeProvider>
         </AuthProvider>

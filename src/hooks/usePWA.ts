@@ -86,9 +86,26 @@ export interface PWAState {
 // full reload.
 const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
 
+/**
+ * The install event index.html stashed before the app loaded.
+ *
+ * Chrome fires `beforeinstallprompt` once, as soon as the install criteria
+ * are met - usually before this bundle has parsed. Reading the stash is what
+ * makes the install button appear at all on a normal page load; a listener
+ * added here alone is simply too late.
+ */
+const stashedInstallEvent = (): BeforeInstallPromptEvent | null => {
+  if (typeof window === "undefined") return null;
+  return (
+    ((window as unknown as Record<string, unknown>).__nexoraInstallEvent as
+      | BeforeInstallPromptEvent
+      | null) || null
+  );
+};
+
 export const usePWA = (): PWAState => {
   const [deferredPrompt, setDeferredPrompt] =
-    useState<BeforeInstallPromptEvent | null>(null);
+    useState<BeforeInstallPromptEvent | null>(stashedInstallEvent);
   const [isInstalled, setIsInstalled] = useState<boolean>(detectStandalone);
   const [isDismissed, setIsDismissed] = useState<boolean>(() => {
     try {
@@ -146,6 +163,16 @@ export const usePWA = (): PWAState => {
       setIsInstalled(true);
     };
 
+    // Fired by the early capture in index.html when it stashes an event that
+    // arrived before React mounted.
+    const onStashed = () => setDeferredPrompt(stashedInstallEvent());
+
+    // And read whatever is already stashed, for the usual case where the
+    // event arrived while the bundle was still downloading.
+    const alreadyStashed = stashedInstallEvent();
+    if (alreadyStashed) setDeferredPrompt(alreadyStashed);
+
+    window.addEventListener("nexora:installable", onStashed);
     window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
     window.addEventListener("appinstalled", onInstalled);
 
@@ -159,6 +186,7 @@ export const usePWA = (): PWAState => {
     displayMode.addEventListener("change", onDisplayModeChange);
 
     return () => {
+      window.removeEventListener("nexora:installable", onStashed);
       window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
       window.removeEventListener("appinstalled", onInstalled);
       displayMode.removeEventListener("change", onDisplayModeChange);
@@ -174,6 +202,7 @@ export const usePWA = (): PWAState => {
     // The event cannot be reused whatever the user chose. Chrome fires a fresh
     // one later if the app is still installable.
     setDeferredPrompt(null);
+    (window as unknown as Record<string, unknown>).__nexoraInstallEvent = null;
 
     if (outcome === "accepted") {
       setIsInstalled(true);

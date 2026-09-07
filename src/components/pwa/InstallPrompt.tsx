@@ -14,9 +14,10 @@ import AppLogo from "../AppLogo";
  * The "Install Nexora" surface.
  *
  * Purely presentational: every piece of state arrives as a prop from
- * {@link PWAManager}, which owns the single usePWA() instance. This component
- * deliberately calls no PWA hook of its own - useRegisterSW registers a service
- * worker per call site, so more than one consumer would register twice.
+ * {@link PWAManager}, which reads it from PWAProvider - the single usePWA()
+ * call site. This component deliberately calls no PWA hook of its own:
+ * useRegisterSW registers a service worker per call site, so more than one
+ * consumer would register twice.
  *
  * Two shapes, because the platforms differ:
  *   - Android/desktop get a real button wired to the native prompt.

@@ -68,6 +68,30 @@
       href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap"
       rel="stylesheet"
     />
+    <!--
+      Catch the install prompt before the app exists.
+
+      Chrome fires `beforeinstallprompt` as soon as the install criteria are
+      met, which is routinely before the React bundle has finished parsing.
+      It fires once and is never re-fired, so a listener added later in a
+      useEffect misses it outright - and the install button then never
+      appears, on a browser that was perfectly willing to install.
+
+      Stashing it here costs nothing and is the only place early enough.
+      usePWA picks it up on mount.
+    -->
+    <script>
+      window.__nexoraInstallEvent = null;
+      window.addEventListener('beforeinstallprompt', function (event) {
+        // Chrome shows its own mini-infobar unless the event is cancelled.
+        event.preventDefault();
+        window.__nexoraInstallEvent = event;
+        window.dispatchEvent(new Event('nexora:installable'));
+      });
+      window.addEventListener('appinstalled', function () {
+        window.__nexoraInstallEvent = null;
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
