@@ -3,6 +3,7 @@ import AppLogo from "../components/AppLogo";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   employeeAttendanceKey,
+  machineEmployeesKey,
   rosterAttendanceKey,
 } from "../lib/attendanceCache";
 import DatePicker from "../components/ui/DatePicker";
@@ -194,6 +195,24 @@ const AttendancePage: React.FC = () => {
     }
   }, [selectedIP, currentUser]);
 
+  /**
+   * Put the device roster back after a navigation.
+   *
+   * Without this the attendance restored below has nobody to belong to: the
+   * table renders one row per enrolled employee, so an empty list draws an
+   * empty table no matter how much is cached behind it. Nothing is fetched
+   * here - reading the device needs a live connection to it, which is exactly
+   * why the answer is worth keeping.
+   */
+  useEffect(() => {
+    const ip = selectedIP === "custom" ? customIP : selectedIP;
+    if (!ip) return;
+
+    const cached = queryClient.getQueryData<Employee[]>(machineEmployeesKey(ip));
+    if (cached?.length) setEmployees(cached);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedIP, customIP]);
+
   // Load late time settings
   useEffect(() => {
     loadLateTimeSettings();
@@ -378,6 +397,10 @@ const AttendancePage: React.FC = () => {
         );
 
         setEmployees(sortedEmployees);
+        // Kept with the attendance it labels. Reading the device is the slow,
+        // stateful part of this page - it needs a live connection to the unit -
+        // so losing the list on every navigation was what emptied the table.
+        queryClient.setQueryData(machineEmployeesKey(ip), sortedEmployees);
         setSuccess(
           `Fetched ${response.data.count} employees from machine (sorted by UserID)`
         );

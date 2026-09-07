@@ -23,6 +23,7 @@ import type { QueryClient } from "@tanstack/react-query";
 /** Namespace roots, so cache defaults and invalidation can match on prefix. */
 export const EMPLOYEE_ATTENDANCE_ROOT = "employee-attendance";
 export const ROSTER_ATTENDANCE_ROOT = "roster-attendance";
+export const MACHINE_EMPLOYEES_ROOT = "machine-employees";
 
 /** "official" rather than undefined, so the admin's saved rule keys stably. */
 const policyKey = (policy?: string | null) => policy || "official";
@@ -41,6 +42,17 @@ export const rosterAttendanceKey = (
   to: string,
   policy?: string | null
 ) => [ROSTER_ATTENDANCE_ROOT, from, to, policyKey(policy)];
+
+/**
+ * Who is enrolled on one device.
+ *
+ * Cached for the same reason as the attendance itself, and it matters more
+ * than it looks: the roster table renders one row per enrolled employee, so
+ * an empty list draws an empty table however much attendance is cached
+ * behind it. Restoring the records without restoring who they belong to
+ * fixes nothing an admin can see.
+ */
+export const machineEmployeesKey = (ip: string) => [MACHINE_EMPLOYEES_ROOT, ip];
 
 /**
  * How long an attendance answer is kept and how long it is trusted.
@@ -63,7 +75,11 @@ const STALE_TIME_MS = 5 * 60 * 1000;
  * created it. Called from App.tsx where the QueryClient is built.
  */
 export function configureAttendanceCache(client: QueryClient): void {
-  for (const root of [EMPLOYEE_ATTENDANCE_ROOT, ROSTER_ATTENDANCE_ROOT]) {
+  for (const root of [
+    EMPLOYEE_ATTENDANCE_ROOT,
+    ROSTER_ATTENDANCE_ROOT,
+    MACHINE_EMPLOYEES_ROOT,
+  ]) {
     client.setQueryDefaults([root], {
       gcTime: GC_TIME_MS,
       staleTime: STALE_TIME_MS,
