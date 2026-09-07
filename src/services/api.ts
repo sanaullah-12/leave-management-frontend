@@ -367,6 +367,51 @@ export const attendanceAPI = {
       `/attendance/db/status-summary?startDate=${startDate}&endDate=${endDate}`
     ),
 
+  /**
+   * Late hours for one employee: the running total and the daily late record
+   * behind it.
+   *
+   * Derived from the same punches the attendance screen already reads, on
+   * every request - there is no stored total, so nothing can be edited into
+   * disagreeing with the records.
+   */
+  getLateHours: (
+    employeeId: string,
+    startDate?: string,
+    endDate?: string,
+    policy?: "flexible" | "strict"
+  ) => {
+    const params = new URLSearchParams();
+    if (startDate && endDate) {
+      params.append("startDate", startDate);
+      params.append("endDate", endDate);
+    }
+    if (policy) params.append("policy", policy);
+    const query = params.toString();
+    return attendanceApi.get(
+      `/attendance/db/late-hours/${employeeId}${query ? `?${query}` : ""}`
+    );
+  },
+
+  /** Admin only. Late hours across the roster in one pass over the range. */
+  getLateHoursOverview: (
+    startDate?: string,
+    endDate?: string,
+    limit = 20,
+    policy?: "flexible" | "strict"
+  ) => {
+    const params = new URLSearchParams();
+    if (startDate && endDate) {
+      params.append("startDate", startDate);
+      params.append("endDate", endDate);
+    }
+    params.append("limit", String(limit));
+    if (policy) params.append("policy", policy);
+    return attendanceApi.get(
+      `/attendance/db/late-hours?${params.toString()}`
+    );
+  },
+
   // Late time settings
   getLateTimeSettings: () =>
     attendanceApi.get("/attendance/settings/late-time"),
@@ -579,6 +624,32 @@ export const notificationsAPI = {
   markAllRead: () => api.put("/notifications/mark-all-read"),
 
   remove: (id: string) => api.delete(`/notifications/${id}`),
+};
+
+/**
+ * Web Push subscription management.
+ *
+ * Transport only: which browsers may be pushed to. The notifications
+ * themselves are still created by the backend notification layer and read
+ * through notificationsAPI above, so nothing here changes what an employee is
+ * told - only whether a copy reaches them outside the tab.
+ */
+export const pushAPI = {
+  /** The server's VAPID public key, or supported:false when push is off. */
+  getVapidPublicKey: () => api.get("/push/vapid-public-key"),
+
+  /** Whether this account has any registered device. */
+  getStatus: () => api.get("/push/status"),
+
+  subscribe: (subscription: {
+    endpoint: string;
+    keys: { p256dh: string; auth: string };
+  }) => api.post("/push/subscribe", subscription),
+
+  unsubscribe: (payload: { endpoint: string }) =>
+    api.post("/push/unsubscribe", payload),
+
+  sendTest: () => api.post("/push/test"),
 };
 
 // Employee Voice API

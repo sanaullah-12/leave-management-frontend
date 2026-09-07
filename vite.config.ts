@@ -33,6 +33,9 @@ export default defineConfig({
         'favicon-16x16.png',
         'favicon-32x32.png',
         'apple-touch-icon.png',
+        // Imported by the generated service worker at runtime, so it has to be
+        // copied into dist/ even though nothing references it from the page.
+        'push-sw.js',
       ],
 
       manifest: {
@@ -88,6 +91,11 @@ export default defineConfig({
       },
 
       workbox: {
+        // Pulled into the generated worker rather than registered as a second
+        // service worker. Two workers would contend for the same scope and only
+        // one of them would receive pushes; this keeps exactly one.
+        importScripts: ['push-sw.js'],
+
         // Precache the shell and every hashed asset. Vite content-hashes
         // filenames, so Workbox stores them with `revision: null` and a build
         // that changes nothing re-downloads nothing.

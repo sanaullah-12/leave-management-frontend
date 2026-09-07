@@ -3,6 +3,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   EyeIcon,
+  CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
 import StatusBadge from "./StatusBadge";
 import { CARD } from "../../lib/surfaces";
@@ -44,6 +45,12 @@ interface Props {
   /** Show only days with this status. Set by clicking the breakdown panel. */
   statusFilter?: string | null;
   onClearFilter?: () => void;
+  /**
+   * Open the whole record in the side panel. This table pages ten days at a
+   * time, which answers "how was last week" but not "show me everything", so
+   * the full record needs a way in that is not paging to it.
+   */
+  onViewFull?: () => void;
 }
 
 const PAGE_SIZE = 10;
@@ -55,6 +62,7 @@ const DayTable: React.FC<Props> = ({
   emptyMessage,
   statusFilter = null,
   onClearFilter,
+  onViewFull,
 }) => {
   const [page, setPage] = useState(1);
 
@@ -101,6 +109,16 @@ const DayTable: React.FC<Props> = ({
               className="rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:border-gray-600 dark:text-blue-400 dark:hover:bg-blue-500/10"
             >
               Show all days
+            </button>
+          )}
+          {onViewFull && (
+            <button
+              type="button"
+              onClick={onViewFull}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-500/40 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20"
+            >
+              <CalendarDaysIcon className="h-4 w-4" />
+              View full attendance
             </button>
           )}
         </div>

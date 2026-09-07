@@ -59,6 +59,7 @@
     "departments": "部署",
     "leavePolicies": "休暇ポリシー",
     "attendance": "勤怠",
+    "lateTime": "遅刻時間",
     "payrollDashboard": "給与ダッシュボード",
     "employeeSalaries": "従業員の給与",
     "runPayroll": "給与処理",

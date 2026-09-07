@@ -12,6 +12,10 @@ import EmployeeDrawer from "../components/attendance/EmployeeDrawer";
 import DayTable from "../components/attendance/DayTable";
 import type { DayRow } from "../components/attendance/DayTable";
 import DayDrawer from "../components/attendance/DayDrawer";
+import FullAttendanceDrawer from "../components/attendance/FullAttendanceDrawer";
+import LateHoursCard from "../components/attendance/LateHoursCard";
+import LateHoursOverview from "../components/attendance/LateHoursOverview";
+import { useLateHours, useLateHoursOverview } from "../hooks/useLateHours";
 import {
   CheckCircleIcon,
   ArrowPathIcon,
@@ -920,6 +924,15 @@ const AttendancePage: React.FC = () => {
   const [selectedDay, setSelectedDay] = useState<DayRow | null>(null);
 
   /**
+   * Whether the whole record is open in the side panel.
+   *
+   * The table below pages ten days at a time and the day panel answers one
+   * date, so an employee asking to see their attendance in full had nowhere to
+   * go. This panel is that place.
+   */
+  const [showFullAttendance, setShowFullAttendance] = useState(false);
+
+  /**
    * The breakdown segment the list below is filtered to, or null for all.
    *
    * Clicking "Late" in the breakdown is a question - who are they - and the
@@ -1025,6 +1038,39 @@ const AttendancePage: React.FC = () => {
 
     return rows.reverse();
   }, [isAdmin, selfData, startDate, endDate]);
+
+  /**
+   * Late hours over the same range the rest of the page describes.
+   *
+   * Read through the shared hook rather than recounted here: the total, the
+   * day-by-day list and the admin's view all have to be the same arithmetic
+   * over the same punches, and the only way to guarantee that is for none of
+   * them to do the arithmetic themselves.
+   */
+  const employeeLateHours = useLateHours(currentUser?.employeeId, {
+    startDate,
+    endDate,
+    enabled: !isAdmin && Boolean(currentUser?.employeeId),
+  });
+
+  const rosterLateHours = useLateHoursOverview({
+    startDate,
+    endDate,
+    limit: 15,
+    enabled: isAdmin,
+  });
+
+  /** The range the day rows cover, as the full-record panel prints it. */
+  const dayRangeLabel = useMemo(() => {
+    const format = (iso: string) =>
+      new Date(`${iso}T00:00:00Z`).toLocaleDateString(undefined, {
+        timeZone: "UTC",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+    return `${format(startDate)} - ${format(endDate)}`;
+  }, [startDate, endDate]);
 
 
 
@@ -1520,9 +1566,62 @@ const AttendancePage: React.FC = () => {
             onSelect={setSelectedDay}
             statusFilter={statusFilter}
             onClearFilter={() => setStatusFilter(null)}
+            onViewFull={
+              dayRows.length ? () => setShowFullAttendance(true) : undefined
+            }
           />
         )}
       </div>
+
+      {/* Late Hours. An employee sees their own running total and the days
+          behind it; an admin sees the roster and the recent late arrivals.
+          Both are derived from the punches above, never stored. */}
+      {isAdmin ? (
+        <LateHoursOverview
+          summary={rosterLateHours.summary}
+          employees={rosterLateHours.employees}
+          recentLateEntries={rosterLateHours.recentLateEntries}
+          loading={rosterLateHours.isLoading}
+          policy={rosterLateHours.policy}
+          rangeLabel={dayRangeLabel}
+          onSelectEmployee={(employeeId) => {
+            const match = employees.find(
+              (employee) =>
+                String(employee.employeeId) === String(employeeId) ||
+                String((employee as any).machineId) === String(employeeId)
+            );
+            if (match) handleEmployeeClick(match);
+          }}
+        />
+      ) : (
+        <LateHoursCard
+          summary={employeeLateHours.summary}
+          entries={employeeLateHours.lateEntries}
+          loading={employeeLateHours.isLoading}
+          policy={employeeLateHours.policy}
+          rangeLabel={dayRangeLabel}
+          emptyMessage="No late arrivals in this range. Every punch was inside the arrival time."
+        />
+      )}
+
+      {/* The whole record. Every day of the range, unpaged. */}
+      {showFullAttendance && (
+        <FullAttendanceDrawer
+          rows={dayRows}
+          rangeLabel={dayRangeLabel}
+          employee={{
+            employeeId: currentUser?.employeeId,
+            name: currentUser?.name,
+            department: currentUser?.department,
+            machineId: currentUser?.employeeId,
+          }}
+          policy={selfData?.lateTimePolicy}
+          loading={rosterLoading}
+          onSelectDay={setSelectedDay}
+          detailOpen={!!selectedDay}
+          onClose={() => setShowFullAttendance(false)}
+        />
+      )}
 
       {/* One day, in full */}
       {selectedDay && (

@@ -50,6 +50,7 @@ import {
   PlayCircleIcon,
   DocumentTextIcon,
   ArchiveBoxIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 
@@ -142,7 +143,10 @@ const Layout: React.FC = () => {
           short: t("short.attendance"),
           label: t("groups.attendance"),
           icon: ClockIcon,
-          items: [{ name: t("items.attendance"), href: "/attendance", icon: ClockIcon }],
+          items: [
+            { name: t("items.attendance"), href: "/attendance", icon: ClockIcon, exact: true },
+            { name: t("items.lateTime"), href: "/attendance/late-time", icon: ExclamationTriangleIcon },
+          ],
         },
         {
           key: "payroll",
@@ -218,7 +222,10 @@ const Layout: React.FC = () => {
         short: t("short.attendance"),
         label: t("groups.attendance"),
         icon: ClockIcon,
-        items: [{ name: t("items.attendance"), href: "/attendance", icon: ClockIcon }],
+        items: [
+          { name: t("items.attendance"), href: "/attendance", icon: ClockIcon, exact: true },
+          { name: t("items.lateTime"), href: "/attendance/late-time", icon: ExclamationTriangleIcon },
+        ],
       },
       {
         key: "voice",
