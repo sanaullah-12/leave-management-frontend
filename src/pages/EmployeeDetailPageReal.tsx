@@ -10,6 +10,8 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import LogoLoader from "../components/LogoLoader";
 import Avatar from "../components/Avatar";
 import EmployeeLeaveActivity from "../components/EmployeeLeaveActivity";
+import LateHoursCard from "../components/attendance/LateHoursCard";
+import { useLateHours } from "../hooks/useLateHours";
 import {
   ArrowLeftIcon,
   EnvelopeIcon,
@@ -335,6 +337,31 @@ const EmployeeDetailPageReal: React.FC = () => {
     [leaveHistoryData?.data?.leaves]
   );
 
+  /**
+   * Late hours for this employee, over the last three months.
+   *
+   * A record opened by HR should answer attendance as well as leave, and the
+   * two are kept apart on purpose: late minutes are reported here and charged
+   * to nothing. The window is fixed rather than picked, because this page has
+   * no date range of its own and a quarter is the span a review covers.
+   */
+  const lateRange = React.useMemo(() => {
+    const end = new Date();
+    const start = new Date();
+    start.setMonth(start.getMonth() - 3);
+    const iso = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+        d.getDate()
+      ).padStart(2, "0")}`;
+    return { startDate: iso(start), endDate: iso(end), label: "last 3 months" };
+  }, []);
+
+  const lateHours = useLateHours(employee?.employeeId, {
+    startDate: lateRange.startDate,
+    endDate: lateRange.endDate,
+    enabled: Boolean(employee?.employeeId),
+  });
+
   const calculateLeaveBalance = React.useCallback(() => {
     const year = new Date().getFullYear();
     const yearlyLeaves = leaveHistory.filter((leave: any) => {
@@ -652,6 +679,21 @@ const EmployeeDetailPageReal: React.FC = () => {
             />
           ))}
         </div>
+      </div>
+
+      {/* Late Hours. An attendance figure, kept beside the leave record but
+          never charged against it. */}
+      <div className="space-y-4">
+        <SectionHeading>Attendance</SectionHeading>
+        <LateHoursCard
+          summary={lateHours.summary}
+          entries={lateHours.lateEntries}
+          loading={lateHours.isLoading}
+          policy={lateHours.policy}
+          rangeLabel={lateRange.label}
+          title={`Late Hours - ${employee?.name || "Employee"}`}
+          emptyMessage="No late arrivals in the last 3 months."
+        />
       </div>
 
       {/* Analytics */}

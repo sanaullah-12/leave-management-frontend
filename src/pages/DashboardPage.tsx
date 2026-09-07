@@ -17,6 +17,7 @@ import AnimatedNumber from "../components/AnimatedNumber";
 import { StatCardsSkeleton } from "../components/Skeletons";
 import LogoLoader from "../components/LogoLoader";
 import DashboardAnnouncements from "../components/DashboardAnnouncements";
+import PushNotificationToggle from "../components/notifications/PushNotificationToggle";
 import { motion } from "framer-motion";
 import MeshBackground from "../components/MeshBackground";
 import EmployeeVoiceWidget from "../components/voice/EmployeeVoiceWidget";
@@ -577,6 +578,10 @@ const DashboardPage: React.FC = () => {
                   {t("actions.quickApply")}
                 </motion.button>
               )}
+
+              {/* Browser/OS alerts for this device. Renders nothing when the
+                  browser has no Push API or the server has no VAPID keys. */}
+              <PushNotificationToggle />
               <motion.button
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.96 }}

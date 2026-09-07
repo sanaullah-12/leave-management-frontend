@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { authAPI } from '../services/api';
 import { markKnownUser } from '../utils/knownUser';
+import { detachOnLogout } from '../services/pushNotifications';
 
 // Inline type definitions
 interface User {
@@ -190,6 +191,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    // A push subscription belongs to a person, not to a machine. Left in place,
+    // the next person to log into this browser would be pushed the previous
+    // one's attendance and leave notifications.
+    //
+    // Fired before the token is cleared, because unsubscribing is an
+    // authenticated call - and deliberately not awaited, because a logout must
+    // never hang on a push service being slow. The row is pruned server-side on
+    // its first failed delivery even if this does not complete.
+    void detachOnLogout();
+
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     dispatch({ type: 'LOGOUT' });

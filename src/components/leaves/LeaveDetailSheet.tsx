@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import Modal from "../ui/Modal";
 import { leavesAPI } from "../../services/api";
+import LateHoursSummary from "../attendance/LateHoursSummary";
+import { useLateHours } from "../../hooks/useLateHours";
 import {
   InitialsTile,
   MonthRail,
@@ -80,6 +82,37 @@ const LeaveDetailSheet: React.FC<Props> = ({
     enabled: Boolean(leave && employeeId),
     staleTime: 60_000,
     retry: false,
+  });
+
+  /**
+   * The same person's late hours over the last three months.
+   *
+   * Shown to a reviewer as context, never as arithmetic: a late minute is an
+   * attendance figure and is not deducted from the balance above it or from
+   * the request being decided. Employees do not need it here - they are
+   * looking at their own request, and their own total is on their attendance
+   * page.
+   */
+  const lateRange = React.useMemo(() => {
+    const end = new Date();
+    const start = new Date();
+    start.setMonth(start.getMonth() - 3);
+    const iso = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+        d.getDate()
+      ).padStart(2, "0")}`;
+    return { startDate: iso(start), endDate: iso(end) };
+  }, []);
+
+  const employeeCode =
+    leave && typeof leave.employee === "object"
+      ? leave.employee?.employeeId
+      : undefined;
+
+  const lateHours = useLateHours(employeeCode, {
+    startDate: lateRange.startDate,
+    endDate: lateRange.endDate,
+    enabled: Boolean(leave && employeeCode && isAdmin),
   });
 
   if (!leave) return null;
@@ -194,6 +227,18 @@ const LeaveDetailSheet: React.FC<Props> = ({
                   : `${total - used} of ${total} days still available.`}
               </p>
             </div>
+          </div>
+        )}
+
+        {isAdmin && employeeCode && (lateHours.isLoading || lateHours.summary) && (
+          <div className="mt-6">
+            <Label>Late hours, last 3 months</Label>
+            <LateHoursSummary
+              summary={lateHours.summary}
+              loading={lateHours.isLoading}
+              compact
+              showNote
+            />
           </div>
         )}
 
