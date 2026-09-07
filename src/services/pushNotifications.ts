@@ -15,6 +15,12 @@ import { pushAPI } from "./api";
  */
 
 export type PushState =
+  /**
+   * Nothing is known yet - the server has not been asked whether push is
+   * configured. The control renders nothing in this state, so it never appears
+   * and then vanishes when the answer arrives.
+   */
+  | "checking"
   /** This browser cannot do Web Push at all. */
   | "unsupported"
   /** Supported, but this deployment has no VAPID keys configured. */

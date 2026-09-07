@@ -88,13 +88,28 @@ export interface VoiceStats {
   byCategory: VoiceStatBucket[];
 }
 
+/**
+ * Every value Notification.type can hold, matching the enum in
+ * backend/models/Notification.js. Kept complete rather than partial: the
+ * icon map below is a Record over this union, so a type the backend can send
+ * and the UI has no icon for is a compile error rather than a bell with no
+ * meaning next to it.
+ */
 export type NotificationType =
   | "leave_request"
   | "leave_approved"
   | "leave_rejected"
+  | "leave_auto_marked"
+  | "leave_auto_reversed"
+  | "wfh_request"
+  | "wfh_approved"
+  | "wfh_rejected"
   | "voice_submitted"
   | "voice_reply"
-  | "voice_status";
+  | "voice_status"
+  | "announcement"
+  | "attendance_late"
+  | "app_update";
 
 export interface AppNotification {
   _id: string;

@@ -13,16 +13,16 @@ import "../styles/design-system.css";
  * Late arrivals on their own screen, for whoever is reading.
  *
  * An employee sees their own running total and the day-by-day record behind
- * it. An admin sees the whole roster worst first, and can open any one person
- * to get exactly the card that person sees - the same component over the same
- * range, so the two roles can never be shown different arithmetic for the same
- * days.
+ * it. An admin sees the whole roster ordered by employee ID, and can open any
+ * one person to get exactly the card that person sees - the same component
+ * over the same range, so the two roles can never be shown different
+ * arithmetic for the same days.
  *
- * Split out of the attendance page rather than copied from it: this is a
- * question people come to deliberately, and it was previously the last block
- * under a full attendance table. Every figure is still derived from the
- * punches on read through useLateHours - nothing is stored here, nothing is
- * editable, and none of it touches a leave balance.
+ * This is now the only place late hours are read. The attendance page keeps
+ * the per-day late status on each punch, because that is attendance data, but
+ * every total, daily late record and roster ranking lives here. Every figure
+ * is derived from the punches on read through useLateHours - nothing is
+ * stored here, nothing is editable, and none of it touches a leave balance.
  */
 
 /** Ranges offered above the tables, in days back from today. */
@@ -98,6 +98,29 @@ const LateTimePage: React.FC = () => {
     endDate,
     enabled: isAdmin && Boolean(openEmployeeId) && !rangeInvalid,
   });
+
+  /**
+   * The roster in employee-ID order.
+   *
+   * Not worst-first. A supervisor reading this screen is usually looking one
+   * person up, and they know that person by the ID the device knows them by;
+   * a list whose order changes every time the range changes has to be
+   * searched from scratch on every visit. The totals still say who is worst.
+   *
+   * Numeric where both IDs are numeric, so 9 sorts before 10 rather than
+   * after it, and numeric-aware string comparison otherwise so a mixed
+   * roster (EMP0007 alongside 15) still lands somewhere predictable.
+   */
+  const employeesById = useMemo(() => {
+    return [...rosterLateHours.employees].sort((a, b) => {
+      const left = Number(a.employeeId);
+      const right = Number(b.employeeId);
+      if (Number.isFinite(left) && Number.isFinite(right)) return left - right;
+      return String(a.employeeId).localeCompare(String(b.employeeId), undefined, {
+        numeric: true,
+      });
+    });
+  }, [rosterLateHours.employees]);
 
   const openEmployeeRow = useMemo(
     () =>
@@ -208,7 +231,7 @@ const LateTimePage: React.FC = () => {
               title={
                 openEmployeeRow?.name ||
                 openEmployeeLateHours.data?.employee?.name ||
-                "Employee " + openEmployeeId
+                "ID " + openEmployeeId
               }
               previewRows={20}
               emptyMessage="No late arrivals in this range. Every punch was inside the arrival time."
@@ -217,7 +240,7 @@ const LateTimePage: React.FC = () => {
         ) : (
           <LateHoursOverview
             summary={rosterLateHours.summary}
-            employees={rosterLateHours.employees}
+            employees={employeesById}
             recentLateEntries={rosterLateHours.recentLateEntries}
             loading={rosterLateHours.isLoading}
             policy={rosterLateHours.policy}

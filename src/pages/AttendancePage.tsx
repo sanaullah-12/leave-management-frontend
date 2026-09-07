@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import AppLogo from "../components/AppLogo";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  employeeAttendanceKey,
+  rosterAttendanceKey,
+} from "../lib/attendanceCache";
 import DatePicker from "../components/ui/DatePicker";
 import { useThemeAccent } from "../hooks/useThemeAccent";
 import { CARD } from "../lib/surfaces";
@@ -13,9 +18,6 @@ import DayTable from "../components/attendance/DayTable";
 import type { DayRow } from "../components/attendance/DayTable";
 import DayDrawer from "../components/attendance/DayDrawer";
 import FullAttendanceDrawer from "../components/attendance/FullAttendanceDrawer";
-import LateHoursCard from "../components/attendance/LateHoursCard";
-import LateHoursOverview from "../components/attendance/LateHoursOverview";
-import { useLateHours, useLateHoursOverview } from "../hooks/useLateHours";
 import {
   CheckCircleIcon,
   ArrowPathIcon,
@@ -91,6 +93,10 @@ const RANGE_PRESETS = [
 ];
 
 const AttendancePage: React.FC = () => {
+  // Attendance is cached on the QueryClient rather than in this component, so
+  // a fetch survives navigating away and back. See lib/attendanceCache.ts.
+  const queryClient = useQueryClient();
+
   const [selectedIP, setSelectedIP] = useState("192.168.1.201");
   const [customIP, setCustomIP] = useState("");
 
@@ -394,14 +400,32 @@ const AttendancePage: React.FC = () => {
     setSelectedEmployee(employee);
     setModalEmployee(employee);
     setIsModalOpen(true);
-    setIsLoadingModalData(true);
-    setModalAttendanceData(null);
     setError("");
 
+    // What was fetched for this exact person, range and rule last time. It is
+    // shown straight away and NOT refetched: a reader who wants newer figures
+    // presses Fetch records, and one who is returning to something already
+    // loaded should not have to wait for it a second time.
+    const cached = queryClient.getQueryData<any>(
+      employeeAttendanceKey(
+        employee.employeeId,
+        startDate,
+        endDate,
+        viewPolicy || undefined
+      )
+    );
+
+    if (cached) {
+      setModalAttendanceData(cached);
+      setIsLoadingModalData(false);
+      return;
+    }
+
+    setIsLoadingModalData(true);
+    setModalAttendanceData(null);
+
     try {
-      // Fetch attendance data for the selected employee
       await fetchAttendanceRecords(employee, true);
-      // The modal data will be set when fetchAttendanceRecords completes
     } catch (error) {
       console.error("Failed to fetch attendance for modal:", error);
     } finally {
@@ -447,6 +471,19 @@ const AttendancePage: React.FC = () => {
       );
 
       if (response.data.success) {
+        // Cached under exactly the inputs that produced it. Written even when
+        // the reader has navigated on: the answer is still correct for those
+        // inputs, and keeping it is what makes coming back instant.
+        queryClient.setQueryData(
+          employeeAttendanceKey(
+            employee.employeeId,
+            fromDate,
+            toDate,
+            effectivePolicy || undefined
+          ),
+          response.data
+        );
+
         // Store the response only while this is still the employee on screen,
         // so a slow reply for someone the user has navigated away from cannot
         // overwrite the panel.
@@ -750,7 +787,49 @@ const AttendancePage: React.FC = () => {
       policy: viewPolicy || "official",
     });
     setRosterLoading(false);
+
+    // A roster load is one request per employee. Keeping it means returning to
+    // this page costs nothing instead of running the whole walk again.
+    queryClient.setQueryData(
+      rosterAttendanceKey(startDate, endDate, viewPolicy || undefined),
+      collected
+    );
+
+    // Each slice is also that one employee's own answer, so opening anyone
+    // from the table is instant rather than a fresh request for data already
+    // in hand.
+    for (const [code, data] of Object.entries(collected)) {
+      queryClient.setQueryData(
+        employeeAttendanceKey(code, startDate, endDate, viewPolicy || undefined),
+        data
+      );
+    }
   };
+
+  /**
+   * Put a previously loaded roster back on screen.
+   *
+   * Only ever restores an entry matching the controls exactly, so it can never
+   * show one range's figures under another's heading. Nothing is fetched here:
+   * a range with no cached answer leaves the existing stale notice to say so,
+   * and the reader presses Fetch attendance.
+   */
+  useEffect(() => {
+    if (rosterLoading) return;
+
+    const cached = queryClient.getQueryData<Record<string, any>>(
+      rosterAttendanceKey(startDate, endDate, viewPolicy || undefined)
+    );
+    if (!cached || !Object.keys(cached).length) return;
+
+    setRosterAttendance(cached);
+    setRosterFetchedFor({
+      from: startDate,
+      to: endDate,
+      policy: viewPolicy || "official",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startDate, endDate, viewPolicy]);
 
   /**
    * Whether what is on screen still describes the current controls.
@@ -1038,27 +1117,6 @@ const AttendancePage: React.FC = () => {
 
     return rows.reverse();
   }, [isAdmin, selfData, startDate, endDate]);
-
-  /**
-   * Late hours over the same range the rest of the page describes.
-   *
-   * Read through the shared hook rather than recounted here: the total, the
-   * day-by-day list and the admin's view all have to be the same arithmetic
-   * over the same punches, and the only way to guarantee that is for none of
-   * them to do the arithmetic themselves.
-   */
-  const employeeLateHours = useLateHours(currentUser?.employeeId, {
-    startDate,
-    endDate,
-    enabled: !isAdmin && Boolean(currentUser?.employeeId),
-  });
-
-  const rosterLateHours = useLateHoursOverview({
-    startDate,
-    endDate,
-    limit: 15,
-    enabled: isAdmin,
-  });
 
   /** The range the day rows cover, as the full-record panel prints it. */
   const dayRangeLabel = useMemo(() => {
@@ -1573,36 +1631,10 @@ const AttendancePage: React.FC = () => {
         )}
       </div>
 
-      {/* Late Hours. An employee sees their own running total and the days
-          behind it; an admin sees the roster and the recent late arrivals.
-          Both are derived from the punches above, never stored. */}
-      {isAdmin ? (
-        <LateHoursOverview
-          summary={rosterLateHours.summary}
-          employees={rosterLateHours.employees}
-          recentLateEntries={rosterLateHours.recentLateEntries}
-          loading={rosterLateHours.isLoading}
-          policy={rosterLateHours.policy}
-          rangeLabel={dayRangeLabel}
-          onSelectEmployee={(employeeId) => {
-            const match = employees.find(
-              (employee) =>
-                String(employee.employeeId) === String(employeeId) ||
-                String((employee as any).machineId) === String(employeeId)
-            );
-            if (match) handleEmployeeClick(match);
-          }}
-        />
-      ) : (
-        <LateHoursCard
-          summary={employeeLateHours.summary}
-          entries={employeeLateHours.lateEntries}
-          loading={employeeLateHours.isLoading}
-          policy={employeeLateHours.policy}
-          rangeLabel={dayRangeLabel}
-          emptyMessage="No late arrivals in this range. Every punch was inside the arrival time."
-        />
-      )}
+      {/* Late hours live on their own page now (/attendance/late-time), which
+          is where every late total, daily late record and roster ranking is
+          read. This page keeps the per-day late status on each punch, because
+          that is attendance data rather than a late-hours report. */}
 
       {/* The whole record. Every day of the range, unpaged. */}
       {showFullAttendance && (

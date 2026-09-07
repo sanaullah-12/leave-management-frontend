@@ -33,13 +33,16 @@ export function usePushNotifications() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const [state, setState] = useState<PushState>(() =>
-    isPushSupported() ? "default" : "unsupported"
-  );
+  // Starts as "checking", never as "default". Rendering the button before the
+  // server has said whether push is configured means it appears on first paint
+  // and disappears a moment later on any deployment without VAPID keys - which
+  // reads as a bug even though both states are correct.
+  const [state, setState] = useState<PushState>("checking");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Guards the mount-time re-registration so a re-render cannot re-run it.
+  // Cleared again if a run is torn down before it finishes - see the effect.
   const syncedFor = useRef<string | null>(null);
 
   const refresh = useCallback(async () => {
@@ -55,7 +58,7 @@ export function usePushNotifications() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      setState(isPushSupported() ? "default" : "unsupported");
+      setState("checking");
       syncedFor.current = null;
       return;
     }
@@ -65,10 +68,20 @@ export function usePushNotifications() {
     syncedFor.current = userKey;
 
     let cancelled = false;
+    let settled = false;
 
     (async () => {
       const resolved = await resolveState().catch(() => null);
-      if (cancelled || !resolved) return;
+      settled = true;
+      if (cancelled) return;
+
+      // The server could not be reached to ask. Offer the control rather than
+      // hiding it for good: trying is what re-checks, and a network blip must
+      // not remove a feature until the next reload.
+      if (!resolved) {
+        setState(isPushSupported() ? "default" : "unsupported");
+        return;
+      }
 
       // Permission is already granted but this browser holds no subscription
       // the backend knows about - it expired, was rotated, or belongs to the
@@ -92,6 +105,16 @@ export function usePushNotifications() {
 
     return () => {
       cancelled = true;
+
+      // Forget that this user was synced when the effect is torn down before
+      // its resolve landed. Without this, StrictMode's deliberate
+      // mount-unmount-remount leaves the guard set from the first mount while
+      // that mount's result is discarded as cancelled - so the second mount
+      // short-circuits, nothing ever resolves, and the state sits on
+      // "checking" forever with the control rendering nothing at all.
+      if (!settled && syncedFor.current === userKey) {
+        syncedFor.current = null;
+      }
     };
   }, [isAuthenticated, user?.id]);
 
@@ -179,8 +202,12 @@ export function usePushNotifications() {
     error,
     /** The employee has browser notifications working right now. */
     isEnabled: state === "enabled",
-    /** Nothing to offer: no Push API, or no keys on this deployment. */
-    isUnavailable: state === "unsupported" || state === "unavailable",
+    /**
+     * Render nothing: still asking, no Push API, or no keys on this deployment.
+     * "checking" is included so the control cannot flash in and out.
+     */
+    isUnavailable:
+      state === "checking" || state === "unsupported" || state === "unavailable",
     isBlocked: state === "blocked",
     enable,
     disable,

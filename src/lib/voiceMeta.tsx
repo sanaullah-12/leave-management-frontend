@@ -15,6 +15,11 @@ import {
   PaperAirplaneIcon,
   CheckCircleIcon,
   BellAlertIcon,
+  ArrowUturnLeftIcon,
+  HomeModernIcon,
+  MegaphoneIcon,
+  ClockIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import type { ComponentType, SVGProps } from "react";
 
@@ -234,6 +239,38 @@ export const NOTIFICATION_META: Record<
   voice_status: {
     icon: CheckCircleIcon,
     tile: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400",
+  },
+  leave_auto_marked: {
+    icon: ExclamationTriangleIcon,
+    tile: "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400",
+  },
+  leave_auto_reversed: {
+    icon: ArrowUturnLeftIcon,
+    tile: "bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400",
+  },
+  wfh_request: {
+    icon: HomeModernIcon,
+    tile: "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400",
+  },
+  wfh_approved: {
+    icon: CheckCircleIcon,
+    tile: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400",
+  },
+  wfh_rejected: {
+    icon: FaceFrownIcon,
+    tile: "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400",
+  },
+  announcement: {
+    icon: MegaphoneIcon,
+    tile: "bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400",
+  },
+  attendance_late: {
+    icon: ClockIcon,
+    tile: "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400",
+  },
+  app_update: {
+    icon: SparklesIcon,
+    tile: "bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400",
   },
 };
 
