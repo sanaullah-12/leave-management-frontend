@@ -9,10 +9,12 @@ import { CARD } from "../../lib/surfaces";
  * -----------------
  * Late hours across the roster, for an admin.
  *
- * Two questions get asked of this screen and they need different lists: "who
- * is habitually late" is answered by per-employee totals, worst first, and
- * "what happened lately" by the most recent late arrivals across everyone. So
- * both are here rather than one list pretending to answer both.
+ * Two questions get asked of this screen and they need different lists: "how
+ * is each person doing" is answered by per-employee totals, and "what
+ * happened lately" by the most recent late arrivals across everyone. So both
+ * are here rather than one list pretending to answer both.
+ *
+ * The order of `employees` is the caller's decision, not this component's.
  *
  * Every figure is derived from the attendance records on read. Nothing is
  * stored, nothing is editable, and none of it touches a leave balance.
@@ -56,8 +58,30 @@ const LateHoursOverview: React.FC<Props> = ({
     "whitespace-nowrap border-b border-gray-100 bg-gray-50/70 px-4 py-2.5 text-left text-xs font-semibold text-gray-600 dark:border-gray-700 dark:bg-gray-700/40 dark:text-gray-300";
   const cell = "border-b border-gray-100 px-4 py-2.5 dark:border-gray-700";
 
+  /**
+   * What to call the person a device ID belongs to.
+   *
+   * The device records a numeric enrolment ID; the name comes from the
+   * Nexora account carrying that same employeeId. Where no account has been
+   * linked there is genuinely no name to show, so the ID is shown as the
+   * identity rather than dressed up as "Employee 22" - which reads like a
+   * person's name and hides the fact that somebody has to link the account.
+   */
   const nameOf = (row: { name: string | null; employeeId: string }) =>
-    row.name || `Employee ${row.employeeId}`;
+    row.name || `ID ${row.employeeId}`;
+
+  const subtitleOf = (row: {
+    name: string | null;
+    employeeId: string;
+    department?: string | null;
+  }) => {
+    if (!row.name) return "Not linked to an employee account";
+    // The ID stays visible even for a named person: the list is ordered by
+    // it, and an order you cannot see is an order you cannot trust.
+    return row.department
+      ? `${row.department} - ID ${row.employeeId}`
+      : `ID ${row.employeeId}`;
+  };
 
   return (
     <div className={`overflow-hidden ${CARD}`}>
@@ -106,7 +130,8 @@ const LateHoursOverview: React.FC<Props> = ({
         </p>
       ) : (
         <>
-          {/* Who, worst first */}
+          {/* Who. The caller decides the order - the Late Time page sorts by
+              employee ID so a supervisor can look somebody up. */}
           <div className="overflow-x-auto">
             <table className="w-full min-w-[460px] border-collapse">
               <thead>
@@ -136,8 +161,14 @@ const LateHoursOverview: React.FC<Props> = ({
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         {nameOf(row)}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {row.department || `ID ${row.employeeId}`}
+                      <p
+                        className={
+                          row.name
+                            ? "text-xs text-gray-500 dark:text-gray-400"
+                            : "text-xs italic text-amber-600 dark:text-amber-500"
+                        }
+                      >
+                        {subtitleOf(row)}
                       </p>
                     </td>
                     <td

@@ -7,12 +7,23 @@ import { useNotifications, voiceIdOf } from "../hooks/useNotifications";
 import { NOTIFICATION_META, isVoiceNotification } from "../lib/voiceMeta";
 import type { AppNotification } from "../types/employeeVoice";
 
+/**
+ * Where opening a notification should take you.
+ *
+ * Every type is listed rather than falling through to /leaves, which used to
+ * send an announcement and a late-arrival notice to the leave screen - a
+ * destination with nothing to do with either.
+ */
 export const notificationTarget = (n: AppNotification): string => {
   if (isVoiceNotification(n.type)) {
     const id = voiceIdOf(n);
     return id ? `/employee-voice?voice=${id}` : "/employee-voice";
   }
   if (n.type && n.type.startsWith("wfh_")) return "/work-from-home";
+  if (n.type === "announcement") return "/announcements";
+  if (n.type === "attendance_late") return "/attendance/late-time";
+  // A release is about the app as a whole, so it opens the app.
+  if (n.type === "app_update") return "/";
   return "/leaves";
 };
 
