@@ -28,6 +28,11 @@ import "../styles/design-system.css";
 
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
+
+/** One label style for the toolbar, so four cells cannot drift apart. */
+const FIELD_LABEL =
+  "mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100";
+
 const EmployeesPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -308,13 +313,21 @@ const EmployeesPage: React.FC = () => {
           Search & Generate Reports
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Four controls of different natures - a text field, two date
+            triggers and a button - sharing one baseline. Every cell is a
+            column that pushes its control to the bottom, and grid cells
+            stretch to the tallest, so the controls line up whatever happens
+            above them: a label that wraps at a narrow column width moves
+            nothing but itself, and the button needs no label of its own to
+            be dragged down level with the fields. */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           {/* Search Input */}
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
-              Search Employee
+          <div className="flex flex-col">
+            <label className={FIELD_LABEL} htmlFor="employee-search">
+              Search employee
             </label>
             <Input
+              id="employee-search"
               icon={MagnifyingGlassIcon}
               type="text"
               placeholder="Name, email, or ID..."
@@ -322,38 +335,32 @@ const EmployeesPage: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               onClear={() => setSearchTerm("")}
               clearable
+              wrapperClassName="mt-auto"
             />
           </div>
 
           {/* Start Date */}
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
-              Start Date (for reports)
-            </label>
+          <div className="flex flex-col">
+            <label className={FIELD_LABEL}>Report start</label>
             <DatePicker
               value={dateFrom}
               onChange={setDateFrom}
-              className="w-full"
+              className="mt-auto w-full"
             />
           </div>
 
           {/* End Date */}
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
-              End Date (for reports)
-            </label>
+          <div className="flex flex-col">
+            <label className={FIELD_LABEL}>Report end</label>
             <DatePicker
               value={dateTo}
               onChange={setDateTo}
-              className="w-full"
+              className="mt-auto w-full"
             />
           </div>
 
           {/* Report button */}
-          <div className="flex flex-col justify-end">
-            <label className="mb-2 block text-sm font-medium text-transparent select-none">
-              Report
-            </label>
+          <div className="flex flex-col">
             <button
               onClick={() => {
                 const emp = filteredUsers[0];
@@ -363,9 +370,9 @@ const EmployeesPage: React.FC = () => {
                 }
                 handleGenerateReport(emp);
               }}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-md"
+              className="mt-auto inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-3 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-md"
             >
-              <DocumentChartBarIcon className="h-4 w-4" />
+              <DocumentChartBarIcon className="h-4 w-4 flex-shrink-0" />
               Generate Report
             </button>
           </div>

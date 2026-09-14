@@ -55,11 +55,15 @@
     "totalRequests": "Solicitudes totales"
   },
   "labels": {
+    "absentToday": "Ausente hoy",
     "approved": "Aprobado",
     "availableToday": "Disponible hoy",
     "employees": "Empleados",
+    "lateToday": "Tarde hoy",
     "onLeaveToday": "De baja hoy",
     "pending": "Pendiente",
+    "presentToday": "Presente hoy",
+    "remoteToday": "Trabajando en remoto",
     "requests": "Solicitudes"
   },
   "loading": "Cargando tu panel...",

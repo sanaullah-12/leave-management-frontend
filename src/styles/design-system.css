@@ -2081,6 +2081,14 @@ html.theme-mint { --blue-25: 236 253 245; --blue-50: 236 253 245; --blue-100: 20
 :root {
   --glass-fill: rgb(255 255 255 / 0.55);
   --glass-fill-strong: rgb(255 255 255 / 0.72);
+  /* The overlay fill. It is opaque enough to read on its own because an
+     overlay cannot borrow legibility from its blur: every dropdown in the app
+     opens inside a bar that already carries backdrop-blur, and a backdrop
+     filter establishes a backdrop root for its descendants - so the panel's
+     own blur samples an empty backdrop and diffuses nothing. What is left is
+     the fill, and at glass alpha the content underneath reads straight
+     through the menu text. */
+  --panel-fill: rgb(255 255 255 / 0.94);
   --glass-edge: rgb(255 255 255 / 0.65);
   --glass-sheen: inset 0 1px 0 rgb(255 255 255 / 0.75);
   --glass-drop:
@@ -2104,6 +2112,10 @@ html.dark {
      asks for. Move the ground and these have to move with it. */
   --glass-fill: rgb(255 255 255 / 0.055);
   --glass-fill-strong: rgb(255 255 255 / 0.09);
+  /* Not a white lift like the two above: at this opacity a white overlay
+     would wash out to near-grey. This is --card-surface raised one elevation
+     step, which is the tone an overlay floating above a card should be. */
+  --panel-fill: rgb(38 42 54 / 0.94);
   --glass-edge: rgb(255 255 255 / 0.09);
   --glass-sheen: inset 0 1px 0 rgb(255 255 255 / 0.06);
   --glass-drop:
@@ -2135,9 +2147,11 @@ html.dark {
    enough to separate it.
 
    .glass-panel is the floating overlay - menus, popovers, toasts, the mobile
-   tab bar. It sits on top of CONTENT, not on the ground, so it needs the
-   denser fill and a harder shadow: at the card's alpha the text underneath
-   shows through and the panel becomes unreadable. */
+   tab bar. It sits on top of CONTENT, not on the ground, so it needs an opaque
+   fill and a harder shadow: at any glass alpha the text underneath shows
+   through and the panel becomes unreadable. The blur stays for the hairline
+   of translucency at the edges and for overlays that are not nested inside a
+   blurred bar, but nothing about the panel's legibility depends on it. */
 .glass-card,
 .glass-panel {
   -webkit-backdrop-filter: var(--glass-blur);
@@ -2151,7 +2165,7 @@ html.dark {
 }
 
 .glass-panel {
-  background-color: var(--glass-fill-strong);
+  background-color: var(--panel-fill);
   box-shadow: var(--glass-sheen), var(--glass-drop-lifted);
 }
 

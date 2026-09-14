@@ -55,11 +55,15 @@
     "totalRequests": "Anträge gesamt"
   },
   "labels": {
+    "absentToday": "Heute abwesend",
     "approved": "Genehmigt",
     "availableToday": "Heute verfügbar",
     "employees": "Mitarbeiter",
+    "lateToday": "Heute zu spät",
     "onLeaveToday": "Heute abwesend",
     "pending": "Ausstehend",
+    "presentToday": "Heute anwesend",
+    "remoteToday": "Arbeitet remote",
     "requests": "Anträge"
   },
   "loading": "Ihr Dashboard wird geladen ...",

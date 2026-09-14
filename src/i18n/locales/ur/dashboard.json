@@ -55,11 +55,15 @@
     "totalRequests": "کل درخواستیں"
   },
   "labels": {
+    "absentToday": "آج غیر حاضر",
     "approved": "منظور شدہ",
     "availableToday": "آج دستیاب",
     "employees": "ملازمین",
+    "lateToday": "آج تاخیر سے",
     "onLeaveToday": "آج چھٹی پر",
     "pending": "زیر التوا",
+    "presentToday": "آج حاضر",
+    "remoteToday": "ریموٹ کام",
     "requests": "درخواستیں"
   },
   "loading": "آپ کا ڈیش بورڈ لوڈ ہو رہا ہے...",

@@ -148,6 +148,13 @@ export const PayrollSection: React.FC<SectionProps> = ({
 /* Search input                                                        */
 /* ------------------------------------------------------------------ */
 
+/**
+ * The default height, not the compact one: every toolbar this sits in puts a
+ * Select beside it, and those are the field family's h-10. It used to be `sm`
+ * to match a Select that sized itself from its padding, which only ever lined
+ * up on desktop - the two were 4px apart on a phone.
+ */
+
 export const PayrollSearch: React.FC<{
   value: string;
   onChange: (v: string) => void;
@@ -156,7 +163,6 @@ export const PayrollSearch: React.FC<{
 }> = React.memo(({ value, onChange, placeholder = "Search", className = "w-52" }) => (
   <Input
     icon={MagnifyingGlassIcon}
-    inputSize="sm"
     value={value}
     onChange={(e) => onChange(e.target.value)}
     onClear={() => onChange("")}
