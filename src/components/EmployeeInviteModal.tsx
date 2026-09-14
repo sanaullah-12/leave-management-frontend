@@ -8,6 +8,8 @@ import Select from "./ui/Select";
 import DatePicker from "./ui/DatePicker";
 import LoadingSpinner from "./LoadingSpinner";
 
+import Input from "./ui/Input";
+import Button from "./ui/Button";
 const DEPARTMENT_OPTIONS = [
   "Engineering",
   "Product & Development",
@@ -33,9 +35,6 @@ const POSITION_OPTIONS = [
   "Operations Manager",
 ].map((p) => ({ value: p, label: p }));
 
-// Shared themed input styling - matches the Select / DatePicker triggers.
-const INPUT =
-  "w-full rounded-xl bg-[var(--card-surface)] px-4 py-2.5 text-sm text-gray-900 outline-none ring-1 ring-inset ring-gray-200/70 transition-shadow placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 dark:text-gray-100 dark:placeholder-gray-500 dark:ring-white/10";
 import {
   UserIcon,
   EnvelopeIcon,
@@ -284,10 +283,9 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
               />
             ) : (
               // Custom Name Input
-              <input
+              <Input
                 type="text"
                 {...register("name", { required: "Full name is required" })}
-                className={INPUT}
                 placeholder="Enter full name"
               />
             )}
@@ -322,10 +320,9 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
               <HashtagIcon className="w-4 h-4 mr-2 text-gray-400" />
               Employee ID
             </label>
-            <input
+            <Input
               type="text"
               {...register("employeeId")}
-              className={INPUT}
               placeholder="Auto-generated or from machine selection"
               readOnly={!useCustomName && selectedEmployee}
             />
@@ -342,7 +339,7 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
               <EnvelopeIcon className="w-4 h-4 mr-2 text-gray-400" />
               Email Address
             </label>
-            <input
+            <Input
               type="email"
               {...register("email", {
                 required: "Email is required",
@@ -351,7 +348,6 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
                   message: "Invalid email address",
                 },
               })}
-              className={INPUT}
               placeholder="employee@company.com"
             />
             {errors.email && (
@@ -368,10 +364,9 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
               <PhoneIcon className="w-4 h-4 mr-2 text-gray-400" />
               Phone Number (Optional)
             </label>
-            <input
+            <Input
               type="tel"
               {...register("phone", phoneValidationRules)}
-              className={INPUT}
               placeholder={PHONE_PLACEHOLDER}
             />
             {errors.phone ? (
@@ -472,12 +467,11 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
               <TagIcon className="w-4 h-4 mr-2 text-gray-400" />
               Tags (Optional)
             </label>
-            <input
+            <Input
               type="text"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={handleAddTag}
-              className={INPUT}
               placeholder="Add tags and press Enter"
             />
 
@@ -505,19 +499,15 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
 
         {/* Action Buttons */}
         <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
-          <button
+          <Button variant="secondary" className="px-6 py-3"
             type="button"
             onClick={handleClose}
-            className="btn-secondary px-6 py-3"
-            disabled={inviteEmployeeMutation.isPending}
-          >
+            disabled={inviteEmployeeMutation.isPending}>
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button variant="primary" className="px-8 py-3"
             type="submit"
-            disabled={inviteEmployeeMutation.isPending}
-            className="btn-primary px-8 py-3 inline-flex items-center"
-          >
+            disabled={inviteEmployeeMutation.isPending}>
             {inviteEmployeeMutation.isPending ? (
               <>
                 <LoadingSpinner size="sm" />
@@ -529,7 +519,7 @@ const EmployeeInviteModal: React.FC<EmployeeInviteModalProps> = ({
                 Send Invitation
               </>
             )}
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

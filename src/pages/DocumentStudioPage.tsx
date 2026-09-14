@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -59,6 +61,8 @@ import type {
 } from "../components/documentStudio/types";
 import "../components/documentStudio/studio.css";
 
+import Input from "../components/ui/Input";
+import Button from "../components/ui/Button";
 /** Editor working session - what's currently loaded into the canvas. */
 interface Session {
   key: string; // forces canvas DOM reset
@@ -375,40 +379,36 @@ const DocumentStudioPage: React.FC = () => {
       className="space-y-6"
     >
       {/* ============ Header ============ */}
-      <motion.div
-        variants={staggerItem}
-        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-white">
-            <DocumentTextIcon className="h-7 w-7 text-blue-600 dark:text-blue-400" />
-            Document Studio
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Create, manage and generate professional HR documents without
-            leaving Nexora.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 self-start">
-          {canManage && (
-            <button
-              onClick={() => setLetterheadOpen(true)}
-              className="btn-secondary inline-flex items-center gap-2"
-            >
-              <SwatchIcon className="h-5 w-5" />
-              <span className="hidden sm:inline">Branding</span>
-            </button>
-          )}
-          <motion.button
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={startBlank}
-            className="btn-primary inline-flex items-center gap-2"
-          >
-            <PlusIcon className="h-5 w-5" />
-            New Document
-          </motion.button>
-        </div>
+      <motion.div variants={staggerItem}>
+        <SectionHeader
+          variant="documents"
+          eyebrow="HR documents"
+          title="Document Studio"
+          description="Create, manage and generate professional HR documents without leaving Nexora."
+          illustration={sectionIllustration("documents")}
+          action={
+            <>
+              {canManage && (
+                <button
+                  onClick={() => setLetterheadOpen(true)}
+                  className="sh-action"
+                >
+                  <SwatchIcon className="h-5 w-5" />
+                  <span className="hidden sm:inline">Branding</span>
+                </button>
+              )}
+              <motion.button
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={startBlank}
+                className="sh-action-primary"
+              >
+                <PlusIcon className="h-5 w-5" />
+                New Document
+              </motion.button>
+            </>
+          }
+        />
       </motion.div>
 
       {/* ============ Overview cards ============ */}
@@ -441,24 +441,22 @@ const DocumentStudioPage: React.FC = () => {
               </p>
             </div>
           </div>
-          <button
-            onClick={() => setLetterheadOpen(true)}
-            className="btn-primary self-start whitespace-nowrap text-sm sm:self-auto"
-          >
+          <Button variant="primary" className="self-start whitespace-nowrap text-sm sm:self-auto"
+            onClick={() => setLetterheadOpen(true)}>
             Set up branding
-          </button>
+          </Button>
         </motion.div>
       )}
 
       {/* ============ Canvas-first workspace ============ */}
       <motion.div variants={staggerItem} className="space-y-3">
         {/* Control bar - the only always-visible chrome */}
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-gray-200/70 bg-white/80 px-2.5 py-2 backdrop-blur-sm dark:border-gray-700/50 dark:bg-gray-800/70">
+        <div className="glass-card flex flex-wrap items-center justify-between gap-2 rounded-xl px-2.5 py-2">
           <div className="flex min-w-0 items-center gap-2">
             <button
               data-studio-keep
               onClick={() => setShowLibrary((v) => !v)}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors ${
                 showLibrary
                   ? "text-white"
                   : "text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
@@ -471,7 +469,7 @@ const DocumentStudioPage: React.FC = () => {
             {canManage && (
               <button
                 onClick={() => setImportOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
+                className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
               >
                 <DocumentArrowUpIcon className="h-4 w-4" />
                 <span className="hidden sm:inline">Import</span>
@@ -503,7 +501,7 @@ const DocumentStudioPage: React.FC = () => {
                     key={m.key}
                     onClick={() => setView(m.key)}
                     title={m.label}
-                    className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors ${
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium transition-colors ${
                       view === m.key
                         ? "bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-white"
                         : "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
@@ -519,28 +517,24 @@ const DocumentStudioPage: React.FC = () => {
               centerActions
                 .filter((a) => a.show)
                 .map((a) => (
-                  <button
+                  <Button variant="secondary" className="gap-1.5 !py-1.5 text-xs"
                     key={a.label}
-                    onClick={a.onClick}
-                    className="btn-secondary inline-flex items-center gap-1.5 !py-1.5 text-xs"
-                  >
+                    onClick={a.onClick}>
                     <a.icon className="h-4 w-4" />
                     <span className="hidden sm:inline">{a.label}</span>
-                  </button>
+                  </Button>
                 ))}
             {hasSession && (
-              <button
-                onClick={() => setGenerateOpen(true)}
-                className="btn-primary inline-flex items-center gap-1.5 !py-1.5 text-xs"
-              >
+              <Button variant="primary" className="gap-1.5 !py-1.5 text-xs"
+                onClick={() => setGenerateOpen(true)}>
                 <PaperAirplaneIcon className="h-4 w-4" />
                 Generate
-              </button>
+              </Button>
             )}
             <button
               data-studio-keep
               onClick={() => setShowProps((v) => !v)}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors ${
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors ${
                 showProps
                   ? "text-white"
                   : "text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
@@ -555,7 +549,7 @@ const DocumentStudioPage: React.FC = () => {
 
         {/* Preview subject - which employee's data the preview merges in */}
         {hasSession && showPreview && canManage && (
-          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-gray-200/70 bg-white/60 px-3 py-2 text-xs dark:border-gray-700/50 dark:bg-gray-800/50">
+          <div className="glass-card flex flex-wrap items-center gap-2 rounded-xl px-3 py-2 text-xs">
             <UserCircleIcon className="h-4 w-4 text-gray-400" />
             <span className="font-medium text-gray-500 dark:text-gray-400">
               Preview with
@@ -563,7 +557,7 @@ const DocumentStudioPage: React.FC = () => {
             <select
               value={previewEmployeeId}
               onChange={(e) => setPreviewEmployeeId(e.target.value)}
-              className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs text-gray-800 outline-none sm:flex-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+              className="min-w-0 flex-1 rounded-full border border-gray-200 bg-white px-2 py-1 text-xs text-gray-800 outline-none sm:flex-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
             >
               <option value="">Sample placeholders</option>
               {employees.map((e) => (
@@ -599,7 +593,7 @@ const DocumentStudioPage: React.FC = () => {
                   }
                 />
               ) : (
-                <div className="flex h-full items-center justify-center rounded-2xl border border-gray-200/70 bg-white/60 dark:border-gray-700/50 dark:bg-gray-800/50">
+                <div className="glass-card flex h-full items-center justify-center rounded-2xl">
                   <StudioEmptyState
                     onCreate={
                       canManage ? startBlank : () => setShowLibrary(true)
@@ -809,28 +803,25 @@ const DocumentStudioPage: React.FC = () => {
         icon={<DocumentDuplicateIcon className="h-5 w-5" />}
         footer={
           <div className="flex w-full justify-end gap-2">
-            <button
-              onClick={() => setRenameFor(null)}
-              className="btn-secondary text-sm"
-            >
+            <Button variant="secondary" className="text-sm"
+              onClick={() => setRenameFor(null)}>
               Cancel
-            </button>
-            <button onClick={submitRename} className="btn-primary text-sm">
+            </Button>
+            <Button variant="primary" className="text-sm" onClick={submitRename}>
               {renameFor === "new" ? "Create" : "Save"}
-            </button>
+            </Button>
           </div>
         }
       >
         <label className="mb-1.5 block text-xs font-semibold text-gray-500 dark:text-gray-400">
           Template name
         </label>
-        <input
+        <Input
           autoFocus
           value={renameValue}
           onChange={(e) => setRenameValue(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submitRename()}
           placeholder="e.g. Probation Confirmation Letter"
-          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
         />
       </Modal>
 

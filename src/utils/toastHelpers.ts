@@ -39,7 +39,7 @@ const getThemedToastStyle = (
     success: "#10b981", // emerald-500
     error: "#ef4444", // red-500
     warning: "#f59e0b", // amber-500
-    info: "#3b82f6", // blue-500
+    info: "rgb(var(--blue-500))", // the theme accent
     loading: "#6b7280", // gray-500
   };
 
@@ -244,9 +244,9 @@ export const showSystemToast = (
     style: {
       ...getThemedToastStyle("info"),
       background: isDark
-        ? "linear-gradient(135deg, #312e81 0%, #3730a3 100%)" // dark indigo gradient
-        : "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)", // light sky gradient
-      borderLeft: "4px solid #6366f1", // indigo-500
+        ? "linear-gradient(135deg, rgb(var(--blue-900)) 0%, rgb(var(--blue-800)) 100%)"
+        : "linear-gradient(135deg, rgb(var(--blue-50)) 0%, rgb(var(--blue-100)) 100%)",
+      borderLeft: "4px solid rgb(var(--blue-500))"
     },
   });
 };

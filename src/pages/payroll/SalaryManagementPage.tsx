@@ -181,7 +181,7 @@ const SalaryManagementPage: React.FC = () => {
         <button
           onClick={() => setEditing(row)}
           title={row.structure ? "Edit salary structure" : "Set up salary"}
-          className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
+          className="grid h-8 w-8 place-items-center rounded-full text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
         >
           <PencilSquareIcon className="h-4 w-4" />
         </button>
@@ -189,7 +189,7 @@ const SalaryManagementPage: React.FC = () => {
           <button
             onClick={() => setConfirmClear(row)}
             title="Remove salary structure"
-            className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-500/10"
+            className="grid h-8 w-8 place-items-center rounded-full text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-500/10"
           >
             <TrashIcon className="h-4 w-4" />
           </button>
@@ -218,7 +218,7 @@ const SalaryManagementPage: React.FC = () => {
         {employeesLoading ? (
           <PayrollStatsSkeleton count={4} />
         ) : (
-          <PayrollStatCards tiles={tiles} columnsClassName="xl:grid-cols-4" />
+          <PayrollStatCards tiles={tiles} />
         )}
       </motion.div>
 

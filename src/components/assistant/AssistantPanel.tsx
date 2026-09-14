@@ -27,6 +27,7 @@ import AssistantTurn from "./AssistantMessage";
 import TypingDots from "./TypingDots";
 import { useAssistant } from "./useAssistant";
 
+import Input from "../ui/Input";
 interface Props {
   open: boolean;
   closePanel: () => void;
@@ -150,7 +151,7 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
                   onClick={reset}
                   title={STRINGS.resetLabel}
                   aria-label={STRINGS.resetLabel}
-                  className="grid h-8 w-8 place-items-center rounded-xl text-gray-500 transition-colors hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
+                  className="grid h-8 w-8 place-items-center rounded-full text-gray-500 transition-colors hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
                 >
                   <ArrowPathIcon className="h-4 w-4" />
                 </button>
@@ -159,7 +160,7 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
                 type="button"
                 onClick={closePanel}
                 aria-label={STRINGS.closeLabel}
-                className="grid h-8 w-8 place-items-center rounded-xl text-gray-500 transition-colors hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
+                className="grid h-8 w-8 place-items-center rounded-full text-gray-500 transition-colors hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
               >
                 <XMarkIcon className="h-5 w-5" />
               </button>
@@ -176,7 +177,7 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-4"
                 >
-                  <div className="rounded-2xl border border-gray-200/80 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-gray-800/80">
+                  <div className="glass-card rounded-2xl p-4">
                     <p className="text-base font-bold text-gray-900 dark:text-white">
                       {STRINGS.emptyGreeting(context.userName)}
                     </p>
@@ -208,7 +209,7 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
                                     "noopener,noreferrer"
                                   );
                               }}
-                              className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition-transform hover:-translate-y-0.5 dark:border-white/10 dark:bg-gray-800 dark:text-gray-200"
+                              className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition-transform hover:-translate-y-0.5 dark:border-white/10 dark:bg-gray-800 dark:text-gray-200"
                             >
                               <Icon
                                 className="h-3.5 w-3.5"
@@ -233,7 +234,7 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
                           key={s.entryId}
                           type="button"
                           onClick={() => askEntry(s.entryId, s.question)}
-                          className="flex w-full items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-start text-sm font-medium text-gray-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-transparent hover:shadow-md dark:border-white/10 dark:bg-gray-800 dark:text-gray-200"
+                          className="flex w-full items-center justify-between gap-2 rounded-full border border-gray-200 bg-white px-3 py-2.5 text-start text-sm font-medium text-gray-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-transparent hover:shadow-md dark:border-white/10 dark:bg-gray-800 dark:text-gray-200"
                         >
                           <span>{s.question}</span>
                           <span
@@ -268,19 +269,19 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
               onSubmit={submit}
               className="flex items-center gap-2 border-t border-black/5 bg-white/80 px-3 py-3 dark:border-white/10 dark:bg-gray-900/70"
             >
-              <input
+              <Input
                 ref={inputRef}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder={STRINGS.inputPlaceholder}
                 aria-label={STRINGS.inputPlaceholder}
-                className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 outline-none transition-colors placeholder:text-gray-400 focus:border-[var(--accent)] dark:border-white/10 dark:bg-gray-800 dark:text-gray-100"
+                className="min-w-0 flex-1"
               />
               <button
                 type="submit"
                 disabled={!draft.trim()}
                 aria-label={STRINGS.send}
-                className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-xl text-white shadow-sm transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
+                className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-full text-white shadow-sm transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
                 style={{ backgroundColor: "var(--accent)" }}
               >
                 <PaperAirplaneIcon className="h-5 w-5 rtl:-scale-x-100" />

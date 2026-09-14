@@ -201,7 +201,7 @@ const LateHoursOverview: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setShowAllEmployees((v) => !v)}
-                className="rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:border-gray-600 dark:text-blue-400 dark:hover:bg-blue-500/10"
+                className="rounded-full border border-gray-200 px-2.5 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:border-gray-600 dark:text-blue-400 dark:hover:bg-blue-500/10"
               >
                 {showAllEmployees
                   ? `Show top ${PREVIEW_ROWS}`

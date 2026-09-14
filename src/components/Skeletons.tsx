@@ -15,14 +15,13 @@ const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({
   children,
   className = "",
 }) => (
-  <div
-    className={`rounded-2xl border border-gray-100 dark:border-gray-700/60 bg-white dark:bg-gray-800/50 ${className}`}
-  >
+  <div className={`glass-card rounded-2xl ${className}`}>
     {children}
   </div>
 );
 
 /* ------------------------------ Page header ------------------------------ */
+
 export const HeaderSkeleton: React.FC = () => (
   <div className="flex items-center justify-between">
     <div className="space-y-2.5">

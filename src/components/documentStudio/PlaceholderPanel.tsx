@@ -5,6 +5,7 @@ import { PLACEHOLDERS } from "./constants";
 import { studioIcon } from "./icons";
 import type { PlaceholderDef, TemplateField } from "./types";
 
+import Input from "../ui/Input";
 interface Props {
   /** Insert the token at the caret (click). Drag is handled inline. */
   onInsert: (key: string) => void;
@@ -63,15 +64,16 @@ const PlaceholderPanel: React.FC<Props> = ({
         Fields resolve to real employee data when you generate.
       </p>
 
-      <div className="relative mb-3">
-        <MagnifyingGlassIcon className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search fields"
-          className="w-full rounded-lg border border-gray-200 bg-white/70 py-2 pl-8 pr-3 text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-gray-300 dark:border-white/10 dark:bg-white/5 dark:text-gray-100"
-        />
-      </div>
+      <Input
+        icon={MagnifyingGlassIcon}
+        inputSize="sm"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onClear={() => setQuery("")}
+        clearable
+        placeholder="Search fields"
+        className="mb-3"
+      />
 
       <div className="flex-1 space-y-4 overflow-y-auto pr-0.5">
         {grouped.map(({ group, items }) => (
@@ -97,7 +99,7 @@ const PlaceholderPanel: React.FC<Props> = ({
                   whileHover={{ x: 2 }}
                   whileTap={{ scale: 0.98 }}
                   disabled={disabled}
-                  className="group flex items-center gap-2.5 rounded-lg border border-gray-200/70 bg-white/60 px-2.5 py-2 text-left transition-colors hover:border-transparent disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700/50 dark:bg-white/5"
+                  className="group flex items-center gap-2.5 rounded-full border border-gray-200/70 bg-white/60 px-2.5 py-2 text-left transition-colors hover:border-transparent disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700/50 dark:bg-white/5"
                   style={{ cursor: disabled ? "not-allowed" : "grab" }}
                 >
                   <span className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-md text-gray-500 dark:text-gray-400">

@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import {
   MegaphoneIcon,
+  EnvelopeOpenIcon,
   PlusIcon,
   MagnifyingGlassIcon,
   EllipsisHorizontalIcon,
@@ -17,6 +18,9 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { announcementsAPI } from "../services/api";
+import { StatCardRow } from "../components/ui/StatCard";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import {
   categoryIcon,
   type IconComponent,
@@ -34,6 +38,8 @@ import Dropdown from "../components/ui/Dropdown";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
 import LogoLoader from "../components/LogoLoader";
 
+import Input from "../components/ui/Input";
+import Button from "../components/ui/Button";
 /* ------------------------------------------------------------------ */
 /*  Types & metadata                                                   */
 /* ------------------------------------------------------------------ */
@@ -124,7 +130,7 @@ const ReactionBar: React.FC<{
               initial={{ opacity: 0, y: 6, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 6, scale: 0.96 }}
-              className="absolute bottom-9 left-0 z-20 flex gap-1 rounded-xl border border-gray-200 bg-white p-1.5 shadow-xl dark:border-gray-700 dark:bg-gray-800"
+              className="glass-panel absolute bottom-9 left-0 z-20 flex gap-1 rounded-xl p-1.5"
             >
               {EMOJIS.map((e) => (
                 <button
@@ -134,7 +140,7 @@ const ReactionBar: React.FC<{
                     onReact(e);
                     setOpen(false);
                   }}
-                  className={`grid h-8 w-8 place-items-center rounded-lg text-lg transition-transform hover:scale-125 ${
+                  className={`grid h-8 w-8 place-items-center rounded-full text-lg transition-transform hover:scale-125 ${
                     a.myReaction === e ? "bg-gray-100 dark:bg-gray-700" : ""
                   }`}
                 >
@@ -174,7 +180,7 @@ const AnnouncementCard: React.FC<{
     <motion.article
       variants={staggerItem}
       layout
-      className="group relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-gray-700/60 dark:bg-gray-800/60"
+      className="glass-card group relative overflow-hidden rounded-2xl transition-shadow transition-all hover:bg-[var(--glass-fill-strong)] hover:shadow-[shadow:var(--glass-sheen),var(--glass-drop-lifted)]"
     >
       {/* Category accent bar */}
       <div className={`h-1 w-full bg-gradient-to-r ${meta.bar}`} />
@@ -228,7 +234,7 @@ const AnnouncementCard: React.FC<{
                 align="right"
                 widthClass="w-40"
                 bareButton
-                buttonClassName="grid h-7 w-7 place-items-center rounded-lg text-gray-400 hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
+                buttonClassName="grid h-7 w-7 place-items-center rounded-full text-gray-400 hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
                 sections={[
                   {
                     items: [
@@ -344,29 +350,26 @@ const AnnouncementModal: React.FC<{
       icon={<MegaphoneIcon className="h-5 w-5" />}
       footer={
         <div className="flex w-full justify-end gap-2">
-          <button onClick={onClose} className="btn-secondary text-sm">
+          <Button variant="secondary" className="text-sm" onClick={onClose}>
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button variant="primary" className="text-sm"
             onClick={() => valid && onSubmit(draft)}
-            disabled={!valid || saving}
-            className="btn-primary text-sm disabled:cursor-not-allowed disabled:opacity-50"
-          >
+            disabled={!valid || saving}>
             {saving ? "Posting..." : editing ? "Save changes" : "Post announcement"}
-          </button>
+          </Button>
         </div>
       }
     >
       <div className="space-y-5">
         <div>
           <label className="form-label">Title</label>
-          <input
+          <Input
             autoFocus
             value={draft.title}
             onChange={(e) => setDraft({ ...draft, title: e.target.value })}
             placeholder="e.g. Office closed for the long weekend"
             maxLength={160}
-            className={FIELD}
           />
         </div>
 
@@ -424,7 +427,7 @@ const AnnouncementModal: React.FC<{
             <button
               type="button"
               onClick={() => setDraft({ ...draft, pinned: !draft.pinned })}
-              className="flex w-full items-center justify-between rounded-xl bg-[var(--card-surface)] px-4 py-3 text-sm ring-1 ring-inset ring-gray-200/70 transition-shadow dark:ring-white/10"
+              className="flex w-full items-center justify-between rounded-full bg-[var(--card-surface)] px-4 py-3 text-sm ring-1 ring-inset ring-gray-200/70 transition-shadow dark:ring-white/10"
             >
               <span className="font-medium text-gray-700 dark:text-gray-200">
                 Pin to top
@@ -565,53 +568,53 @@ const AnnouncementsPage: React.FC = () => {
       className="space-y-6"
     >
       {/* Header */}
-      <motion.div
-        variants={staggerItem}
-        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-white">
-            <MegaphoneIcon className="h-7 w-7 text-blue-600 dark:text-blue-400" />
-            Announcements
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {canManage
+      <motion.div variants={staggerItem}>
+        <SectionHeader
+          variant="announcements"
+          eyebrow="Company news"
+          title="Announcements"
+          description={
+            canManage
               ? "Post company news, events and updates to your whole team."
-              : "News, events and updates from your HR team."}
-          </p>
-        </div>
-        {canManage && (
-          <motion.button
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={openCreate}
-            className="btn-primary inline-flex items-center gap-2 self-start"
-          >
-            <PlusIcon className="h-5 w-5" />
-            New Announcement
-          </motion.button>
-        )}
+              : "News, events and updates from your HR team."
+          }
+          illustration={sectionIllustration("announcements")}
+          action={
+            canManage ? (
+              <button
+                type="button"
+                onClick={openCreate}
+                className="sh-action-primary"
+              >
+                <PlusIcon className="h-4 w-4" />
+                New Announcement
+              </button>
+            ) : undefined
+          }
+        />
       </motion.div>
 
-      {/* Stat chips */}
-      <motion.div variants={staggerItem} className="flex flex-wrap gap-3">
-        {[
-          { label: "Total notices", value: stats.total },
-          { label: "Pinned", value: stats.pinned },
-          { label: "Unread", value: stats.unread },
-        ].map((s) => (
-          <div
-            key={s.label}
-            className="flex items-center gap-2 rounded-xl border border-gray-200/70 bg-white px-4 py-2.5 dark:border-gray-700/50 dark:bg-gray-800/60"
-          >
-            <span className="text-xl font-bold tabular-nums text-gray-900 dark:text-white">
-              {s.value}
-            </span>
-            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-              {s.label}
-            </span>
-          </div>
-        ))}
+      {/* Stat row */}
+      <motion.div variants={staggerItem}>
+        <StatCardRow
+          tiles={[
+            {
+              label: "Total notices",
+              value: stats.total,
+              icon: <MegaphoneIcon className="h-5 w-5" />,
+            },
+            {
+              label: "Pinned",
+              value: stats.pinned,
+              icon: <BookmarkIcon className="h-5 w-5" />,
+            },
+            {
+              label: "Unread",
+              value: stats.unread,
+              icon: <EnvelopeOpenIcon className="h-5 w-5" />,
+            },
+          ]}
+        />
       </motion.div>
 
       {/* Filters */}
@@ -640,15 +643,15 @@ const AnnouncementsPage: React.FC = () => {
             );
           })}
         </div>
-        <div className="relative sm:w-64">
-          <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search announcements"
-            className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-sm outline-none focus:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-          />
-        </div>
+        <Input
+          icon={MagnifyingGlassIcon}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onClear={() => setSearch("")}
+          clearable
+          placeholder="Search announcements"
+          className="sm:w-64"
+        />
       </motion.div>
 
       {/* Feed */}
@@ -673,10 +676,10 @@ const AnnouncementsPage: React.FC = () => {
               : "Check back soon - your HR team hasn't posted anything yet."}
           </p>
           {canManage && !search && category === "all" && (
-            <button onClick={openCreate} className="btn-primary mt-5 inline-flex items-center gap-2">
+            <Button variant="primary" className="mt-5 gap-2" onClick={openCreate}>
               <PlusIcon className="h-5 w-5" />
               New Announcement
-            </button>
+            </Button>
           )}
         </motion.div>
       ) : (

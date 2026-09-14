@@ -106,7 +106,7 @@ const DayTable: React.FC<Props> = ({
             <button
               type="button"
               onClick={onClearFilter}
-              className="rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:border-gray-600 dark:text-blue-400 dark:hover:bg-blue-500/10"
+              className="rounded-full border border-gray-200 px-2.5 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:border-gray-600 dark:text-blue-400 dark:hover:bg-blue-500/10"
             >
               Show all days
             </button>
@@ -115,7 +115,7 @@ const DayTable: React.FC<Props> = ({
             <button
               type="button"
               onClick={onViewFull}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-500/40 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20"
+              className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-500/40 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20"
             >
               <CalendarDaysIcon className="h-4 w-4" />
               View full attendance
@@ -204,7 +204,7 @@ const DayTable: React.FC<Props> = ({
                         onSelect(row);
                       }}
                       aria-label={`View ${row.dateDisplay}`}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                     >
                       <EyeIcon className="h-4 w-4" />
                     </button>
@@ -228,7 +228,7 @@ const DayTable: React.FC<Props> = ({
               disabled={safePage === 1}
               onClick={() => setPage(safePage - 1)}
               aria-label="Previous page"
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300"
             >
               <ChevronLeftIcon className="h-4 w-4" />
             </button>
@@ -240,7 +240,7 @@ const DayTable: React.FC<Props> = ({
               disabled={safePage === totalPages}
               onClick={() => setPage(safePage + 1)}
               aria-label="Next page"
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300"
             >
               <ChevronRightIcon className="h-4 w-4" />
             </button>

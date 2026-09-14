@@ -12,6 +12,7 @@ import {
 import StatusBadge from "./StatusBadge";
 import type { DayRow } from "./DayTable";
 
+import Input from "../ui/Input";
 /**
  * Slide-over holding an employee's own attendance in full.
  *
@@ -254,7 +255,7 @@ const FullAttendanceDrawer: React.FC<Props> = ({
             ref={closeRef}
             onClick={onClose}
             aria-label="Close panel"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             <XMarkIcon className="h-4 w-4" />
           </button>
@@ -410,7 +411,7 @@ const FullAttendanceDrawer: React.FC<Props> = ({
                         setShowAll((v) => !v);
                         setQuery("");
                       }}
-                      className="shrink-0 rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:border-gray-600 dark:text-blue-400 dark:hover:bg-blue-500/10"
+                      className="shrink-0 rounded-full border border-gray-200 px-2.5 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:border-gray-600 dark:text-blue-400 dark:hover:bg-blue-500/10"
                     >
                       {showAll ? "Show this week" : "View full"}
                     </button>
@@ -418,16 +419,18 @@ const FullAttendanceDrawer: React.FC<Props> = ({
                 </div>
 
                 {showAll && (
-                  <div className="relative mb-2">
-                    <MagnifyingGlassIcon className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
-                    <input
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      placeholder="Find a date or status"
-                      aria-label="Search attendance days"
-                      className="w-full rounded-lg border border-gray-200 py-1.5 pl-8 pr-2 text-xs text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-                    />
-                  </div>
+                  <Input
+                    icon={MagnifyingGlassIcon}
+                    inputSize="sm"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onClear={() => setQuery("")}
+                    clearable
+                    placeholder="Find a date or status"
+                    aria-label="Search attendance days"
+                    className="mb-2"
+                    inputClassName="text-xs"
+                  />
                 )}
 
                 {historyRows.length ? (

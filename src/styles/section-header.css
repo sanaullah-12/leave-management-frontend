@@ -1,0 +1,183 @@
+/* ==========================================================================
+   Section header / dashboard banner
+   --------------------------------------------------------------------------
+   Motion for the banner illustration. Kept in CSS rather than framer-motion
+   so it runs on the compositor and costs nothing per frame on the main
+   thread - a banner sits at the top of every screen, so it must never be
+   what makes a page feel slow.
+
+   Every animation here is gated on prefers-reduced-motion.
+   ========================================================================== */
+
+/* A slow, shallow bob. 6s and 8px so it reads as "alive" in peripheral
+   vision without ever pulling the eye off the heading beside it. */
+@keyframes sh-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.sh-float {
+  animation: sh-float 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Secondary elements drift on a different period so the illustration never
+   moves as one rigid block. */
+.sh-float-slow {
+  animation: sh-float 9s ease-in-out infinite;
+  animation-delay: -3s;
+  will-change: transform;
+}
+
+/* Broadcast ripple: each arc brightens and pushes outward in turn, so a
+   megaphone reads as actively sending rather than sitting still. Staggered
+   by delay on the elements themselves. */
+@keyframes sh-ripple {
+  0% {
+    opacity: 0.15;
+    transform: translateX(0) scale(0.96);
+  }
+  35% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(6px) scale(1.06);
+  }
+}
+
+.sh-ripple {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: sh-ripple 2.8s ease-out infinite;
+}
+
+/* A slow tilt, for an object that should feel held rather than pinned. */
+@keyframes sh-sway {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(1.5deg);
+  }
+}
+
+.sh-sway {
+  transform-box: fill-box;
+  transform-origin: 50% 60%;
+  animation: sh-sway 7s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sh-float,
+  .sh-float-slow,
+  .sh-ripple,
+  .sh-sway {
+    animation: none;
+  }
+
+  /* A ripple's resting state is invisible, so it is pinned open instead of
+     simply stopped - otherwise the arcs would vanish entirely. */
+  .sh-ripple {
+    opacity: 0.5;
+  }
+}
+
+/* ==========================================================================
+   Banner actions
+   --------------------------------------------------------------------------
+   A banner is painted in the theme accent, so the app's `btn-primary` /
+   `btn-secondary` - which are drawn for a light card surface - lose all
+   contrast on it. These are the same two roles restated for a saturated
+   ground: solid white for the primary action, glass for everything else.
+
+   They are plain CSS rather than Tailwind utilities because every page that
+   moves an action into its banner needs the identical treatment, and a shared
+   class is the difference between one decision and twenty.
+   ========================================================================== */
+
+.sh-action,
+.sh-action-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  /* Same scale as the app's shared .btn-* controls, so a banner action and
+     a card action below it are the same size rather than nearly it. The
+     horizontal padding tracks the pill radius, not the old rectangle. */
+  height: 2rem;
+  padding: 0 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  white-space: nowrap;
+  transition: background-color 150ms ease, color 150ms ease,
+    box-shadow 150ms ease, transform 150ms ease;
+}
+
+@media (min-width: 640px) {
+  .sh-action,
+  .sh-action-primary {
+    height: 2.25rem;
+    padding: 0 1rem;
+    font-size: 0.8125rem;
+  }
+}
+
+.sh-action > svg,
+.sh-action-primary > svg {
+  height: 1rem;
+  width: 1rem;
+  flex: none;
+}
+
+/* Secondary: a pane of the banner rather than an object on it. */
+.sh-action {
+  background-color: rgb(255 255 255 / 0.15);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25);
+}
+
+.sh-action:hover:not(:disabled) {
+  background-color: rgb(255 255 255 / 0.25);
+}
+
+/* Primary: the one thing the section wants done, so it is opaque. The label
+   takes the accent, which keeps the button tied to the theme rather than
+   printing a fixed blue on a repainted banner. */
+.sh-action-primary {
+  background-color: #fff;
+  color: rgb(var(--blue-700));
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.08);
+}
+
+.sh-action-primary:hover:not(:disabled) {
+  background-color: rgb(255 255 255 / 0.9);
+}
+
+.sh-action:disabled,
+.sh-action-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sh-action:focus-visible,
+.sh-action-primary:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sh-action,
+  .sh-action-primary {
+    transition: none;
+  }
+}

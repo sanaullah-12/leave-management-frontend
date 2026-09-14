@@ -1,4 +1,6 @@
 import React from "react";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import { CARD } from "../lib/surfaces";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
@@ -6,7 +8,6 @@ import { leavesAPI } from "../services/api";
 import EmployeeLeaveActivity from "../components/EmployeeLeaveActivity";
 import Avatar from "../components/Avatar";
 import {
-  ClipboardDocumentListIcon,
   InformationCircleIcon,
   SunIcon,
   HeartIcon,
@@ -191,38 +192,19 @@ const MyLeaveActivityPage: React.FC = () => {
   return (
     <div className="space-y-6 fade-in">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl text-blue-600 dark:text-blue-400">
-            <ClipboardDocumentListIcon className="h-6 w-6" />
+      <SectionHeader
+        variant="leave"
+        eyebrow="Time off"
+        title="My Leave Activity"
+        description="Track your requests, approvals, and leave history."
+        badge={
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white ring-1 ring-inset ring-white/25">
+            <Avatar src={user.profilePicture} name={user.name} size="xs" />
+            {departmentName} &bull; {user.position}
           </span>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-              My Leave Activity
-            </h1>
-            <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
-              Track your requests, approvals, and leave history.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="hidden text-right sm:block">
-            <p className="text-sm font-semibold text-gray-900 dark:text-white">
-              {user.name}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {departmentName} • {user.position}
-            </p>
-          </div>
-          <Avatar
-            src={user.profilePicture}
-            name={user.name}
-            size="md"
-            className="ring-2 ring-blue-500/20"
-          />
-        </div>
-      </div>
+        }
+        illustration={sectionIllustration("leave")}
+      />
 
       {/* Leave balance rings */}
       <div className="space-y-4">

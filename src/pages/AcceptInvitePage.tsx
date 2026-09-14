@@ -34,8 +34,6 @@ interface InvitationData {
   invitedBy: string;
 }
 
-const inputClass =
-  "w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/40 px-4 py-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:ring-4 focus:ring-blue-500/10";
 
 const initialsOf = (name?: string) =>
   (name || "")
@@ -158,13 +156,13 @@ const AcceptInvitePage: React.FC = () => {
           <div className="mt-7 space-y-3">
             <button
               onClick={() => navigate("/login")}
-              className="flex w-full items-center justify-center rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 hover:shadow-xl"
+              className="flex w-full items-center justify-center rounded-full bg-blue-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 hover:shadow-xl"
             >
               Go to sign in
             </button>
             <button
               onClick={() => navigate("/register")}
-              className="flex w-full items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 transition-all hover:bg-gray-50 dark:hover:bg-gray-800"
+              className="flex w-full items-center justify-center rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 transition-all hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               Register a new company
             </button>
@@ -311,7 +309,7 @@ const AcceptInvitePage: React.FC = () => {
           placeholder="Enter a secure password"
           autoComplete="new-password"
           error={errors.password?.message}
-          className={inputClass}
+          inputSize="lg"
         />
 
         <PasswordInput
@@ -324,7 +322,7 @@ const AcceptInvitePage: React.FC = () => {
           placeholder="Re-enter your password"
           autoComplete="new-password"
           error={errors.confirmPassword?.message}
-          className={inputClass}
+          inputSize="lg"
         />
 
         {/* Live requirements checklist */}
@@ -363,7 +361,7 @@ const AcceptInvitePage: React.FC = () => {
           type="submit"
           disabled={isSubmitting}
           whileTap={{ scale: 0.99 }}
-          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 hover:shadow-xl disabled:opacity-70"
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 hover:shadow-xl disabled:opacity-70"
         >
           {isSubmitting ? (
             <InlineLoader label="Creating your account..." />

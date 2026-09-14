@@ -15,6 +15,8 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 import Select from "../ui/Select";
+import SectionHeader from "../ui/SectionHeader";
+import { sectionIllustration } from "../ui/illustrations";
 import { Skeleton } from "../Skeletons";
 import { CARD } from "../../lib/surfaces";
 import type { StatusStyle } from "./constants";
@@ -26,6 +28,7 @@ import {
 } from "./formatters";
 import type { PayrollPeriod } from "./types";
 
+import Input from "../ui/Input";
 /* ------------------------------------------------------------------ */
 /* Status pill                                                         */
 /* ------------------------------------------------------------------ */
@@ -62,28 +65,45 @@ StatusPill.displayName = "StatusPill";
 interface PageHeaderProps {
   title: string;
   subtitle: string;
-  /** Page icon. Defaults to the payroll banknotes mark. */
+  /** Screen icon, shown in the eyebrow. Defaults to the payroll banknotes mark. */
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   actions?: React.ReactNode;
 }
 
-/** The standard Nexora page heading (matches Document Studio / Employees). */
+/**
+ * The heading every payroll screen opens with.
+ *
+ * It is the app's `SectionHeader` with the payroll variant already chosen, so
+ * all six screens share one banner, one gradient and one animation without
+ * each of them having to say so. Payroll has a single animation because it is
+ * a single subject: Payslips and Processing are two views of the same thing,
+ * and arriving on either should look like arriving in payroll.
+ *
+ * What separates the screens is the icon in the eyebrow, which is why the
+ * `icon` prop survived the move to a banner.
+ *
+ * Actions belong on the gradient, so they take the `sh-action` classes rather
+ * than the app's card-surface `btn-*` pair - see styles/section-header.css.
+ */
 export const PayrollPageHeader: React.FC<PageHeaderProps> = ({
   title,
   subtitle,
   icon: Icon = BanknotesIcon,
   actions,
 }) => (
-  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-    <div>
-      <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-white">
-        <Icon className="h-7 w-7 text-blue-600 dark:text-blue-400" />
-        {title}
-      </h1>
-      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>
-    </div>
-    {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
-  </div>
+  <SectionHeader
+    variant="payroll"
+    eyebrow={
+      <span className="inline-flex items-center gap-1.5">
+        <Icon className="h-3.5 w-3.5" />
+        Payroll
+      </span>
+    }
+    title={title}
+    description={subtitle}
+    illustration={sectionIllustration("payroll")}
+    action={actions}
+  />
 );
 
 /* ------------------------------------------------------------------ */
@@ -134,15 +154,16 @@ export const PayrollSearch: React.FC<{
   placeholder?: string;
   className?: string;
 }> = React.memo(({ value, onChange, placeholder = "Search", className = "w-52" }) => (
-  <div className={`relative ${className}`}>
-    <MagnifyingGlassIcon className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-    <input
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-8 pr-3 text-sm outline-none focus:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-    />
-  </div>
+  <Input
+    icon={MagnifyingGlassIcon}
+    inputSize="sm"
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    onClear={() => onChange("")}
+    clearable
+    placeholder={placeholder}
+    className={className}
+  />
 ));
 PayrollSearch.displayName = "PayrollSearch";
 
@@ -196,7 +217,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = React.memo(
           <button
             onClick={() => step(-1)}
             aria-label="Previous month"
-            className="grid h-9 w-9 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
+            className="grid h-9 w-9 place-items-center rounded-full text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
           >
             <ChevronLeftIcon className="h-4 w-4" />
           </button>
@@ -212,7 +233,7 @@ export const PeriodPicker: React.FC<PeriodPickerProps> = React.memo(
           <button
             onClick={() => step(1)}
             aria-label="Next month"
-            className="grid h-9 w-9 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
+            className="grid h-9 w-9 place-items-center rounded-full text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
           >
             <ChevronRightIcon className="h-4 w-4" />
           </button>
@@ -271,14 +292,14 @@ export const PayrollEmptyState: React.FC<EmptyProps> = ({
         <motion.div
           animate={{ y: [0, -8, 0], rotate: [-6, -4, -6] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute left-3 top-5 w-24 rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+          className="glass-card absolute left-3 top-5 w-24 rounded-xl"
           style={{ height: "7.5rem" }}
         />
         {/* Front payslip with money rows */}
         <motion.div
           animate={{ y: [0, 8, 0], rotate: [6, 4, 6] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute right-2 top-7 flex w-28 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-3 shadow-xl dark:border-gray-700 dark:bg-gray-800"
+          className="glass-card absolute right-2 top-7 flex w-28 flex-col gap-2 rounded-xl p-3"
           style={{ height: "8.5rem" }}
         >
           <div

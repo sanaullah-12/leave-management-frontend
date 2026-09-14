@@ -66,7 +66,7 @@ const PushNotificationToggle: React.FC<{ className?: string }> = ({
   // Same shape and weight as the hero's other secondary action, so it reads as
   // part of the set rather than as an alert bolted onto the card.
   const base =
-    "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium backdrop-blur border transition-colors";
+    "inline-flex items-center gap-2 px-3.5 py-2 sm:px-4 rounded-full text-[13px] sm:text-sm font-medium backdrop-blur border transition-colors";
 
   const tone = isEnabled
     ? "text-emerald-700 dark:text-emerald-400 bg-white/80 dark:bg-gray-800/80 border-emerald-300 dark:border-emerald-500/40 hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
@@ -122,7 +122,7 @@ const PushNotificationToggle: React.FC<{ className?: string }> = ({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+              className="rounded-full border border-gray-200 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
             >
               Close
             </button>
@@ -132,7 +132,7 @@ const PushNotificationToggle: React.FC<{ className?: string }> = ({
                 type="button"
                 disabled={busy}
                 onClick={async () => setTested((await sendTest()) ? "sent" : "failed")}
-                className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+                className="rounded-full border border-gray-200 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
               >
                 Send a test
               </button>
@@ -140,7 +140,7 @@ const PushNotificationToggle: React.FC<{ className?: string }> = ({
                 type="button"
                 disabled={busy}
                 onClick={() => disable()}
-                className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+                className="rounded-full border border-gray-200 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
               >
                 {busy ? "Working..." : "Turn off"}
               </button>
@@ -150,7 +150,7 @@ const PushNotificationToggle: React.FC<{ className?: string }> = ({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+                className="rounded-full border border-gray-200 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
               >
                 Not now
               </button>
@@ -158,7 +158,7 @@ const PushNotificationToggle: React.FC<{ className?: string }> = ({
                 type="button"
                 disabled={busy}
                 onClick={handleEnable}
-                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-colors hover:bg-blue-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-colors hover:bg-blue-700 disabled:opacity-50"
               >
                 <BellIcon className="h-4 w-4" />
                 {busy ? "Enabling..." : "Enable notifications"}

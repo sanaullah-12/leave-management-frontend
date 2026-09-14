@@ -62,9 +62,18 @@
     --surface: var(--app-bg);
     --surface-elevated: var(--card-surface);
   }
+  /* Dark ground and its one card step. Both sit in the same blue-grey family,
+     so the accent wash on the background reads as light on a surface rather
+     than as a colour cast fighting the cards. */
   html.dark {
-    --app-bg: #0f1420;
-    --card-surface: #1a2130;
+    /* Read off the reference dashboard: a near-neutral dark ground with only a
+       trace of cool in it, and a card step about eight levels above it. The
+       purple in the reference is the theme's ambient wash on top of this, not
+       a tint baked into the tokens - which is why these stay near-neutral and
+       the ground still turns purple/green/teal with the theme. */
+    --app-bg: #101219;
+    --card-surface: #1b1e27;
+    --hairline: #2a2d38;
   }
 
   body::before {
@@ -80,6 +89,9 @@
     transition: background-color 0.4s ease;
   }
 
+  /* The accent-tinted corners the theme paints onto the ground. --blue-* is
+     remapped per theme, so this wash turns purple/green/teal with the theme
+     rather than printing a fixed blue behind every card. */
   html.dark body::before {
     background-image:
       radial-gradient(58rem 50rem at 90% -8%, rgb(var(--blue-500) / 0.16), transparent 62%),
@@ -89,48 +101,63 @@
 
   /* ============================================================ */
   /* App-wide dark surface unification */
-  /* Remap every dark gray-800/900 surface utility to the          */
-  /* coordinated blue-gray palette (card = 26 33 48, base = 15 20  */
-  /* 32), so all pages/panels/modals match the dashboard + ambient */
-  /* background. Higher specificity (html.dark) beats Tailwind's    */
-  /* (.dark) rules; per-element opacity is preserved.              */
+  /* Remap every dark gray-800/900 surface utility to the shared  */
+  /* palette (card = 27 30 39, base = 16 18 25), so all pages,     */
+  /* panels and modals land on the same two steps as the shell.     */
+  /* Higher specificity (html.dark) beats Tailwind's (.dark)        */
+  /* rules; per-element opacity is preserved.                       */
   /* Light mode already matches (white cards on the light base).   */
   /* ============================================================ */
-  html.dark .dark\:bg-gray-800        { background-color: rgb(26 33 48 / var(--tw-bg-opacity, 1)); }
-  html.dark .dark\:bg-gray-800\/40    { background-color: rgb(26 33 48 / 0.4); }
-  html.dark .dark\:bg-gray-800\/50    { background-color: rgb(26 33 48 / 0.5); }
-  html.dark .dark\:bg-gray-800\/60    { background-color: rgb(26 33 48 / 0.6); }
-  html.dark .dark\:bg-gray-800\/70    { background-color: rgb(26 33 48 / 0.7); }
-  html.dark .dark\:bg-gray-800\/80    { background-color: rgb(26 33 48 / 0.8); }
-  html.dark .dark\:bg-gray-800\/90    { background-color: rgb(26 33 48 / 0.9); }
+  html.dark .dark\:bg-gray-800        { background-color: rgb(27 30 39 / var(--tw-bg-opacity, 1)); }
+  html.dark .dark\:bg-gray-800\/40    { background-color: rgb(27 30 39 / 0.4); }
+  html.dark .dark\:bg-gray-800\/50    { background-color: rgb(27 30 39 / 0.5); }
+  html.dark .dark\:bg-gray-800\/60    { background-color: rgb(27 30 39 / 0.6); }
+  html.dark .dark\:bg-gray-800\/70    { background-color: rgb(27 30 39 / 0.7); }
+  html.dark .dark\:bg-gray-800\/80    { background-color: rgb(27 30 39 / 0.8); }
+  html.dark .dark\:bg-gray-800\/90    { background-color: rgb(27 30 39 / 0.9); }
 
-  html.dark .dark\:bg-gray-900        { background-color: rgb(15 20 32 / var(--tw-bg-opacity, 1)); }
-  html.dark .dark\:bg-gray-900\/20    { background-color: rgb(15 20 32 / 0.2); }
-  html.dark .dark\:bg-gray-900\/30    { background-color: rgb(15 20 32 / 0.3); }
-  html.dark .dark\:bg-gray-900\/40    { background-color: rgb(15 20 32 / 0.4); }
-  html.dark .dark\:bg-gray-900\/50    { background-color: rgb(15 20 32 / 0.5); }
-  html.dark .dark\:bg-gray-900\/55    { background-color: rgb(15 20 32 / 0.55); }
-  html.dark .dark\:bg-gray-900\/60    { background-color: rgb(15 20 32 / 0.6); }
-  html.dark .dark\:bg-gray-900\/70    { background-color: rgb(15 20 32 / 0.7); }
-  html.dark .dark\:bg-gray-900\/80    { background-color: rgb(15 20 32 / 0.8); }
-  html.dark .dark\:bg-gray-900\/95    { background-color: rgb(15 20 32 / 0.95); }
+  html.dark .dark\:bg-gray-900        { background-color: rgb(16 18 25 / var(--tw-bg-opacity, 1)); }
+  html.dark .dark\:bg-gray-900\/20    { background-color: rgb(16 18 25 / 0.2); }
+  html.dark .dark\:bg-gray-900\/30    { background-color: rgb(16 18 25 / 0.3); }
+  html.dark .dark\:bg-gray-900\/40    { background-color: rgb(16 18 25 / 0.4); }
+  html.dark .dark\:bg-gray-900\/50    { background-color: rgb(16 18 25 / 0.5); }
+  html.dark .dark\:bg-gray-900\/55    { background-color: rgb(16 18 25 / 0.55); }
+  html.dark .dark\:bg-gray-900\/60    { background-color: rgb(16 18 25 / 0.6); }
+  html.dark .dark\:bg-gray-900\/70    { background-color: rgb(16 18 25 / 0.7); }
+  html.dark .dark\:bg-gray-900\/80    { background-color: rgb(16 18 25 / 0.8); }
+  html.dark .dark\:bg-gray-900\/95    { background-color: rgb(16 18 25 / 0.95); }
 
   /* Gradient card shells - remap the gray-800/900 colour stops to the same
      palette (opacity + gradient positions preserved). */
-  html.dark .dark\:from-gray-800      { --tw-gradient-from: #1a2130 var(--tw-gradient-from-position); }
-  html.dark .dark\:from-gray-800\/40  { --tw-gradient-from: rgb(26 33 48 / 0.4) var(--tw-gradient-from-position); }
-  html.dark .dark\:from-gray-800\/90  { --tw-gradient-from: rgb(26 33 48 / 0.9) var(--tw-gradient-from-position); }
-  html.dark .dark\:from-gray-900      { --tw-gradient-from: #0f1420 var(--tw-gradient-from-position); }
-  html.dark .dark\:from-gray-900\/20  { --tw-gradient-from: rgb(15 20 32 / 0.2) var(--tw-gradient-from-position); }
-  html.dark .dark\:to-gray-800        { --tw-gradient-to: #1a2130 var(--tw-gradient-to-position); }
-  html.dark .dark\:to-gray-800\/50    { --tw-gradient-to: rgb(26 33 48 / 0.5) var(--tw-gradient-to-position); }
-  html.dark .dark\:to-gray-900\/20    { --tw-gradient-to: rgb(15 20 32 / 0.2) var(--tw-gradient-to-position); }
+  html.dark .dark\:from-gray-800      { --tw-gradient-from: #1b1e27 var(--tw-gradient-from-position); }
+  html.dark .dark\:from-gray-800\/40  { --tw-gradient-from: rgb(27 30 39 / 0.4) var(--tw-gradient-from-position); }
+  html.dark .dark\:from-gray-800\/90  { --tw-gradient-from: rgb(27 30 39 / 0.9) var(--tw-gradient-from-position); }
+  html.dark .dark\:from-gray-900      { --tw-gradient-from: #101219 var(--tw-gradient-from-position); }
+  html.dark .dark\:from-gray-900\/20  { --tw-gradient-from: rgb(16 18 25 / 0.2) var(--tw-gradient-from-position); }
+  html.dark .dark\:to-gray-800        { --tw-gradient-to: #1b1e27 var(--tw-gradient-to-position); }
+  html.dark .dark\:to-gray-800\/50    { --tw-gradient-to: rgb(27 30 39 / 0.5) var(--tw-gradient-to-position); }
+  html.dark .dark\:to-gray-900\/20    { --tw-gradient-to: rgb(16 18 25 / 0.2) var(--tw-gradient-to-position); }
 
   /* Shared component card classes (use @apply'd dark:bg-gray-800/900 which the
-     utility remap above can't reach) - recolor them explicitly. */
+     utility remap above can't reach) - hand them the glass fill explicitly, or
+     the opaque utility wins and the pane loses its transparency. */
   html.dark .card,
   html.dark .card-elevated,
-  html.dark .dashboard-card { background-color: var(--card-surface); }
+  html.dark .dashboard-card { background-color: var(--glass-fill); }
+
+  /* Hairlines. Tailwind's gray-700 (#374151) is a touch light against this
+     ground and reads as an outline rather than an edge, so borders come from
+     the same blue-grey family as the surfaces. Same for the divide-* pairs. */
+  html.dark .dark\:border-gray-600,
+  html.dark .dark\:border-gray-700,
+  html.dark .dark\:border-gray-800   { border-color: var(--hairline); }
+  html.dark .dark\:border-gray-700\/50,
+  html.dark .dark\:border-gray-700\/60,
+  html.dark .dark\:border-gray-700\/70 { border-color: rgb(42 45 56 / 0.7); }
+  html.dark .dark\:divide-gray-700 > :not([hidden]) ~ :not([hidden]),
+  html.dark .dark\:divide-gray-800 > :not([hidden]) ~ :not([hidden]) {
+    border-color: var(--hairline);
+  }
 
   /* ============================= */
   /* Heading hierarchy defaults */
@@ -272,7 +299,7 @@
 
   /* Legacy button compatibility - Buttons: Geist SemiBold 15px */
   .btn-primary {
-    @apply text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:shadow-md;
+    @apply text-white font-semibold py-2.5 px-4 rounded-full shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:shadow-md;
     font-size: 0.9375rem;
     letter-spacing: -0.006em;
     background-color: var(--color-primary-600);
@@ -289,7 +316,7 @@
   }
 
   .btn-secondary {
-    @apply font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply font-semibold py-2.5 px-4 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
     font-size: 0.9375rem;
     letter-spacing: -0.006em;
     background-color: var(--surface-elevated);
@@ -308,14 +335,14 @@
   }
 
   .btn-danger {
-    @apply bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 hover:shadow-md;
+    @apply bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-4 rounded-full shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 hover:shadow-md;
     font-size: 0.9375rem;
     letter-spacing: -0.006em;
   }
 
   /* Enhanced input field - Inputs: Geist Regular 15px */
   .input-field {
-    @apply block w-full px-3.5 py-2.5 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:border-transparent shadow-sm;
+    @apply block w-full px-4 py-2.5 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:border-transparent shadow-sm;
     font-size: 0.9375rem;
     letter-spacing: -0.006em;
     background-color: var(--surface-elevated);
@@ -345,10 +372,10 @@
     .btn-secondary,
     .btn-danger,
     .btn-success {
-      min-height: 40px;
-      padding-top: 0.5rem;
-      padding-bottom: 0.5rem;
-      font-size: 0.875rem;
+      min-height: 36px;
+      padding-top: 0.375rem;
+      padding-bottom: 0.375rem;
+      font-size: 0.8125rem;
     }
 
     .input-field {
@@ -476,45 +503,38 @@
   }
 
   /* ============================================================ */
-  /* Unified neumorphic card system (app-wide) */
-  /* One soft-UI surface shared by the dashboard, reports, team,   */
+  /* Unified glass card system (app-wide) */
+  /* One frosted surface shared by the dashboard, reports, team,   */
   /* and every legacy .card/.card-elevated/.dashboard-card. Use    */
   /* .surface-card on any container to get the dashboard card look;*/
-  /* add .surface-card-interactive for the hover lift.             */
+  /* add .surface-card-interactive for the hover lift. The glass    */
+  /* recipe itself lives in design-system.css as --glass-*.         */
   /* ============================================================ */
   .surface-card,
   .card,
   .card-elevated,
   .dashboard-card {
-    background-color: var(--card-surface);
-    border: none;
+    background-color: var(--glass-fill);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-edge);
     border-radius: 1rem; /* rounded-2xl */
-    box-shadow: 7px 7px 16px rgba(174, 186, 204, 0.5),
-      -7px -7px 16px rgba(255, 255, 255, 0.95);
-  }
-  .dark .surface-card,
-  .dark .card,
-  .dark .card-elevated,
-  .dark .dashboard-card {
-    box-shadow: 7px 7px 18px rgba(0, 0, 0, 0.55),
-      -6px -6px 16px rgba(255, 255, 255, 0.045);
+    box-shadow: var(--glass-sheen), var(--glass-drop);
   }
 
-  /* Opt-in hover lift for clickable cards */
+  /* Opt-in hover lift for clickable cards. The fill steps up with the lift so
+     the pane reads as coming toward the viewer, not just moving. */
   .surface-card-interactive {
     cursor: pointer;
     transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 0.3s ease;
     will-change: transform;
   }
   .surface-card-interactive:hover {
     transform: translateY(-4px);
-    box-shadow: 12px 12px 24px rgba(174, 186, 204, 0.6),
-      -12px -12px 24px rgba(255, 255, 255, 1);
-  }
-  .dark .surface-card-interactive:hover {
-    box-shadow: 12px 12px 28px rgba(0, 0, 0, 0.7),
-      -10px -10px 24px rgba(255, 255, 255, 0.06);
+    background-color: var(--glass-fill-strong);
+    box-shadow: var(--glass-sheen), var(--glass-drop-lifted);
   }
 }
 

@@ -113,7 +113,7 @@ const VoiceNotificationToaster: React.FC = () => {
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 60, scale: 0.95 }}
               transition={{ type: "spring", stiffness: 320, damping: 28 }}
-              className="voice-toast pointer-events-auto relative overflow-hidden rounded-2xl border border-blue-200/60 bg-white/95 p-4 shadow-xl backdrop-blur-xl dark:border-blue-500/20 dark:bg-gray-900/95"
+              className="glass-panel voice-toast pointer-events-auto relative overflow-hidden rounded-2xl p-4"
             >
               {/* unread accent bar */}
               <span className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-blue-500 to-blue-400" />
@@ -146,7 +146,7 @@ const VoiceNotificationToaster: React.FC = () => {
                     </span>
                     <button
                       onClick={() => open(n)}
-                      className="rounded-lg bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white transition-colors hover:bg-blue-700"
+                      className="rounded-full bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white transition-colors hover:bg-blue-700"
                     >
                       View
                     </button>
@@ -154,7 +154,7 @@ const VoiceNotificationToaster: React.FC = () => {
                 </div>
                 <button
                   onClick={() => dismiss(n)}
-                  className="flex-shrink-0 rounded-md p-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800"
+                  className="flex-shrink-0 rounded-full p-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800"
                   aria-label="Dismiss"
                 >
                   <XMarkIcon className="h-4 w-4" />

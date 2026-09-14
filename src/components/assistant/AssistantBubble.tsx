@@ -47,7 +47,7 @@ const AssistantBubble: React.FC<Props> = ({
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 24 }}
             style={{ transformOrigin: "bottom right" }}
-            className="pointer-events-auto relative max-w-[16.5rem] rounded-2xl rounded-ee-md border border-gray-200/80 bg-white p-3.5 pe-9 shadow-xl dark:border-white/10 dark:bg-gray-800"
+            className="glass-panel pointer-events-auto relative max-w-[16.5rem] rounded-2xl rounded-ee-md p-3.5 pe-9"
           >
             <button
               type="button"
@@ -66,7 +66,7 @@ const AssistantBubble: React.FC<Props> = ({
               type="button"
               onClick={onDismissGreeting}
               aria-label={STRINGS.dismissGreetingLabel}
-              className="absolute end-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
+              className="absolute end-1.5 top-1.5 grid h-6 w-6 place-items-center rounded-full text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
             >
               <XMarkIcon className="h-3.5 w-3.5" />
             </button>

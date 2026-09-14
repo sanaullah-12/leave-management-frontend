@@ -74,7 +74,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <button
             onClick={onClose}
             disabled={loading}
-            className="rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
+            className="rounded-full border border-gray-200 dark:border-gray-700 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
           >
             {cancelLabel}
           </button>
@@ -82,7 +82,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             whileTap={{ scale: 0.97 }}
             onClick={onConfirm}
             disabled={loading}
-            className={`rounded-xl px-5 py-2.5 text-sm font-semibold transition-all disabled:opacity-70 ${s.confirm}`}
+            className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-all disabled:opacity-70 ${s.confirm}`}
           >
             {loading ? <InlineLoader label="Working..." /> : confirmLabel}
           </motion.button>

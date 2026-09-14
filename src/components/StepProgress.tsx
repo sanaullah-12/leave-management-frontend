@@ -34,9 +34,7 @@ const StepProgress: React.FC<StepProgressProps> = ({
   const pct = Math.max(0, Math.min(100, progress ?? 0));
 
   return (
-    <div
-      className={`w-full max-w-md rounded-2xl border border-gray-100 dark:border-gray-700/60 bg-white dark:bg-gray-800/60 p-6 shadow-sm ${className}`}
-    >
+    <div className={`glass-card w-full max-w-md rounded-2xl p-6 ${className}`}>
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
           {title}

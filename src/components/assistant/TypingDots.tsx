@@ -19,7 +19,7 @@ const TypingDots: React.FC = () => {
       aria-live="polite"
       aria-label={STRINGS.thinking}
     >
-      <div className="flex items-center gap-1.5 rounded-2xl rounded-es-md border border-gray-200/80 bg-white px-3.5 py-3 shadow-sm dark:border-white/10 dark:bg-gray-800/80">
+      <div className="glass-card flex items-center gap-1.5 rounded-2xl rounded-es-md px-3.5 py-3">
         {reduce ? (
           <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
             {STRINGS.thinking}...

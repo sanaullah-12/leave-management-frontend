@@ -59,7 +59,7 @@ const AssistantTurn: React.FC<Props> = ({
 
   return (
     <motion.div {...enter} className="flex justify-start">
-      <div className="w-full max-w-[92%] rounded-2xl rounded-es-md border border-gray-200/80 bg-white p-3.5 shadow-sm dark:border-white/10 dark:bg-gray-800/80">
+      <div className="glass-card w-full max-w-[92%] rounded-2xl rounded-es-md p-3.5">
         {reply.title && (
           <div className="mb-1.5 flex items-start justify-between gap-2">
             <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -135,7 +135,7 @@ const AssistantTurn: React.FC<Props> = ({
                       window.open(action.href, "_blank", "noopener,noreferrer");
                     else onAskEntry(action.entryId, action.action.label);
                   }}
-                  className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-transform hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0"
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-transform hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0"
                   style={{ backgroundColor: "var(--accent)" }}
                   disabled={here}
                   title={here ? "You're already here" : undefined}

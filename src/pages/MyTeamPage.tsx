@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { CARD, CARD_HOVER } from "../lib/surfaces";
+import { CARD } from "../lib/surfaces";
 import { useAuth } from "../context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -8,35 +8,25 @@ import LogoLoader from "../components/LogoLoader";
 import MobileTeamList from "../components/team/MobileTeamList";
 import Avatar from "../components/Avatar";
 import Dropdown from "../components/ui/Dropdown";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import {
   MagnifyingGlassIcon,
   UserGroupIcon,
   FunnelIcon,
   BarsArrowDownIcon,
-  IdentificationIcon,
   CalendarDaysIcon,
-  ArrowTrendingUpIcon,
   SunIcon,
   HeartIcon,
+  Cog6ToothIcon,
+  BriefcaseIcon,
+  UserIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 
 
-// Deterministic department badge colours (semantic accent set).
-const DEPT_COLORS = [
-  "bg-emerald-50 text-emerald-600 ring-emerald-200/60 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20",
-  "bg-blue-50 text-blue-600 ring-blue-200/60 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20",
-  "bg-violet-50 text-violet-600 ring-violet-200/60 dark:bg-violet-500/10 dark:text-violet-400 dark:ring-violet-500/20",
-  "bg-amber-50 text-amber-600 ring-amber-200/60 dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/20",
-  "bg-rose-50 text-rose-600 ring-rose-200/60 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/20",
-  "bg-teal-50 text-teal-600 ring-teal-200/60 dark:bg-teal-500/10 dark:text-teal-400 dark:ring-teal-500/20",
-];
-const deptColor = (name: string) => {
-  let h = 0;
-  for (let i = 0; i < name.length; i++) h = (h + name.charCodeAt(i)) % DEPT_COLORS.length;
-  return DEPT_COLORS[h];
-};
-
+import Input from "../components/ui/Input";
 const deptName = (m: any): string =>
   typeof m.department === "object" && m.department?.name
     ? m.department.name
@@ -63,27 +53,39 @@ const SORT_LABELS: Record<SortKey, string> = {
 /*  Small pieces                                                       */
 /* ------------------------------------------------------------------ */
 
+/**
+ * A fact about the person: icon, hairline rule, value.
+ *
+ * The rule is what separates the two halves - without it the icon reads as
+ * decoration attached to the number rather than as its label.
+ */
 const Chip: React.FC<{ icon: React.ReactNode; children: React.ReactNode }> = ({
   icon,
   children,
 }) => (
-  <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300">
-    <span className="text-gray-400 dark:text-gray-500">{icon}</span>
-    {children}
+  <span className="flex min-w-0 items-center gap-2 rounded-lg bg-slate-50 px-2 py-1.5 ring-1 ring-inset ring-gray-200/70 dark:bg-white/[0.04] dark:ring-white/10">
+    <span className="flex-none text-blue-500 dark:text-blue-300">{icon}</span>
+    <span className="h-4 w-px flex-none bg-gray-200 dark:bg-white/10" />
+    <span className="truncate text-xs font-semibold text-gray-700 dark:text-gray-200">
+      {children}
+    </span>
   </span>
 );
 
+/** One leave type in the balance panel: badge, label, days. */
 const Stat: React.FC<{
   icon: React.ReactNode;
   label: string;
   value: React.ReactNode;
 }> = ({ icon, label, value }) => (
-  <div className="flex flex-col items-center gap-1 text-center">
-    <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+  <div className="flex min-w-0 flex-col items-center gap-1.5 px-1 text-center">
+    <span className="grid h-9 w-9 place-items-center rounded-full bg-blue-500/15 text-blue-600 ring-1 ring-inset ring-blue-500/25 dark:bg-blue-400/20 dark:text-blue-200 dark:ring-blue-300/20">
+      {icon}
+    </span>
+    <span className="truncate text-xs font-medium text-gray-500 dark:text-gray-300/80">
       {label}
     </span>
-    <span className="flex items-center gap-1.5 text-lg font-bold tabular-nums text-blue-600 dark:text-blue-400">
-      <span className="text-blue-500/70 dark:text-blue-400/70">{icon}</span>
+    <span className="text-xl font-bold tabular-nums leading-none text-gray-900 dark:text-white">
       {value}
     </span>
   </div>
@@ -145,38 +147,35 @@ const MyTeamPage: React.FC = () => {
   return (
     <div className="space-y-6 fade-in">
       {/* Header */}
-      <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-        <div className="max-w-xl">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl text-blue-600 dark:text-blue-400">
-              <UserGroupIcon className="h-6 w-6" />
+      <SectionHeader
+        variant="team"
+        eyebrow="Workforce"
+        title="My Team"
+        description="Manage your organization's employees, track leave allocations, and oversee departmental distribution from a centralized hub."
+        badge={
+          isAdmin ? (
+            <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-sm font-semibold text-white ring-1 ring-inset ring-white/25">
+              {allMembers.length} employees
             </span>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-              My Team
-            </h1>
-            {isAdmin && (
-              <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-600 ring-1 ring-inset ring-blue-200/60 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20">
-                Total Employees: {allMembers.length}
-              </span>
-            )}
-          </div>
-          <p className="mt-3 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-            Manage your organization's employees, track leave allocations, and
-            oversee departmental distribution from a centralized hub.
-          </p>
-        </div>
+          ) : undefined
+        }
+        illustration={sectionIllustration("team")}
+      />
 
+      {/* Page controls. Separate from the banner: these act on the list
+          below, not on the section's identity. */}
+      <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
         {isAdmin && (
           <div className="flex flex-wrap items-center gap-3">
-            <div className="relative w-full sm:w-72">
-              <MagnifyingGlassIcon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search employees, roles..."
-                className="w-full rounded-xl bg-[var(--card-surface)] py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 ring-1 ring-inset ring-gray-200/70 outline-none transition-shadow focus:ring-2 focus:ring-blue-500/50 dark:text-gray-100 dark:placeholder-gray-500 dark:ring-white/10"
-              />
-            </div>
+            <Input
+              icon={MagnifyingGlassIcon}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onClear={() => setSearch("")}
+              clearable
+              placeholder="Search employees, roles..."
+              className="w-full sm:w-72"
+            />
 
             {/* Filter (by department) */}
             <Dropdown
@@ -264,66 +263,102 @@ const MyTeamPage: React.FC = () => {
               <button
                 key={m._id}
                 onClick={() => navigate(`/employees/${m._id}`)}
-                className={`group ${CARD} ${CARD_HOVER} flex flex-col p-5 text-left`}
+                className="glass-card group relative flex flex-col overflow-hidden rounded-2xl p-4 text-left transition-all hover:bg-[var(--glass-fill-strong)] hover:shadow-[shadow:var(--glass-sheen),var(--glass-drop-lifted)]"
               >
-                {/* Top: avatar + dept/status */}
-                <div className="flex items-start justify-between gap-3">
-                  <Avatar
-                    src={m.profilePicture}
-                    name={m.name}
-                    size="lg"
-                    className="rounded-2xl ring-2 ring-white shadow-sm dark:ring-white/10"
-                  />
-                  <div className="flex flex-col items-end gap-1.5">
+                {/* A violet bloom in the corner, echoing the balance panel
+                    below so the card reads as one object. */}
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-blue-500/10 blur-2xl dark:bg-blue-500/20"
+                />
+
+                {/* Department, top right. */}
+                <div className="relative flex justify-end">
+                  <span className="inline-flex max-w-[70%] items-center gap-1.5 rounded-xl bg-blue-50 px-2.5 py-1.5 text-[10px] font-bold uppercase leading-tight tracking-wide text-blue-600 ring-1 ring-inset ring-blue-200/70 dark:bg-blue-500/15 dark:text-blue-300 dark:ring-blue-400/25">
+                    <Cog6ToothIcon className="h-3.5 w-3.5 flex-none" />
+                    <span className="truncate">{dName}</span>
+                  </span>
+                </div>
+
+                {/* Identity: ringed avatar, name over role, status. */}
+                <div className="relative mt-2.5 flex items-center gap-3">
+                  <span className="relative flex-none">
+                    {/* The ring is the status, so the colour is the state and
+                        never decoration. */}
                     <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ring-1 ring-inset ${deptColor(
-                        dName
-                      )}`}
-                    >
-                      {dName}
-                    </span>
-                    <span
-                      className={`inline-flex items-center gap-1.5 text-xs font-medium ${
+                      className={`grid place-items-center rounded-full border-2 p-0.5 ${
                         active
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-gray-400 dark:text-gray-500"
+                          ? "border-emerald-400 dark:border-emerald-400"
+                          : m.status === "pending"
+                          ? "border-amber-400"
+                          : "border-gray-300 dark:border-white/20"
                       }`}
                     >
-                      <span
-                        className={`h-1.5 w-1.5 rounded-full ${
-                          active ? "bg-emerald-500" : "bg-gray-400"
-                        }`}
-                      />
-                      {active ? "Active" : m.status === "pending" ? "Pending" : "Inactive"}
+                      <Avatar src={m.profilePicture} name={m.name} size="md" />
                     </span>
+                    <span
+                      className={`absolute bottom-0 left-1/2 h-2.5 w-2.5 -translate-x-1/2 translate-y-1/2 rounded-full ring-2 ring-white dark:ring-[color:var(--card-surface)] ${
+                        active
+                          ? "bg-emerald-400"
+                          : m.status === "pending"
+                          ? "bg-amber-400"
+                          : "bg-gray-300 dark:bg-white/25"
+                      }`}
+                    />
+                  </span>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="truncate text-base font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-300">
+                        {m.name}
+                      </h3>
+                      <span
+                        className={`inline-flex flex-none items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset ${
+                          active
+                            ? "bg-emerald-50 text-emerald-600 ring-emerald-200/70 dark:bg-emerald-400/10 dark:text-emerald-300 dark:ring-emerald-400/25"
+                            : "bg-slate-100 text-gray-500 ring-gray-200/70 dark:bg-white/5 dark:text-gray-400 dark:ring-white/10"
+                        }`}
+                      >
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${
+                            active ? "bg-emerald-500" : "bg-gray-400"
+                          }`}
+                        />
+                        {active
+                          ? "Active"
+                          : m.status === "pending"
+                          ? "Pending"
+                          : "Inactive"}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 truncate text-sm text-gray-500 dark:text-gray-400">
+                      {m.position || "-"}
+                    </p>
                   </div>
                 </div>
 
-                {/* Name + position */}
-                <div className="mt-4">
-                  <h3 className="truncate text-lg font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">
-                    {m.name}
-                  </h3>
-                  <p className="mt-0.5 truncate text-sm text-gray-500 dark:text-gray-400">
-                    {m.position || "-"}
-                  </p>
-                </div>
-
-                {/* Meta chips */}
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <Chip icon={<IdentificationIcon className="h-3.5 w-3.5" />}>
+                {/* Three facts, evenly weighted. */}
+                <div className="relative mt-3 grid grid-cols-3 gap-1.5">
+                  <Chip icon={<UserIcon className="h-3.5 w-3.5" />}>
                     {m.employeeId || "-"}
                   </Chip>
                   <Chip icon={<CalendarDaysIcon className="h-3.5 w-3.5" />}>
                     {formatJoin(m.joinDate)}
                   </Chip>
-                  <Chip icon={<ArrowTrendingUpIcon className="h-3.5 w-3.5" />}>
+                  <Chip icon={<BriefcaseIcon className="h-3.5 w-3.5" />}>
                     {formatTenure(m.joinDate)}
                   </Chip>
                 </div>
 
-                {/* Leave allocation stats */}
-                <div className="mt-auto grid grid-cols-3 gap-2 divide-x divide-gray-100 border-t border-gray-100 pt-4 dark:divide-white/5 dark:border-white/5">
+                <hr className="relative my-3 border-gray-100 dark:border-white/10" />
+
+                <p className="relative flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
+                  <ClockIcon className="h-4 w-4 text-blue-500 dark:text-blue-300" />
+                  Leave Balance
+                </p>
+
+                {/* The allocation, as one panel so the three read as a set. */}
+                <div className="relative mt-2.5 grid grid-cols-3 divide-x divide-gray-200/70 rounded-2xl bg-gradient-to-br from-slate-50 to-blue-100/70 p-3 ring-1 ring-inset ring-gray-200/70 dark:divide-white/10 dark:from-white/[0.04] dark:to-blue-500/25 dark:ring-white/10">
                   <Stat
                     icon={<SunIcon className="h-4 w-4" />}
                     label="Annual"

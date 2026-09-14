@@ -1,4 +1,6 @@
 import React, { useMemo } from "react";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import { useAuth } from "../context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { usersAPI } from "../services/api";
@@ -43,18 +45,24 @@ const DepartmentsPage: React.FC = () => {
   return (
     <div className="space-y-6 fade-in">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-          Departments
-        </h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          {isAdmin
-            ? `${departments.length} ${
+      <SectionHeader
+        variant="departments"
+        eyebrow="Workforce"
+        title="Departments"
+        description="How the organization is divided, and who sits in each part of it."
+        badge={
+          isAdmin ? (
+            <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-sm font-semibold text-white ring-1 ring-inset ring-white/25">
+              {`${departments.length} ${
                 departments.length === 1 ? "department" : "departments"
-              } · ${totalMembers} ${totalMembers === 1 ? "person" : "people"}`
-            : "Organization departments"}
-        </p>
-      </div>
+              } · ${totalMembers} ${
+                totalMembers === 1 ? "person" : "people"
+              }`}
+            </span>
+          ) : undefined
+        }
+        illustration={sectionIllustration("departments")}
+      />
 
       {!isAdmin ? (
         <EmptyState subtitle="Your administrator can view and manage departments." />

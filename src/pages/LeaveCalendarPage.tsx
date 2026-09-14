@@ -1,4 +1,6 @@
 import React, { useMemo, useState } from "react";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import { useAuth } from "../context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { leavesAPI } from "../services/api";
@@ -24,6 +26,7 @@ import {
 import { getHoliday } from "../data/holidays";
 import "../styles/design-system.css";
 
+import Button from "../components/ui/Button";
 const TYPE_DOT: Record<string, string> = {
   annual: "bg-blue-500",
   sick: "bg-red-500",
@@ -96,40 +99,39 @@ const LeaveCalendarPage: React.FC = () => {
       />
 
       {/* Header (desktop) */}
-      <div className="hidden flex-col gap-4 lg:flex lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Leave Calendar
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {user?.role === "admin"
-              ? "Team leave across the month"
-              : "Your scheduled leave across the month"}
-          </p>
-        </div>
+      <div className="hidden lg:block">
+        <SectionHeader
+          variant="calendar"
+          eyebrow="Time off"
+          title="Leave Calendar"
+          description={
+            user?.role === "admin"
+              ? "Every booked day across the team, month by month."
+              : "Your scheduled leave across the month."
+          }
+          illustration={sectionIllustration("calendar")}
+        />
+      </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setCursor((c) => subMonths(c, 1))}
-            className="btn-secondary !px-2.5"
-            aria-label="Previous month"
-          >
-            <ChevronLeftIcon className="h-5 w-5" />
-          </button>
-          <span className="min-w-[10rem] text-center text-sm font-semibold text-gray-900 dark:text-gray-100">
-            {format(cursor, "MMMM yyyy")}
-          </span>
-          <button
-            onClick={() => setCursor((c) => addMonths(c, 1))}
-            className="btn-secondary !px-2.5"
-            aria-label="Next month"
-          >
-            <ChevronRightIcon className="h-5 w-5" />
-          </button>
-          <button onClick={() => setCursor(new Date())} className="btn-secondary ml-1">
-            Today
-          </button>
-        </div>
+      {/* Month stepper. Below the banner rather than in it: it steps the grid
+          underneath, and is not part of the section's identity. */}
+      <div className="hidden items-center justify-end gap-2 lg:flex">
+        <Button variant="secondary" className="!px-2.5"
+          onClick={() => setCursor((c) => subMonths(c, 1))}
+          aria-label="Previous month">
+          <ChevronLeftIcon className="h-5 w-5" />
+        </Button>
+        <span className="min-w-[10rem] text-center text-sm font-semibold text-gray-900 dark:text-gray-100">
+          {format(cursor, "MMMM yyyy")}
+        </span>
+        <Button variant="secondary" className="!px-2.5"
+          onClick={() => setCursor((c) => addMonths(c, 1))}
+          aria-label="Next month">
+          <ChevronRightIcon className="h-5 w-5" />
+        </Button>
+        <Button variant="secondary" className="ml-1" onClick={() => setCursor(new Date())}>
+          Today
+        </Button>
       </div>
 
       {/* Legend */}

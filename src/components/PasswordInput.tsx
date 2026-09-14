@@ -1,55 +1,40 @@
-import React, { useState, forwardRef } from 'react';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { useState, forwardRef } from "react";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import Input from "./ui/Input";
+import type { InputProps } from "./ui/Input";
 
-interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
-  error?: string;
-  className?: string;
-}
+/** The shared pill field plus a visibility toggle in its trailing slot. */
+export type PasswordInputProps = Omit<InputProps, "type" | "trailing">;
 
 const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
-  ({ label, error, className = '', ...props }, ref) => {
-    const [showPassword, setShowPassword] = useState(false);
-
-    const togglePasswordVisibility = () => {
-      setShowPassword(!showPassword);
-    };
+  (props, ref) => {
+    const [visible, setVisible] = useState(false);
 
     return (
-      <div>
-        {label && (
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {label}
-          </label>
-        )}
-        <div className="relative">
-          <input
-            {...props}
-            ref={ref}
-            type={showPassword ? 'text' : 'password'}
-            className={`pr-10 ${className}`}
-          />
+      <Input
+        {...props}
+        ref={ref}
+        type={visible ? "text" : "password"}
+        trailing={
           <button
             type="button"
-            onClick={togglePasswordVisibility}
-            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+            onClick={() => setVisible((v) => !v)}
+            className="text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             tabIndex={-1}
+            aria-label={visible ? "Hide password" : "Show password"}
           >
-            {showPassword ? (
+            {visible ? (
               <EyeSlashIcon className="h-5 w-5" />
             ) : (
               <EyeIcon className="h-5 w-5" />
             )}
           </button>
-        </div>
-        {error && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
-        )}
-      </div>
+        }
+      />
     );
   }
 );
 
-PasswordInput.displayName = 'PasswordInput';
+PasswordInput.displayName = "PasswordInput";
 
 export default PasswordInput;

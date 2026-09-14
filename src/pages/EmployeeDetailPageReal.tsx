@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import { CARD } from "../lib/surfaces";
 import { accentFor } from "../lib/themeTokens";
 import { useParams, useNavigate } from "react-router-dom";
@@ -40,6 +42,7 @@ import {
 } from "recharts";
 import "../styles/design-system.css";
 
+import Input from "../components/ui/Input";
 interface LeaveAllocation {
   casual: number;
   sick: number;
@@ -155,13 +158,14 @@ const LeaveBalanceCard: React.FC<{
           <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
             Allocation (days / year)
           </label>
-          <input
+          <Input
             type="number"
             min={0}
             max={365}
             value={editValue}
             onChange={(e) => onChange(parseInt(e.target.value) || 0)}
-            className="mt-1.5 w-full rounded-xl bg-slate-100 px-4 py-3 text-3xl font-extrabold tabular-nums outline-none ring-1 ring-inset ring-gray-200/70 focus:ring-2 dark:bg-white/5 dark:ring-white/10"
+            className="mt-1.5 h-14"
+            inputClassName="text-3xl font-extrabold tabular-nums"
             style={{ color: meta.hex }}
           />
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
@@ -408,7 +412,7 @@ const EmployeeDetailPageReal: React.FC = () => {
         <div className="mb-6 flex items-center gap-4">
           <button
             onClick={() => navigate("/employees")}
-            className="rounded-lg p-2 text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/5"
+            className="rounded-full p-2 text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/5"
           >
             <ArrowLeftIcon className="h-5 w-5" />
           </button>
@@ -423,7 +427,7 @@ const EmployeeDetailPageReal: React.FC = () => {
           </p>
           <button
             onClick={() => navigate("/employees")}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25"
+            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-white shadow-sm shadow-blue-600/25"
           >
             Back to Employees
           </button>
@@ -525,34 +529,30 @@ const EmployeeDetailPageReal: React.FC = () => {
   return (
     <div className="space-y-6 fade-in">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
+      <SectionHeader
+        variant="employees"
+        eyebrow={
           <button
+            type="button"
             onClick={() => navigate("/employees")}
-            className="rounded-xl p-2 text-gray-600 transition-colors hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/5"
+            className="inline-flex items-center gap-1.5 uppercase tracking-[0.14em] transition-colors hover:text-white"
           >
-            <ArrowLeftIcon className="h-5 w-5" />
+            <ArrowLeftIcon className="h-3.5 w-3.5" />
+            Back to Employees
           </button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-              Employee Details
-            </h1>
-            <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
-              Leave overview & analytics
-            </p>
-          </div>
-        </div>
-
-        {isAdmin && !isEditingAllocation && (
-          <button
-            onClick={handleStartEdit}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-md"
-          >
-            <PencilIcon className="h-4 w-4" />
-            Edit Allocation
-          </button>
-        )}
-      </div>
+        }
+        title="Employee Details"
+        description="Leave overview and analytics for this employee."
+        illustration={sectionIllustration("employees")}
+        action={
+          isAdmin && !isEditingAllocation ? (
+            <button onClick={handleStartEdit} className="sh-action-primary">
+              <PencilIcon className="h-4 w-4" />
+              Edit Allocation
+            </button>
+          ) : undefined
+        }
+      />
 
       {/* Profile */}
       <div className={`${CARD} p-6 sm:p-7`}>
@@ -635,7 +635,7 @@ const EmployeeDetailPageReal: React.FC = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleCancelEdit}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:text-gray-200 dark:hover:bg-white/5"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:text-gray-200 dark:hover:bg-white/5"
                 >
                   <XMarkIcon className="h-3.5 w-3.5" />
                   Cancel
@@ -643,7 +643,7 @@ const EmployeeDetailPageReal: React.FC = () => {
                 <button
                   onClick={handleSaveAllocation}
                   disabled={updateAllocationMutation.isPending}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-blue-600/25 disabled:opacity-70"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-blue-600/25 disabled:opacity-70"
                 >
                   {updateAllocationMutation.isPending ? (
                     <LoadingSpinner size="sm" />

@@ -171,7 +171,7 @@ const PayrollHistoryPage: React.FC = () => {
 
       {runs.length > 0 && (
         <motion.div variants={staggerItem}>
-          <PayrollStatCards tiles={tiles} columnsClassName="xl:grid-cols-4" />
+          <PayrollStatCards tiles={tiles} />
         </motion.div>
       )}
 
@@ -358,7 +358,7 @@ const RunRow: React.FC<RowProps> = React.memo(
             <button
               onClick={() => onMarkPaid(run)}
               title="Mark as paid"
-              className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-500/10"
+              className="grid h-8 w-8 place-items-center rounded-full text-gray-400 transition-colors hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-500/10"
             >
               <CheckCircleIcon className="h-4 w-4" />
             </button>
@@ -366,21 +366,21 @@ const RunRow: React.FC<RowProps> = React.memo(
           <button
             onClick={onOpenPayslips}
             title={`View ${payslipCount} payslips`}
-            className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
+            className="grid h-8 w-8 place-items-center rounded-full text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
           >
             <DocumentTextIcon className="h-4 w-4" />
           </button>
           <button
             onClick={() => onExport(run)}
             title="Export as CSV"
-            className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
+            className="grid h-8 w-8 place-items-center rounded-full text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
           >
             <TableCellsIcon className="h-4 w-4" />
           </button>
           <button
             onClick={() => onDelete(run)}
             title="Delete run"
-            className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-500/10"
+            className="grid h-8 w-8 place-items-center rounded-full text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-500/10"
           >
             <TrashIcon className="h-4 w-4" />
           </button>

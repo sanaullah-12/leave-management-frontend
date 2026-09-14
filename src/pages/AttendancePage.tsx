@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import AppLogo from "../components/AppLogo";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   employeeAttendanceKey,
@@ -1179,33 +1180,32 @@ const AttendancePage: React.FC = () => {
 
   return (
     <div className="attendance-dashboard space-y-6 fade-in">
-      {/* Page header: title, the date it describes, and the range that drives
-          every figure below. */}
-      <header
-        className={`relative flex flex-wrap items-center justify-between gap-3 overflow-hidden ${CARD} px-5 py-4`}
+      {/* Page header. The section's identity only - the date range that
+          drives every figure below is a control, so it stays in the toolbar
+          under the banner where it sits next to what it filters. */}
+      <SectionHeader
+        variant="attendance"
+        eyebrow="Presence"
+        title="Attendance"
+        description="Punch records, hours worked and lateness across the range you pick below."
+        badge={
+          <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white ring-1 ring-inset ring-white/25">
+            {new Date(endDate + "T00:00:00").toLocaleDateString(undefined, {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+            })}
+          </span>
+        }
+        illustration={sectionIllustration("attendance")}
+      />
+
+      {/* Range toolbar. */}
+      <div
+        className={`relative flex flex-wrap items-center justify-end gap-3 overflow-hidden ${CARD} px-5 py-4`}
       >
         <AccentEdge color={themeAccent} />
-        <div className="flex items-center gap-3">
-          {/* White plate so the brand mark keeps its own colours against the
-              card surface, in either theme. */}
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-gray-200/70 dark:ring-gray-600/60">
-            <AppLogo size={26} />
-          </span>
-          <div>
-            <p className="text-base font-semibold tracking-tight text-gray-900 dark:text-gray-100">
-              Attendance
-            </p>
-            <p className="text-[12.5px] text-gray-400 dark:text-gray-500">
-              {new Date(endDate + "T00:00:00").toLocaleDateString(undefined, {
-                weekday: "long",
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </p>
-          </div>
-        </div>
-
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-2">
             <div className="w-[150px]">
@@ -1237,13 +1237,13 @@ const AttendancePage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-700/50">
+          <div className="flex gap-1 rounded-full bg-gray-100 p-1 dark:bg-gray-700/50">
             {RANGE_PRESETS.map((preset) => (
               <button
                 key={preset.label}
                 type="button"
                 onClick={() => applyRangePreset(preset.days)}
-                className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
                   activeRangeDays === preset.days
                     ? "bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-gray-100"
                     : "text-gray-600 hover:text-gray-900 dark:text-gray-300"
@@ -1259,7 +1259,7 @@ const AttendancePage: React.FC = () => {
               settings, and a second control beside it would read as a rival
               setting rather than a comparison. */}
           {!isAdmin && (
-            <div className="flex gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-700/50">
+            <div className="flex gap-1 rounded-full bg-gray-100 p-1 dark:bg-gray-700/50">
               {[
                 { key: null as null, label: "Official" },
                 {
@@ -1280,7 +1280,7 @@ const AttendancePage: React.FC = () => {
                       ? `Measure your record against ${option.label}`
                       : "Use the arrival time your administrator set"
                   }
-                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                  className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
                     viewPolicy === option.key
                       ? "bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-gray-100"
                       : "text-gray-600 hover:text-gray-900 dark:text-gray-300"
@@ -1301,7 +1301,7 @@ const AttendancePage: React.FC = () => {
                 ? "Load attendance for the selected range"
                 : "Connect to the device to load the roster first"
             }
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-2 rounded-full bg-blue-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <ArrowPathIcon
               className={`h-4 w-4 ${rosterLoading ? "animate-spin" : ""}`}
@@ -1319,7 +1319,7 @@ const AttendancePage: React.FC = () => {
             </span>
           )}
         </div>
-      </header>
+      </div>
 
       {/* Door feedback. The button that triggers it is in the toolbar below. */}
       {(!currentUser || currentUser.role === "admin") &&
@@ -1564,7 +1564,7 @@ const AttendancePage: React.FC = () => {
         <button
           type="button"
           onClick={() => setShowDevicePanel((v) => !v)}
-          className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+          className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
         >
           <ServerIcon className="h-4 w-4" />
           {machineStatus?.status === "connected"
@@ -1581,7 +1581,7 @@ const AttendancePage: React.FC = () => {
               type="button"
               onClick={handleUnlockDoor}
               disabled={isUnlockingDoor}
-              className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+              className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
             >
               <LockOpenIcon className="h-4 w-4" />
               Unlock door
@@ -1592,7 +1592,7 @@ const AttendancePage: React.FC = () => {
                 setShowDevicePanel(true);
                 setShowSettings(true);
               }}
-              className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+              className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
             >
               <Cog6ToothIcon className="h-4 w-4" />
               Late time
@@ -1606,7 +1606,7 @@ const AttendancePage: React.FC = () => {
             fetchEmployees(selectedIP === "custom" ? customIP : selectedIP)
           }
           disabled={isFetchingEmployees}
-          className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+          className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
         >
           <ArrowPathIcon
             className={`h-4 w-4 ${isFetchingEmployees ? "animate-spin" : ""}`}
@@ -1618,7 +1618,7 @@ const AttendancePage: React.FC = () => {
           type="button"
           onClick={exportRoster}
           disabled={!rosterRows.length}
-          className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+          className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
         >
           <ArrowDownTrayIcon className="h-4 w-4" />
           Export

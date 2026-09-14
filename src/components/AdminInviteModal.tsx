@@ -7,6 +7,8 @@ import { attendanceAPI, authAPI } from '../services/api';
 import Modal from './Modal';
 import LoadingSpinner from './LoadingSpinner';
 import Select from './ui/Select';
+import Input from "./ui/Input";
+import Button from "./ui/Button";
 import {
   UserIcon,
   EnvelopeIcon,
@@ -37,9 +39,6 @@ interface AdminInviteModalProps {
   onClose: () => void;
 }
 
-// Shared themed input styling - matches the Select / DatePicker triggers.
-const INPUT =
-  "w-full rounded-xl bg-[var(--card-surface)] px-4 py-2.5 text-sm text-gray-900 outline-none ring-1 ring-inset ring-gray-200/70 transition-shadow placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 dark:text-gray-100 dark:placeholder-gray-500 dark:ring-white/10";
 
 const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) => {
   const queryClient = useQueryClient();
@@ -181,10 +180,9 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
               />
             ) : (
               // Custom Name Input
-              <input
+              <Input
                 type="text"
                 {...register('name', { required: 'Administrator name is required' })}
-                className={INPUT}
                 placeholder="Enter administrator name"
               />
             )}
@@ -221,10 +219,9 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
               <HashtagIcon className="w-4 h-4 mr-2 text-gray-400" />
               Employee ID
             </label>
-            <input
+            <Input
               type="text"
               {...register("employeeId")}
-              className={INPUT}
               placeholder="Auto-generated or from machine selection"
               readOnly={!useCustomName && selectedEmployee}
             />
@@ -241,7 +238,7 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
               <EnvelopeIcon className="w-4 h-4 mr-2 text-gray-400" />
               Email Address
             </label>
-            <input
+            <Input
               type="email"
               {...register('email', {
                 required: 'Email is required',
@@ -250,7 +247,6 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
                   message: 'Invalid email address',
                 },
               })}
-              className={INPUT}
               placeholder="admin@company.com"
             />
             {errors.email && (
@@ -269,10 +265,9 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
               <PhoneIcon className="w-4 h-4 mr-2 text-gray-400" />
               Phone Number (Optional)
             </label>
-            <input
+            <Input
               type="tel"
               {...register('phone', phoneValidationRules)}
-              className={INPUT}
               placeholder={PHONE_PLACEHOLDER}
             />
             {errors.phone ? (
@@ -294,10 +289,9 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
                 <BuildingOfficeIcon className="w-4 h-4 mr-2 text-gray-400" />
                 Department (Optional)
               </label>
-              <input
+              <Input
                 type="text"
                 {...register('department')}
-                className={INPUT}
                 placeholder="Administration"
               />
             </div>
@@ -308,10 +302,9 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
                 <BriefcaseIcon className="w-4 h-4 mr-2 text-gray-400" />
                 Position (Optional)
               </label>
-              <input
+              <Input
                 type="text"
                 {...register('position')}
-                className={INPUT}
                 placeholder="Administrator"
               />
             </div>
@@ -339,16 +332,14 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
           <button
             type="button"
             onClick={handleClose}
-            className="px-6 py-3 text-sm font-medium rounded-lg transition-colors bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
+            className="px-6 py-3 text-sm font-medium rounded-full transition-colors bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
             disabled={inviteAdminMutation.isPending}
           >
             Cancel
           </button>
-          <button
+          <Button variant="primary" className="px-8 py-3 text-sm text-white"
             type="submit"
-            disabled={inviteAdminMutation.isPending}
-            className="btn-primary px-8 py-3 text-sm font-medium text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
-          >
+            disabled={inviteAdminMutation.isPending}>
             {inviteAdminMutation.isPending ? (
               <>
                 <LoadingSpinner size="sm" />
@@ -360,7 +351,7 @@ const AdminInviteModal: React.FC<AdminInviteModalProps> = ({ isOpen, onClose }) 
                 Send Admin Invitation
               </>
             )}
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>

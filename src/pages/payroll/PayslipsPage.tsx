@@ -149,7 +149,7 @@ const PayslipsPage: React.FC = () => {
             payslips.length > 0 && (
               <button
                 onClick={handleCsv}
-                className="btn-secondary inline-flex items-center gap-2"
+                className="sh-action"
               >
                 <TableCellsIcon className="h-5 w-5" />
                 Export CSV
@@ -343,21 +343,21 @@ const PayslipRow: React.FC<RowProps> = React.memo(
             <button
               onClick={() => onView(p)}
               title="View payslip"
-              className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
+              className="grid h-8 w-8 place-items-center rounded-full text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
             >
               <EyeIcon className="h-4 w-4" />
             </button>
             <button
               onClick={() => onPrint(p)}
               title="Print"
-              className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
+              className="grid h-8 w-8 place-items-center rounded-full text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
             >
               <PrinterIcon className="h-4 w-4" />
             </button>
             <button
               onClick={() => onDownload(p)}
               title="Download PDF"
-              className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
+              className="grid h-8 w-8 place-items-center rounded-full text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
             >
               <ArrowDownTrayIcon className="h-4 w-4" />
             </button>

@@ -204,7 +204,7 @@ export const RUN_STATUS: Record<PayrollRunStatus, StatusStyle> = {
   processed: {
     labelKey: "status.processed",
     className: "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300",
-    dot: "#3b82f6",
+    dot: "rgb(var(--blue-500))",
   },
   paid: {
     labelKey: "status.paid",
@@ -218,7 +218,7 @@ export const PAYSLIP_STATUS: Record<PayslipStatus, StatusStyle> = {
   generated: {
     labelKey: "status.generated",
     className: "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300",
-    dot: "#3b82f6",
+    dot: "rgb(var(--blue-500))",
   },
   downloaded: {
     labelKey: "status.downloaded",

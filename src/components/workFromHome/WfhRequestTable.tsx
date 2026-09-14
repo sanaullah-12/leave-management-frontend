@@ -172,7 +172,7 @@ const WfhRequestTable: React.FC<Props> = ({
                           <button
                             type="button"
                             onClick={() => onReview(request, "approved")}
-                            className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400"
+                            className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400"
                           >
                             <CheckIcon className="h-3.5 w-3.5" />
                             Approve
@@ -180,7 +180,7 @@ const WfhRequestTable: React.FC<Props> = ({
                           <button
                             type="button"
                             onClick={() => onReview(request, "rejected")}
-                            className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-700 transition-colors hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400"
+                            className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-700 transition-colors hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400"
                           >
                             <XMarkIcon className="h-3.5 w-3.5" />
                             Reject
@@ -190,7 +190,7 @@ const WfhRequestTable: React.FC<Props> = ({
                         <button
                           type="button"
                           onClick={() => onCancel(request)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                          className="inline-flex items-center gap-1 rounded-full border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                         >
                           <NoSymbolIcon className="h-3.5 w-3.5" />
                           Withdraw

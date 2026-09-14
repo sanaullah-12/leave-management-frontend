@@ -50,7 +50,7 @@ const Select: React.FC<SelectProps> = ({
   return (
     <Listbox value={value} onChange={onChange} disabled={disabled}>
       <div className={`relative ${className}`}>
-        <ListboxButton className="flex w-full items-center gap-2.5 rounded-xl bg-[var(--card-surface)] px-4 py-2.5 text-left text-sm font-medium text-gray-800 min-h-[44px] sm:min-h-0 ring-1 ring-inset ring-gray-200/70 transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60 dark:text-gray-100 dark:ring-white/10">
+        <ListboxButton className="flex w-full items-center gap-2.5 rounded-full bg-[var(--card-surface)] px-4 py-2 text-left text-sm font-medium text-gray-800 min-h-[40px] sm:min-h-0 ring-1 ring-inset ring-gray-200/70 transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60 dark:text-gray-100 dark:ring-white/10">
           {selected?.dotColor && (
             <span
               className="h-2 w-2 flex-shrink-0 rounded-full"
@@ -69,13 +69,13 @@ const Select: React.FC<SelectProps> = ({
 
         <ListboxOptions
           anchor="bottom"
-          className="z-[110] mt-2 w-[var(--button-width)] rounded-xl border border-black/5 bg-white/80 p-1.5 shadow-xl shadow-black/10 ring-1 ring-black/5 backdrop-blur-xl focus:outline-none dark:border-white/10 dark:bg-gray-900/80 dark:ring-white/10 origin-top transition ease-out data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-150 data-[leave]:duration-100"
+          className="glass-panel z-[110] mt-2 w-[var(--button-width)] rounded-xl p-1.5 focus:outline-none origin-top transition ease-out data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-150 data-[leave]:duration-100"
         >
           {options.map((opt) => (
             <ListboxOption
               key={opt.value}
               value={opt.value}
-              className="group flex cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-gray-700 transition-colors data-[focus]:bg-black/[0.04] dark:text-gray-200 dark:data-[focus]:bg-white/[0.06]"
+              className="group flex cursor-pointer items-center gap-2.5 rounded-full px-3 py-2 text-sm text-gray-700 transition-colors data-[focus]:bg-black/[0.04] dark:text-gray-200 dark:data-[focus]:bg-white/[0.06]"
             >
               {opt.dotColor && (
                 <span

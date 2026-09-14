@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from "./ui/Button";
 import {
   EyeIcon
 } from '@heroicons/react/24/outline';
@@ -88,10 +89,10 @@ const EmployeeRow: React.FC<EmployeeRowProps> = ({
           </div>
 
           {/* Details Button */}
-          <button className="btn-secondary flex items-center space-x-2 text-sm">
+          <Button variant="secondary" className="space-x-2 text-sm">
             <EyeIcon className="w-4 h-4" />
             <span>View Details</span>
-          </button>
+          </Button>
         </div>
       </div>
     </div>

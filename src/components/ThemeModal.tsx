@@ -50,7 +50,7 @@ const ThemeModal: React.FC<ThemeModalProps> = ({ open, onClose }) => {
                   key={m.key}
                   type="button"
                   onClick={() => setThemeMode(m.key)}
-                  className={`flex flex-col items-center gap-2 rounded-xl border p-4 transition-all ${
+                  className={`flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all ${
                     sel
                       ? "border-blue-500 bg-blue-50/60 ring-2 ring-blue-500/30 dark:bg-blue-500/10"
                       : "border-gray-200 hover:-translate-y-0.5 hover:border-gray-300 dark:border-white/10 dark:hover:border-white/20"

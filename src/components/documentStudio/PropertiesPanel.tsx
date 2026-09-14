@@ -11,6 +11,7 @@ import Select from "../ui/Select";
 import PlaceholderPanel from "./PlaceholderPanel";
 import { BRAND_ACCENTS, PAGE_FONT_FAMILIES, VARIANT_META } from "./constants";
 import { PANEL } from "./ui";
+import Button from "../ui/Button";
 import type {
   BrandSettings,
   CompanyProfile,
@@ -49,7 +50,7 @@ const Toggle: React.FC<{
   <button
     type="button"
     onClick={() => onChange(!checked)}
-    className="flex w-full items-center justify-between rounded-lg px-1 py-2 text-left"
+    className="flex w-full items-center justify-between rounded-full px-1 py-2 text-left"
   >
     <span>
       <span className="block text-sm font-medium text-gray-800 dark:text-gray-200">
@@ -115,20 +116,20 @@ const PropertiesPanel: React.FC<Props> = ({
             <button
               onClick={onClose}
               title="Close"
-              className="grid h-7 w-7 place-items-center rounded-lg text-gray-400 hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
+              className="grid h-7 w-7 place-items-center rounded-full text-gray-400 hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
             >
               <XMarkIcon className="h-4 w-4" />
             </button>
           )}
         </div>
-        <div className="flex gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-700/50">
+        <div className="flex gap-1 rounded-full bg-gray-100 p-1 dark:bg-gray-700/50">
           {TABS.map((t) => {
             const active = tab === t.key;
             return (
               <button
                 key={t.key}
                 onClick={() => setTab(t.key)}
-                className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors ${
+                className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full px-2 py-1.5 text-xs font-medium transition-colors ${
                   active
                     ? "text-gray-900 dark:text-white"
                     : "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
@@ -292,13 +293,11 @@ const PropertiesPanel: React.FC<Props> = ({
                   ? `${assetCount} brand asset${assetCount > 1 ? "s" : ""} uploaded`
                   : "No logo uploaded yet"}
               </p>
-              <button
+              <Button variant="secondary" className="mt-3 w-full text-sm"
                 onClick={onOpenLetterhead}
-                disabled={!canManage}
-                className="btn-secondary mt-3 w-full justify-center text-sm disabled:cursor-not-allowed disabled:opacity-50"
-              >
+                disabled={!canManage}>
                 Manage branding & letterhead
-              </button>
+              </Button>
               {!canManage && (
                 <p className="mt-2 text-[11px] text-gray-400">
                   Only HR/Admins can edit branding.
@@ -376,7 +375,7 @@ const PropertiesPanel: React.FC<Props> = ({
               </p>
               <button
                 disabled
-                className="mt-3 w-full cursor-not-allowed rounded-lg border border-white/40 bg-white/50 py-2 text-sm font-medium text-gray-500 dark:bg-gray-900/30"
+                className="mt-3 w-full cursor-not-allowed rounded-full border border-white/40 bg-white/50 py-2 text-sm font-medium text-gray-500 dark:bg-gray-900/30"
               >
                 <SparklesIcon className="h-4 w-4" />
                 Draft with AI

@@ -92,7 +92,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
     <Popover className={`relative ${className}`}>
       <PopoverButton
         disabled={disabled}
-        className="flex w-full items-center gap-2.5 rounded-xl bg-[var(--card-surface)] px-4 py-2.5 text-left text-sm font-medium text-gray-800 min-h-[44px] sm:min-h-0 ring-1 ring-inset ring-gray-200/70 transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60 dark:text-gray-100 dark:ring-white/10"
+        className="flex w-full items-center gap-2.5 rounded-full bg-[var(--card-surface)] px-4 py-2 text-left text-sm font-medium text-gray-800 min-h-[40px] sm:min-h-0 ring-1 ring-inset ring-gray-200/70 transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60 dark:text-gray-100 dark:ring-white/10"
       >
         <CalendarDaysIcon className="h-4 w-4 flex-shrink-0 text-gray-400" />
         <span className={`flex-1 truncate ${selected ? "" : "text-gray-400"}`}>
@@ -102,7 +102,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
       <PopoverPanel
         anchor="bottom start"
-        className="z-[110] mt-2 w-[19rem] rounded-2xl border border-black/5 bg-white/85 p-4 shadow-xl shadow-black/10 ring-1 ring-black/5 backdrop-blur-xl focus:outline-none dark:border-white/10 dark:bg-gray-900/85 dark:ring-white/10 origin-top transition ease-out data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-150 data-[leave]:duration-100"
+        className="glass-panel z-[110] mt-2 w-[19rem] rounded-2xl p-4 focus:outline-none origin-top transition ease-out data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-150 data-[leave]:duration-100"
       >
         {({ close }) => (
           <>
@@ -115,7 +115,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 <button
                   type="button"
                   onClick={() => setView(new Date(year, month - 1, 1))}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm shadow-blue-600/25 transition-transform hover:scale-105"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm shadow-blue-600/25 transition-transform hover:scale-105"
                   aria-label="Previous month"
                 >
                   <ChevronLeftIcon className="h-4 w-4" />
@@ -123,7 +123,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 <button
                   type="button"
                   onClick={() => setView(new Date(year, month + 1, 1))}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm shadow-blue-600/25 transition-transform hover:scale-105"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm shadow-blue-600/25 transition-transform hover:scale-105"
                   aria-label="Next month"
                 >
                   <ChevronRightIcon className="h-4 w-4" />
@@ -161,7 +161,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                       onChange(toISO(d));
                       close();
                     }}
-                    className={`flex h-9 items-center justify-center rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex h-9 items-center justify-center rounded-full text-sm font-medium transition-colors ${
                       isSel
                         ? "bg-blue-600 text-white shadow-sm shadow-blue-600/30"
                         : isToday

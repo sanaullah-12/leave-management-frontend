@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -24,6 +26,8 @@ import {
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 
+import Input from "../components/ui/Input";
+import Button from "../components/ui/Button";
 const EmployeesPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -226,51 +230,48 @@ const EmployeesPage: React.FC = () => {
 
   return (
     <div className="space-y-6 fade-in">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Team Management
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Manage your company team members
-          </p>
-          {/* Debug info */}
-        </div>
-
-        <div className="flex space-x-3">
-          <button
-            onClick={() => refetchEmployees()}
-            className="btn-secondary inline-flex items-center"
-            disabled={employeesLoading}
-          >
-            <ArrowPathIcon className="h-5 w-5 mr-2" />
-            Refresh
-          </button>
-          {activeTab === "employees" ? (
+      <SectionHeader
+        variant="employees"
+        eyebrow="Workforce"
+        title="Team Management"
+        description="Invite people, manage their records and keep the roster current."
+        illustration={sectionIllustration("employees")}
+        action={
+          <>
             <button
-              onClick={() => setShowInviteModal(true)}
-              className="btn-primary inline-flex items-center"
+              onClick={() => refetchEmployees()}
+              className="sh-action"
+              disabled={employeesLoading}
             >
-              <PlusIcon className="h-5 w-5 mr-2" />
-              Invite Employee
+              <ArrowPathIcon className="h-5 w-5" />
+              Refresh
             </button>
-          ) : (
-            <button
-              onClick={() => setShowAdminInviteModal(true)}
-              className="btn-primary inline-flex items-center"
-            >
-              <PlusIcon className="h-5 w-5 mr-2" />
-              Invite Admin
-            </button>
-          )}
-        </div>
-      </div>
+            {activeTab === "employees" ? (
+              <button
+                onClick={() => setShowInviteModal(true)}
+                className="sh-action-primary"
+              >
+                <PlusIcon className="h-5 w-5" />
+                Invite Employee
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowAdminInviteModal(true)}
+                className="sh-action-primary"
+              >
+                <PlusIcon className="h-5 w-5" />
+                Invite Admin
+              </button>
+            )}
+          </>
+        }
+      />
 
       {/* Tabs Section */}
-      <div className="flex space-x-1 p-1 bg-gray-100 dark:bg-gray-800/80 rounded-xl border border-gray-200/60 dark:border-gray-700/60">
+      <div className="flex space-x-1 p-1 bg-gray-100 dark:bg-gray-800/80 rounded-full border border-gray-200/60 dark:border-gray-700/60">
         <button
           onClick={() => setActiveTab("employees")}
-          className={`flex-1 inline-flex items-center justify-center py-2 px-4 text-sm font-medium rounded-lg transition-all ${
+          className={`flex-1 inline-flex items-center justify-center py-2 px-4 text-sm font-medium rounded-full transition-all ${
             activeTab === "employees"
               ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
               : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
@@ -285,7 +286,7 @@ const EmployeesPage: React.FC = () => {
         </button>
         <button
           onClick={() => setActiveTab("admins")}
-          className={`flex-1 inline-flex items-center justify-center py-2 px-4 text-sm font-medium rounded-lg transition-all ${
+          className={`flex-1 inline-flex items-center justify-center py-2 px-4 text-sm font-medium rounded-full transition-all ${
             activeTab === "admins"
               ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
               : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
@@ -313,16 +314,15 @@ const EmployeesPage: React.FC = () => {
             <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
               Search Employee
             </label>
-            <div className="relative">
-              <MagnifyingGlassIcon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Name, email, or ID..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-xl bg-[var(--card-surface)] py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none ring-1 ring-inset ring-gray-200/70 transition-shadow focus:ring-2 focus:ring-blue-500/50 dark:text-gray-100 dark:ring-white/10"
-              />
-            </div>
+            <Input
+              icon={MagnifyingGlassIcon}
+              type="text"
+              placeholder="Name, email, or ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onClear={() => setSearchTerm("")}
+              clearable
+            />
           </div>
 
           {/* Start Date */}
@@ -363,7 +363,7 @@ const EmployeesPage: React.FC = () => {
                 }
                 handleGenerateReport(emp);
               }}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-md"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-md"
             >
               <DocumentChartBarIcon className="h-4 w-4" />
               Generate Report
@@ -447,21 +447,17 @@ const EmployeesPage: React.FC = () => {
             )}
 
             <div className="flex justify-end space-x-3">
-              <button
+              <Button variant="secondary"
                 onClick={() => {
                   setDeleteConfirm({ show: false, employee: null });
                   setError(""); // Clear error when closing modal
                 }}
-                className="btn-secondary"
-                disabled={deleteEmployeeMutation.isPending}
-              >
+                disabled={deleteEmployeeMutation.isPending}>
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button variant="danger"
                 onClick={handleDeleteEmployee}
-                disabled={deleteEmployeeMutation.isPending}
-                className="btn-danger inline-flex items-center"
-              >
+                disabled={deleteEmployeeMutation.isPending}>
                 {deleteEmployeeMutation.isPending ? (
                   <>
                     <LoadingSpinner size="sm" />
@@ -473,7 +469,7 @@ const EmployeesPage: React.FC = () => {
                     Delete Employee
                   </>
                 )}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -605,7 +601,7 @@ const EmployeesPage: React.FC = () => {
                                     deactivateEmployeeMutation.isPending ||
                                     activateEmployeeMutation.isPending
                                   }
-                                  className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-lg ring-1 ring-inset transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                                  className={`inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full ring-1 ring-inset transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                                     employee.isActive
                                       ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 ring-red-200/70 dark:ring-red-500/30 hover:bg-red-100 dark:hover:bg-red-500/20"
                                       : "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 ring-emerald-200/70 dark:ring-emerald-500/30 hover:bg-emerald-100 dark:hover:bg-emerald-500/20"
@@ -619,7 +615,7 @@ const EmployeesPage: React.FC = () => {
 
                               <button
                                 onClick={() => handleGenerateReport(employee)}
-                                className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 ring-1 ring-inset ring-blue-200/70 dark:ring-blue-500/30 hover:bg-blue-100 dark:hover:bg-blue-500/20"
+                                className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium transition-colors text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 ring-1 ring-inset ring-blue-200/70 dark:ring-blue-500/30 hover:bg-blue-100 dark:hover:bg-blue-500/20"
                               >
                                 <DocumentChartBarIcon className="h-4 w-4 mr-1" />
                                 Report
@@ -628,7 +624,7 @@ const EmployeesPage: React.FC = () => {
                               {activeTab === "employees" && (
                                 <button
                                   onClick={() => showDeleteConfirm(employee)}
-                                  className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/40 ring-1 ring-inset ring-gray-200/70 dark:ring-gray-600/40 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:ring-red-200/70 dark:hover:ring-red-500/30"
+                                  className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium transition-colors text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/40 ring-1 ring-inset ring-gray-200/70 dark:ring-gray-600/40 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:ring-red-200/70 dark:hover:ring-red-500/30"
                                 >
                                   <TrashIcon className="h-4 w-4 mr-1" />
                                   Delete

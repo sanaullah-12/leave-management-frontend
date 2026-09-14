@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { authAPI } from '../services/api';
 
+import Button from "../components/ui/Button";
 interface ResetPasswordForm {
   password: string;
   confirmPassword: string;
@@ -238,13 +239,11 @@ const ResetPasswordPage: React.FC = () => {
             </div>
 
             <div>
-              <button
+              <Button variant="primary" className="w-full"
                 type="submit"
-                disabled={isSubmitting}
-                className="btn-primary w-full"
-              >
+                disabled={isSubmitting}>
                 {isSubmitting ? <LoadingSpinner size="sm" /> : 'Reset Password'}
-              </button>
+              </Button>
             </div>
           </form>
 

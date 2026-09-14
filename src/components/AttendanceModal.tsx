@@ -151,7 +151,7 @@ const AttendanceModal: React.FC<AttendanceModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+            className="rounded-full border border-gray-200 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
           >
             Close
           </button>
@@ -159,7 +159,7 @@ const AttendanceModal: React.FC<AttendanceModalProps> = ({
             type="button"
             onClick={() => fetch(true)}
             disabled={isLoading || rangeInvalid}
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-colors hover:bg-blue-700 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-colors hover:bg-blue-700 disabled:opacity-50"
           >
             {isLoading ? (
               <InlineLoader label="Fetching..." />

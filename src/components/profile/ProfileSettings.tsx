@@ -6,6 +6,7 @@ import { authAPI, usersAPI } from "../../services/api";
 import Avatar from "../Avatar";
 import InlineLoader from "../InlineLoader";
 import Select from "../ui/Select";
+import Input from "../ui/Input";
 import {
   IdentificationIcon,
   Cog6ToothIcon,
@@ -323,38 +324,29 @@ const ProfileSettings: React.FC = () => {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className={labelClass}>Full Name</label>
-              <input {...profileForm.register("name", { required: true })} className={inputClass} />
+              <Input {...profileForm.register("name", { required: true })} />
             </div>
             <div>
               <label className={labelClass}>Designation</label>
-              <input
+              <Input
                 {...profileForm.register("position")}
                 disabled={!isAdmin}
-                className={inputClass}
                 placeholder="-"
               />
             </div>
             <div>
               <label className={labelClass}>Email Address</label>
-              <input value={user?.email || ""} disabled className={inputClass} />
+              <Input value={user?.email || ""} disabled readOnly />
             </div>
             <div>
               <label className={labelClass}>Phone Number</label>
-              <input
+              <Input
                 type="tel"
                 {...profileForm.register("phone", phoneValidationRules)}
-                className={inputClass}
                 placeholder={PHONE_PLACEHOLDER}
+                error={profileForm.formState.errors.phone?.message}
+                hint={PHONE_HINT}
               />
-              {profileForm.formState.errors.phone ? (
-                <p className="mt-1.5 text-xs text-red-600">
-                  {profileForm.formState.errors.phone.message}
-                </p>
-              ) : (
-                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                  {PHONE_HINT}
-                </p>
-              )}
             </div>
           </div>
 
@@ -372,7 +364,7 @@ const ProfileSettings: React.FC = () => {
             <button
               type="submit"
               disabled={updateMutation.isPending}
-              className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition-all hover:bg-blue-700 disabled:opacity-70"
+              className="rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition-all hover:bg-blue-700 disabled:opacity-70"
             >
               {updateMutation.isPending ? <InlineLoader label="Saving..." /> : "Save changes"}
             </button>
@@ -453,27 +445,24 @@ const ProfileSettings: React.FC = () => {
           <form onSubmit={passwordForm.handleSubmit(onChangePassword)} className="space-y-4">
             <div>
               <label className={labelClass}>Current Password</label>
-              <input
+              <Input
                 type={showPw ? "text" : "password"}
                 {...passwordForm.register("currentPassword", { required: true })}
-                className={inputClass}
               />
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className={labelClass}>New Password</label>
-                <input
+                <Input
                   type={showPw ? "text" : "password"}
                   {...passwordForm.register("newPassword", { required: true, minLength: 6 })}
-                  className={inputClass}
                 />
               </div>
               <div>
                 <label className={labelClass}>Confirm Password</label>
-                <input
+                <Input
                   type={showPw ? "text" : "password"}
                   {...passwordForm.register("confirmPassword", { required: true })}
-                  className={inputClass}
                 />
               </div>
             </div>
@@ -490,7 +479,7 @@ const ProfileSettings: React.FC = () => {
               <button
                 type="submit"
                 disabled={passwordMutation.isPending}
-                className="rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-70"
+                className="rounded-full border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-70"
               >
                 {passwordMutation.isPending ? <InlineLoader label="Updating..." /> : "Update password"}
               </button>
@@ -514,7 +503,7 @@ const ProfileSettings: React.FC = () => {
             </div>
             <button
               onClick={handleDeactivate}
-              className="flex-shrink-0 rounded-lg border border-red-300 dark:border-red-500/40 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-500/10"
+              className="flex-shrink-0 rounded-full border border-red-300 dark:border-red-500/40 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 transition-colors hover:bg-red-100 dark:hover:bg-red-500/10"
             >
               Deactivate
             </button>

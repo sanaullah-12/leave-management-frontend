@@ -1,12 +1,14 @@
 import React, { useMemo, useState } from "react";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import {
   HomeIcon,
   ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
-import AppLogo from "../components/AppLogo";
-import { CARD, CARD_HOVER } from "../lib/surfaces";
+import { CARD } from "../lib/surfaces";
+import { StatCardRow } from "../components/ui/StatCard";
 import { AccentEdge } from "../components/ui/CardAccents";
 import { useThemeAccent } from "../hooks/useThemeAccent";
 import { useAuth } from "../context/AuthContext";
@@ -156,26 +158,24 @@ const WorkFromHomePage: React.FC = () => {
   return (
     <div className="space-y-6 fade-in">
       {/* Header */}
-      <header
-        className={`relative flex flex-wrap items-center justify-between gap-3 overflow-hidden ${CARD} px-5 py-4`}
+      <SectionHeader
+        variant="workFromHome"
+        eyebrow="Presence"
+        title={isAdmin ? "Work From Home Requests" : "Work From Home"}
+        description={
+          isAdmin
+            ? "Approve or reject requests from your team."
+            : "Request a day away from the office and track its status."
+        }
+        illustration={sectionIllustration("workFromHome")}
+      />
+
+      {/* Status filter. A control over the list below, so it sits with the
+          list rather than in the banner. */}
+      <div
+        className={`relative flex justify-end overflow-hidden ${CARD} px-5 py-4`}
       >
         <AccentEdge color={accent} />
-        <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-gray-200/70 dark:ring-gray-600/60">
-            <AppLogo size={26} />
-          </span>
-          <div>
-            <p className="text-base font-semibold tracking-tight text-gray-900 dark:text-gray-100">
-              {isAdmin ? "Work From Home Requests" : "Work From Home"}
-            </p>
-            <p className="text-[12.5px] text-gray-400 dark:text-gray-500">
-              {isAdmin
-                ? "Approve or reject requests from your team"
-                : "Request a day away from the office and track its status"}
-            </p>
-          </div>
-        </div>
-
         <div className="w-[180px]">
           <Select
             value={status}
@@ -184,37 +184,17 @@ const WorkFromHomePage: React.FC = () => {
             placeholder="Filter by status"
           />
         </div>
-      </header>
+      </div>
 
       {/* Counts */}
-      <section
-        aria-label="Work from home summary"
-        className="grid grid-cols-1 gap-3 sm:grid-cols-3"
-      >
-        {tiles.map((tile) => (
-          <div
-            key={tile.label}
-            className={`relative overflow-hidden ${CARD} ${CARD_HOVER} p-4 sm:p-5`}
-          >
-            <AccentEdge color={tile.tone} />
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-overline truncate text-gray-400 dark:text-gray-500">
-                  {tile.label}
-                </p>
-                <p className="mt-2 text-2xl font-bold leading-none tabular-nums text-gray-900 dark:text-white sm:text-3xl">
-                  {tile.value ?? "-"}
-                </p>
-                <p className="mt-2 text-[11px] font-medium text-gray-500 dark:text-gray-400 sm:text-xs">
-                  {tile.caption}
-                </p>
-              </div>
-              <span className="hidden text-blue-600 dark:text-blue-400 sm:block">
-                {tile.icon}
-              </span>
-            </div>
-          </div>
-        ))}
+      <section aria-label="Work from home summary">
+        <StatCardRow
+          tiles={tiles.map((tile) => ({
+            label: tile.label,
+            value: tile.value ?? "-",
+            icon: tile.icon,
+          }))}
+        />
       </section>
 
       {/* Employees request; admins only review. An admin who needs a WFH day

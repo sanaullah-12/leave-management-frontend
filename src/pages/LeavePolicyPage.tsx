@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import { CARD, CARD_HOVER } from "../lib/surfaces";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { leavesAPI } from "../services/api";
@@ -18,6 +20,7 @@ import {
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 
+import Input from "../components/ui/Input";
 interface LeavePolicy {
   casual: number;
   sick: number;
@@ -146,35 +149,23 @@ const LeavePolicyPage: React.FC = () => {
   return (
     <div className="space-y-6 fade-in">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl text-blue-600 dark:text-blue-400">
-            <ShieldCheckIcon className="h-6 w-6" />
-          </span>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-              Leave Policy
-            </h1>
-            <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
-              Configure company-wide leave allocation for all employees.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {isEditing ? (
+      <SectionHeader
+        variant="policies"
+        eyebrow="Time off"
+        title="Leave Policy"
+        description="Configure company-wide leave allocation for all employees."
+        illustration={sectionIllustration("policies")}
+        action={
+          isEditing ? (
             <>
-              <button
-                onClick={handleCancelEdit}
-                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-white/10 dark:text-gray-200 dark:hover:bg-white/5"
-              >
+              <button onClick={handleCancelEdit} className="sh-action">
                 <XMarkIcon className="h-4 w-4" />
                 Cancel
               </button>
               <button
                 onClick={handleSavePolicy}
                 disabled={updatePolicyMutation.isPending}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-md disabled:opacity-70"
+                className="sh-action-primary"
               >
                 {updatePolicyMutation.isPending ? (
                   <LoadingSpinner size="sm" />
@@ -185,16 +176,13 @@ const LeavePolicyPage: React.FC = () => {
               </button>
             </>
           ) : (
-            <button
-              onClick={handleStartEdit}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-md"
-            >
+            <button onClick={handleStartEdit} className="sh-action-primary">
               <PencilIcon className="h-4 w-4" />
               Edit Policy
             </button>
-          )}
-        </div>
-      </div>
+          )
+        }
+      />
 
       {/* Total allocation banner */}
       <div className={`${CARD} overflow-hidden`}>
@@ -269,7 +257,7 @@ const LeavePolicyPage: React.FC = () => {
                   <Icon className="h-6 w-6" />
                 </span>
                 {isEditing ? (
-                  <input
+                  <Input
                     type="number"
                     min={0}
                     max={365}
@@ -280,7 +268,8 @@ const LeavePolicyPage: React.FC = () => {
                         [t.key]: parseInt(e.target.value) || 0,
                       }))
                     }
-                    className="w-20 rounded-xl bg-slate-100 py-2 text-center text-2xl font-bold text-gray-900 outline-none ring-1 ring-inset ring-gray-200/70 focus:ring-2 focus:ring-blue-500/50 dark:bg-white/5 dark:text-white dark:ring-white/10"
+                    className="h-12 w-24"
+                    inputClassName="text-center text-2xl font-bold"
                   />
                 ) : (
                   <div className="text-right">

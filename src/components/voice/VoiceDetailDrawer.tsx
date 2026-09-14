@@ -188,7 +188,7 @@ const VoiceDetailDrawer: React.FC<Props> = ({ voiceId, open, onClose }) => {
             whileTap={{ scale: 0.94 }}
             onClick={sendReply}
             disabled={!replyText.trim() || replyM.isPending}
-            className="flex h-[42px] w-[42px] flex-shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-600/25 transition-colors hover:bg-blue-700 disabled:opacity-40"
+            className="flex h-[42px] w-[42px] flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm shadow-blue-600/25 transition-colors hover:bg-blue-700 disabled:opacity-40"
             aria-label="Send reply"
           >
             {replyM.isPending ? (

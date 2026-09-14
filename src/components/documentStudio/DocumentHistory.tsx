@@ -14,6 +14,7 @@ import Avatar from "../Avatar";
 import { CARD } from "./ui";
 import type { DocumentStatus, StudioDocument } from "./types";
 
+import Input from "../ui/Input";
 interface Props {
   documents: StudioDocument[];
   onOpen: (doc: StudioDocument) => void;
@@ -87,15 +88,16 @@ const DocumentHistory: React.FC<Props> = ({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="relative">
-            <MagnifyingGlassIcon className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search history"
-              className="w-48 rounded-lg border border-gray-200 bg-white py-2 pl-8 pr-3 text-sm outline-none focus:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-            />
-          </div>
+          <Input
+            icon={MagnifyingGlassIcon}
+            inputSize="sm"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onClear={() => setQuery("")}
+            clearable
+            placeholder="Search history"
+            className="w-48"
+          />
           <div className="w-36">
             <Select
               value={status}
@@ -103,7 +105,7 @@ const DocumentHistory: React.FC<Props> = ({
               options={[
                 { value: "all", label: "All statuses" },
                 { value: "draft", label: "Draft", dotColor: "#9ca3af" },
-                { value: "generated", label: "Generated", dotColor: "#3b82f6" },
+                { value: "generated", label: "Generated", dotColor: "rgb(var(--blue-500))" },
                 { value: "downloaded", label: "Downloaded", dotColor: "#10b981" },
                 { value: "printed", label: "Printed", dotColor: "#8b5cf6" },
               ]}
@@ -201,28 +203,28 @@ const DocumentHistory: React.FC<Props> = ({
                         <button
                           onClick={() => onOpen(d)}
                           title="Open in editor"
-                          className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
+                          className="grid h-8 w-8 place-items-center rounded-full text-gray-400 hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
                         >
                           <ArrowUpRightIcon className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => onExport(d)}
                           title="Download PDF"
-                          className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
+                          className="grid h-8 w-8 place-items-center rounded-full text-gray-400 hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
                         >
                           <ArrowDownTrayIcon className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => onPrint(d)}
                           title="Print"
-                          className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
+                          className="grid h-8 w-8 place-items-center rounded-full text-gray-400 hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
                         >
                           <PrinterIcon className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => onDelete(d)}
                           title="Delete"
-                          className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+                          className="grid h-8 w-8 place-items-center rounded-full text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
                         >
                           <TrashIcon className="h-4 w-4" />
                         </button>

@@ -10,14 +10,12 @@ import {
   ClockIcon,
 } from "@heroicons/react/24/outline";
 import AuthLayout from "../components/auth/AuthLayout";
+import Input from "../components/ui/Input";
 import InlineLoader from "../components/InlineLoader";
 
 interface ForgotPasswordForm {
   email: string;
 }
-
-const inputClass =
-  "w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/40 px-4 py-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:ring-4 focus:ring-blue-500/10";
 
 const ForgotPasswordPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,13 +76,13 @@ const ForgotPasswordPage: React.FC = () => {
               setSuccess(false);
               setError("");
             }}
-            className="w-full rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 hover:shadow-xl"
+            className="w-full rounded-full bg-blue-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 hover:shadow-xl"
           >
             Try a different email
           </button>
           <Link
             to="/login"
-            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-gray-200 dark:border-gray-700 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="flex w-full items-center justify-center gap-1.5 rounded-full border border-gray-200 dark:border-gray-700 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <ArrowLeftIcon className="h-4 w-4" />
             Back to login
@@ -118,32 +116,26 @@ const ForgotPasswordPage: React.FC = () => {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-        <div>
-          <input
-            {...register("email", {
-              required: "Email is required",
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: "Please enter a valid email address",
-              },
-            })}
-            type="email"
-            autoComplete="email"
-            placeholder="Work email"
-            className={inputClass}
-          />
-          {errors.email && (
-            <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
-              {errors.email.message}
-            </p>
-          )}
-        </div>
+        <Input
+          {...register("email", {
+            required: "Email is required",
+            pattern: {
+              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              message: "Please enter a valid email address",
+            },
+          })}
+          type="email"
+          autoComplete="email"
+          placeholder="Work email"
+          inputSize="lg"
+          error={errors.email?.message}
+        />
 
         <motion.button
           type="submit"
           disabled={isSubmitting}
           whileTap={{ scale: 0.99 }}
-          className="flex w-full items-center justify-center rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 hover:shadow-xl disabled:opacity-70"
+          className="flex w-full items-center justify-center rounded-full bg-blue-600 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-700 hover:shadow-xl disabled:opacity-70"
         >
           {isSubmitting ? (
             <InlineLoader label="Sending link..." />

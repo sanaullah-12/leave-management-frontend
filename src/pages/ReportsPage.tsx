@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { CARD, CARD_HOVER } from "../lib/surfaces";
+import { StatCard, type StatAccent } from "../components/ui/StatCard";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
+import { accentFor } from "../lib/themeTokens";
 import { useQuery } from "@tanstack/react-query";
 import { leavesAPI } from "../services/api";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -122,24 +127,14 @@ const HeroPill: React.FC<{
 );
 
 // Compact metadata card (Employee ID / Joining Date / Generated).
+/** The report's metadata tiles, on the product's shared KPI card. */
 const InfoCard: React.FC<{
   icon: React.ReactNode;
   label: string;
   value: string;
-}> = ({ icon, label, value }) => (
-  <div className={`group ${CARD} ${CARD_HOVER} flex h-full flex-col p-5`}>
-    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-blue-600 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 group-hover:-rotate-3 dark:text-blue-400">
-      {icon}
-    </span>
-    {/* Label + value pinned to the bottom so they align across the row even
-        when one card's value wraps to a second line. */}
-    <p className="mt-auto pt-3 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-      {label}
-    </p>
-    <p className="mt-1 text-lg font-bold text-gray-900 dark:text-white">
-      {value}
-    </p>
-  </div>
+  accent?: StatAccent;
+}> = ({ icon, label, value, accent }) => (
+  <StatCard icon={icon} label={label} value={value} accent={accent} />
 );
 
 // Field row in the profile card (label + value).
@@ -343,7 +338,7 @@ const ActivityTimeline: React.FC<{
       {events.length > 0 ? (
         <ol className="mt-5">
           {events.map((l, i) => {
-            const dot = STATUS_DOT[l.status] || "#3b82f6";
+            const dot = STATUS_DOT[l.status] || "rgb(var(--blue-500))";
             const last = i === events.length - 1;
             const ts = l.createdAt || l.updatedAt || l.startDate;
             return (
@@ -414,6 +409,8 @@ const ActivityTimeline: React.FC<{
 
 const ReportsPage: React.FC = () => {
   const { user } = useAuth();
+  const { colorScheme } = useTheme();
+  const accent = accentFor(colorScheme);
   const navigate = useNavigate();
   const [reportData, setReportData] = useState<EmployeeReportData | null>(null);
   // Which export is running (if any) and how far along it is.
@@ -705,60 +702,66 @@ const ReportsPage: React.FC = () => {
         </div>
       )}
 
-      {/* ---------------- Action bar (excluded from PDF) ---------------- */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+      {/* ---------------- Banner + actions (screen only) ----------------
+          The PDF and workbook are built from `buildModel()`, not from this
+          markup, so nothing here can leak into an export. */}
+      <SectionHeader
+        variant="reports"
+        eyebrow={
           <button
+            type="button"
             onClick={handleBackToEmployees}
-            className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/5"
+            className="inline-flex items-center gap-1.5 uppercase tracking-[0.14em] transition-colors hover:text-white"
           >
-            <ArrowLeftIcon className="h-4 w-4" />
+            <ArrowLeftIcon className="h-3.5 w-3.5" />
             Back to Employees
           </button>
-          <span className="hidden h-5 w-px bg-gray-200 dark:bg-white/10 sm:block" />
-          <h1 className="text-base font-semibold text-blue-600 dark:text-blue-400">
-            Employee Report
-          </h1>
-        </div>
+        }
+        title="Employee Report"
+        description={`Comprehensive leave analysis for ${
+          employee?.name || "this employee"
+        }, ready to download as a PDF or a workbook.`}
+        illustration={sectionIllustration("reports")}
+        action={
+          <>
+            <button
+              onClick={handleDownloadExcel}
+              disabled={isExporting}
+              className="sh-action"
+            >
+              {exportKind === "excel" ? (
+                <>
+                  <LoadingSpinner size="sm" />
+                  <span>Building...</span>
+                </>
+              ) : (
+                <>
+                  <TableCellsIcon className="h-4 w-4" />
+                  Download Excel
+                </>
+              )}
+            </button>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <button
-            onClick={handleDownloadExcel}
-            disabled={isExporting}
-            className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-all hover:-translate-y-0.5 hover:bg-emerald-100 disabled:translate-y-0 disabled:opacity-60 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
-          >
-            {exportKind === "excel" ? (
-              <>
-                <LoadingSpinner size="sm" />
-                <span>Building...</span>
-              </>
-            ) : (
-              <>
-                <TableCellsIcon className="h-4 w-4" />
-                Download Excel
-              </>
-            )}
-          </button>
-
-          <button
-            onClick={handleDownloadPDF}
-            disabled={isExporting}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-md disabled:translate-y-0 disabled:opacity-70"
-          >
-            {exportKind === "pdf" ? (
-              <>
-                <LoadingSpinner size="sm" />
-                <span>Generating...</span>
-              </>
-            ) : (
-              <>
-                <DocumentArrowDownIcon className="h-4 w-4" />
-                Download PDF
-              </>
-            )}
-          </button>
-        </div>
-      </div>
+            <button
+              onClick={handleDownloadPDF}
+              disabled={isExporting}
+              className="sh-action-primary"
+            >
+              {exportKind === "pdf" ? (
+                <>
+                  <LoadingSpinner size="sm" />
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <DocumentArrowDownIcon className="h-4 w-4" />
+                  Download PDF
+                </>
+              )}
+            </button>
+          </>
+        }
+      />
 
       {/* ---------------- Report content (on-screen view) ---------------- */}
       <div className="space-y-6">
@@ -844,7 +847,7 @@ const ReportsPage: React.FC = () => {
 
             <button
               onClick={() => navigate(`/employees/${employee._id}`)}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-white/10 dark:text-gray-200 dark:hover:bg-white/5"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-white/10 dark:text-gray-200 dark:hover:bg-white/5"
             >
               View Full Profile
               <ArrowRightIcon className="h-4 w-4" />
@@ -890,6 +893,7 @@ const ReportsPage: React.FC = () => {
           />
           <InfoCard
             icon={<CalendarDaysIcon className="h-5 w-5" />}
+            accent="teal"
             label="Joining Date"
             value={
               employee.joinDate
@@ -968,7 +972,7 @@ const ReportsPage: React.FC = () => {
                       />
                       <Bar
                         dataKey="days"
-                        fill="#3b82f6"
+                        fill={accent}
                         radius={[6, 6, 0, 0]}
                         maxBarSize={34}
                       />

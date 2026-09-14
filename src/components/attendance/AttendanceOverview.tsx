@@ -369,7 +369,7 @@ const AttendanceOverview: React.FC<Props> = ({
             type="button"
             onClick={() => onSelect(row.label)}
             aria-pressed={active}
-            className={`${shell} w-full px-2 -mx-2 text-left rounded-md transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/40 ${
+            className={`${shell} w-full px-2 -mx-2 text-left rounded-full transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/40 ${
               active ? "bg-gray-50 dark:bg-gray-700/40" : ""
             }`}
           >

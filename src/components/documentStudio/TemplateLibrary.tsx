@@ -18,6 +18,7 @@ import { studioIcon } from "./icons";
 import { PANEL, tintFor, relativeTime } from "./ui";
 import type { DocumentTemplate, TemplateCategory } from "./types";
 
+import Input from "../ui/Input";
 interface Props {
   templates: DocumentTemplate[];
   activeId: string | null;
@@ -110,7 +111,7 @@ const TemplateCard: React.FC<{
             align="right"
             widthClass="w-44"
             bareButton
-            buttonClassName="rounded-lg p-1.5 text-gray-400 opacity-0 transition-opacity hover:bg-black/5 hover:text-gray-700 group-hover:opacity-100 dark:hover:bg-white/10 dark:hover:text-gray-200"
+            buttonClassName="rounded-full p-1.5 text-gray-400 opacity-0 transition-opacity hover:bg-black/5 hover:text-gray-700 group-hover:opacity-100 dark:hover:bg-white/10 dark:hover:text-gray-200"
             sections={[
               {
                 items: [
@@ -215,7 +216,7 @@ const TemplateLibrary: React.FC<Props> = ({
               whileTap={{ scale: 0.95 }}
               onClick={onNew}
               title="New template"
-              className="grid h-8 w-8 place-items-center rounded-lg text-white shadow-sm"
+              className="grid h-8 w-8 place-items-center rounded-full text-white shadow-sm"
               style={{ background: "var(--accent)" }}
             >
               <PlusIcon className="h-4 w-4" />
@@ -225,7 +226,7 @@ const TemplateLibrary: React.FC<Props> = ({
             <button
               onClick={onClose}
               title="Close"
-              className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
+              className="grid h-8 w-8 place-items-center rounded-full text-gray-400 hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
             >
               <XMarkIcon className="h-4 w-4" />
             </button>
@@ -235,15 +236,15 @@ const TemplateLibrary: React.FC<Props> = ({
 
       {/* Search */}
       <div className="px-4 pt-3">
-        <div className="relative">
-          <MagnifyingGlassIcon className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search templates"
-            className="w-full rounded-lg border border-gray-200 bg-white/70 py-2 pl-8 pr-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-gray-300 dark:border-white/10 dark:bg-white/5 dark:text-gray-100 dark:placeholder-gray-500"
-          />
-        </div>
+        <Input
+          icon={MagnifyingGlassIcon}
+          inputSize="sm"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onClear={() => setQuery("")}
+          clearable
+          placeholder="Search templates"
+        />
       </div>
 
       {/* Category chips */}

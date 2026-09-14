@@ -11,6 +11,7 @@ import {
 import StatusBadge from "./StatusBadge";
 import { CARD } from "../../lib/surfaces";
 
+import Input from "../ui/Input";
 /**
  * The employee roster with its filters, sorting and pagination.
  *
@@ -207,19 +208,23 @@ const EmployeeTable: React.FC<Props> = ({
       {/* Toolbar */}
       {showFilters && (
       <div className="flex flex-wrap items-center gap-2 border-b border-gray-200/70 p-4 dark:border-gray-700">
-        <div className="relative min-w-[180px] flex-1 max-w-xs">
-          <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <input
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Search by name or ID"
-            aria-label="Search employees by name or ID"
-            className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-          />
-        </div>
+        <Input
+          icon={MagnifyingGlassIcon}
+          inputSize="sm"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+          onClear={() => {
+            setSearch("");
+            setPage(1);
+          }}
+          clearable
+          placeholder="Search by name or ID"
+          aria-label="Search employees by name or ID"
+          className="min-w-[180px] max-w-xs flex-1"
+        />
 
         <select
           value={department}
@@ -228,7 +233,7 @@ const EmployeeTable: React.FC<Props> = ({
             setPage(1);
           }}
           aria-label="Filter by department"
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+          className="rounded-full border border-gray-200 bg-white px-3.5 py-2 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
         >
           <option value="All">All departments</option>
           {departments.map((d) => (
@@ -242,7 +247,7 @@ const EmployeeTable: React.FC<Props> = ({
           value={status}
           onChange={(e) => setStatus(e.target.value)}
           aria-label="Filter by status"
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+          className="rounded-full border border-gray-200 bg-white px-3.5 py-2 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
         >
           <option value="All">All statuses</option>
           <option value="On time">On time</option>
@@ -370,7 +375,7 @@ const EmployeeTable: React.FC<Props> = ({
                         onSelect(row.employee);
                       }}
                       aria-label={`View ${row.employee.name || "employee"}`}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                     >
                       <EyeIcon className="h-4 w-4" />
                     </button>
@@ -396,7 +401,7 @@ const EmployeeTable: React.FC<Props> = ({
               disabled={safePage === 1}
               onClick={() => setPage(safePage - 1)}
               aria-label="Previous page"
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300"
             >
               <ChevronLeftIcon className="h-4 w-4" />
             </button>
@@ -408,7 +413,7 @@ const EmployeeTable: React.FC<Props> = ({
               disabled={safePage === totalPages}
               onClick={() => setPage(safePage + 1)}
               aria-label="Next page"
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300"
             >
               <ChevronRightIcon className="h-4 w-4" />
             </button>

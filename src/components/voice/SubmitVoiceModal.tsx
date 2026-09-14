@@ -15,6 +15,8 @@ import { CATEGORY_LIST, PRIORITY_LIST } from "../../lib/voiceMeta";
 import { showErrorToast, showSuccessToast } from "../../utils/toastHelpers";
 import type { VoiceCategory, VoicePriority } from "../../types/employeeVoice";
 
+import Input from "../ui/Input";
+import Button from "../ui/Button";
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -189,7 +191,7 @@ const SubmitVoiceModal: React.FC<Props> = ({ open, onClose }) => {
                       key={c.key}
                       type="button"
                       onClick={() => setCategory(c.key)}
-                      className={`group flex flex-col items-start gap-2 rounded-xl border p-3 text-left transition-all ${
+                      className={`group flex flex-col items-start gap-2 rounded-2xl border p-3 text-left transition-all ${
                         active
                           ? "border-blue-500 bg-blue-50/60 ring-2 ring-blue-500/15 dark:border-blue-400 dark:bg-blue-500/10"
                           : "border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600"
@@ -220,12 +222,12 @@ const SubmitVoiceModal: React.FC<Props> = ({ open, onClose }) => {
                   {title.length}/140
                 </span>
               </div>
-              <input
+              <Input
                 value={title}
                 maxLength={140}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="A short summary..."
-                className={`${inputClass} mt-2`}
+                className="mt-2"
               />
             </div>
 
@@ -259,7 +261,7 @@ const SubmitVoiceModal: React.FC<Props> = ({ open, onClose }) => {
                         key={p.key}
                         type="button"
                         onClick={() => setPriority(p.key)}
-                        className={`flex items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-xs font-medium transition-all ${
+                        className={`flex items-center justify-center gap-1.5 rounded-full border px-2 py-2 text-xs font-medium transition-all ${
                           active
                             ? "border-blue-500 bg-blue-50/60 text-blue-700 ring-2 ring-blue-500/15 dark:border-blue-400 dark:bg-blue-500/10 dark:text-blue-300"
                             : "border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600"
@@ -274,11 +276,11 @@ const SubmitVoiceModal: React.FC<Props> = ({ open, onClose }) => {
               </div>
               <div>
                 <p className={eyebrow}>Department</p>
-                <input
+                <Input
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
                   placeholder="e.g. Engineering"
-                  className={`${inputClass} mt-2`}
+                  className="mt-2"
                 />
               </div>
             </div>
@@ -357,7 +359,7 @@ const SubmitVoiceModal: React.FC<Props> = ({ open, onClose }) => {
                             e.stopPropagation();
                             removeFile(i);
                           }}
-                          className="flex-shrink-0 rounded-md p-0.5 text-gray-400 hover:bg-gray-200/70 hover:text-red-500 dark:hover:bg-gray-700"
+                          className="flex-shrink-0 rounded-full p-0.5 text-gray-400 hover:bg-gray-200/70 hover:text-red-500 dark:hover:bg-gray-700"
                         >
                           <XMarkIcon className="h-4 w-4" />
                         </button>
@@ -426,20 +428,18 @@ const SubmitVoiceModal: React.FC<Props> = ({ open, onClose }) => {
 
             {/* Actions */}
             <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-4 dark:border-gray-800">
-              <button
+              <Button variant="secondary"
                 type="button"
                 onClick={close}
-                disabled={submit.isPending}
-                className="btn-secondary"
-              >
+                disabled={submit.isPending}>
                 Cancel
-              </button>
+              </Button>
               <motion.button
                 type="button"
                 whileTap={{ scale: 0.97 }}
                 onClick={handleSubmit}
                 disabled={!canSubmit || submit.isPending}
-                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {submit.isPending ? (
                   <>
