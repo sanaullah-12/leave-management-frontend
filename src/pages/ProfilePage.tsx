@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import OrganizationProfile from "../components/profile/OrganizationProfile";
@@ -29,22 +31,21 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-          {header.title}
-        </h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          {header.sub}
-        </p>
-      </div>
+      <SectionHeader
+        variant="profile"
+        eyebrow="Account"
+        title={header.title}
+        description={header.sub}
+        illustration={sectionIllustration("profile")}
+      />
 
       {isAdmin && (
-        <div className="inline-flex gap-1 rounded-xl border border-gray-200/60 dark:border-gray-700/60 bg-gray-100 dark:bg-gray-800/80 p-1">
+        <div className="inline-flex gap-1 rounded-full border border-gray-200/60 dark:border-gray-700/60 bg-gray-100 dark:bg-gray-800/80 p-1">
           {tabs.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`relative rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
+              className={`relative rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                 tab === t.id
                   ? "text-blue-600 dark:text-blue-400"
                   : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"

@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import PasswordInput from "../components/PasswordInput";
+import Input from "../components/ui/Input";
 import BrandedLoader from "../components/BrandedLoader";
 import AuthLayout from "../components/auth/AuthLayout";
 import InlineLoader from "../components/InlineLoader";
@@ -23,9 +24,6 @@ interface RegisterCompanyData {
   password: string;
   phone?: string;
 }
-
-const inputClass =
-  "w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/40 px-4 py-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:ring-4 focus:ring-blue-500/10";
 
 const labelClass =
   "mb-1.5 block text-xs font-semibold text-gray-600 dark:text-gray-300";
@@ -91,7 +89,7 @@ const RegisterPage: React.FC = () => {
             type="button"
             whileTap={{ scale: 0.97 }}
             onClick={() => handleSSO(name)}
-            className="inline-flex items-center justify-center gap-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="inline-flex items-center justify-center gap-2.5 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <Icon className="h-5 w-5" />
             {name}
@@ -122,21 +120,17 @@ const RegisterPage: React.FC = () => {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className={labelClass}>Company name</label>
-            <input
+            <Input
               {...register("companyName", { required: "Company name is required" })}
               type="text"
               placeholder="Acme Inc."
-              className={inputClass}
+              inputSize="lg"
+              error={errors.companyName?.message}
             />
-            {errors.companyName && (
-              <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
-                {errors.companyName.message}
-              </p>
-            )}
           </div>
           <div>
             <label className={labelClass}>Company email</label>
-            <input
+            <Input
               {...register("companyEmail", {
                 required: "Company email is required",
                 pattern: {
@@ -146,34 +140,26 @@ const RegisterPage: React.FC = () => {
               })}
               type="email"
               placeholder="hello@acme.com"
-              className={inputClass}
+              inputSize="lg"
+              error={errors.companyEmail?.message}
             />
-            {errors.companyEmail && (
-              <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
-                {errors.companyEmail.message}
-              </p>
-            )}
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className={labelClass}>Admin name</label>
-            <input
+            <Input
               {...register("adminName", { required: "Admin name is required" })}
               type="text"
               placeholder="Jane Doe"
-              className={inputClass}
+              inputSize="lg"
+              error={errors.adminName?.message}
             />
-            {errors.adminName && (
-              <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
-                {errors.adminName.message}
-              </p>
-            )}
           </div>
           <div>
             <label className={labelClass}>Admin email</label>
-            <input
+            <Input
               {...register("adminEmail", {
                 required: "Admin email is required",
                 pattern: {
@@ -183,33 +169,22 @@ const RegisterPage: React.FC = () => {
               })}
               type="email"
               placeholder="jane@acme.com"
-              className={inputClass}
+              inputSize="lg"
+              error={errors.adminEmail?.message}
             />
-            {errors.adminEmail && (
-              <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
-                {errors.adminEmail.message}
-              </p>
-            )}
           </div>
         </div>
 
         <div>
           <label className={labelClass}>Phone (optional)</label>
-          <input
+          <Input
             {...register("phone", phoneValidationRules)}
             type="tel"
             placeholder={PHONE_PLACEHOLDER}
-            className={inputClass}
+            inputSize="lg"
+            error={errors.phone?.message}
+            hint={PHONE_HINT}
           />
-          {errors.phone ? (
-            <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
-              {errors.phone.message}
-            </p>
-          ) : (
-            <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-              {PHONE_HINT}
-            </p>
-          )}
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -220,8 +195,8 @@ const RegisterPage: React.FC = () => {
             })}
             label="Password"
             placeholder="Create a password"
+            inputSize="lg"
             error={errors.password?.message}
-            className={inputClass}
           />
           <PasswordInput
             {...register("confirmPassword", {
@@ -230,8 +205,8 @@ const RegisterPage: React.FC = () => {
             })}
             label="Confirm password"
             placeholder="Repeat password"
+            inputSize="lg"
             error={errors.confirmPassword?.message}
-            className={inputClass}
           />
         </div>
 
@@ -239,7 +214,7 @@ const RegisterPage: React.FC = () => {
           type="submit"
           disabled={isSubmitting}
           whileTap={{ scale: 0.99 }}
-          className="mt-2 flex w-full items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl disabled:opacity-70"
+          className="mt-2 flex w-full items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl disabled:opacity-70"
         >
           {isSubmitting ? (
             <InlineLoader label="Creating workspace..." />

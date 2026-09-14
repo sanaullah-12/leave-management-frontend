@@ -28,6 +28,7 @@ import {
 } from "../../components/payroll/formatters";
 import type { PayrollSettings } from "../../components/payroll/types";
 
+import Input from "../../components/ui/Input";
 /** Salary can be paid on any day of the month; 31 clamps to the month's end. */
 const DAY_OPTIONS = Array.from({ length: 31 }, (_, i) => ({
   value: String(i + 1),
@@ -106,14 +107,14 @@ const PayrollSettingsPage: React.FC = () => {
           actions={
             <>
               {dirty && (
-                <button onClick={handleReset} className="btn-secondary">
+                <button onClick={handleReset} className="sh-action">
                   Discard
                 </button>
               )}
               <button
                 onClick={handleSave}
                 disabled={!dirty}
-                className="btn-primary inline-flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="sh-action-primary"
               >
                 <CheckIcon className="h-5 w-5" />
                 Save Changes
@@ -138,11 +139,10 @@ const PayrollSettingsPage: React.FC = () => {
               hint="Appears in the payslip header and footer."
               icon={<BuildingOffice2Icon className="h-4 w-4" />}
             >
-              <input
+              <Input
                 value={draft.companyName}
                 onChange={(e) => patch("companyName", e.target.value)}
                 placeholder="Your company"
-                className="input-field"
               />
             </Field>
 
@@ -178,27 +178,23 @@ const PayrollSettingsPage: React.FC = () => {
               hint="Percentage of taxable earnings. Set 0 to disable."
               icon={<ReceiptPercentIcon className="h-4 w-4" />}
             >
-              <div className="relative">
-                <input
-                  inputMode="decimal"
-                  value={
-                    draft.defaultTaxPercent === 0
-                      ? ""
-                      : String(draft.defaultTaxPercent)
-                  }
-                  onChange={(e) =>
-                    patch(
-                      "defaultTaxPercent",
-                      Math.min(100, Math.max(0, Number(e.target.value) || 0))
-                    )
-                  }
-                  placeholder="0"
-                  className="input-field pr-8 text-right tabular-nums"
-                />
-                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
-                  %
-                </span>
-              </div>
+              <Input
+                inputMode="decimal"
+                value={
+                  draft.defaultTaxPercent === 0
+                    ? ""
+                    : String(draft.defaultTaxPercent)
+                }
+                onChange={(e) =>
+                  patch(
+                    "defaultTaxPercent",
+                    Math.min(100, Math.max(0, Number(e.target.value) || 0))
+                  )
+                }
+                placeholder="0"
+                inputClassName="text-right tabular-nums"
+                trailing={<span className="text-sm text-gray-400">%</span>}
+              />
             </Field>
           </PayrollSection>
         </div>

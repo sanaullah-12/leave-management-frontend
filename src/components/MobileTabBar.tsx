@@ -93,7 +93,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({ items, center }) => {
     >
       <nav
         aria-label="Primary"
-        className="pointer-events-auto mx-3 mb-2 flex items-stretch rounded-[26px] border border-black/5 bg-[var(--card-surface)] px-1.5 shadow-[0_8px_28px_rgba(15,20,32,0.16),0_2px_8px_rgba(15,20,32,0.08)] backdrop-blur-xl dark:border-white/10 dark:shadow-[0_8px_28px_rgba(0,0,0,0.55)]"
+        className="glass-panel pointer-events-auto mx-3 mb-2 flex items-stretch rounded-[26px] px-1.5"
       >
         {left.map(renderTab)}
 

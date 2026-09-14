@@ -128,7 +128,7 @@ export const PricingSection: React.FC = () => {
                   <button
                     onClick={() => setContactOpen(true)}
                     className={
-                      "block w-full rounded-xl py-3 text-center text-nav font-semibold transition-shadow " +
+                      "block w-full rounded-full py-3 text-center text-nav font-semibold transition-shadow " +
                       (p.featured
                         ? "bg-gray-900 text-white hover:shadow-lg dark:bg-white dark:text-gray-900"
                         : "border border-gray-200 text-gray-800 hover:border-gray-300 dark:border-white/10 dark:text-white")

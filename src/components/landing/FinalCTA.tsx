@@ -54,7 +54,7 @@ export const FinalCTA: React.FC = () => {
               <Magnetic strength={0.4}>
                 <button
                   onClick={() => setContactOpen(true)}
-                  className="group inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 text-[1rem] font-semibold text-gray-900 shadow-lg transition-shadow hover:shadow-xl"
+                  className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-[1rem] font-semibold text-gray-900 shadow-lg transition-shadow hover:shadow-xl"
                 >
                   Start free
                   <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
@@ -66,7 +66,7 @@ export const FinalCTA: React.FC = () => {
                   and no way to reach an existing account. */}
               <Link
                 to="/login"
-                className="rounded-xl border border-white/20 px-6 py-3.5 text-[1rem] font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 active:scale-[0.98]"
+                className="rounded-full border border-white/20 px-6 py-3.5 text-[1rem] font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 active:scale-[0.98]"
               >
                 Log in
               </Link>

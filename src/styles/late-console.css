@@ -1,0 +1,347 @@
+/* ==========================================================================
+   Attendance console
+   --------------------------------------------------------------------------
+   A dark, self-contained surface for the late-arrivals report. It is the one
+   screen in Nexora that is a monitoring console rather than a form, and the
+   dark ground is what lets the delay pills carry severity at a glance.
+
+   Everything is scoped under `.lateconsole`, and the page background is only
+   overridden while the page is mounted (see LateTimePage), so no other screen
+   is affected.
+   ========================================================================== */
+
+.lateconsole {
+  /* Ground and surfaces.
+
+     These mirror the app's DARK tokens by value rather than referencing
+     --app-bg / --glass-* directly, because the console stays dark in light
+     mode too: it is a monitoring screen, and its near-white text would be
+     unreadable if the ground followed the light theme. Keep them in step with
+     the html.dark block in index.css and the --glass-* block in
+     design-system.css. */
+  --lc-bg: #101219;
+  --lc-card: rgba(255, 255, 255, 0.055);
+  --lc-card-solid: #1b1e27;
+  --lc-line: rgba(255, 255, 255, 0.09);
+  --lc-line-soft: rgba(255, 255, 255, 0.05);
+  --lc-raised: rgba(255, 255, 255, 0.09);
+  --lc-sheen: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --lc-drop:
+    0 2px 4px rgba(0, 0, 0, 0.62),
+    0 10px 24px -2px rgba(0, 0, 0, 0.6),
+    0 34px 64px -10px rgba(0, 0, 0, 0.8);
+
+  /* Text */
+  --lc-text: #e9eef7;
+  --lc-muted: #8e9bb3;
+  --lc-dim: #6b7996;
+
+  /* The console's accent is the app accent, so it repaints with the theme
+     instead of printing a fixed teal on a purple app. The other three are
+     severity, are read as meaning rather than decoration, and so stay put. */
+  --lc-accent: rgb(var(--blue-400));
+  --lc-good: #34d399;
+  --lc-warn: #fbbf24;
+  --lc-bad: #fb7185;
+
+  color: var(--lc-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The console owns the whole viewport ground while it is open. The app paints
+   a theme-tinted gradient on body::before; this replaces it, and the class is
+   removed on unmount so the app's own background returns untouched. */
+html.late-console-page body::before {
+  background-color: #101219 !important;
+  background-image:
+    radial-gradient(48rem 34rem at 88% -6%, rgb(var(--blue-500) / 0.16), transparent 60%),
+    radial-gradient(42rem 32rem at -6% 104%, rgb(var(--blue-600) / 0.14), transparent 62%) !important;
+}
+
+/* --------------------------------------------------------------------------
+   Surfaces
+   -------------------------------------------------------------------------- */
+
+.lc-card {
+  background-color: var(--lc-card);
+  border: 1px solid var(--lc-line);
+  border-radius: 1rem;
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  backdrop-filter: blur(18px) saturate(180%);
+  box-shadow: var(--lc-sheen), var(--lc-drop);
+}
+
+.lc-pad { padding: 1.25rem; }
+
+/* --------------------------------------------------------------------------
+   Type
+   --------------------------------------------------------------------------
+   Sizes, weights and tracking are the app's own roles from index.css - this
+   screen only changes the colours, never the typography. Values are repeated
+   rather than @applied so the console stays a plain stylesheet, and each one
+   names the role it mirrors.
+   -------------------------------------------------------------------------- */
+
+/* .text-overline */
+.lc-overline {
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--lc-dim);
+}
+.lc-overline-accent { color: var(--lc-accent); }
+
+/* .text-section-heading */
+.lc-title {
+  font-size: 1.375rem;
+  line-height: 1.75rem;
+  letter-spacing: -0.017em;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* .text-card-title */
+.lc-card-title {
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  letter-spacing: -0.011em;
+  font-weight: 600;
+  color: #fff;
+}
+
+.lc-muted { color: var(--lc-muted); }
+.lc-dim { color: var(--lc-dim); }
+
+/* A figure is a number, so it takes the card-title weight one step up in
+   size - not the display weight, which reads as shouting on a dense screen. */
+.lc-figure {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  letter-spacing: -0.017em;
+  font-weight: 600;
+  color: #fff;
+}
+.lc-unit {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--lc-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Brand mark and chips
+   -------------------------------------------------------------------------- */
+
+.lc-mark {
+  display: grid;
+  place-items: center;
+  height: 2.75rem;
+  width: 2.75rem;
+  flex: none;
+  border-radius: 0.85rem;
+  background: rgba(45, 212, 191, 0.14);
+  color: var(--lc-accent);
+}
+
+.lc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--lc-line);
+  background: var(--lc-card);
+  font-size: 0.8125rem;
+  color: var(--lc-muted);
+}
+
+.lc-dot {
+  height: 0.5rem;
+  width: 0.5rem;
+  flex: none;
+  border-radius: 50%;
+  background: var(--lc-good);
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.16);
+}
+
+/* --------------------------------------------------------------------------
+   Segmented range control
+   -------------------------------------------------------------------------- */
+
+.lc-segment {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--lc-line);
+  background: var(--lc-card);
+}
+.lc-segment button {
+  padding: 0.45rem 1rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--lc-muted);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+.lc-segment button:hover { color: var(--lc-text); }
+.lc-segment button[aria-pressed="true"] {
+  background: var(--lc-raised);
+  color: #fff;
+}
+
+/* The shared DatePicker (components/ui/DatePicker) is used here as it is
+   everywhere else. Its trigger is painted for the app's light surfaces, so
+   only the trigger's colours are re-tinted for the dark ground - its layout,
+   calendar and behaviour are untouched. */
+.lateconsole .lc-datefield > button {
+  background: var(--lc-card) !important;
+  color: var(--lc-text) !important;
+  --tw-ring-color: var(--lc-line) !important;
+  border-radius: 0.7rem !important;
+}
+.lateconsole .lc-datefield > button:hover { background: var(--lc-raised) !important; }
+.lateconsole .lc-datefield > button svg { color: var(--lc-dim) !important; }
+
+/* The shared StatCard (components/ui/StatCard) is used here as it is on every
+   other screen. It is painted for the app's light and dark themes; the console
+   is dark whatever the app theme is, so only its colours are re-tinted. Size,
+   ring and layout are untouched, so a KPI tile is the same tile everywhere. */
+.lateconsole .statcard {
+  background: var(--lc-card) !important;
+  box-shadow: none !important;
+}
+.lateconsole .statcard > span > span:first-child { color: var(--lc-muted) !important; }
+.lateconsole .statcard > span > span:nth-child(2) { color: #fff !important; }
+
+/* --------------------------------------------------------------------------
+   Severity pills - the delay column and the repeat counts
+   -------------------------------------------------------------------------- */
+
+.lc-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.lc-pill-good { background: rgba(52, 211, 153, 0.14); color: var(--lc-good); }
+.lc-pill-warn { background: rgba(251, 191, 36, 0.14); color: var(--lc-warn); }
+.lc-pill-bad  { background: rgba(251, 113, 133, 0.14); color: var(--lc-bad); }
+
+/* --------------------------------------------------------------------------
+   Table
+   -------------------------------------------------------------------------- */
+
+.lc-table-wrap {
+  border: 1px solid var(--lc-line-soft);
+  border-radius: 0.85rem;
+  overflow: hidden;
+}
+.lc-scroll { width: 100%; overflow-x: auto; }
+
+.lc-table {
+  width: 100%;
+  border-collapse: collapse;
+  /* .text-secondary */
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+  letter-spacing: -0.003em;
+}
+.lc-table thead th {
+  padding: 0.7rem 1rem;
+  text-align: left;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.03);
+  /* .text-overline */
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lc-dim);
+}
+.lc-table tbody td {
+  padding: 0.8rem 1rem;
+  vertical-align: middle;
+  border-top: 1px solid var(--lc-line-soft);
+  color: var(--lc-muted);
+  white-space: nowrap;
+}
+.lc-table tbody tr { transition: background-color 0.15s ease; }
+.lc-table tbody tr:hover { background: rgba(255, 255, 255, 0.025); }
+.lc-name { color: #fff; font-weight: 500; }
+
+/* --------------------------------------------------------------------------
+   Weekly trend - one column per weekday, height is that day's share
+   -------------------------------------------------------------------------- */
+
+.lc-trend {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  align-items: end;
+  gap: 0.5rem;
+  height: 8rem;
+}
+.lc-trend-bar {
+  border-radius: 0.4rem 0.4rem 0.2rem 0.2rem;
+  background: linear-gradient(180deg, var(--lc-accent), rgb(var(--blue-500) / 0.25));
+  min-height: 0.25rem;
+  transition: height 0.5s ease;
+}
+.lc-trend-bar-empty { background: rgba(255, 255, 255, 0.06); }
+.lc-trend-labels {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--lc-dim);
+}
+
+/* --------------------------------------------------------------------------
+   Rows in the offenders list
+   -------------------------------------------------------------------------- */
+
+.lc-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.6rem;
+  border: 0;
+  border-radius: 0.7rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.lc-row:hover { background: rgba(255, 255, 255, 0.04); }
+
+.lc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 0.7rem;
+  border: 1px solid var(--lc-line);
+  background: var(--lc-card);
+  color: var(--lc-muted);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.lc-btn:hover { background: var(--lc-raised); color: var(--lc-text); }

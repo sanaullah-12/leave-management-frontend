@@ -17,16 +17,16 @@ import AnimatedNumber from "../AnimatedNumber";
 import SubmitVoiceModal from "./SubmitVoiceModal";
 import { STATUS_META } from "../../lib/voiceMeta";
 
-// Neumorphic (soft-UI) card surface - matches the dashboard cards. Dual
-// shadows extrude the card from the page; hover deepens them (the lift itself
-// is driven by framer-motion's whileHover below).
+// The shared glass card surface. Same tokens as CARD/CARD_HOVER in
+// lib/surfaces, so this widget tracks the dashboard cards beside it rather
+// than carrying its own copy of the material.
 const cardShell =
-  "group rounded-2xl bg-[var(--card-surface)] " +
-  "shadow-[7px_7px_16px_rgba(174,186,204,0.5),-7px_-7px_16px_rgba(255,255,255,0.95)] " +
-  "dark:shadow-[7px_7px_18px_rgba(0,0,0,0.55),-6px_-6px_16px_rgba(255,255,255,0.045)] " +
-  "transition-shadow duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] " +
-  "hover:shadow-[12px_12px_24px_rgba(174,186,204,0.6),-12px_-12px_24px_rgba(255,255,255,1)] " +
-  "dark:hover:shadow-[12px_12px_28px_rgba(0,0,0,0.7),-10px_-10px_24px_rgba(255,255,255,0.06)]";
+  "group rounded-2xl bg-[var(--glass-fill)] backdrop-blur-[18px] backdrop-saturate-[1.8] " +
+  "border border-[var(--glass-edge)] " +
+  "shadow-[shadow:var(--glass-sheen),var(--glass-drop)] " +
+  "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] " +
+  "hover:bg-[var(--glass-fill-strong)] " +
+  "hover:shadow-[shadow:var(--glass-sheen),var(--glass-drop-lifted)]";
 
 const MiniStat: React.FC<{
   label: string;
@@ -34,7 +34,7 @@ const MiniStat: React.FC<{
   icon: React.ReactNode;
   tile: string;
 }> = ({ label, value, icon, tile }) => (
-  <div className="flex items-center gap-2.5 rounded-xl bg-[var(--card-surface)] p-3 shadow-[inset_2px_2px_5px_rgba(174,186,204,0.55),inset_-2px_-2px_5px_rgba(255,255,255,0.9)] dark:shadow-[inset_2px_2px_5px_rgba(0,0,0,0.55),inset_-2px_-2px_5px_rgba(255,255,255,0.05)]">
+  <div className="flex items-center gap-2.5 rounded-xl border border-black/[0.04] bg-black/[0.03] p-3 dark:border-white/[0.06] dark:bg-white/[0.04]">
     <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${tile}`}>
       {icon}
     </span>
@@ -154,7 +154,7 @@ const EmployeeVoiceWidget: React.FC = () => {
           <motion.button
             whileTap={{ scale: 0.96 }}
             onClick={() => setSubmitOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-colors hover:bg-blue-700"
+            className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-colors hover:bg-blue-700"
           >
             <PlusIcon className="h-4 w-4" />
             {t("widget.share")}

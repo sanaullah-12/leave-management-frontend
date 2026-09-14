@@ -73,7 +73,7 @@ export const MobileRow: React.FC<MobileRowProps> = ({
   <button
     type="button"
     onClick={onClick}
-    className="relative w-full overflow-hidden rounded-[18px] border border-gray-200 bg-[var(--card-surface)] px-4 pb-3.5 pt-4 text-left transition-colors active:bg-black/[0.02] dark:border-white/10 dark:active:bg-white/[0.03]"
+    className="glass-card relative w-full overflow-hidden rounded-[18px] px-4 pb-3.5 pt-4 text-left transition-colors active:bg-black/[0.02] dark:active:bg-white/[0.03]"
   >
     {flagged && (
       <span className={`absolute inset-y-0 left-0 w-[3px] ${flagClassName}`} />
@@ -159,7 +159,7 @@ export const MobileList: React.FC<MobileListProps> = ({
           onClick={action.onClick}
           disabled={action.busy}
           aria-label={action.label}
-          className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-xl border border-gray-200 bg-[var(--card-surface)] text-gray-500 transition-colors active:bg-black/5 disabled:opacity-60 dark:border-white/10 dark:text-gray-400 dark:active:bg-white/10"
+          className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-full border border-gray-200 bg-[var(--card-surface)] text-gray-500 transition-colors active:bg-black/5 disabled:opacity-60 dark:border-white/10 dark:text-gray-400 dark:active:bg-white/10"
         >
           <action.icon className={`h-[17px] w-[17px] ${action.busy ? "animate-spin" : ""}`} />
         </button>

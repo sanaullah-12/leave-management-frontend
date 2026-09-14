@@ -111,12 +111,17 @@ const GetAppButton: React.FC<{ className?: string; compact?: boolean }> = ({
         disabled={installing}
         aria-label="Get the Nexora app"
         title="Install Nexora on this device"
+        // A utility, not a call to action. It used to be a filled blue pill,
+        // which read as the most important control in the header while being
+        // the least: most people install once or never. Neutral chrome with an
+        // accent icon keeps it findable without it shouting over the actions
+        // that are used every day.
         className={
-          "inline-flex items-center gap-2 rounded-xl border border-blue-300 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 disabled:opacity-50 dark:border-blue-500/40 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20 " +
+          "inline-flex h-9 items-center gap-1.5 rounded-full border border-gray-200/80 bg-white/60 px-2.5 text-[13px] font-medium text-gray-600 transition-colors hover:border-gray-300 hover:bg-white hover:text-gray-900 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white " +
           className
         }
       >
-        <ArrowDownTrayIcon className="h-4 w-4 shrink-0" />
+        <ArrowDownTrayIcon className="h-4 w-4 shrink-0 text-[rgb(var(--blue-600))]" />
         {!compact && (
           <span className="whitespace-nowrap">
             {installing ? "Installing..." : "Get app"}
@@ -135,7 +140,7 @@ const GetAppButton: React.FC<{ className?: string; compact?: boolean }> = ({
             <button
               type="button"
               onClick={() => setShowSteps(false)}
-              className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+              className="rounded-full border border-gray-200 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
             >
               Close
             </button>
@@ -150,7 +155,7 @@ const GetAppButton: React.FC<{ className?: string; compact?: boolean }> = ({
               type="button"
               disabled={installing}
               onClick={install}
-              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-colors hover:bg-blue-700 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-colors hover:bg-blue-700 disabled:opacity-50"
             >
               <ArrowDownTrayIcon className="h-4 w-4" />
               {installing ? "Installing..." : "Install now"}
@@ -247,7 +252,7 @@ const GetAppButton: React.FC<{ className?: string; compact?: boolean }> = ({
             <button
               type="button"
               onClick={() => window.location.reload()}
-              className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-white/70 px-3 py-1.5 text-xs font-semibold text-amber-800 transition-colors hover:bg-white dark:border-amber-500/40 dark:bg-transparent dark:text-amber-300 dark:hover:bg-amber-500/10"
+              className="mt-2.5 inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-white/70 px-3 py-1.5 text-xs font-semibold text-amber-800 transition-colors hover:bg-white dark:border-amber-500/40 dark:bg-transparent dark:text-amber-300 dark:hover:bg-amber-500/10"
             >
               <ArrowPathIcon className="h-3.5 w-3.5" />
               Reload and try again

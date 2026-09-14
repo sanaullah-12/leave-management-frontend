@@ -19,6 +19,8 @@ import {
 } from "./studioService";
 import { exportPdf, exportDocx, printDocument } from "./exporters";
 import DocumentPreview from "./DocumentPreview";
+import Input from "../ui/Input";
+import Button from "../ui/Button";
 import type {
   BrandSettings,
   BrandingAsset,
@@ -300,19 +302,19 @@ const GenerateDocumentModal: React.FC<Props> = ({
             )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <button onClick={handlePrint} className="btn-secondary inline-flex items-center gap-1.5 text-sm">
+            <Button variant="secondary" className="gap-1.5 text-sm" onClick={handlePrint}>
               <PrinterIcon className="h-4 w-4" /> Print
-            </button>
-            <button onClick={handleDocx} className="btn-secondary inline-flex items-center gap-1.5 text-sm">
+            </Button>
+            <Button variant="secondary" className="gap-1.5 text-sm" onClick={handleDocx}>
               <DocumentArrowDownIcon className="h-4 w-4" /> DOCX
-            </button>
-            <button onClick={handlePdf} className="btn-secondary inline-flex items-center gap-1.5 text-sm">
+            </Button>
+            <Button variant="secondary" className="gap-1.5 text-sm" onClick={handlePdf}>
               <DocumentArrowDownIcon className="h-4 w-4" /> PDF
-            </button>
-            <button onClick={handleGenerate} className="btn-primary inline-flex items-center gap-1.5 text-sm">
+            </Button>
+            <Button variant="primary" className="gap-1.5 text-sm" onClick={handleGenerate}>
               <CheckCircleIcon className="h-4 w-4" />
               {generatedDoc ? "Saved" : "Generate & Save"}
-            </button>
+            </Button>
           </div>
         </div>
       }
@@ -324,15 +326,15 @@ const GenerateDocumentModal: React.FC<Props> = ({
             <label className="mb-1.5 block text-xs font-semibold text-gray-500 dark:text-gray-400">
               Select employee
             </label>
-            <div className="relative">
-              <MagnifyingGlassIcon className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search by name, ID, department"
-                className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-8 pr-3 text-sm outline-none focus:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-              />
-            </div>
+            <Input
+              icon={MagnifyingGlassIcon}
+              inputSize="sm"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onClear={() => setQuery("")}
+              clearable
+              placeholder="Search by name, ID, department"
+            />
 
             <div className="mt-2 max-h-44 space-y-1 overflow-y-auto rounded-lg border border-gray-100 p-1 dark:border-gray-700/50">
               {employeesLoading ? (
@@ -352,7 +354,7 @@ const GenerateDocumentModal: React.FC<Props> = ({
                     <button
                       key={e._id}
                       onClick={() => setSelected(e)}
-                      className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors ${
+                      className={`flex w-full items-center gap-2.5 rounded-full px-2 py-1.5 text-left transition-colors ${
                         active
                           ? "text-white"
                           : "hover:bg-black/5 dark:hover:bg-white/5"
@@ -406,14 +408,14 @@ const GenerateDocumentModal: React.FC<Props> = ({
                       className="w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
                     />
                   ) : (
-                    <input
+                    <Input
                       type={f.type === "number" ? "number" : f.type === "date" ? "date" : "text"}
+                      inputSize="sm"
                       value={values[f.key] ?? ""}
                       onChange={(e) =>
                         setValues((v) => ({ ...v, [f.key]: e.target.value }))
                       }
                       placeholder={f.placeholder}
-                      className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
                     />
                   )}
                 </div>

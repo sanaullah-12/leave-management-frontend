@@ -6,6 +6,7 @@ import { AccentEdge } from "../ui/CardAccents";
 import { useThemeAccent } from "../../hooks/useThemeAccent";
 import type { WfhPolicy } from "../../hooks/useWorkFromHome";
 
+import Input from "../ui/Input";
 /**
  * The request form: a date or date range, a reason, and an optional note.
  *
@@ -186,13 +187,12 @@ const WfhRequestForm: React.FC<Props> = ({
           >
             Reason
           </label>
-          <input
+          <Input
             id="wfh-reason"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             maxLength={500}
             placeholder="Why do you need to work from home?"
-            className={field}
           />
         </div>
 
@@ -223,7 +223,7 @@ const WfhRequestForm: React.FC<Props> = ({
         <button
           type="submit"
           disabled={submitting}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting && <ArrowPathIcon className="h-4 w-4 animate-spin" />}
           {submitting ? "Submitting..." : "Submit request"}

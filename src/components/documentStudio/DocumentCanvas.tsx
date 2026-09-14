@@ -22,6 +22,8 @@ import {
 } from "@heroicons/react/24/outline";
 import RichTextToolbar, { type EditorCommands } from "./RichTextToolbar";
 import { documentCss } from "./documentStyles";
+import Input from "../ui/Input";
+import Button from "../ui/Button";
 import {
   assetFor,
   renderFooter,
@@ -356,7 +358,7 @@ ${signaturePreviewCss(
           <motion.div
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-3 flex flex-wrap items-center gap-1 rounded-xl border border-gray-200/70 bg-white/80 p-1.5 backdrop-blur-sm dark:border-gray-700/50 dark:bg-gray-800/70"
+            className="glass-card mb-3 flex flex-wrap items-center gap-1 rounded-xl p-1.5"
           >
             <span className="px-2 text-xs font-semibold text-gray-500 dark:text-gray-400">
               Picture
@@ -366,7 +368,7 @@ ${signaturePreviewCss(
               <button
                 key={p}
                 onClick={() => setImgWidthPct(p)}
-                className="rounded-lg px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
+                className="rounded-full px-2 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
                 title={`Set width to ${p}%`}
               >
                 {p}%
@@ -376,21 +378,21 @@ ${signaturePreviewCss(
             <button
               onClick={() => setImgAlign("left")}
               title="Align left"
-              className="grid h-8 w-8 place-items-center rounded-lg text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
+              className="grid h-8 w-8 place-items-center rounded-full text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
             >
               <Bars3BottomLeftIcon className="h-4 w-4" />
             </button>
             <button
               onClick={() => setImgAlign("center")}
               title="Align center"
-              className="grid h-8 w-8 place-items-center rounded-lg text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
+              className="grid h-8 w-8 place-items-center rounded-full text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
             >
               <Bars3Icon className="h-4 w-4" />
             </button>
             <button
               onClick={() => setImgAlign("right")}
               title="Align right"
-              className="grid h-8 w-8 place-items-center rounded-lg text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
+              className="grid h-8 w-8 place-items-center rounded-full text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
             >
               <Bars3BottomRightIcon className="h-4 w-4" />
             </button>
@@ -398,7 +400,7 @@ ${signaturePreviewCss(
             <button
               onClick={deleteImg}
               title="Delete image"
-              className="grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+              className="grid h-8 w-8 place-items-center rounded-full text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
             >
               <TrashIcon className="h-4 w-4" />
             </button>
@@ -413,24 +415,26 @@ ${signaturePreviewCss(
           <motion.div
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-gray-200/70 bg-white/80 p-2 dark:border-gray-700/50 dark:bg-gray-800/70"
+            className="glass-card mb-3 flex flex-wrap items-center gap-2 rounded-xl p-2"
           >
-            <input
+            <Input
+              inputSize="sm"
               value={find}
               onChange={(e) => setFind(e.target.value)}
               onKeyUp={countMatches}
               placeholder="Find"
-              className="h-8 w-32 rounded-lg border border-gray-200 bg-white px-2 text-sm outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+              className="h-8 w-32"
             />
-            <input
+            <Input
+              inputSize="sm"
               value={replace}
               onChange={(e) => setReplace(e.target.value)}
               placeholder="Replace with"
-              className="h-8 w-32 rounded-lg border border-gray-200 bg-white px-2 text-sm outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+              className="h-8 w-32"
             />
-            <button onClick={doReplaceAll} className="btn-secondary h-8 px-3 text-xs">
+            <Button variant="secondary" className="h-8 px-3 text-xs" onClick={doReplaceAll}>
               Replace all
-            </button>
+            </Button>
             {matchInfo && (
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 {matchInfo}
@@ -438,7 +442,7 @@ ${signaturePreviewCss(
             )}
             <button
               onClick={() => setFindOpen(false)}
-              className="ml-auto grid h-8 w-8 place-items-center rounded-lg text-gray-400 hover:bg-black/5 dark:hover:bg-white/10"
+              className="ml-auto grid h-8 w-8 place-items-center rounded-full text-gray-400 hover:bg-black/5 dark:hover:bg-white/10"
             >
               <XMarkIcon className="h-4 w-4" />
             </button>
@@ -563,11 +567,11 @@ ${signaturePreviewCss(
         </div>
 
         {/* Bottom bar: zoom + preview */}
-        <div className="mt-3 flex items-center justify-between rounded-xl border border-gray-200/70 bg-white/80 px-3 py-2 dark:border-gray-700/50 dark:bg-gray-800/70">
+        <div className="glass-card mt-3 flex items-center justify-between rounded-xl px-3 py-2">
           <div className="flex items-center gap-1">
             <button
               onClick={() => setZoom((z) => Math.max(0.5, +(z - 0.1).toFixed(2)))}
-              className="grid h-8 w-8 place-items-center rounded-lg text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
+              className="grid h-8 w-8 place-items-center rounded-full text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
               title="Zoom out"
             >
               <MinusIcon className="h-4 w-4" />
@@ -577,14 +581,14 @@ ${signaturePreviewCss(
             </span>
             <button
               onClick={() => setZoom((z) => Math.min(1.5, +(z + 0.1).toFixed(2)))}
-              className="grid h-8 w-8 place-items-center rounded-lg text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
+              className="grid h-8 w-8 place-items-center rounded-full text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
               title="Zoom in"
             >
               <PlusIcon className="h-4 w-4" />
             </button>
             <button
               onClick={() => setZoom(1)}
-              className="ml-1 grid h-8 w-8 place-items-center rounded-lg text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
+              className="ml-1 grid h-8 w-8 place-items-center rounded-full text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
               title="Reset zoom"
             >
               <ArrowsPointingOutIcon className="h-4 w-4" />
@@ -598,7 +602,7 @@ ${signaturePreviewCss(
           {editable && (
             <button
               onClick={() => setPreview((v) => !v)}
-              className="inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium text-gray-600 transition-colors hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
+              className="inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-gray-600 transition-colors hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
             >
               {preview ? (
                 <>

@@ -32,25 +32,50 @@ const LanguageSwitcher: React.FC<Props> = ({ variant = "menu", className = "" })
     return (
       <Dropdown
         align="right"
-        widthClass="w-56"
-        buttonClassName="inline-flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
+        widthClass="w-60"
+        buttonClassName={`inline-flex h-9 items-center gap-1.5 rounded-xl border border-transparent px-2 text-sm font-medium text-gray-600 transition-colors hover:border-gray-200/80 hover:bg-white/60 hover:text-gray-900 dark:text-gray-300 dark:hover:border-white/10 dark:hover:bg-white/10 dark:hover:text-white ${
+          isChanging ? "opacity-60" : ""
+        } ${className}`}
         bareButton
+        header={
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-400">
+            Language
+          </p>
+        }
         sections={[
           {
             items: languages.map((l) => ({
-              label: `${l.flag}  ${l.nativeName}`,
+              label: l.nativeName,
+              // The English name is the disambiguator for anyone who does not
+              // read the script - "Deutsch" alone is no help to them.
+              description: l.name === l.nativeName ? undefined : l.name,
               onClick: () => setLanguage(l.code),
-              // A tick on the active language; the registry drives the rest.
-              icon:
-                l.code === language
-                  ? (p: { className?: string }) => <CheckIcon {...p} />
-                  : undefined,
+              selected: l.code === language,
+              // The BCP-47 code is the row glyph rather than `l.flag`.
+              // Regional-indicator flag emoji have no glyph in any font that
+              // ships with Windows, so a flag renders there as the two bare
+              // letters it is built from ("GB") - which next to the code would
+              // read as the same thing printed twice.
+              icon: (p: { className?: string }) => (
+                <span
+                  {...p}
+                  aria-hidden="true"
+                  className="text-[10px] font-bold uppercase tracking-wide text-gray-400"
+                >
+                  {l.code}
+                </span>
+              ),
             })),
           },
         ]}
       >
-        <LanguageIcon className="h-5 w-5" />
-        <span className="hidden sm:inline">{meta.nativeName}</span>
+        {/* An icon plus the code, not the flag: see the note on the row
+            glyph above. It also avoids equating a language with a country,
+            which a flag does and which is wrong for most of them. */}
+        <LanguageIcon className="h-[18px] w-[18px]" />
+        <span className="hidden text-xs font-semibold uppercase tracking-wide sm:inline">
+          {meta.code}
+        </span>
       </Dropdown>
     );
   }

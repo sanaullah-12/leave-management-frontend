@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import PasswordInput from "../components/PasswordInput";
+import Input from "../components/ui/Input";
 import BrandedLoader from "../components/BrandedLoader";
 import AuthLayout from "../components/auth/AuthLayout";
 import InlineLoader from "../components/InlineLoader";
@@ -14,9 +15,6 @@ interface LoginCredentials {
   email: string;
   password: string;
 }
-
-const inputClass =
-  "w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-900/40 px-4 py-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 focus:ring-4 focus:ring-blue-500/10";
 
 const LoginPage: React.FC = () => {
   const { login, isAuthenticated, isLoading } = useAuth();
@@ -74,7 +72,7 @@ const LoginPage: React.FC = () => {
             type="button"
             whileTap={{ scale: 0.97 }}
             onClick={() => handleSSO(name)}
-            className="inline-flex items-center justify-center gap-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="inline-flex items-center justify-center gap-2.5 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <Icon className="h-5 w-5" />
             {name}
@@ -102,26 +100,20 @@ const LoginPage: React.FC = () => {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <input
-            {...register("email", {
-              required: "Email is required",
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: "Invalid email address",
-              },
-            })}
-            type="email"
-            autoComplete="email"
-            placeholder="Work email"
-            className={inputClass}
-          />
-          {errors.email && (
-            <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
-              {errors.email.message}
-            </p>
-          )}
-        </div>
+        <Input
+          {...register("email", {
+            required: "Email is required",
+            pattern: {
+              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              message: "Invalid email address",
+            },
+          })}
+          type="email"
+          autoComplete="email"
+          placeholder="Work email"
+          inputSize="lg"
+          error={errors.email?.message}
+        />
 
         <PasswordInput
           {...register("password", {
@@ -130,8 +122,8 @@ const LoginPage: React.FC = () => {
           })}
           autoComplete="current-password"
           placeholder="Password"
+          inputSize="lg"
           error={errors.password?.message}
-          className={inputClass}
         />
 
         <div className="flex items-center justify-between pt-1">
@@ -156,7 +148,7 @@ const LoginPage: React.FC = () => {
           type="submit"
           disabled={isSubmitting}
           whileTap={{ scale: 0.99 }}
-          className="mt-2 flex w-full items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl disabled:opacity-70"
+          className="mt-2 flex w-full items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl disabled:opacity-70"
         >
           {isSubmitting ? <InlineLoader label="Signing in..." /> : "Sign in"}
         </motion.button>

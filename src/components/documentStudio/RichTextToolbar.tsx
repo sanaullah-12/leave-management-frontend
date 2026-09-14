@@ -57,7 +57,7 @@ const ToolBtn: React.FC<{
     title={title}
     onMouseDown={(e) => e.preventDefault()}
     onClick={onClick}
-    className={`grid h-8 w-8 flex-shrink-0 place-items-center rounded-lg transition-colors ${
+    className={`grid h-8 w-8 flex-shrink-0 place-items-center rounded-full transition-colors ${
       active
         ? "text-white"
         : "text-gray-600 hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
@@ -91,7 +91,7 @@ const ColorPopover: React.FC<{
         title={label}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-8 items-center gap-0.5 rounded-lg px-1.5 text-gray-600 transition-colors hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
+        className="flex h-8 items-center gap-0.5 rounded-full px-1.5 text-gray-600 transition-colors hover:bg-black/5 dark:text-gray-300 dark:hover:bg-white/10"
       >
         <span className="grid place-items-center">{glyph}</span>
         <span
@@ -100,7 +100,7 @@ const ColorPopover: React.FC<{
         />
       </button>
       {open && (
-        <div className="absolute left-0 top-9 z-30 grid grid-cols-5 gap-1.5 rounded-xl border border-gray-200 bg-white p-2 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+        <div className="glass-panel absolute left-0 top-9 z-30 grid grid-cols-5 gap-1.5 rounded-xl p-2">
           {colors.map((c) => (
             <button
               key={c}
@@ -110,7 +110,7 @@ const ColorPopover: React.FC<{
                 onPick(c);
                 setOpen(false);
               }}
-              className="h-6 w-6 rounded-md border border-black/10 dark:border-white/10"
+              className="h-6 w-6 rounded-full border border-black/10 dark:border-white/10"
               style={{
                 background:
                   c === "transparent"
@@ -131,7 +131,7 @@ const RichTextToolbar: React.FC<Props> = ({ cmd }) => {
   const [block, setBlockState] = React.useState("p");
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5 rounded-xl border border-gray-200/70 bg-white/80 p-1.5 backdrop-blur-sm dark:border-gray-700/50 dark:bg-gray-800/70">
+    <div className="glass-card flex flex-wrap items-center gap-0.5 rounded-xl p-1.5">
       {/* Block style */}
       <select
         value={block}
@@ -140,7 +140,7 @@ const RichTextToolbar: React.FC<Props> = ({ cmd }) => {
           setBlockState(e.target.value);
           cmd.setBlock(e.target.value);
         }}
-        className="h-8 flex-shrink-0 rounded-lg border border-gray-200 bg-white px-2 text-xs font-medium text-gray-700 outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+        className="h-8 flex-shrink-0 rounded-full border border-gray-200 bg-white px-2 text-xs font-medium text-gray-700 outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
         title="Text style"
       >
         <option value="p">Paragraph</option>

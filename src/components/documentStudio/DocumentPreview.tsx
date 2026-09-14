@@ -89,7 +89,7 @@ const DocumentPreview: React.FC<Props> = ({
   }, []);
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+    <div className="glass-card flex h-full flex-col rounded-2xl">
       <div className="flex items-center justify-between gap-2 border-b border-gray-200/70 px-4 py-2.5 dark:border-gray-700/50">
         <div className="min-w-0">
           <h3 className="flex items-center gap-1.5 text-sm font-bold text-gray-900 dark:text-white">
@@ -116,7 +116,7 @@ const DocumentPreview: React.FC<Props> = ({
             <button
               onClick={onExpand}
               title="Open full-size preview"
-              className="grid h-7 w-7 place-items-center rounded-lg text-gray-400 hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
+              className="grid h-7 w-7 place-items-center rounded-full text-gray-400 hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
             >
               <ArrowsPointingOutIcon className="h-4 w-4" />
             </button>
@@ -125,7 +125,7 @@ const DocumentPreview: React.FC<Props> = ({
             <button
               onClick={onHide}
               title="Hide preview"
-              className="grid h-7 w-7 place-items-center rounded-lg text-gray-400 hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
+              className="grid h-7 w-7 place-items-center rounded-full text-gray-400 hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10 dark:hover:text-gray-200"
             >
               <XMarkIcon className="h-4 w-4" />
             </button>

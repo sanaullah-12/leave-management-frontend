@@ -454,7 +454,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setSelectedStatus('')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
               selectedStatus === '' ? 'btn-primary' : 'btn-secondary'
             }`}
           >
@@ -462,7 +462,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
           </button>
           <button
             onClick={() => setSelectedStatus('pending')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
               selectedStatus === 'pending' ? 'badge-warning' : 'btn-secondary'
             }`}
           >
@@ -470,7 +470,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
           </button>
           <button
             onClick={() => setSelectedStatus('approved')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
               selectedStatus === 'approved' ? 'badge-success' : 'btn-secondary'
             }`}
           >
@@ -478,7 +478,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
           </button>
           <button
             onClick={() => setSelectedStatus('rejected')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
               selectedStatus === 'rejected' ? 'badge-error' : 'btn-secondary'
             }`}
           >
@@ -602,7 +602,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
 
                   {/* Action */}
                   <div className="flex-shrink-0">
-                    <button className="p-2 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-all">
+                    <button className="p-2 rounded-full hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-all">
                       <EyeIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                     </button>
                   </div>

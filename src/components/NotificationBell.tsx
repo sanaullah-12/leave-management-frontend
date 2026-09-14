@@ -27,7 +27,14 @@ export const notificationTarget = (n: AppNotification): string => {
   return "/leaves";
 };
 
-const NotificationBell: React.FC = () => {
+/**
+ * `compact` is for the desktop bar, where every control is a 36px chrome
+ * button and a 44px one reads as oversized. The mobile header keeps the
+ * default: 44px is the touch target, not a style choice.
+ */
+const NotificationBell: React.FC<{ compact?: boolean }> = ({
+  compact = false,
+}) => {
   const navigate = useNavigate();
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications({
     limit: 12,
@@ -54,14 +61,24 @@ const NotificationBell: React.FC = () => {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="relative flex h-11 w-11 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700/60 dark:hover:text-white"
-        aria-label="Notifications"
+        aria-label={
+          unreadCount > 0
+            ? `Notifications, ${unreadCount} unread`
+            : "Notifications"
+        }
+        className={`relative flex items-center justify-center rounded-full border border-transparent text-gray-600 transition-colors hover:border-gray-200/80 hover:bg-white/60 hover:text-gray-900 dark:text-gray-300 dark:hover:border-white/10 dark:hover:bg-white/10 dark:hover:text-white ${
+          compact ? "h-9 w-9" : "h-11 w-11"
+        } ${open ? "border-gray-200/80 bg-white/60 text-gray-900 dark:border-white/10 dark:bg-white/10 dark:text-white" : ""}`}
       >
-        <BellIcon className="h-6 w-6" />
+        <BellIcon className={compact ? "h-[18px] w-[18px]" : "h-6 w-6"} />
         {unreadCount > 0 && (
-          <span className="absolute right-1 top-1 flex h-4 min-w-[16px] items-center justify-center">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-60" />
-            <span className="relative inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+          // The count is ringed in the bar's own colour so it stays legible
+          // where it overlaps the bell, and the ping is dropped under reduced
+          // motion - an indefinite pulse in the chrome is exactly the kind of
+          // thing that preference is for.
+          <span className="absolute -right-0.5 -top-0.5 flex h-[17px] min-w-[17px] items-center justify-center">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-60 motion-reduce:hidden" />
+            <span className="relative inline-flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white dark:ring-gray-900">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           </span>
@@ -75,7 +92,7 @@ const NotificationBell: React.FC = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.97 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="absolute right-0 z-50 mt-2 w-[22rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-2xl shadow-gray-900/20 dark:border-gray-700/60 dark:bg-gray-900"
+            className="glass-panel absolute right-0 z-50 mt-2 w-[22rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl"
           >
             <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-800">
               <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">

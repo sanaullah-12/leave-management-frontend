@@ -18,6 +18,7 @@ import { buildPayslipHtml } from "./exporters";
 import { formatPeriod } from "./formatters";
 import type { PayrollSettings, Payslip } from "./types";
 
+import Button from "../ui/Button";
 /** A4 width at 96dpi - the natural width of the composed document. */
 const A4_WIDTH_PX = 794;
 
@@ -94,23 +95,19 @@ const PayslipPreviewModal: React.FC<Props> = ({
       bodyClassName="bg-gray-100 dark:bg-gray-900/60"
       footer={
         <div className="flex w-full justify-end gap-2">
-          <button onClick={onClose} className="btn-secondary text-sm">
+          <Button variant="secondary" className="text-sm" onClick={onClose}>
             Close
-          </button>
-          <button
-            onClick={() => onPrint(payslip)}
-            className="btn-secondary inline-flex items-center gap-1.5 text-sm"
-          >
+          </Button>
+          <Button variant="secondary" className="gap-1.5 text-sm"
+            onClick={() => onPrint(payslip)}>
             <PrinterIcon className="h-4 w-4" />
             Print
-          </button>
-          <button
-            onClick={() => onDownload(payslip)}
-            className="btn-primary inline-flex items-center gap-1.5 text-sm"
-          >
+          </Button>
+          <Button variant="primary" className="gap-1.5 text-sm"
+            onClick={() => onDownload(payslip)}>
             <ArrowDownTrayIcon className="h-4 w-4" />
             Download PDF
-          </button>
+          </Button>
         </div>
       }
     >

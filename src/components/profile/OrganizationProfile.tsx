@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { showSuccessToast, showErrorToast } from "../../utils/toastHelpers";
 import Select from "../ui/Select";
+import Input from "../ui/Input";
 import {
   BuildingOffice2Icon,
   GlobeAltIcon,
@@ -70,8 +71,6 @@ const DAYS = [
   { i: 0, label: "S" },
 ];
 
-const inputClass =
-  "w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 px-3.5 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10";
 const labelClass =
   "mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400";
 const cardClass =
@@ -152,19 +151,17 @@ const OrganizationProfile: React.FC = () => {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className={labelClass}>Company Name</label>
-              <input
+              <Input
                 value={org.name}
                 onChange={(e) => set("name", e.target.value)}
-                className={inputClass}
               />
             </div>
             <div>
               <label className={labelClass}>Website</label>
-              <input
+              <Input
                 value={org.website}
                 onChange={(e) => set("website", e.target.value)}
                 placeholder="https://example.com"
-                className={inputClass}
               />
             </div>
             <div>
@@ -227,7 +224,7 @@ const OrganizationProfile: React.FC = () => {
                     key={idx}
                     type="button"
                     onClick={() => toggleDay(d.i)}
-                    className={`flex h-11 w-11 items-center justify-center rounded-xl text-sm font-bold transition-all ${
+                    className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold transition-all ${
                       active
                         ? "bg-blue-600 text-white shadow-sm shadow-blue-600/25"
                         : "bg-gray-100 dark:bg-gray-700/60 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -247,7 +244,7 @@ const OrganizationProfile: React.FC = () => {
         <div className="flex justify-end">
           <button
             onClick={handleSave}
-            className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition-all hover:bg-blue-700"
+            className="rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition-all hover:bg-blue-700"
           >
             Save changes
           </button>
@@ -270,7 +267,7 @@ const OrganizationProfile: React.FC = () => {
             </div>
             <button
               onClick={() => logoRef.current?.click()}
-              className="mt-5 w-full rounded-lg border border-gray-200 dark:border-gray-700 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+              className="mt-5 w-full rounded-full border border-gray-200 dark:border-gray-700 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               Upload New Logo
             </button>

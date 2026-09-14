@@ -4,6 +4,7 @@ import { CARD } from "../../lib/surfaces";
 import { AccentEdge } from "../ui/CardAccents";
 import { useThemeAccent } from "../../hooks/useThemeAccent";
 
+import Input from "../ui/Input";
 /**
  * Device connection and the arrival rule, in one panel.
  *
@@ -81,7 +82,7 @@ const DeviceSettingsPanel: React.FC<Props> = ({
           type="button"
           onClick={onClose}
           aria-label="Close settings"
-          className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
         >
           <XMarkIcon className="h-4 w-4" />
         </button>
@@ -94,18 +95,19 @@ const DeviceSettingsPanel: React.FC<Props> = ({
             Connection
           </p>
           <div className="flex flex-wrap items-center gap-2">
-            <input
+            <Input
+              inputSize="sm"
               value={ip}
               onChange={(e) => onIpChange(e.target.value)}
               aria-label="Device IP address"
               placeholder="192.168.1.201"
-              className="w-44 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+              className="w-44"
             />
             {connected ? (
               <button
                 type="button"
                 onClick={onDisconnect}
-                className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300"
+                className="rounded-full border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300"
               >
                 Disconnect
               </button>
@@ -114,7 +116,7 @@ const DeviceSettingsPanel: React.FC<Props> = ({
                 type="button"
                 onClick={onConnect}
                 disabled={connecting}
-                className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                className="rounded-full bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {connecting ? "Connecting..." : "Connect"}
               </button>
@@ -157,12 +159,14 @@ const DeviceSettingsPanel: React.FC<Props> = ({
                 >
                   {option.label}
                 </label>
-                <input
+                <Input
                   type="time"
+                  inputSize="sm"
                   value={(settings as any)[option.field] || option.fallback}
                   disabled={!canEditSettings || policy !== option.key}
                   onChange={(e) => update({ [option.field]: e.target.value } as any)}
-                  className="rounded-lg border border-gray-200 px-2 py-1 text-xs text-gray-900 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+                  className="w-28"
+                  inputClassName="text-xs"
                 />
               </div>
             ))}
@@ -181,7 +185,7 @@ const DeviceSettingsPanel: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={onSaveSettings}
-                className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+                className="rounded-full bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
               >
                 Save rule
               </button>

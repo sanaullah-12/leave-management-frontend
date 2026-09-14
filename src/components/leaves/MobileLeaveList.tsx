@@ -97,7 +97,7 @@ const MobileLeaveList: React.FC<Props> = ({
           onClick={onRefresh}
           disabled={isRefreshing}
           aria-label="Refresh requests"
-          className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-xl border border-gray-200 bg-[var(--card-surface)] text-gray-500 transition-colors active:bg-black/5 disabled:opacity-60 dark:border-white/10 dark:text-gray-400 dark:active:bg-white/10"
+          className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-full border border-gray-200 bg-[var(--card-surface)] text-gray-500 transition-colors active:bg-black/5 disabled:opacity-60 dark:border-white/10 dark:text-gray-400 dark:active:bg-white/10"
         >
           <ArrowPathIcon
             className={`h-[17px] w-[17px] ${isRefreshing ? "animate-spin" : ""}`}
@@ -162,7 +162,7 @@ const MobileLeaveList: React.FC<Props> = ({
                 key={leave._id}
                 type="button"
                 onClick={() => onOpen(leave)}
-                className="relative w-full overflow-hidden rounded-[18px] border border-gray-200 bg-[var(--card-surface)] px-4 pb-3.5 pt-4 text-left transition-colors active:bg-black/[0.02] dark:border-white/10 dark:active:bg-white/[0.03]"
+                className="glass-card relative w-full overflow-hidden rounded-[18px] px-4 pb-3.5 pt-4 text-left transition-colors active:bg-black/[0.02] dark:active:bg-white/[0.03]"
               >
                 {/* Left edge marks a request that still needs a decision. */}
                 {isPending && (

@@ -33,6 +33,8 @@ import {
   SALARY_STATUS,
 } from "./constants";
 import { formatMoney, parseAmount } from "./formatters";
+import Input from "../ui/Input";
+import Button from "../ui/Button";
 import type {
   ComponentKind,
   ComputeMode,
@@ -225,12 +227,12 @@ const SalaryStructureModal: React.FC<Props> = ({
             </span>
           </div>
           <div className="flex justify-end gap-2">
-            <button onClick={onClose} className="btn-secondary text-sm">
+            <Button variant="secondary" className="text-sm" onClick={onClose}>
               Cancel
-            </button>
-            <button onClick={handleSave} className="btn-primary text-sm">
+            </Button>
+            <Button variant="primary" className="text-sm" onClick={handleSave}>
               Save Structure
-            </button>
+            </Button>
           </div>
         </div>
       }
@@ -254,12 +256,13 @@ const SalaryStructureModal: React.FC<Props> = ({
             <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-400">
               Basic Salary
             </label>
-            <input
+            <Input
+              inputSize="sm"
               inputMode="decimal"
               value={basic}
               onChange={(e) => setBasic(e.target.value)}
               placeholder="0"
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-semibold tabular-nums outline-none focus:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+              inputClassName="font-semibold tabular-nums"
             />
           </div>
 
@@ -314,7 +317,7 @@ const SalaryStructureModal: React.FC<Props> = ({
               </h4>
               <button
                 onClick={() => addCustom(kind)}
-                className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-gray-500 transition-colors hover:bg-black/5 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-gray-200"
+                className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium text-gray-500 transition-colors hover:bg-black/5 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-gray-200"
               >
                 <PlusIcon className="h-3.5 w-3.5" />
                 Add custom
@@ -427,18 +430,22 @@ const ComponentRow: React.FC<RowProps> = React.memo(
         c.enabled ? "" : "opacity-50"
       }`}
     >
-      <input
+      <Input
+        inputSize="sm"
         value={c.name}
         onChange={(e) => onPatch(c.id, { name: e.target.value })}
         placeholder="Component name"
-        className="min-w-0 flex-1 rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-sm font-medium outline-none focus:border-gray-200 focus:bg-white dark:text-gray-100 dark:focus:border-gray-700 dark:focus:bg-gray-800"
+        className="min-w-0 flex-1"
+        inputClassName="font-medium"
       />
-      <input
+      <Input
+        inputSize="sm"
         value={c.code}
         onChange={(e) => onPatch(c.id, { code: e.target.value.toUpperCase() })}
         placeholder="CODE"
         maxLength={8}
-        className="w-20 rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-center text-xs font-semibold uppercase tracking-wider text-gray-500 outline-none focus:border-gray-200 focus:bg-white dark:focus:border-gray-700 dark:focus:bg-gray-800"
+        className="w-24"
+        inputClassName="text-center text-xs font-semibold uppercase tracking-wider"
       />
       <div className="w-32">
         <Select
@@ -447,12 +454,14 @@ const ComponentRow: React.FC<RowProps> = React.memo(
           options={MODE_OPTIONS}
         />
       </div>
-      <input
+      <Input
+        inputSize="sm"
         inputMode="decimal"
         value={c.value === 0 ? "" : String(c.value)}
         onChange={(e) => onPatch(c.id, { value: parseAmount(e.target.value) })}
         placeholder="0"
-        className="w-24 rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-right text-sm tabular-nums outline-none focus:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+        className="w-24"
+        inputClassName="text-right tabular-nums"
       />
       <span className="w-28 text-right text-sm font-semibold tabular-nums text-gray-700 dark:text-gray-300">
         {formatMoney(amount, currency)}
@@ -462,7 +471,7 @@ const ComponentRow: React.FC<RowProps> = React.memo(
         <button
           onClick={() => onPatch(c.id, { taxable: !c.taxable })}
           title={c.taxable ? "Taxable" : "Tax exempt"}
-          className={`rounded-lg px-2 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors ${
+          className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wider transition-colors ${
             c.taxable
               ? "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400"
               : "bg-gray-100 text-gray-400 dark:bg-gray-700/60"
@@ -474,7 +483,7 @@ const ComponentRow: React.FC<RowProps> = React.memo(
       <button
         onClick={() => onPatch(c.id, { enabled: !c.enabled })}
         title={c.enabled ? "Disable" : "Enable"}
-        className="grid h-7 w-7 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10"
+        className="grid h-7 w-7 place-items-center rounded-full text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-700 dark:hover:bg-white/10"
       >
         {c.enabled ? (
           <EyeIcon className="h-4 w-4" />
@@ -485,7 +494,7 @@ const ComponentRow: React.FC<RowProps> = React.memo(
       <button
         onClick={() => onRemove(c.id)}
         title="Remove"
-        className="grid h-7 w-7 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-500/10"
+        className="grid h-7 w-7 place-items-center rounded-full text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-500/10"
       >
         <TrashIcon className="h-4 w-4" />
       </button>

@@ -2,6 +2,9 @@ import React from "react";
 import { CARD, CARD_HOVER } from "../lib/surfaces";
 import { accentFor, accentSoftFor } from "../lib/themeTokens";
 import { AccentEdge } from "../components/ui/CardAccents";
+import { StatCard, type StatAccent } from "../components/ui/StatCard";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import { useAuth } from "../context/AuthContext";
 import AttendancePieCard from "../components/dashboard/AttendancePieCard";
 import { useTheme } from "../context/ThemeContext";
@@ -19,7 +22,6 @@ import LogoLoader from "../components/LogoLoader";
 import DashboardAnnouncements from "../components/DashboardAnnouncements";
 import PushNotificationToggle from "../components/notifications/PushNotificationToggle";
 import { motion } from "framer-motion";
-import MeshBackground from "../components/MeshBackground";
 import EmployeeVoiceWidget from "../components/voice/EmployeeVoiceWidget";
 import { staggerContainer, staggerItem } from "../lib/motion";
 import {
@@ -93,53 +95,29 @@ const StatusPill: React.FC<{ status?: string; label: string }> = ({
 
 // Compact KPI tile: label + big value on the left, accent icon chip on
 // the right, supporting caption below. Mirrors the reference top row.
+/**
+ * The dashboard's KPI tiles, on the product's shared StatCard.
+ *
+ * `caption` is accepted but not shown: the shared tile is two lines - label
+ * over figure - so a KPI row is the same height on every screen.
+ */
 const KpiCard: React.FC<{
   label: string;
   value: number | string;
   suffix?: string;
-  caption: string;
+  caption?: string;
   icon: React.ReactNode;
-  accent: string;
+  accent?: StatAccent;
   onClick?: () => void;
-}> = ({ label, value, suffix, caption, icon, accent, onClick }) => (
-  <div
+}> = ({ label, value, suffix, icon, accent, onClick }) => (
+  <StatCard
+    label={label}
+    value={value}
+    suffix={suffix}
+    icon={icon}
+    accent={accent}
     onClick={onClick}
-    className={`group relative overflow-hidden ${CARD} ${CARD_HOVER} flex h-full flex-col p-3.5 sm:p-5 ${
-      onClick ? "cursor-pointer" : ""
-    }`}
-  >
-    <AccentEdge color={accent} />
-    <div className="relative flex items-start justify-between gap-3">
-      <div className="min-w-0 flex-1">
-        <p
-          className="text-overline truncate text-gray-400 dark:text-gray-500"
-          title={label}
-        >
-          {label}
-        </p>
-        {/* Fixed-height value line keeps every tile's number on the same
-            baseline, with or without a suffix. */}
-        <p className="mt-2 flex min-h-[2rem] items-end gap-1 sm:min-h-[2.25rem]">
-          <span className="text-2xl sm:text-3xl font-bold tabular-nums leading-none text-gray-900 dark:text-white">
-            {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
-          </span>
-          {suffix && (
-            <span className="text-sm font-medium leading-none text-gray-400 dark:text-gray-500">
-              {suffix}
-            </span>
-          )}
-        </p>
-      </div>
-      {/* Bare icon, no plate. It scales on hover so the tile still responds. */}
-      <div className="hidden sm:grid flex-shrink-0 place-items-center w-11 h-11 text-blue-600 dark:text-blue-400 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110">
-        {icon}
-      </div>
-    </div>
-    {/* Pinned to the bottom so captions align across the whole row. */}
-    <p className="mt-auto pt-2 text-[11px] leading-snug sm:pt-3 sm:text-xs font-medium text-gray-500 dark:text-gray-400">
-      {caption}
-    </p>
-  </div>
+  />
 );
 
 // Semicircle gauge card - replaces the reference "Satisfaction / Referral"
@@ -515,6 +493,50 @@ const DashboardPage: React.FC = () => {
       initial="initial"
       animate="animate"
     >
+      {/* ---------------- Banner ---------------- */}
+      <motion.div variants={staggerItem}>
+        <SectionHeader
+          variant="dashboard"
+          eyebrow={t("greeting.welcomeBack")}
+          title={`${greeting}, ${user?.name?.split(" ")[0] || "there"}`}
+          description={isAdmin ? t("hero.adminSub") : t("hero.employeeSub")}
+          badge={
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white ring-1 ring-inset ring-white/25">
+              <CalendarDaysIcon className="h-3.5 w-3.5" />
+              {today}
+            </span>
+          }
+          illustration={sectionIllustration("dashboard")}
+          action={
+            <>
+              {user?.role === "employee" && (
+                <button
+                  type="button"
+                  onClick={() => navigate("/apply-leave")}
+                  className="sh-action"
+                >
+                  <BoltIcon className="h-4 w-4" />
+                  {t("actions.quickApply")}
+                </button>
+              )}
+
+              {/* Browser/OS alerts for this device. Renders nothing when the
+                  browser has no Push API or the server has no VAPID keys. */}
+              <PushNotificationToggle />
+
+              <button
+                type="button"
+                onClick={() => navigate(isAdmin ? "/leaves" : "/apply-leave")}
+                className="sh-action-primary"
+              >
+                <PlusIcon className="h-4 w-4" />
+                {isAdmin ? t("hero.viewRequests") : t("hero.requestLeave")}
+              </button>
+            </>
+          }
+        />
+      </motion.div>
+
       {/* ---------------- Top KPI row (4-up) ---------------- */}
       {showCardsLoading ? (
         <StatCardsSkeleton count={4} />
@@ -524,7 +546,7 @@ const DashboardPage: React.FC = () => {
           className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4"
         >
           {kpis.map((c, i) => (
-            <KpiCard key={i} {...c} accent={accent} />
+            <KpiCard key={i} {...c} accent={i % 2 === 0 ? "indigo" : "teal"} />
           ))}
         </motion.div>
       )}
@@ -532,69 +554,11 @@ const DashboardPage: React.FC = () => {
       {/* ---------------- Announcements highlight (fresh 24h + pinned) ---------------- */}
       <DashboardAnnouncements />
 
-      {/* ---------------- Hero + gauges ---------------- */}
+      {/* ---------------- Attendance + gauges ---------------- */}
       <motion.div
         variants={staggerItem}
-        className="grid grid-cols-1 lg:grid-cols-4 gap-5"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-5"
       >
-        {/* Welcome hero (spans 2) */}
-        <div className={`lg:col-span-2 relative overflow-hidden p-6 sm:p-7 ${CARD}`}>
-          <MeshBackground />
-          <div className="relative flex h-full flex-col justify-between gap-5">
-            <div>
-              <p className="text-overline text-blue-600 dark:text-blue-400">
-                {t("greeting.welcomeBack")}
-              </p>
-              <motion.h1
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white"
-              >
-                {greeting}, {user?.name?.split(" ")[0] || "there"}
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.13, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="mt-1.5 text-sm text-gray-600 dark:text-gray-300 max-w-md"
-              >
-                {isAdmin ? t("hero.adminSub") : t("hero.employeeSub")}
-              </motion.p>
-              <p className="mt-3 inline-flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                <CalendarDaysIcon className="w-4 h-4" />
-                {today}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              {user?.role === "employee" && (
-                <motion.button
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => navigate("/apply-leave")}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/60 transition-colors"
-                >
-                  <BoltIcon className="w-4 h-4" />
-                  {t("actions.quickApply")}
-                </motion.button>
-              )}
-
-              {/* Browser/OS alerts for this device. Renders nothing when the
-                  browser has no Push API or the server has no VAPID keys. */}
-              <PushNotificationToggle />
-              <motion.button
-                whileHover={{ y: -1 }}
-                whileTap={{ scale: 0.96 }}
-                onClick={() => navigate(isAdmin ? "/leaves" : "/apply-leave")}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-600/20 transition-colors"
-              >
-                <PlusIcon className="w-4 h-4" />
-                {isAdmin ? t("hero.viewRequests") : t("hero.requestLeave")}
-              </motion.button>
-            </div>
-          </div>
-        </div>
-
         {/* Attendance donut, then the remaining gauge. */}
         <AttendancePieCard role={user?.role} employeeId={user?.employeeId} />
 
@@ -744,9 +708,13 @@ const DashboardPage: React.FC = () => {
       </motion.div>
 
       {/* ---------------- Activity + timeline ---------------- */}
+      {/* `items-start` so each column keeps its own height. Stretched, the
+          activity card grew to match the holidays + availability stack beside
+          it, which left most of it empty whenever there were only a few
+          recent requests - and there are at most five. */}
       <motion.div
         variants={staggerItem}
-        className="grid grid-cols-1 lg:grid-cols-3 gap-5"
+        className="grid grid-cols-1 items-start lg:grid-cols-3 gap-5"
       >
         {/* Recent Activity (spans 2) */}
         <PanelCard
@@ -863,7 +831,7 @@ const DashboardPage: React.FC = () => {
             </ul>
             <button
               onClick={() => navigate("/leave-calendar")}
-              className="mt-4 w-full py-2 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700/40 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors"
+              className="mt-4 w-full py-2 rounded-full text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-700/40 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition-colors"
             >
               {t("actions.viewCompanyCalendar")}
             </button>

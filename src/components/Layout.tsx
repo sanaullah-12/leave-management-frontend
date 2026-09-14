@@ -12,6 +12,7 @@ import BrandedLoader from "./BrandedLoader";
 import { RouteFallback } from "./Skeletons";
 import AppLogo from "./AppLogo";
 import Dropdown from "./ui/Dropdown";
+import GlobalSearch, { type SearchEntry } from "./header/GlobalSearch";
 import ThemeModal from "./ThemeModal";
 import VoiceNotificationToaster from "./voice/VoiceNotificationToaster";
 import NexoraAssistant from "./assistant/NexoraAssistant";
@@ -55,6 +56,7 @@ import {
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 
+import Input from "./ui/Input";
 type Icon = React.ComponentType<{ className?: string }>;
 
 interface PanelItem {
@@ -73,6 +75,39 @@ interface NavGroup {
   items: PanelItem[];
 }
 
+/**
+ * Extra search terms per route, for the words people use that the page titles
+ * do not contain. Keyed by href so it survives the titles being translated -
+ * the nav labels come from i18n, these do not.
+ */
+const SEARCH_KEYWORDS: Record<string, string> = {
+  "/": "home overview summary kpi",
+  "/apply-leave": "request time off holiday vacation book",
+  "/leaves": "requests approvals time off holiday",
+  "/leave-calendar": "schedule month who is out",
+  "/leave-policies": "allocation entitlement rules days",
+  "/my-leave-activity": "my requests history balance",
+  "/attendance": "punch clock in out hours present",
+  "/attendance/late-time": "late arrivals tardy punctuality",
+  "/work-from-home": "wfh remote home office",
+  "/employees": "staff people team members roster invite",
+  "/team": "staff people colleagues",
+  "/departments": "org structure divisions teams",
+  "/payroll": "salary pay wages compensation",
+  "/payroll/salaries": "salary structure ctc compensation",
+  "/payroll/run": "process generate payslips run",
+  "/payroll/payslips": "payslip salary slip payment",
+  "/payroll/history": "past runs archive payroll",
+  "/payroll/settings": "tax deductions allowances payroll config",
+  "/document-studio": "letter offer contract certificate template hr docs",
+  "/announcements": "news updates company post",
+  "/employee-voice": "feedback idea complaint suggestion appreciation report",
+  "/notifications": "alerts activity inbox",
+  "/reports": "analytics export pdf excel insights",
+  "/profile": "account me my details password",
+  "/theme": "appearance colour dark mode language settings customize",
+};
+
 const Layout: React.FC = () => {
   const { user, logout, isAuthenticated, isLoading } = useAuth();
   // "nav" is preloaded at init, so these resolve without suspending.
@@ -84,6 +119,7 @@ const Layout: React.FC = () => {
   const [themeOpen, setThemeOpen] = useState(false);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
+  const globalSearchRef = useRef<HTMLInputElement>(null);
   const { unreadCount } = useNotifications({ limit: 12 });
 
   const isAdmin = user?.role === "admin";
@@ -92,6 +128,14 @@ const Layout: React.FC = () => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
+        // The header field is the global one, so it takes the shortcut. It
+        // only exists on desktop; below `lg` the panel's own search is the
+        // one on screen, so the shortcut falls back to it.
+        if (globalSearchRef.current) {
+          globalSearchRef.current.focus();
+          globalSearchRef.current.select();
+          return;
+        }
         setCollapsed(false);
         setTimeout(() => searchRef.current?.focus(), 50);
       }
@@ -301,6 +345,31 @@ const Layout: React.FC = () => {
     },
   ];
 
+  /**
+   * What the header's search can find.
+   *
+   * Built from the same `groups` the rail and panel are built from, so a page
+   * added to the navigation is searchable the moment it appears - there is no
+   * second list to keep in step.
+   *
+   * `SEARCH_KEYWORDS` covers the gap between what a page is called and what
+   * somebody types looking for it. "Salary" is not in the word "Payroll" and
+   * "wfh" is not in "Work From Home", but both are what people search for.
+   */
+  const searchEntries: SearchEntry[] = useMemo(
+    () =>
+      groups.flatMap((g) =>
+        g.items.map((i) => ({
+          name: i.name,
+          href: i.href,
+          icon: i.icon,
+          group: g.label,
+          keywords: SEARCH_KEYWORDS[i.href],
+        }))
+      ),
+    [groups]
+  );
+
   // Global search across all pages.
   const searchResults: PanelItem[] = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -322,6 +391,14 @@ const Layout: React.FC = () => {
   const roleLabel =
     user?.position ||
     (isAdmin ? t("header.administrator") : t("header.employee"));
+
+  // The API returns `department` either populated or as a bare id string.
+  const departmentName =
+    typeof user?.department === "object" && (user?.department as any)?.name
+      ? ((user.department as any).name as string)
+      : typeof user?.department === "string"
+      ? user.department
+      : "";
   const leftOffset = collapsed ? "lg:left-16" : "lg:left-[19rem]";
   const mainOffset = collapsed ? "lg:ml-16" : "lg:ml-[19rem]";
 
@@ -339,7 +416,7 @@ const Layout: React.FC = () => {
         key={it.href}
         to={it.href}
         onClick={onClick}
-        className={`group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors ${
+        className={`group flex items-center gap-2.5 rounded-full px-2.5 py-2 text-sm transition-colors ${
           active
             ? "font-medium"
             : "text-gray-600 hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-100"
@@ -388,7 +465,7 @@ const Layout: React.FC = () => {
         <div className="flex items-center gap-1">
           <button
             onClick={() => setCollapsed(true)}
-            className="hidden rounded-md p-1 text-gray-500 hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white lg:block"
+            className="hidden rounded-full p-1 text-gray-500 hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white lg:block"
             title={t("actions.collapse")}
           >
             <ChevronDoubleLeftIcon className="h-4 w-4" />
@@ -398,16 +475,16 @@ const Layout: React.FC = () => {
 
       {/* Search */}
       <div className="px-3 pb-2 pt-3">
-        <div className="relative">
-          <MagnifyingGlassIcon className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-          <input
-            ref={attachRef ? searchRef : undefined}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t("search.placeholder")}
-            className="w-full rounded-lg border border-gray-200 bg-white/70 py-2 pl-8 pr-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-gray-300 dark:border-white/10 dark:bg-white/5 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-white/20"
-          />
-        </div>
+        <Input
+          icon={MagnifyingGlassIcon}
+          inputSize="sm"
+          ref={attachRef ? searchRef : undefined}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onClear={() => setQuery("")}
+          clearable
+          placeholder={t("search.placeholder")}
+        />
       </div>
 
       {/* List */}
@@ -495,7 +572,7 @@ const Layout: React.FC = () => {
         {collapsed && (
           <button
             onClick={() => setCollapsed(false)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-gray-500 hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
             title={t("actions.expand")}
           >
             <ChevronDoubleRightIcon className="h-5 w-5" />
@@ -508,7 +585,7 @@ const Layout: React.FC = () => {
         <button
           onClick={logout}
           title={t("actions.logout")}
-          className="flex h-9 w-9 items-center justify-center rounded-xl text-gray-500 hover:bg-black/5 hover:text-red-500 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-red-400"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:bg-black/5 hover:text-red-500 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-red-400"
         >
           <ArrowRightOnRectangleIcon className="h-5 w-5" />
         </button>
@@ -552,7 +629,7 @@ const Layout: React.FC = () => {
           <div className="flex justify-end p-2">
             <button
               onClick={() => setMobileOpen(false)}
-              className="rounded-md p-1 text-gray-500 hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
+              className="rounded-full p-1 text-gray-500 hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
               aria-label={t("actions.closeMenu")}
             >
               <XMarkIcon className="h-5 w-5" />
@@ -575,7 +652,7 @@ const Layout: React.FC = () => {
         <div className="flex h-14 items-center gap-2 px-2">
           <Link
             to="/"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl active:bg-black/5 dark:active:bg-white/10"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full active:bg-black/5 dark:active:bg-white/10"
             aria-label={t("brand.name")}
           >
             <AppLogo size={26} />
@@ -596,7 +673,7 @@ const Layout: React.FC = () => {
                 reads as a tag or a bookmark, not as "change how this looks". */}
             <button
               onClick={() => setThemeOpen(true)}
-              className="flex h-11 w-11 items-center justify-center rounded-xl text-gray-600 active:bg-black/5 dark:text-gray-300 dark:active:bg-white/10"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-gray-600 active:bg-black/5 dark:text-gray-300 dark:active:bg-white/10"
               aria-label={t("items.theme")}
             >
               <PaintBrushIcon className="h-[21px] w-[21px]" />
@@ -606,7 +683,7 @@ const Layout: React.FC = () => {
             <GetAppButton compact className="ml-1 !px-2.5 !py-2" />
             <button
               onClick={() => setMobileOpen(true)}
-              className="flex h-11 w-11 items-center justify-center rounded-xl text-gray-600 active:bg-black/5 dark:text-gray-300 dark:active:bg-white/10"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-gray-600 active:bg-black/5 dark:text-gray-300 dark:active:bg-white/10"
               aria-label={t("actions.openMenu")}
             >
               <Bars3Icon className="h-6 w-6" />
@@ -616,42 +693,54 @@ const Layout: React.FC = () => {
       </header>
 
       {/* ============ Desktop header ============ */}
+      {/* Search leads, account trails, utilities sit between them.
+          It used to open with "Welcome back, <name>" over the department and
+          role - three lines of chrome restating what the account menu already
+          says, on every screen, forever. A greeting is worth reading once a
+          session, and the dashboard banner already gives it. That space now
+          holds the one control that earns permanent residence: a field that
+          reaches every page in the product. */}
       <header
-        className={`fixed right-0 top-0 z-30 hidden h-16 items-center justify-between border-b border-gray-200/70 bg-white/70 px-8 backdrop-blur-xl dark:border-gray-700/60 dark:bg-gray-900/55 lg:flex ${leftOffset}`}
+        className={`fixed right-0 top-0 z-30 hidden h-16 items-center gap-4 border-b border-gray-200/70 bg-white/70 px-6 backdrop-blur-xl dark:border-gray-700/60 dark:bg-gray-900/55 lg:flex ${leftOffset}`}
       >
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {t("header.welcome", { name: user?.name ?? "" })}
-          </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            {typeof user?.department === "object" && (user?.department as any)?.name
-              ? (user.department as any).name
-              : user?.department}{" "}
-            • {roleLabel}
-          </p>
-        </div>
-        <div className="flex items-center space-x-4">
+        <GlobalSearch
+          entries={searchEntries}
+          inputRef={globalSearchRef}
+          className="w-full max-w-sm xl:max-w-md"
+        />
+
+        {/* One gap for the whole cluster, so the utilities read as a set
+            rather than as four unrelated buttons. */}
+        <div className="ml-auto flex shrink-0 items-center gap-1">
           {/* Renders nothing once installed, or where the browser cannot
               install at all. */}
           <GetAppButton />
           <LanguageSwitcher />
-          <NotificationBell />
-          <div className="h-8 w-px bg-gray-200 dark:bg-gray-700" />
+          <NotificationBell compact />
+
+          <span
+            aria-hidden="true"
+            className="mx-1.5 h-6 w-px bg-gray-200 dark:bg-white/10"
+          />
+
           <Dropdown
             align="right"
-            widthClass="w-64"
+            widthClass="w-72"
             showChevron
             bareButton
-            buttonClassName="group flex items-center gap-2.5 rounded-xl p-1.5 pr-2.5 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+            buttonClassName="group flex items-center gap-2.5 rounded-full border border-transparent py-1 pl-1 pr-2 transition-colors hover:border-gray-200/80 hover:bg-white/60 dark:hover:border-white/10 dark:hover:bg-white/10"
             header={
               <div className="flex items-center gap-3">
-                <Avatar src={user?.profilePicture} name={user?.name} size="sm" />
-                <div className="min-w-0">
+                <Avatar src={user?.profilePicture} name={user?.name} size="md" />
+                <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">
                     {user?.name}
                   </p>
                   <p className="truncate text-xs text-gray-500 dark:text-gray-400">
                     {user?.email}
+                  </p>
+                  <p className="mt-1.5 inline-flex max-w-full items-center gap-1.5 truncate rounded-md bg-[rgb(var(--blue-600))]/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[rgb(var(--blue-700))] dark:text-[rgb(var(--blue-300))]">
+                    {departmentName ? `${departmentName} - ${roleLabel}` : roleLabel}
                   </p>
                 </div>
               </div>
@@ -672,8 +761,17 @@ const Layout: React.FC = () => {
             ]}
           >
             <Avatar src={user?.profilePicture} name={user?.name} size="sm" />
-            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-              {user?.name}
+            {/* Name over role, not name alone: the role is what tells an admin
+                which account they are acting as, and it costs no extra height
+                next to a 32px avatar. Hidden on narrow desktops, where the
+                avatar alone still identifies the account. */}
+            <span className="hidden min-w-0 flex-col items-start leading-tight xl:flex">
+              <span className="max-w-[9rem] truncate text-[13px] font-semibold text-gray-900 dark:text-gray-100">
+                {user?.name}
+              </span>
+              <span className="max-w-[9rem] truncate text-[11px] text-gray-500 dark:text-gray-400">
+                {roleLabel}
+              </span>
             </span>
           </Dropdown>
         </div>

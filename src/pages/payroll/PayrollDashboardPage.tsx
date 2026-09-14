@@ -208,18 +208,16 @@ const PayrollDashboardPage: React.FC = () => {
               <Link
                 to="/payroll/settings"
                 aria-label="Payroll settings"
-                className="grid h-9 w-9 place-items-center rounded-full border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700/50"
+                className="sh-action"
               >
                 <Cog6ToothIcon className="h-4 w-4" />
               </Link>
               <button
                 onClick={() => navigate("/payroll/run")}
-                className="inline-flex items-center gap-2 rounded-full bg-blue-600 py-1.5 pl-4 pr-1.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-colors hover:bg-blue-700"
+                className="sh-action-primary"
               >
+                <PlusIcon className="h-4 w-4" />
                 Run Payroll
-                <span className="grid h-7 w-7 place-items-center rounded-full bg-white/20 text-white">
-                  <PlusIcon className="h-4 w-4" />
-                </span>
               </button>
             </>
           }
@@ -467,7 +465,7 @@ const PayrollDashboardPage: React.FC = () => {
                       />
                       <button
                         onClick={() => navigate("/payroll/payslips")}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 transition-all hover:border-blue-600/40 hover:bg-blue-600/[0.06] hover:text-blue-700 dark:border-gray-700 dark:bg-transparent dark:text-gray-200 dark:hover:border-blue-400/40 dark:hover:bg-blue-400/10 dark:hover:text-blue-300"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 transition-all hover:border-blue-600/40 hover:bg-blue-600/[0.06] hover:text-blue-700 dark:border-gray-700 dark:bg-transparent dark:text-gray-200 dark:hover:border-blue-400/40 dark:hover:bg-blue-400/10 dark:hover:text-blue-300"
                       >
                         <DocumentTextIcon className="h-4 w-4" />
                         View payslip
@@ -532,7 +530,7 @@ const PayrollDashboardPage: React.FC = () => {
 
                 {/* Readiness strip. Sits on its own surface so the call to
                     action reads as the next step, not as more figures. */}
-                <div className="mt-4 rounded-xl border border-gray-200/70 bg-white/70 p-3 backdrop-blur-sm dark:border-gray-700/50 dark:bg-gray-900/30">
+                <div className="glass-card mt-4 rounded-xl p-3">
                   <div className="flex items-center gap-2">
                     <UserGroupIcon className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
                     <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -556,7 +554,7 @@ const PayrollDashboardPage: React.FC = () => {
                           pendingCount > 0 ? "/payroll/salaries" : "/payroll/run"
                         )
                       }
-                      className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-blue-700"
+                      className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-blue-700"
                     >
                       {pendingCount > 0 ? "Set up" : "Run now"}
                       <ArrowUpRightIcon className="h-3.5 w-3.5" />

@@ -36,13 +36,13 @@ const StudioEmptyState: React.FC<Props> = ({
         <motion.div
           animate={{ y: [0, -8, 0], rotate: [-6, -4, -6] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute left-4 top-6 h-32 w-24 rounded-xl border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+          className="glass-card absolute left-4 top-6 h-32 w-24 rounded-xl"
         />
         {/* Floating front document */}
         <motion.div
           animate={{ y: [0, 8, 0], rotate: [6, 4, 6] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute right-3 top-8 flex h-36 w-28 flex-col gap-2 rounded-xl border border-gray-200 bg-white p-3 shadow-xl dark:border-gray-700 dark:bg-gray-800"
+          className="glass-card absolute right-3 top-8 flex h-36 w-28 flex-col gap-2 rounded-xl p-3"
         >
           <div
             className="h-2 w-10 rounded-full"

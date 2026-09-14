@@ -1,4 +1,6 @@
 import React from "react";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
@@ -27,29 +29,28 @@ const NotificationsPage: React.FC = () => {
       animate="animate"
     >
       {/* Header */}
-      <motion.div
-        variants={staggerItem}
-        className="flex items-center justify-between"
-      >
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Notifications
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {unreadCount > 0
-              ? `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}`
-              : "You're all caught up"}
-          </p>
-        </div>
-        {unreadCount > 0 && (
-          <button
-            onClick={() => markAllRead()}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
-          >
-            <CheckIcon className="h-4 w-4" />
-            Mark all read
-          </button>
-        )}
+      <motion.div variants={staggerItem}>
+        <SectionHeader
+          variant="notifications"
+          eyebrow="Activity"
+          title="Notifications"
+          description={
+            unreadCount > 0
+              ? `${unreadCount} unread notification${
+                  unreadCount === 1 ? "" : "s"
+                } waiting on you.`
+              : "You're all caught up - nothing needs your attention."
+          }
+          illustration={sectionIllustration("notifications")}
+          action={
+            unreadCount > 0 ? (
+              <button onClick={() => markAllRead()} className="sh-action">
+                <CheckIcon className="h-4 w-4" />
+                Mark all read
+              </button>
+            ) : undefined
+          }
+        />
       </motion.div>
 
       {notifications.length === 0 ? (

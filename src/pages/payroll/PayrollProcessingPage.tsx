@@ -254,23 +254,26 @@ const PayrollProcessingPage: React.FC = () => {
           title={t("run.title")}
           subtitle={t("run.subtitle")}
           actions={
-            <>
-              <PeriodPicker value={period} onChange={setPeriod} />
-              <button
-                onClick={() => setConfirmOpen(true)}
-                disabled={included.length === 0 || processing}
-                className="btn-primary inline-flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {existingRun ? (
-                  <ArrowPathIcon className="h-5 w-5" />
-                ) : (
-                  <PlayCircleIcon className="h-5 w-5" />
-                )}
-                {existingRun ? t("run.reprocess") : t("run.generate")}
-              </button>
-            </>
+            <button
+              onClick={() => setConfirmOpen(true)}
+              disabled={included.length === 0 || processing}
+              className="sh-action-primary"
+            >
+              {existingRun ? (
+                <ArrowPathIcon className="h-5 w-5" />
+              ) : (
+                <PlayCircleIcon className="h-5 w-5" />
+              )}
+              {existingRun ? t("run.reprocess") : t("run.generate")}
+            </button>
           }
         />
+      </motion.div>
+
+      {/* The period the run covers. A card-surface control, so it sits under
+          the banner rather than on the gradient. */}
+      <motion.div variants={staggerItem} className="flex justify-end">
+        <PeriodPicker value={period} onChange={setPeriod} />
       </motion.div>
 
       {/* ---- Period notices ---- */}
@@ -314,7 +317,7 @@ const PayrollProcessingPage: React.FC = () => {
       </AnimatePresence>
 
       <motion.div variants={staggerItem}>
-        <PayrollStatCards tiles={tiles} columnsClassName="xl:grid-cols-4" />
+        <PayrollStatCards tiles={tiles} />
       </motion.div>
 
       <motion.div variants={staggerItem}>

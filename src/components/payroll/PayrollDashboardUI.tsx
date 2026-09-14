@@ -24,7 +24,7 @@ export { AccentEdge, AccentGlow };
  * (top hairline, corner glow) that give each card its identity.
  */
 export const DASH_CARD =
-  "group relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white " +
+  "glass-card group relative overflow-hidden rounded-2xl" +
   "shadow-[0_1px_2px_rgba(16,24,40,0.04)] transition-all duration-300 " +
   "ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 " +
   "hover:border-gray-300/90 hover:shadow-[0_10px_28px_-8px_rgba(16,24,40,0.14)] " +
@@ -158,7 +158,7 @@ export const RangeTabs: React.FC<{
           key={o.label}
           type="button"
           onClick={() => onChange(o.months)}
-          className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+          className={`rounded-full px-2.5 py-1 text-xs font-semibold transition-colors ${
             active
               ? "bg-white text-gray-900 shadow-sm dark:bg-gray-900 dark:text-white"
               : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"

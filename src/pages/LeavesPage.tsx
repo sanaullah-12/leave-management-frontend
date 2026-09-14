@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import { useAuth } from "../context/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -314,52 +316,48 @@ const LeavesPage: React.FC = () => {
   return (
     <div className="space-y-6 fade-in">
       {/* Desktop chrome. The mobile list carries its own header, refresh
-          control and filter chips, so this whole block would otherwise be
-          shown twice on a phone. */}
-      <div className="hidden flex-col gap-4 lg:flex lg:flex-row lg:items-center lg:justify-between">
-        {/* Hidden on phones: the mobile app bar already shows "Leave Requests",
-            so this block repeated the title and spent ~120px of a 844px screen
-            restating it before any content appeared. Desktop has no app bar
-            title, so it keeps the heading. */}
-        <div className="hidden sm:block">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Leave Requests
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {user?.role === "admin"
-              ? "Manage employee leave requests"
-              : "View and submit your leave requests"}
-          </p>
-        </div>
+          control and filter chips, so this banner would otherwise be shown
+          twice on a phone. */}
+      <div className="hidden lg:block">
+        <SectionHeader
+          variant="leave"
+          eyebrow="Time off"
+          title="Leave Requests"
+          description={
+            user?.role === "admin"
+              ? "Review, approve and track every leave request across the company."
+              : "View the requests you have submitted and start a new one."
+          }
+          illustration={sectionIllustration("leave")}
+          action={
+            <>
+              <button
+                onClick={handleRefresh}
+                disabled={isFetching}
+                className="sh-action"
+              >
+                <ArrowPathIcon
+                  className={`h-5 w-5 ${isFetching ? "animate-spin" : ""}`}
+                />
+                Refresh
+              </button>
 
-        <div className="flex space-x-3">
-          <button
-            onClick={handleRefresh}
-            disabled={isFetching}
-            className="btn-secondary inline-flex items-center"
-          >
-            {isFetching ? (
-              <ArrowPathIcon className="h-5 w-5 mr-2 animate-spin" />
-            ) : (
-              <ArrowPathIcon className="h-5 w-5 mr-2" />
-            )}
-            Refresh
-          </button>
-
-          {user?.role === "employee" && (
-            <button
-              onClick={() => navigate("/apply-leave")}
-              className="btn-primary inline-flex items-center"
-            >
-              <PlusIcon className="h-5 w-5 mr-2" />
-              Request Leave
-            </button>
-          )}
-        </div>
+              {user?.role === "employee" && (
+                <button
+                  onClick={() => navigate("/apply-leave")}
+                  className="sh-action-primary"
+                >
+                  <PlusIcon className="h-5 w-5" />
+                  Request Leave
+                </button>
+              )}
+            </>
+          }
+        />
       </div>
 
       {/* Status Filter (desktop only - the mobile list renders chips) */}
-      <div className="hidden flex-wrap gap-1 rounded-xl border border-gray-200/60 bg-gray-100 p-1 dark:border-gray-700/60 dark:bg-gray-800/80 lg:inline-flex">
+      <div className="hidden flex-wrap gap-1 rounded-full border border-gray-200/60 bg-gray-100 p-1 dark:border-gray-700/60 dark:bg-gray-800/80 lg:inline-flex">
         {[
           { key: "", label: "All", active: "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm" },
           { key: "pending", label: "Pending", active: "bg-white dark:bg-gray-700 text-amber-600 dark:text-amber-400 shadow-sm" },
@@ -369,7 +367,7 @@ const LeavesPage: React.FC = () => {
           <button
             key={tab.key}
             onClick={() => setSelectedStatus(tab.key)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
               selectedStatus === tab.key
                 ? tab.active
                 : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
@@ -588,7 +586,7 @@ const LeavesPage: React.FC = () => {
                                     handleReview(leave._id, "approved")
                                   }
                                   disabled={reviewLeaveMutation.isPending}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 ring-1 ring-inset ring-emerald-200/70 dark:ring-emerald-500/30 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-full text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 ring-1 ring-inset ring-emerald-200/70 dark:ring-emerald-500/30 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   <CheckCircleIcon className="w-4 h-4" />
                                   Approve
@@ -596,7 +594,7 @@ const LeavesPage: React.FC = () => {
                                 <button
                                   onClick={() => handleRejectClick(leave._id)}
                                   disabled={reviewLeaveMutation.isPending}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 ring-1 ring-inset ring-red-200/70 dark:ring-red-500/30 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-full text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 ring-1 ring-inset ring-red-200/70 dark:ring-red-500/30 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   <XCircleIcon className="w-4 h-4" />
                                   Reject
@@ -655,14 +653,14 @@ const LeavesPage: React.FC = () => {
             <button
               onClick={handleRejectCancel}
               disabled={reviewLeaveMutation.isPending}
-              className="rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
+              className="rounded-full border border-gray-200 dark:border-gray-700 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
             >
               Cancel
             </button>
             <button
               onClick={handleRejectSubmit}
               disabled={reviewLeaveMutation.isPending}
-              className="rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-600/25 transition-all hover:bg-red-700 disabled:opacity-70"
+              className="rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-600/25 transition-all hover:bg-red-700 disabled:opacity-70"
             >
               {reviewLeaveMutation.isPending ? (
                 <InlineLoader label="Rejecting..." />
@@ -695,7 +693,7 @@ const LeavesPage: React.FC = () => {
         footer={
           <button
             onClick={closeCommentsPopup}
-            className="rounded-xl border border-gray-200 dark:border-gray-700 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="rounded-full border border-gray-200 dark:border-gray-700 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             Close
           </button>

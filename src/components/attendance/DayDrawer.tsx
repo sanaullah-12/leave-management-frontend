@@ -124,7 +124,7 @@ const DayDrawer: React.FC<Props> = ({ row, policy, source, onClose }) => {
               ref={closeRef}
               onClick={onClose}
               aria-label="Close panel"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
             >
               <XMarkIcon className="h-4 w-4" />
             </button>

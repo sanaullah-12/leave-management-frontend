@@ -1,4 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
+import { StatCardRow } from "../components/ui/StatCard";
 import { motion } from "framer-motion";
 import { useSearchParams } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
@@ -30,27 +33,6 @@ const FILTERS: { key: "all" | VoiceStatus; label: string }[] = [
   { key: "all", label: "All" },
   ...STATUS_LIST.map((s) => ({ key: s.key, label: s.label })),
 ];
-
-const StatChip: React.FC<{
-  label: string;
-  value: number;
-  icon: React.ReactNode;
-  tile: string;
-}> = ({ label, value, icon, tile }) => (
-  <div className="flex items-center gap-3 surface-card p-4">
-    <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${tile}`}>
-      {icon}
-    </span>
-    <div>
-      <p className="text-xl font-bold tabular-nums text-gray-900 dark:text-white">
-        {value}
-      </p>
-      <p className="text-[11px] font-medium uppercase tracking-wider text-gray-400">
-        {label}
-      </p>
-    </div>
-  </div>
-);
 
 const VoiceCard: React.FC<{
   voice: EmployeeVoice;
@@ -158,29 +140,28 @@ const EmployeeVoicePage: React.FC = () => {
       animate="animate"
     >
       {/* Header */}
-      <motion.div
-        variants={staggerItem}
-        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-            <MegaphoneIcon className="h-7 w-7 text-blue-600 dark:text-blue-400" />
-            Employee Voice
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {isAdmin
+      <motion.div variants={staggerItem}>
+        <SectionHeader
+          variant="voice"
+          eyebrow="Employee Voice"
+          title="Employee Voice"
+          description={
+            isAdmin
               ? "Every submission from your team - reports, ideas and appreciation."
-              : "Report issues, suggest ideas, request support or send appreciation."}
-          </p>
-        </div>
-        <motion.button
-          whileTap={{ scale: 0.96 }}
-          onClick={() => setSubmitOpen(true)}
-          className="inline-flex items-center gap-2 self-start rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-colors hover:bg-blue-700"
-        >
-          <PlusIcon className="h-4 w-4" />
-          Share your voice
-        </motion.button>
+              : "Report issues, suggest ideas, request support or send appreciation."
+          }
+          illustration={sectionIllustration("voice")}
+          action={
+            <motion.button
+              whileTap={{ scale: 0.96 }}
+              onClick={() => setSubmitOpen(true)}
+              className="sh-action-primary"
+            >
+              <PlusIcon className="h-4 w-4" />
+              Share your voice
+            </motion.button>
+          }
+        />
       </motion.div>
 
       {/* Anything below here mounts only AFTER a query resolves, by which time
@@ -195,31 +176,30 @@ const EmployeeVoicePage: React.FC = () => {
           variants={staggerItem}
           initial="initial"
           animate="animate"
-          className="grid grid-cols-2 gap-4 lg:grid-cols-4"
         >
-          <StatChip
-            label="Pending"
-            value={stats.pending}
-            icon={<ClockIcon className="h-5 w-5" />}
-            tile="bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400"
-          />
-          <StatChip
-            label="Resolved"
-            value={stats.resolved}
-            icon={<CheckCircleIcon className="h-5 w-5" />}
-            tile="bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"
-          />
-          <StatChip
-            label="New Today"
-            value={stats.newToday}
-            icon={<SparklesIcon className="h-5 w-5" />}
-            tile="bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400"
-          />
-          <StatChip
-            label="High Priority"
-            value={stats.highPriority}
-            icon={<FireIcon className="h-5 w-5" />}
-            tile="bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400"
+          <StatCardRow
+            tiles={[
+              {
+                label: "Pending",
+                value: stats.pending,
+                icon: <ClockIcon className="h-5 w-5" />,
+              },
+              {
+                label: "Resolved",
+                value: stats.resolved,
+                icon: <CheckCircleIcon className="h-5 w-5" />,
+              },
+              {
+                label: "New Today",
+                value: stats.newToday,
+                icon: <SparklesIcon className="h-5 w-5" />,
+              },
+              {
+                label: "High Priority",
+                value: stats.highPriority,
+                icon: <FireIcon className="h-5 w-5" />,
+              },
+            ]}
           />
         </motion.div>
       )}

@@ -1,4 +1,6 @@
 import React from "react";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { LanguageIcon } from "@heroicons/react/24/outline";
@@ -9,6 +11,7 @@ import { useLocale } from "../i18n/LocaleProvider";
 import { staggerContainer, staggerItem } from "../lib/motion";
 import "../styles/design-system.css";
 
+import Button from "../components/ui/Button";
 const ThemePage: React.FC = () => {
   // "settings" is lazily fetched the first time this page renders.
   const { t: tSettings } = useTranslation("settings");
@@ -21,14 +24,17 @@ const ThemePage: React.FC = () => {
       initial="initial"
       animate="animate"
     >
-      {/* Header */}
+      {/* Header. Its own banner is the live preview of what the controls
+          below do: the gradient and the animation both repaint the moment an
+          accent is picked. */}
       <motion.div variants={staggerItem}>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-          Customize
-        </h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Personalize the appearance and accent color of your workspace.
-        </p>
+        <SectionHeader
+          variant="settings"
+          eyebrow="Preferences"
+          title="Customize"
+          description="Personalize the appearance and accent color of your workspace."
+          illustration={sectionIllustration("settings")}
+        />
       </motion.div>
 
       {/* Settings card */}
@@ -83,7 +89,7 @@ const ThemePage: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           <span className="badge-primary">Accent</span>
-          <button className="btn-primary">Primary button</button>
+          <Button variant="primary">Primary button</Button>
         </div>
       </motion.div>
     </motion.div>

@@ -145,7 +145,7 @@ const MobileLeaveCalendar: React.FC<Props> = ({
   })();
 
   const CARD =
-    "rounded-[18px] border border-gray-200 bg-[var(--card-surface)] dark:border-white/10";
+    "glass-card rounded-[18px]";
 
   return (
     <div className="lg:hidden">
@@ -158,7 +158,7 @@ const MobileLeaveCalendar: React.FC<Props> = ({
           type="button"
           onClick={() => setView(view === "month" ? "agenda" : "month")}
           aria-label="Switch view"
-          className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-xl border border-gray-200 bg-[var(--card-surface)] text-gray-500 active:bg-black/5 dark:border-white/10 dark:text-gray-400 dark:active:bg-white/10"
+          className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-full border border-gray-200 bg-[var(--card-surface)] text-gray-500 active:bg-black/5 dark:border-white/10 dark:text-gray-400 dark:active:bg-white/10"
         >
           <FunnelIcon className="h-[17px] w-[17px]" />
         </button>
@@ -169,7 +169,7 @@ const MobileLeaveCalendar: React.FC<Props> = ({
         <button
           onClick={() => onCursorChange(subMonths(cursor, 1))}
           aria-label="Previous month"
-          className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-xl border border-gray-200 bg-[var(--card-surface)] text-gray-500 active:bg-black/5 dark:border-white/10 dark:text-gray-400 dark:active:bg-white/10"
+          className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-full border border-gray-200 bg-[var(--card-surface)] text-gray-500 active:bg-black/5 dark:border-white/10 dark:text-gray-400 dark:active:bg-white/10"
         >
           <ChevronLeftIcon className="h-[18px] w-[18px]" />
         </button>
@@ -184,7 +184,7 @@ const MobileLeaveCalendar: React.FC<Props> = ({
         <button
           onClick={() => onCursorChange(addMonths(cursor, 1))}
           aria-label="Next month"
-          className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-xl border border-gray-200 bg-[var(--card-surface)] text-gray-500 active:bg-black/5 dark:border-white/10 dark:text-gray-400 dark:active:bg-white/10"
+          className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-full border border-gray-200 bg-[var(--card-surface)] text-gray-500 active:bg-black/5 dark:border-white/10 dark:text-gray-400 dark:active:bg-white/10"
         >
           <ChevronRightIcon className="h-[18px] w-[18px]" />
         </button>
@@ -194,7 +194,7 @@ const MobileLeaveCalendar: React.FC<Props> = ({
             onCursorChange(new Date());
             setSelected(today);
           }}
-          className="h-[38px] shrink-0 rounded-xl border px-3.5 text-[13px] font-bold active:opacity-80"
+          className="h-[38px] shrink-0 rounded-full border px-3.5 text-[13px] font-bold active:opacity-80"
           style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
         >
           Today

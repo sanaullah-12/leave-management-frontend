@@ -1,4 +1,6 @@
 import React, { useMemo } from "react";
+import SectionHeader from "../components/ui/SectionHeader";
+import { sectionIllustration } from "../components/ui/illustrations";
 import { useAuth } from "../context/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm, Controller } from "react-hook-form";
@@ -215,19 +217,13 @@ const ApplyLeavePage: React.FC = () => {
   return (
     <div className="space-y-6 fade-in">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <span className="flex h-11 w-11 items-center justify-center rounded-2xl text-blue-600 dark:text-blue-400">
-          <PlusCircleIcon className="h-6 w-6" />
-        </span>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-3xl">
-            Apply for Leave
-          </h1>
-          <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
-            Choose a leave type, pick your dates, and submit for approval.
-          </p>
-        </div>
-      </div>
+      <SectionHeader
+        variant="leave"
+        eyebrow="Time off"
+        title="Apply for Leave"
+        description="Choose a leave type, pick your dates, and submit for approval."
+        illustration={sectionIllustration("leave")}
+      />
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -564,7 +560,7 @@ const ApplyLeavePage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => navigate("/leaves")}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-white/10 dark:text-gray-200 dark:hover:bg-white/5"
+                  className="w-full rounded-full border border-gray-200 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-white/10 dark:text-gray-200 dark:hover:bg-white/5"
                 >
                   Cancel
                 </button>

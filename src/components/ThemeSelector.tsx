@@ -94,7 +94,7 @@ const ThemeSelector: React.FC<{ showPreview?: boolean }> = () => {
               <button
                 key={m.key}
                 onClick={() => setThemeMode(m.key)}
-                className={`group rounded-2xl border-2 p-2 text-left transition-all ${
+                className={`group rounded-xl border-2 p-2 text-left transition-all ${
                   active
                     ? "border-gray-900 dark:border-white"
                     : "border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600"

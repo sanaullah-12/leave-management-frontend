@@ -1,26 +1,31 @@
 /**
  * Shared surface tokens.
  *
- * The neumorphic card language used by the dashboard KPI tiles, Document Studio
- * and Payroll. Centralised here so a surface tweak lands everywhere at once
- * instead of being re-typed as a long shadow string per module.
+ * The glass card language used by the dashboard KPI tiles, Document Studio and
+ * Payroll. Centralised here so a surface tweak lands everywhere at once instead
+ * of being re-typed per module.
+ *
+ * The values come from the --glass-* tokens in design-system.css, so these
+ * strings and the .surface-card/.card CSS classes stay the same material.
  */
 
-/** Neumorphic card surface - identical to the dashboard KPI tiles. */
+/** Frosted card surface - identical to the dashboard KPI tiles. */
 export const CARD =
-  "rounded-2xl bg-[var(--card-surface)] " +
-  "shadow-[7px_7px_16px_rgba(174,186,204,0.5),-7px_-7px_16px_rgba(255,255,255,0.95)] " +
-  "dark:shadow-[7px_7px_18px_rgba(0,0,0,0.55),-6px_-6px_16px_rgba(255,255,255,0.045)]";
+  "rounded-2xl bg-[var(--glass-fill)] backdrop-blur-[18px] backdrop-saturate-[1.8] " +
+  "border border-[var(--glass-edge)] " +
+  "shadow-[shadow:var(--glass-sheen),var(--glass-drop)]";
 
-/** Interactive lift used on clickable cards. */
+/** Interactive lift used on clickable cards. The fill steps up with the lift. */
 export const CARD_HOVER =
   "transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 " +
-  "hover:shadow-[12px_12px_24px_rgba(174,186,204,0.6),-12px_-12px_24px_rgba(255,255,255,1)] " +
-  "dark:hover:shadow-[12px_12px_28px_rgba(0,0,0,0.7),-10px_-10px_24px_rgba(255,255,255,0.06)]";
+  "hover:bg-[var(--glass-fill-strong)] " +
+  "hover:shadow-[shadow:var(--glass-sheen),var(--glass-drop-lifted)]";
 
-/** Flat bordered surface for panels/side rails - solid so overlays read clearly. */
+/** Denser glass for panels and side rails - more fill, so overlaid text holds up. */
 export const PANEL =
-  "rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800";
+  "rounded-2xl bg-[var(--glass-fill-strong)] backdrop-blur-[18px] backdrop-saturate-[1.8] " +
+  "border border-[var(--glass-edge)] " +
+  "shadow-[shadow:var(--glass-sheen),var(--glass-drop)]";
 
 /** Human "x days ago" relative label used across cards/history tables. */
 export function relativeTime(iso: string): string {

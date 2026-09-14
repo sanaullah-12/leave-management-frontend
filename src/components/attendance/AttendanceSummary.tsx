@@ -1,15 +1,12 @@
 import React from "react";
-import { CARD, CARD_HOVER } from "../../lib/surfaces";
-import { AccentEdge } from "../ui/CardAccents";
-import { useThemeAccent } from "../../hooks/useThemeAccent";
+import { ChartBarIcon } from "@heroicons/react/24/outline";
+import { StatCard, type StatAccent } from "../ui/StatCard";
 
 /**
- * The summary row.
+ * The attendance summary row.
  *
- * Same shell as the dashboard KPI tiles - the shared CARD surface, an accent
- * hairline across the top edge, an overline label, the value on a fixed-height
- * line so every tile's number shares a baseline, and the caption pinned to the
- * bottom so captions align across the row.
+ * Renders the product's shared StatCard, so a figure here is the same tile as
+ * one on the dashboard, in payroll or on a report.
  *
  * During a load the value is a shimmer rather than a zero: a zero is a claim,
  * and "not known yet" is not the same as "nobody".
@@ -19,7 +16,10 @@ export interface SummaryItem {
   label: string;
   value: number | string | null;
   caption?: string;
-  /** Accent hairline colour. Defaults to the active theme accent. */
+  /**
+   * Ignored. The row alternates the two product accents; a per-item colour
+   * would break that rhythm. Kept so callers did not all have to change.
+   */
   accent?: string;
   icon?: React.ReactNode;
 }
@@ -29,56 +29,28 @@ interface Props {
   loading?: boolean;
 }
 
-const AttendanceSummary: React.FC<Props> = ({ items, loading = false }) => {
-  const accent = useThemeAccent(600);
+/** Stands in for the figure until it is known. */
+const Shimmer: React.FC = () => (
+  <span className="inline-block h-5 w-12 animate-pulse rounded bg-gray-200 align-middle dark:bg-gray-700" />
+);
 
-  return (
+const AttendanceSummary: React.FC<Props> = ({ items, loading = false }) => (
   <section
     aria-label="Attendance summary"
-    className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5"
+    // Same rule as StatCardRow: auto-fit from 11rem, then share what is left,
+    // so the row ends flush with the content below it.
+    className="grid grid-cols-1 gap-3 sm:grid-cols-[repeat(auto-fit,minmax(11rem,1fr))]"
   >
-    {items.map((item) => (
-      <div
+    {items.map((item, i) => (
+      <StatCard
         key={item.label}
-        className={`group relative overflow-hidden ${CARD} ${CARD_HOVER} flex h-full flex-col p-3.5 sm:p-5`}
-      >
-        <AccentEdge color={item.accent || accent} />
-
-        <div className="relative flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <p
-              className="text-overline truncate text-gray-400 dark:text-gray-500"
-              title={item.label}
-            >
-              {item.label}
-            </p>
-            <p className="mt-2 flex min-h-[2rem] items-end gap-1 sm:min-h-[2.25rem]">
-              {loading ? (
-                <span className="inline-block h-7 w-14 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
-              ) : (
-                <span className="text-2xl font-bold leading-none tabular-nums text-gray-900 dark:text-white sm:text-3xl">
-                  {item.value ?? "-"}
-                </span>
-              )}
-            </p>
-          </div>
-
-          {item.icon && (
-            <div className="hidden h-11 w-11 flex-shrink-0 place-items-center text-blue-600 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-110 dark:text-blue-400 sm:grid">
-              {item.icon}
-            </div>
-          )}
-        </div>
-
-        {item.caption && (
-          <p className="mt-auto pt-2 text-[11px] font-medium leading-snug text-gray-500 dark:text-gray-400 sm:pt-3 sm:text-xs">
-            {item.caption}
-          </p>
-        )}
-      </div>
-      ))}
-    </section>
-  );
-};
+        label={item.label}
+        value={loading ? <Shimmer /> : (item.value ?? "-")}
+        icon={item.icon ?? <ChartBarIcon className="h-5 w-5" />}
+        accent={(i % 2 === 0 ? "indigo" : "teal") as StatAccent}
+      />
+    ))}
+  </section>
+);
 
 export default AttendanceSummary;
