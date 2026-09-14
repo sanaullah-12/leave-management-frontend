@@ -1,7 +1,8 @@
 {
   "brand": {
     "name": "Nexora",
-    "tagline": "El sistema HRMS"
+    "tagline": "El sistema HRMS",
+    "workspace": "Espacio de trabajo"
   },
   "search": {
     "placeholder": "Buscar",
@@ -28,7 +29,7 @@
   "groups": {
     "home": "Inicio",
     "leave": "Gestión de ausencias",
-    "team": "Equipo y personas",
+    "team": "Empleados",
     "attendance": "Asistencia",
     "payroll": "Nómina",
     "documents": "Estudio de documentos",
@@ -38,7 +39,7 @@
   "short": {
     "home": "Inicio",
     "leave": "Ausencias",
-    "team": "Equipo",
+    "team": "Empleados",
     "attendance": "Asistencia",
     "payroll": "Nómina",
     "documents": "Documentos",
@@ -54,8 +55,8 @@
     "leaveCalendar": "Calendario de ausencias",
     "applyLeave": "Solicitar ausencia",
     "myLeaveActivity": "Mi actividad de ausencias",
-    "myTeam": "Mi equipo",
-    "employees": "Empleados",
+    "myTeam": "Perfiles de empleados",
+    "employees": "Gestionar empleados",
     "departments": "Departamentos",
     "leavePolicies": "Políticas de ausencia",
     "attendance": "Asistencia",

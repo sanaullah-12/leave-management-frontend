@@ -1,6 +1,8 @@
 {
   "actions": {
     "quickApply": "Quick Apply",
+    "seeLess": "See less",
+    "seeMore": "See more",
     "viewAll": "View All",
     "viewCompanyCalendar": "View Company Calendar"
   },
@@ -36,6 +38,7 @@
   "kpi": {
     "acrossAllLeaveTypes": "Across all leave types",
     "activeWorkforce": "Active workforce",
+    "allLeaveRequests": "All leave requests",
     "annualLeave": "Annual Leave",
     "approved": "Approved",
     "awaitingReview": "Awaiting your review",
@@ -48,12 +51,14 @@
     "requestsGranted": "Requests granted",
     "sickLeave": "Sick Leave",
     "thisMonth": "This Month",
-    "totalEmployees": "Total Employees"
+    "totalEmployees": "Total Employees",
+    "totalRequests": "Total Requests"
   },
   "labels": {
     "approved": "Approved",
     "availableToday": "Available Today",
     "employees": "Employees",
+    "onLeaveToday": "On Leave Today",
     "pending": "Pending",
     "requests": "Requests"
   },

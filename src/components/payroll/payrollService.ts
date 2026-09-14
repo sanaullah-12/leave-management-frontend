@@ -13,6 +13,7 @@ import {
   COMPONENT_BLUEPRINTS,
   DEFAULT_COMPONENT_CODES,
   DEFAULT_SETTINGS,
+  PLACEHOLDER_COMPANY_NAME,
 } from "./constants";
 import { payDateFor, periodKey } from "./formatters";
 import { aggregate, computePayslip, type PayrollContext } from "./engine";
@@ -293,4 +294,22 @@ export function updateSettings(
   patch: Partial<PayrollSettings>
 ): PayrollSettings {
   return { ...current, ...patch };
+}
+
+/**
+ * Whether payroll should take `tenant` as the employer name.
+ *
+ * True only when nothing deliberate is stored: an empty field, or the product
+ * name this module used to default to. An admin who typed their own trading
+ * name keeps it - a payslip is a legal document, and nothing here overwrites a
+ * name a person chose.
+ */
+export function shouldAdoptCompanyName(
+  stored: string | undefined,
+  tenant: string
+): boolean {
+  if (!tenant) return false;
+  const current = (stored || "").trim();
+  if (!current) return true;
+  return current === PLACEHOLDER_COMPANY_NAME && current !== tenant;
 }

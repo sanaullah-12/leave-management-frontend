@@ -1,7 +1,8 @@
 {
   "brand": {
     "name": "Nexora",
-    "tagline": "HRMS システム"
+    "tagline": "HRMS システム",
+    "workspace": "ワークスペース"
   },
   "search": {
     "placeholder": "検索",
@@ -28,7 +29,7 @@
   "groups": {
     "home": "ホーム",
     "leave": "休暇管理",
-    "team": "チームと社員",
+    "team": "従業員",
     "attendance": "勤怠",
     "payroll": "給与",
     "documents": "ドキュメントスタジオ",
@@ -38,7 +39,7 @@
   "short": {
     "home": "ホーム",
     "leave": "休暇",
-    "team": "チーム",
+    "team": "従業員",
     "attendance": "勤怠",
     "payroll": "給与",
     "documents": "文書",
@@ -54,8 +55,8 @@
     "leaveCalendar": "休暇カレンダー",
     "applyLeave": "休暇を申請",
     "myLeaveActivity": "自分の休暇履歴",
-    "myTeam": "自分のチーム",
-    "employees": "従業員",
+    "myTeam": "従業員プロフィール",
+    "employees": "従業員の管理",
     "departments": "部署",
     "leavePolicies": "休暇ポリシー",
     "attendance": "勤怠",

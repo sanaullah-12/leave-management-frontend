@@ -1,6 +1,8 @@
 {
   "actions": {
     "quickApply": "Schnellantrag",
+    "seeLess": "Weniger anzeigen",
+    "seeMore": "Mehr anzeigen",
     "viewAll": "Alle ansehen",
     "viewCompanyCalendar": "Firmenkalender ansehen"
   },
@@ -36,6 +38,7 @@
   "kpi": {
     "acrossAllLeaveTypes": "Über alle Urlaubsarten",
     "activeWorkforce": "Aktive Belegschaft",
+    "allLeaveRequests": "Alle Urlaubsanträge",
     "annualLeave": "Jahresurlaub",
     "approved": "Genehmigt",
     "awaitingReview": "Warten auf Ihre Prüfung",
@@ -48,12 +51,14 @@
     "requestsGranted": "Bewilligte Anträge",
     "sickLeave": "Krankheitstage",
     "thisMonth": "Diesen Monat",
-    "totalEmployees": "Mitarbeiter gesamt"
+    "totalEmployees": "Mitarbeiter gesamt",
+    "totalRequests": "Anträge gesamt"
   },
   "labels": {
     "approved": "Genehmigt",
     "availableToday": "Heute verfügbar",
     "employees": "Mitarbeiter",
+    "onLeaveToday": "Heute abwesend",
     "pending": "Ausstehend",
     "requests": "Anträge"
   },

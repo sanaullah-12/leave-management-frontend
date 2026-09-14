@@ -233,7 +233,7 @@ const EmployeesPage: React.FC = () => {
       <SectionHeader
         variant="employees"
         eyebrow="Workforce"
-        title="Team Management"
+        title="Manage Employees"
         description="Invite people, manage their records and keep the roster current."
         illustration={sectionIllustration("employees")}
         action={

@@ -150,7 +150,7 @@ const MyTeamPage: React.FC = () => {
       <SectionHeader
         variant="team"
         eyebrow="Workforce"
-        title="My Team"
+        title="Employees Profile"
         description="Manage your organization's employees, track leave allocations, and oversee departmental distribution from a centralized hub."
         badge={
           isAdmin ? (

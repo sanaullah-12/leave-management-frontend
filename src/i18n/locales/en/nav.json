@@ -1,7 +1,8 @@
 {
   "brand": {
     "name": "Nexora",
-    "tagline": "The HRMS System"
+    "tagline": "The HRMS System",
+    "workspace": "Workspace"
   },
   "search": {
     "placeholder": "Search",
@@ -28,7 +29,7 @@
   "groups": {
     "home": "Home",
     "leave": "Leave management",
-    "team": "Team & people",
+    "team": "Employees",
     "attendance": "Attendance",
     "payroll": "Payroll",
     "documents": "Document Studio",
@@ -38,7 +39,7 @@
   "short": {
     "home": "Home",
     "leave": "Leave",
-    "team": "Team",
+    "team": "Employees",
     "attendance": "Attendance",
     "payroll": "Payroll",
     "documents": "Documents",
@@ -54,8 +55,8 @@
     "leaveCalendar": "Leave Calendar",
     "applyLeave": "Apply Leave",
     "myLeaveActivity": "My Leave Activity",
-    "myTeam": "My Team",
-    "employees": "Employees",
+    "myTeam": "Employees Profile",
+    "employees": "Manage Employees",
     "departments": "Departments",
     "leavePolicies": "Leave Policies",
     "attendance": "Attendance",

@@ -1,6 +1,8 @@
 {
   "actions": {
     "quickApply": "クイック申請",
+    "seeLess": "表示を減らす",
+    "seeMore": "もっと見る",
     "viewAll": "すべて表示",
     "viewCompanyCalendar": "会社カレンダーを見る"
   },
@@ -36,6 +38,7 @@
   "kpi": {
     "acrossAllLeaveTypes": "すべての休暇種別",
     "activeWorkforce": "稼働中の従業員",
+    "allLeaveRequests": "すべての休暇申請",
     "annualLeave": "年次休暇",
     "approved": "承認済み",
     "awaitingReview": "承認待ち",
@@ -48,12 +51,14 @@
     "requestsGranted": "承認された申請",
     "sickLeave": "病気休暇",
     "thisMonth": "今月",
-    "totalEmployees": "従業員総数"
+    "totalEmployees": "従業員総数",
+    "totalRequests": "申請総数"
   },
   "labels": {
     "approved": "承認済み",
     "availableToday": "本日出勤",
     "employees": "従業員",
+    "onLeaveToday": "本日休暇",
     "pending": "保留中",
     "requests": "申請"
   },

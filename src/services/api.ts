@@ -359,6 +359,25 @@ export const attendanceAPI = {
       `/attendance/db/stats?startDate=${startDate}&endDate=${endDate}`
     ),
 
+  /**
+   * The roster day by day: who arrived, when, and how the day counted.
+   *
+   * The same figures the status summary reports, with the rows left in, so a
+   * table of people costs one request instead of one per employee. `detail`
+   * asks for those rows; "summary" asks only for the per-date and per-employee
+   * counts, which is what a month or a quarter should be read as.
+   */
+  getRosterDay: (
+    startDate: string,
+    endDate: string,
+    detail: "day" | "summary" = "day",
+    policy?: "flexible" | "strict"
+  ) => {
+    const params = new URLSearchParams({ startDate, endDate, detail });
+    if (policy) params.append("policy", policy);
+    return attendanceApi.get(`/attendance/db/roster-day?${params.toString()}`);
+  },
+
   // Workforce split into on-time / late / absent employee-days for a range.
   // Computed server-side in one read; the alternative was one request per
   // employee from the dashboard.

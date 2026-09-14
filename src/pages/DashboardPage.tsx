@@ -7,12 +7,13 @@ import SectionHeader from "../components/ui/SectionHeader";
 import { sectionIllustration } from "../components/ui/illustrations";
 import { useAuth } from "../context/AuthContext";
 import AttendancePieCard from "../components/dashboard/AttendancePieCard";
+import AttendanceBoard from "../components/attendance/AttendanceBoard";
 import { useTheme } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
 import { useFormatters } from "../i18n/useFormatters";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { leavesAPI } from "../services/api";
+import { leavesAPI, usersAPI } from "../services/api";
 import LoadingSpinner from "../components/LoadingSpinner";
 import Avatar from "../components/Avatar";
 import { getUpcomingHolidays } from "../data/holidays";
@@ -285,6 +286,38 @@ const DashboardPage: React.FC = () => {
     staleTime: 5 * 60 * 1000,
   });
 
+  /**
+   * The workforce, for the availability panel.
+   *
+   * Shares its key with the team page so the roster is fetched once per
+   * session. Admin only - the endpoint is, and an employee has no roster to
+   * read anyway.
+   */
+  const { data: employeeList } = useQuery({
+    queryKey: ["employees"],
+    queryFn: () => usersAPI.getEmployees(1, 100),
+    enabled: user?.role === "admin",
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  /**
+   * Approved leave, so the panel can say who is actually away.
+   *
+   * Availability was previously asserted rather than checked: everybody listed
+   * was labelled available regardless of whether they were on leave that day.
+   */
+  const { data: approvedLeaves } = useQuery({
+    queryKey: ["approved-leaves"],
+    queryFn: () => leavesAPI.getLeaves(1, 100, "approved"),
+    enabled: user?.role === "admin",
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  /** Expands the availability panel past its first few rows. */
+  const [showAllTeam, setShowAllTeam] = React.useState(false);
+
   if (statsLoading && user?.role === "admin") {
     return <LogoLoader label={t("loading")} />;
   }
@@ -398,15 +431,72 @@ const DashboardPage: React.FC = () => {
   // Bars in the mini-stat row are drawn relative to the biggest tile.
   const miniStatMax = Math.max(...miniStats.map((m) => m.value), 1);
 
-  // Team members for the availability widget - reuse the employees found in
-  // the recent leaves payload (admin view has employee objects populated).
+  /**
+   * Who is in today.
+   *
+   * An admin gets the workforce. It used to be built from whoever appeared in
+   * the last five leave requests, which is not a team: when one person filed
+   * the five most recent requests, the panel listed that one person and called
+   * it the company's availability.
+   *
+   * An employee has no roster to read, so they keep the people their own
+   * recent requests name.
+   */
+  const todayKey = (() => {
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
+      now.getDate()
+    )}`;
+  })();
+
+  const dayOf = (value: any) => {
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return null;
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+      date.getDate()
+    )}`;
+  };
+
+  const onLeaveToday = new Set<string>(
+    ((approvedLeaves as any)?.data?.leaves || [])
+      .filter((l: any) => {
+        const id = l?.employee?._id;
+        const from = dayOf(l?.startDate);
+        const to = dayOf(l?.endDate);
+        return id && from && to && from <= todayKey && todayKey <= to;
+      })
+      .map((l: any) => String(l.employee._id))
+  );
+
+  const rosterEmployees: any[] = ((employeeList as any)?.data?.employees || [])
+    .filter((emp: any) => emp?.isActive !== false && emp?.status !== "inactive");
+
   const teamFromLeaves = Array.from(
     new Map(
       recent
         .filter((l) => l && typeof l.employee === "object" && l.employee?._id)
         .map((l) => [l.employee._id, l.employee])
     ).values()
-  ).slice(0, 4);
+  );
+
+  // Away first: the panel is read to find out who is missing today.
+  const teamMembers = (isAdmin && rosterEmployees.length
+    ? rosterEmployees
+    : teamFromLeaves
+  )
+    .map((emp: any) => ({ ...emp, onLeave: onLeaveToday.has(String(emp._id)) }))
+    .sort(
+      (a: any, b: any) =>
+        Number(b.onLeave) - Number(a.onLeave) ||
+        (a.name || "").localeCompare(b.name || "")
+    );
+
+  const TEAM_PREVIEW = 3;
+  const visibleTeam = showAllTeam
+    ? teamMembers
+    : teamMembers.slice(0, TEAM_PREVIEW);
 
   // Real upcoming public holidays, sourced from the shared holidays config.
   const publicHolidays = getUpcomingHolidays(new Date(), 4).map(
@@ -422,11 +512,15 @@ const DashboardPage: React.FC = () => {
   const kpis = isAdmin
     ? [
         {
-          label: t("kpi.totalEmployees"),
-          value: adminStats.totalEmployees || 0,
-          caption: t("kpi.activeWorkforce"),
-          icon: <UsersIcon className="w-5 h-5" />,
-          onClick: () => navigate("/employees"),
+          // The other three tiles all count leave requests, so a headcount in
+          // the first slot was the odd one out: it made the row read as four
+          // measures of the same thing when it was three plus a total.
+          // Requests raised is the figure the rest of the row is a split of.
+          label: t("kpi.totalRequests"),
+          value: totalReq,
+          caption: t("kpi.allLeaveRequests"),
+          icon: <ChartBarIcon className="w-5 h-5" />,
+          onClick: () => navigate("/leaves"),
         },
         {
           label: t("kpi.pendingRequests"),
@@ -553,6 +647,26 @@ const DashboardPage: React.FC = () => {
 
       {/* ---------------- Announcements highlight (fresh 24h + pinned) ---------------- */}
       <DashboardAnnouncements />
+
+      {/* ---------------- Today's attendance ---------------- */}
+      {/* Opens on today, which is the question this section exists to answer.
+          The period filter widens it without leaving the dashboard. */}
+      <motion.div variants={staggerItem}>
+        <AttendanceBoard
+          variant="dashboard"
+          role={user?.role}
+          footer={
+            <button
+              type="button"
+              onClick={() => navigate("/attendance")}
+              className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+            >
+              Open the attendance page
+              <ArrowUpRightIcon className="h-3.5 w-3.5" />
+            </button>
+          }
+        />
+      </motion.div>
 
       {/* ---------------- Attendance + gauges ---------------- */}
       <motion.div
@@ -843,43 +957,80 @@ const DashboardPage: React.FC = () => {
             title={t("sections.teamAvailability")}
             action={<SunIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />}
           >
-            {teamFromLeaves.length > 0 ? (
-              <ul className="space-y-1">
-                {teamFromLeaves.map((emp: any) => (
-                  <li
-                    key={emp._id}
-                    className="flex items-center justify-between gap-3 rounded-xl p-2 -mx-1 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className="relative flex-shrink-0">
-                        <Avatar
-                          src={emp.profilePicture}
-                          name={emp.name || "Unknown"}
-                          size="md"
-                          className="ring-2 ring-white dark:ring-gray-800 shadow-sm"
-                        />
-                        <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-gray-800" />
-                      </span>
-                      <div className="min-w-0">
-                        <button
-                          onClick={() =>
-                            emp._id && navigate(`/employees/${emp._id}`)
-                          }
-                          className="block text-left text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate"
-                        >
-                          {emp.name || "Unknown"}
-                        </button>
-                        <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium truncate">
-                          {t("labels.availableToday")}
-                        </p>
+            {teamMembers.length > 0 ? (
+              <>
+                {/* Expanded, the list scrolls rather than pushing the column
+                    past the card beside it. */}
+                <ul
+                  className={`space-y-1 ${
+                    showAllTeam ? "max-h-80 overflow-y-auto pr-1" : ""
+                  }`}
+                >
+                  {visibleTeam.map((emp: any) => (
+                    <li
+                      key={emp._id}
+                      className="flex items-center justify-between gap-3 rounded-xl p-2 -mx-1 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="relative flex-shrink-0">
+                          <Avatar
+                            src={emp.profilePicture}
+                            name={emp.name || "Unknown"}
+                            size="md"
+                            className="ring-2 ring-white dark:ring-gray-800 shadow-sm"
+                          />
+                          <span
+                            className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-white dark:ring-gray-800 ${
+                              emp.onLeave ? "bg-cyan-600" : "bg-emerald-500"
+                            }`}
+                          />
+                        </span>
+                        <div className="min-w-0">
+                          <button
+                            onClick={() =>
+                              emp._id && navigate(`/employees/${emp._id}`)
+                            }
+                            className="block text-left text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate"
+                          >
+                            {emp.name || "Unknown"}
+                          </button>
+                          <p
+                            className={`text-xs font-medium truncate ${
+                              emp.onLeave
+                                ? "text-cyan-700 dark:text-cyan-400"
+                                : "text-emerald-600 dark:text-emerald-400"
+                            }`}
+                          >
+                            {emp.onLeave
+                              ? t("labels.onLeaveToday")
+                              : t("labels.availableToday")}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <span className="text-xs text-gray-400 dark:text-gray-500 truncate max-w-[80px] text-right">
-                      {emp.department || emp.position || "Team"}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+                      <span className="text-xs text-gray-400 dark:text-gray-500 truncate max-w-[80px] text-right">
+                        {emp.department?.name ||
+                          emp.department ||
+                          emp.position ||
+                          "Team"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                {teamMembers.length > TEAM_PREVIEW && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllTeam((open) => !open)}
+                    className="mt-2 w-full rounded-xl py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-500/10"
+                  >
+                    {showAllTeam
+                      ? t("actions.seeLess")
+                      : `${t("actions.seeMore")} (${
+                          teamMembers.length - TEAM_PREVIEW
+                        })`}
+                  </button>
+                )}
+              </>
             ) : (
               <p className="text-sm text-gray-500 dark:text-gray-400 py-4 text-center">
                 {t("empty.noTeamActivity")}

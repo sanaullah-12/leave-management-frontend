@@ -1,6 +1,8 @@
 {
   "actions": {
     "quickApply": "فوری درخواست",
+    "seeLess": "کم دیکھیں",
+    "seeMore": "مزید دیکھیں",
     "viewAll": "سب دیکھیں",
     "viewCompanyCalendar": "کمپنی کیلنڈر دیکھیں"
   },
@@ -36,6 +38,7 @@
   "kpi": {
     "acrossAllLeaveTypes": "تمام اقسام کی چھٹیوں میں",
     "activeWorkforce": "فعال افرادی قوت",
+    "allLeaveRequests": "تمام چھٹی کی درخواستیں",
     "annualLeave": "سالانہ چھٹی",
     "approved": "منظور شدہ",
     "awaitingReview": "آپ کے جائزے کے منتظر",
@@ -48,12 +51,14 @@
     "requestsGranted": "منظور شدہ درخواستیں",
     "sickLeave": "بیماری کی چھٹی",
     "thisMonth": "اس مہینے",
-    "totalEmployees": "کل ملازمین"
+    "totalEmployees": "کل ملازمین",
+    "totalRequests": "کل درخواستیں"
   },
   "labels": {
     "approved": "منظور شدہ",
     "availableToday": "آج دستیاب",
     "employees": "ملازمین",
+    "onLeaveToday": "آج چھٹی پر",
     "pending": "زیر التوا",
     "requests": "درخواستیں"
   },
