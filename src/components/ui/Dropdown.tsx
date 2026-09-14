@@ -50,7 +50,7 @@ const DEFAULT_BUTTON =
   "inline-flex items-center gap-2 rounded-full bg-[var(--card-surface)] px-3.5 py-2 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-200/70 transition-colors hover:bg-black/[0.03] dark:text-gray-200 dark:ring-white/10 dark:hover:bg-white/[0.04]";
 
 const PANEL =
-  "glass-panel z-[110] mt-2 rounded-xl p-1.5 focus:outline-none" +
+  "glass-panel z-[110] mt-2 rounded-xl p-1.5 focus:outline-none " +
   "origin-top transition ease-out data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-150 data-[leave]:duration-100";
 
 const Dropdown: React.FC<DropdownProps> = ({

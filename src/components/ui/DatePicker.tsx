@@ -12,6 +12,11 @@ import {
  * Drop-in replacement for <input type="date">: `value`/`onChange` use the same
  * `yyyy-mm-dd` string format, so it works directly with react-hook-form via a
  * Controller. Theme-aware, accessible, and renders above modals (z-[110]).
+ *
+ * The trigger is a flat h-10, which is Input's `md` height. These three - a
+ * text field, a Select and this - are the same field family and are routinely
+ * laid out in one row, so the height is fixed rather than left to the padding
+ * and line-height of whatever each happens to contain.
  */
 
 export interface DatePickerProps {
@@ -92,7 +97,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
     <Popover className={`relative ${className}`}>
       <PopoverButton
         disabled={disabled}
-        className="flex w-full items-center gap-2.5 rounded-full bg-[var(--card-surface)] px-4 py-2 text-left text-sm font-medium text-gray-800 min-h-[40px] sm:min-h-0 ring-1 ring-inset ring-gray-200/70 transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60 dark:text-gray-100 dark:ring-white/10"
+        className="flex w-full items-center gap-2.5 rounded-full bg-[var(--card-surface)] h-10 px-4 text-left text-sm font-medium text-gray-800 ring-1 ring-inset ring-gray-200/70 transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60 dark:text-gray-100 dark:ring-white/10"
       >
         <CalendarDaysIcon className="h-4 w-4 flex-shrink-0 text-gray-400" />
         <span className={`flex-1 truncate ${selected ? "" : "text-gray-400"}`}>

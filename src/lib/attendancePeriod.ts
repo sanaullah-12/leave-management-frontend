@@ -29,7 +29,7 @@ export interface PeriodRange {
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /** A Date as the calendar day it is locally. */
-const isoOf = (date: Date) =>
+export const isoDay = (date: Date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
 export const PERIOD_OPTIONS: { value: PeriodKey; label: string }[] = [
@@ -41,7 +41,7 @@ export const PERIOD_OPTIONS: { value: PeriodKey; label: string }[] = [
 
 export function periodRange(key: PeriodKey): PeriodRange {
   const now = new Date();
-  const to = isoOf(now);
+  const to = isoDay(now);
 
   switch (key) {
     case "last7": {
@@ -51,7 +51,7 @@ export function periodRange(key: PeriodKey): PeriodRange {
       start.setDate(start.getDate() - 6);
       return {
         key,
-        from: isoOf(start),
+        from: isoDay(start),
         to,
         label: "Last 7 days",
         detail: "day",
@@ -61,7 +61,7 @@ export function periodRange(key: PeriodKey): PeriodRange {
       const start = new Date(now.getFullYear(), now.getMonth(), 1);
       return {
         key,
-        from: isoOf(start),
+        from: isoDay(start),
         to,
         // Month to date, never past today: a working day nobody has lived
         // through yet cannot be attended or missed.
@@ -78,7 +78,7 @@ export function periodRange(key: PeriodKey): PeriodRange {
       start.setDate(start.getDate() + 1);
       return {
         key,
-        from: isoOf(start),
+        from: isoDay(start),
         to,
         label: "Last 3 months",
         detail: "summary",

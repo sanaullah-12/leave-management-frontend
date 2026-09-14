@@ -55,11 +55,15 @@
     "totalRequests": "申請総数"
   },
   "labels": {
+    "absentToday": "本日欠勤",
     "approved": "承認済み",
     "availableToday": "本日出勤",
     "employees": "従業員",
+    "lateToday": "本日遅刻",
     "onLeaveToday": "本日休暇",
     "pending": "保留中",
+    "presentToday": "本日出社",
+    "remoteToday": "リモート勤務",
     "requests": "申請"
   },
   "loading": "ダッシュボードを読み込み中...",

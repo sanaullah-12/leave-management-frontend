@@ -55,11 +55,15 @@
     "totalRequests": "Total Requests"
   },
   "labels": {
+    "absentToday": "Absent Today",
     "approved": "Approved",
     "availableToday": "Available Today",
     "employees": "Employees",
+    "lateToday": "Late Today",
     "onLeaveToday": "On Leave Today",
     "pending": "Pending",
+    "presentToday": "Present Today",
+    "remoteToday": "Working Remotely",
     "requests": "Requests"
   },
   "loading": "Loading your dashboard...",

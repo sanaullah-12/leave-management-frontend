@@ -17,6 +17,11 @@ import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/24/outline";
  *   { value: "active", label: "Active", dotColor: "#10b981", badge: "AVAILABLE",
  *     badgeClass: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400" },
  * ]} />
+ *
+ * The trigger is a flat h-10, which is Input's `md` height. These three - a
+ * text field, this and DatePicker - are the same field family and are
+ * routinely laid out in one row, so the height is fixed rather than left to
+ * the padding and line-height of whatever each happens to contain.
  */
 
 export interface SelectOption {
@@ -50,7 +55,7 @@ const Select: React.FC<SelectProps> = ({
   return (
     <Listbox value={value} onChange={onChange} disabled={disabled}>
       <div className={`relative ${className}`}>
-        <ListboxButton className="flex w-full items-center gap-2.5 rounded-full bg-[var(--card-surface)] px-4 py-2 text-left text-sm font-medium text-gray-800 min-h-[40px] sm:min-h-0 ring-1 ring-inset ring-gray-200/70 transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60 dark:text-gray-100 dark:ring-white/10">
+        <ListboxButton className="flex w-full items-center gap-2.5 rounded-full bg-[var(--card-surface)] h-10 px-4 text-left text-sm font-medium text-gray-800 ring-1 ring-inset ring-gray-200/70 transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60 dark:text-gray-100 dark:ring-white/10">
           {selected?.dotColor && (
             <span
               className="h-2 w-2 flex-shrink-0 rounded-full"

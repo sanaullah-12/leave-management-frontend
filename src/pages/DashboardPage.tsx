@@ -13,7 +13,76 @@ import { useTranslation } from "react-i18next";
 import { useFormatters } from "../i18n/useFormatters";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { leavesAPI, usersAPI } from "../services/api";
+import { attendanceAPI, leavesAPI, usersAPI } from "../services/api";
+import { isoDay } from "../lib/attendancePeriod";
+
+/**
+ * How a reported day reads in the Team Availability panel.
+ *
+ * `available` answers "can I reach this person today", which is why Late sits
+ * with On time and Work from home rather than with the absences - a late
+ * arrival is still an arrival, and the panel is not where the arrival rule is
+ * enforced. `rank` sorts the states that need attention to the top, because
+ * the panel is read to find out who is missing and the collapsed preview only
+ * shows the first few rows.
+ *
+ * Keys are the server's own status words, so nothing here has to restate how
+ * a day was judged.
+ */
+const AVAILABILITY: Record<
+  string,
+  { labelKey: string; available: boolean; rank: number; dot: string; text: string }
+> = {
+  Absent: {
+    labelKey: "labels.absentToday",
+    available: false,
+    rank: 0,
+    dot: "bg-rose-500",
+    text: "text-rose-600 dark:text-rose-400",
+  },
+  "On leave": {
+    labelKey: "labels.onLeaveToday",
+    available: false,
+    rank: 1,
+    dot: "bg-cyan-600",
+    text: "text-cyan-700 dark:text-cyan-400",
+  },
+  Late: {
+    labelKey: "labels.lateToday",
+    available: true,
+    rank: 2,
+    dot: "bg-amber-500",
+    text: "text-amber-600 dark:text-amber-400",
+  },
+  "Work from home": {
+    labelKey: "labels.remoteToday",
+    available: true,
+    rank: 3,
+    dot: "bg-indigo-500",
+    text: "text-indigo-600 dark:text-indigo-400",
+  },
+  "On time": {
+    labelKey: "labels.presentToday",
+    available: true,
+    rank: 4,
+    dot: "bg-emerald-500",
+    text: "text-emerald-600 dark:text-emerald-400",
+  },
+};
+
+/**
+ * The reading for somebody the day has nothing to say about - a weekend, a day
+ * the device has not reported yet, or an account with no device code. It keeps
+ * the roster listed under the old wording rather than inventing an absence out
+ * of missing data.
+ */
+const AVAILABILITY_UNKNOWN = {
+  labelKey: "labels.availableToday",
+  available: true,
+  rank: 4,
+  dot: "bg-emerald-500",
+  text: "text-emerald-600 dark:text-emerald-400",
+};
 import LoadingSpinner from "../components/LoadingSpinner";
 import Avatar from "../components/Avatar";
 import { getUpcomingHolidays } from "../data/holidays";
@@ -315,6 +384,21 @@ const DashboardPage: React.FC = () => {
     staleTime: 5 * 60 * 1000,
   });
 
+  /**
+   * Today's attendance, so the availability panel can read who is actually in
+   * rather than assume it. Same endpoint and day the attendance board further
+   * up the page already loads, so the two never disagree.
+   */
+  const todayIso = React.useMemo(() => isoDay(new Date()), []);
+
+  const { data: rosterToday } = useQuery({
+    queryKey: ["roster-day", todayIso],
+    queryFn: () => attendanceAPI.getRosterDay(todayIso, todayIso, "day"),
+    enabled: user?.role === "admin",
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+  });
+
   /** Expands the availability panel past its first few rows. */
   const [showAllTeam, setShowAllTeam] = React.useState(false);
 
@@ -441,22 +525,15 @@ const DashboardPage: React.FC = () => {
    *
    * An employee has no roster to read, so they keep the people their own
    * recent requests name.
+   *
+   * The state beside each name comes from today's punches, not from the
+   * roster: every name without an approved leave used to be labelled
+   * "available today", which said the same thing about somebody at their desk
+   * and somebody who never arrived.
    */
-  const todayKey = (() => {
-    const now = new Date();
-    const pad = (n: number) => String(n).padStart(2, "0");
-    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
-      now.getDate()
-    )}`;
-  })();
-
   const dayOf = (value: any) => {
     const date = new Date(value);
-    if (isNaN(date.getTime())) return null;
-    const pad = (n: number) => String(n).padStart(2, "0");
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
-      date.getDate()
-    )}`;
+    return isNaN(date.getTime()) ? null : isoDay(date);
   };
 
   const onLeaveToday = new Set<string>(
@@ -465,7 +542,7 @@ const DashboardPage: React.FC = () => {
         const id = l?.employee?._id;
         const from = dayOf(l?.startDate);
         const to = dayOf(l?.endDate);
-        return id && from && to && from <= todayKey && todayKey <= to;
+        return id && from && to && from <= todayIso && todayIso <= to;
       })
       .map((l: any) => String(l.employee._id))
   );
@@ -481,15 +558,64 @@ const DashboardPage: React.FC = () => {
     ).values()
   );
 
-  // Away first: the panel is read to find out who is missing today.
+  /**
+   * How today counted for each person the roster read covers, keyed by the
+   * device code - `rows[].employeeId` is the code the machine punches under,
+   * not the account id the rest of this page joins on.
+   */
+  const attendanceToday = new Map<string, string>(
+    (((rosterToday as any)?.data?.rows || []) as any[])
+      .filter((row) => row?.employeeId && row?.date === todayIso)
+      .map((row) => [String(row.employeeId), String(row.status)])
+  );
+
+  /**
+   * Availability is only read off attendance when there is attendance to read.
+   * A weekend, a day the device has not reported yet and a company with no
+   * device at all all send no rows, and calling the entire workforce absent on
+   * that silence would be a worse answer than the one this replaces.
+   */
+  const dayWasReported = attendanceToday.size > 0;
+
+  /**
+   * The workforce that read covers. It is narrower than the roster listed
+   * here: the attendance workforce is accounts that are active and carry a
+   * device code, so an invite nobody has accepted yet is in this panel but not
+   * in that read - and reporting it missing every morning would be a fact
+   * about the invite, not about the day.
+   */
+  const attendanceCovers = new Set<string>(
+    (((rosterToday as any)?.data?.byEmployee || []) as any[])
+      .filter((entry) => entry?.employeeId)
+      .map((entry) => String(entry.employeeId))
+  );
+
+  const availabilityOf = (emp: any) => {
+    const code = emp?.employeeId ? String(emp.employeeId) : null;
+    const reported = code && dayWasReported ? attendanceToday.get(code) : undefined;
+
+    // A punch decides its own day, so the device reading outranks an approved
+    // leave the person came in through anyway - the precedence the attendance
+    // page already applies.
+    if (reported) return AVAILABILITY[reported] ?? AVAILABILITY_UNKNOWN;
+    if (onLeaveToday.has(String(emp?._id))) return AVAILABILITY["On leave"];
+
+    // Absent is a claim about a day that was read, about somebody that read
+    // was looking for.
+    return code && dayWasReported && attendanceCovers.has(code)
+      ? AVAILABILITY.Absent
+      : AVAILABILITY_UNKNOWN;
+  };
+
+  // Unavailable first: the panel is read to find out who is missing today.
   const teamMembers = (isAdmin && rosterEmployees.length
     ? rosterEmployees
     : teamFromLeaves
   )
-    .map((emp: any) => ({ ...emp, onLeave: onLeaveToday.has(String(emp._id)) }))
+    .map((emp: any) => ({ ...emp, availability: availabilityOf(emp) }))
     .sort(
       (a: any, b: any) =>
-        Number(b.onLeave) - Number(a.onLeave) ||
+        a.availability.rank - b.availability.rank ||
         (a.name || "").localeCompare(b.name || "")
     );
 
@@ -980,9 +1106,7 @@ const DashboardPage: React.FC = () => {
                             className="ring-2 ring-white dark:ring-gray-800 shadow-sm"
                           />
                           <span
-                            className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-white dark:ring-gray-800 ${
-                              emp.onLeave ? "bg-cyan-600" : "bg-emerald-500"
-                            }`}
+                            className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-white dark:ring-gray-800 ${emp.availability.dot}`}
                           />
                         </span>
                         <div className="min-w-0">
@@ -995,15 +1119,9 @@ const DashboardPage: React.FC = () => {
                             {emp.name || "Unknown"}
                           </button>
                           <p
-                            className={`text-xs font-medium truncate ${
-                              emp.onLeave
-                                ? "text-cyan-700 dark:text-cyan-400"
-                                : "text-emerald-600 dark:text-emerald-400"
-                            }`}
+                            className={`text-xs font-medium truncate ${emp.availability.text}`}
                           >
-                            {emp.onLeave
-                              ? t("labels.onLeaveToday")
-                              : t("labels.availableToday")}
+                            {t(emp.availability.labelKey)}
                           </p>
                         </div>
                       </div>
