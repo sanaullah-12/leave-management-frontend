@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import {
@@ -50,6 +50,22 @@ const PayrollSettingsPage: React.FC = () => {
   // Local draft so typing never re-runs the engine for every keystroke; the
   // engine only sees the values once they're applied.
   const [draft, setDraft] = useState<PayrollSettings>(settings);
+
+  /**
+   * Follow the employer name the module resolved from the signed-in account.
+   *
+   * The draft is seeded once at mount, and the company is adopted by the
+   * provider - so without this the field sits blank next to a payslip already
+   * stamped with the company, and the form reads as unsaved when nothing was
+   * edited. Only this one field is re-seeded, so nothing being typed is lost.
+   */
+  useEffect(() => {
+    setDraft((d) =>
+      d.companyName === settings.companyName
+        ? d
+        : { ...d, companyName: settings.companyName }
+    );
+  }, [settings.companyName]);
 
   const dirty = useMemo(
     () =>

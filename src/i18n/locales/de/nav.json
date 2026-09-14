@@ -1,7 +1,8 @@
 {
   "brand": {
     "name": "Nexora",
-    "tagline": "Das HRMS-System"
+    "tagline": "Das HRMS-System",
+    "workspace": "Arbeitsbereich"
   },
   "search": {
     "placeholder": "Suchen",
@@ -28,7 +29,7 @@
   "groups": {
     "home": "Startseite",
     "leave": "Urlaubsverwaltung",
-    "team": "Team & Personen",
+    "team": "Mitarbeiter",
     "attendance": "Anwesenheit",
     "payroll": "Gehaltsabrechnung",
     "documents": "Dokumentenstudio",
@@ -38,7 +39,7 @@
   "short": {
     "home": "Start",
     "leave": "Urlaub",
-    "team": "Team",
+    "team": "Personal",
     "attendance": "Anwesenh.",
     "payroll": "Gehalt",
     "documents": "Dokumente",
@@ -54,8 +55,8 @@
     "leaveCalendar": "Urlaubskalender",
     "applyLeave": "Urlaub beantragen",
     "myLeaveActivity": "Meine Urlaubsübersicht",
-    "myTeam": "Mein Team",
-    "employees": "Mitarbeiter",
+    "myTeam": "Mitarbeiterprofile",
+    "employees": "Mitarbeiter verwalten",
     "departments": "Abteilungen",
     "leavePolicies": "Urlaubsrichtlinien",
     "attendance": "Anwesenheit",

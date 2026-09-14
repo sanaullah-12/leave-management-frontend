@@ -1,7 +1,8 @@
 {
   "brand": {
     "name": "نیکسورا",
-    "tagline": "ایچ آر ایم ایس سسٹم"
+    "tagline": "ایچ آر ایم ایس سسٹم",
+    "workspace": "ورک اسپیس"
   },
   "search": {
     "placeholder": "تلاش کریں",
@@ -28,7 +29,7 @@
   "groups": {
     "home": "ہوم",
     "leave": "چھٹیوں کا انتظام",
-    "team": "ٹیم اور عملہ",
+    "team": "ملازمین",
     "attendance": "حاضری",
     "payroll": "تنخواہ",
     "documents": "دستاویز اسٹوڈیو",
@@ -38,7 +39,7 @@
   "short": {
     "home": "ہوم",
     "leave": "چھٹی",
-    "team": "ٹیم",
+    "team": "ملازمین",
     "attendance": "حاضری",
     "payroll": "تنخواہ",
     "documents": "دستاویزات",
@@ -54,8 +55,8 @@
     "leaveCalendar": "چھٹی کا کیلنڈر",
     "applyLeave": "چھٹی کی درخواست",
     "myLeaveActivity": "میری چھٹیوں کی سرگرمی",
-    "myTeam": "میری ٹیم",
-    "employees": "ملازمین",
+    "myTeam": "ملازمین کی پروفائل",
+    "employees": "ملازمین کا انتظام",
     "departments": "شعبہ جات",
     "leavePolicies": "چھٹی کی پالیسیاں",
     "attendance": "حاضری",

@@ -13,6 +13,7 @@ import DatePicker from "../components/ui/DatePicker";
 import { useThemeAccent } from "../hooks/useThemeAccent";
 import { CARD } from "../lib/surfaces";
 import { AccentEdge } from "../components/ui/CardAccents";
+import AttendanceBoard from "../components/attendance/AttendanceBoard";
 import AttendanceSummary from "../components/attendance/AttendanceSummary";
 import AttendanceOverview from "../components/attendance/AttendanceOverview";
 import DeviceSettingsPanel from "../components/attendance/DeviceSettingsPanel";
@@ -1201,11 +1202,37 @@ const AttendancePage: React.FC = () => {
         illustration={sectionIllustration("attendance")}
       />
 
+      {/* Attendance for the chosen period, today by default. One request for
+          the whole roster, so this is the part of the page that can answer
+          "who is in" without being asked to fetch first.
+
+          Changing the period here also moves the range the sections below
+          report on, so the page never holds two different windows at once. */}
+      <AttendanceBoard
+        role={currentUser?.role}
+        onRangeChange={(next) => {
+          setStartDate(next.from);
+          setEndDate(next.to);
+          setActiveRangeDays(null);
+        }}
+      />
+
       {/* Range toolbar. */}
       <div
-        className={`relative flex flex-wrap items-center justify-end gap-3 overflow-hidden ${CARD} px-5 py-4`}
+        className={`relative flex flex-wrap items-center justify-between gap-3 overflow-hidden ${CARD} px-5 py-4`}
       >
         <AccentEdge color={themeAccent} />
+        {/* Named so the two windows on this page cannot be mistaken for each
+            other: the section above answers a period, this one drives the
+            device roster, the trend chart and the per-employee detail. */}
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            Roster and trends
+          </p>
+          <p className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">
+            Pick a custom range, then fetch to load it
+          </p>
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-2">
             <div className="w-[150px]">

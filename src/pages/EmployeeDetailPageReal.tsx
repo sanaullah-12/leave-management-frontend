@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import SectionHeader from "../components/ui/SectionHeader";
+import { CardHeading, Meta } from "../components/ui/CardPrimitives";
+import LeaveBalanceRow from "../components/leaves/LeaveBalanceRow";
 import { sectionIllustration } from "../components/ui/illustrations";
 import { CARD } from "../lib/surfaces";
 import { accentFor } from "../lib/themeTokens";
@@ -16,17 +18,11 @@ import LateHoursCard from "../components/attendance/LateHoursCard";
 import { useLateHours } from "../hooks/useLateHours";
 import {
   ArrowLeftIcon,
-  EnvelopeIcon,
-  BuildingOffice2Icon,
   CalendarDaysIcon,
-  PhoneIcon,
+  UserIcon,
   PencilIcon,
   CheckIcon,
   XMarkIcon,
-  UserIcon,
-  IdentificationIcon,
-  CheckBadgeIcon,
-  ChartBarIcon,
   PlusCircleIcon,
   Square2StackIcon,
 } from "@heroicons/react/24/outline";
@@ -42,7 +38,6 @@ import {
 } from "recharts";
 import "../styles/design-system.css";
 
-import Input from "../components/ui/Input";
 interface LeaveAllocation {
   casual: number;
   sick: number;
@@ -60,180 +55,6 @@ const LEAVE_META = {
 
 type LeaveKey = keyof typeof LEAVE_META;
 const LEAVE_ORDER: LeaveKey[] = ["annual", "sick", "casual"];
-
-/* ------------------------------------------------------------------ */
-/*  Presentational pieces                                              */
-/* ------------------------------------------------------------------ */
-
-// Hollow accent ring (arc only) with a soft glow.
-const ProgressRing: React.FC<{ percent: number; color: string }> = ({
-  percent,
-  color,
-}) => {
-  const p = Math.max(0, Math.min(100, percent));
-  const ARC =
-    "M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831";
-  return (
-    <div className="relative h-16 w-16 flex-shrink-0">
-      <svg className="h-16 w-16 -rotate-90" viewBox="0 0 36 36">
-        <path
-          className="stroke-gray-200 dark:stroke-white/10"
-          d={ARC}
-          fill="none"
-          strokeWidth="4"
-        />
-        <path
-          d={ARC}
-          fill="none"
-          stroke={color}
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeDasharray={`${p}, 100`}
-          style={{
-            transition: "stroke-dasharray 0.7s ease",
-            filter: `drop-shadow(0 0 4px ${color}66)`,
-          }}
-        />
-      </svg>
-    </div>
-  );
-};
-
-// Glowing leave-balance card - view mode shows the ring + remaining; edit
-// mode shows an allocation input. Admin-editable.
-const LeaveBalanceCard: React.FC<{
-  leaveKey: LeaveKey;
-  total: number;
-  used: number;
-  remaining: number;
-  editing: boolean;
-  editValue: number;
-  onChange: (v: number) => void;
-}> = ({ leaveKey, total, used, remaining, editing, editValue, onChange }) => {
-  const meta = LEAVE_META[leaveKey];
-  const Icon = meta.icon;
-  const percent = total > 0 ? Math.round((remaining / total) * 100) : 0;
-  const usedPct = total > 0 ? Math.min(100, (used / total) * 100) : 0;
-  return (
-    <div
-      className="group relative overflow-hidden rounded-2xl bg-[var(--card-surface)] p-6 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1"
-      style={{
-        border: `1px solid ${meta.hex}55`,
-        boxShadow: `inset 0 1px 0 ${meta.hex}22, 0 0 0 1px ${meta.hex}1f, 0 14px 34px -14px ${meta.hex}66`,
-      }}
-    >
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-24"
-        style={{ background: `linear-gradient(to bottom, ${meta.hex}14, transparent)` }}
-      />
-      <Icon
-        className="pointer-events-none absolute -bottom-5 -right-4 h-28 w-28"
-        style={{ color: meta.hex, opacity: 0.1 }}
-      />
-
-      <div className="relative flex items-start justify-between gap-4">
-        <div>
-          <h4 className="text-base font-bold text-gray-900 dark:text-white">
-            {meta.label}
-          </h4>
-          <p className="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
-            Allocated: {editing ? editValue : total} Days
-          </p>
-        </div>
-        {!editing && (
-          <div className="flex flex-col items-end gap-1">
-            <span
-              className="text-xs font-bold tabular-nums"
-              style={{ color: meta.hex }}
-            >
-              {percent}%
-            </span>
-            <ProgressRing percent={percent} color={meta.hex} />
-          </div>
-        )}
-      </div>
-
-      {editing ? (
-        <div className="relative mt-5">
-          <label className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-            Allocation (days / year)
-          </label>
-          <Input
-            type="number"
-            min={0}
-            max={365}
-            value={editValue}
-            onChange={(e) => onChange(parseInt(e.target.value) || 0)}
-            className="mt-1.5 h-14"
-            inputClassName="text-3xl font-extrabold tabular-nums"
-            style={{ color: meta.hex }}
-          />
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            {used} day{used === 1 ? "" : "s"} already used this year
-          </p>
-        </div>
-      ) : (
-        <div className="relative mt-5">
-          <span
-            className="text-5xl font-extrabold leading-none tabular-nums"
-            style={{ color: meta.hex }}
-          >
-            {remaining}
-          </span>
-          <p className="mt-2 text-sm font-medium text-gray-500 dark:text-gray-400">
-            Remaining Days
-          </p>
-          <div className="mt-4">
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200/70 dark:bg-white/10">
-              <div
-                className="h-full rounded-full"
-                style={{ width: `${usedPct}%`, backgroundColor: meta.hex }}
-              />
-            </div>
-            <p className="mt-1.5 text-xs text-gray-400 dark:text-gray-500">
-              Used {used} of {total} days
-            </p>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const ProfileField: React.FC<{
-  icon: React.ReactNode;
-  label: string;
-  value: React.ReactNode;
-}> = ({ icon, label, value }) => (
-  <div className="flex items-start gap-3">
-    <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 dark:bg-white/5 dark:text-gray-400">
-      {icon}
-    </span>
-    <div className="min-w-0">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-        {label}
-      </p>
-      <p className="mt-0.5 truncate font-semibold text-gray-900 dark:text-gray-100">
-        {value}
-      </p>
-    </div>
-  </div>
-);
-
-const SectionHeading: React.FC<{
-  children: React.ReactNode;
-  action?: React.ReactNode;
-}> = ({ children, action }) => (
-  <div className="flex items-center justify-between gap-3">
-    <div className="flex items-center gap-3">
-      <span className="h-6 w-1.5 rounded-full bg-blue-500" />
-      <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-        {children}
-      </h3>
-    </div>
-    {action}
-  </div>
-);
 
 /* ------------------------------------------------------------------ */
 /*  Page                                                               */
@@ -554,82 +375,69 @@ const EmployeeDetailPageReal: React.FC = () => {
         }
       />
 
-      {/* Profile */}
-      <div className={`${CARD} p-6 sm:p-7`}>
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-          <Avatar
-            src={employee.profilePicture}
-            name={employee.name}
-            size="2xl"
-            className="ring-4 ring-blue-500/20"
-          />
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-3">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+      {/* ---- Who ----
+          One statement of each fact. The old layout carried the name, the
+          status, the department and the balance in a hero, then again in a
+          six-field icon grid, then again in the balance cards below it. */}
+      <div className={`${CARD} p-6`}>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <Avatar src={employee.profilePicture} name={employee.name} size="xl" />
+            <div className="min-w-0">
+              <h2 className="truncate text-xl font-bold tracking-tight text-gray-900 dark:text-white">
                 {employee.name}
               </h2>
+              <p className="mt-0.5 truncate text-sm text-gray-500 dark:text-gray-400">
+                {[employee.position, departmentName]
+                  .filter((part) => part && part !== "-")
+                  .join(" · ") || "Employee"}
+              </p>
               <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                className={`mt-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                   active
-                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                    : "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
+                    ? "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200/60 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20"
+                    : "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200/60 dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/20"
                 }`}
               >
-                <CheckBadgeIcon className="h-3.5 w-3.5" />
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    active ? "bg-emerald-500" : "bg-amber-500"
+                  }`}
+                />
                 {active ? "Active" : employee.status || "Inactive"}
               </span>
-            </div>
-            <p className="mt-1 text-sm font-medium text-gray-500 dark:text-gray-400">
-              {employee.position || "-"} • {departmentName}
-            </p>
-            <div className="mt-2 inline-flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 ring-1 ring-inset ring-blue-200/60 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20">
-              <CalendarDaysIcon className="h-3.5 w-3.5" />
-              {totalRemaining} of {totalAllocated} leave days remaining
             </div>
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-x-8 gap-y-5 border-t border-gray-100 pt-6 dark:border-white/5 sm:grid-cols-2 lg:grid-cols-3">
-          <ProfileField
-            icon={<EnvelopeIcon className="h-4 w-4" />}
-            label="Email"
-            value={employee.email || "-"}
-          />
-          <ProfileField
-            icon={<IdentificationIcon className="h-4 w-4" />}
-            label="Employee ID"
-            value={employee.employeeId || "-"}
-          />
-          <ProfileField
-            icon={<BuildingOffice2Icon className="h-4 w-4" />}
-            label="Department"
-            value={departmentName}
-          />
+        <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-gray-100 pt-5 dark:border-white/5 sm:grid-cols-3 lg:grid-cols-6">
+          <Meta label="Employee ID" value={employee.employeeId || "-"} />
+          <Meta label="Email" value={employee.email || "-"} />
+          <Meta label="Department" value={departmentName} />
           {/* Always shown, even when empty: a missing number is the reason an
               employee receives no WhatsApp notifications, and hiding the field
               hides the cause. */}
-          <ProfileField
-            icon={<PhoneIcon className="h-4 w-4" />}
-            label="Phone"
-            value={employee.phone || "-"}
-          />
-
-          <ProfileField
-            icon={<CalendarDaysIcon className="h-4 w-4" />}
+          <Meta label="Phone" value={employee.phone || "-"} />
+          <Meta
             label="Joined"
             value={employee.joinDate ? formatDate(employee.joinDate) : "-"}
           />
-          <ProfileField
-            icon={<UserIcon className="h-4 w-4" />}
+          <Meta
             label="Role"
             value={employee.role === "admin" ? "Administrator" : "Employee"}
           />
         </div>
       </div>
 
-      {/* Leave Balance */}
-      <div className="space-y-4">
-        <SectionHeading
+      {/* ---- What is left ---- */}
+      <div className={`${CARD} p-6`}>
+        <CardHeading
+          title="Leave balance"
+          sub={
+            isEditingAllocation
+              ? "Set this employee's yearly allocation"
+              : "Days remaining, by type"
+          }
           action={
             isAdmin && isEditingAllocation ? (
               <div className="flex items-center gap-2">
@@ -643,7 +451,7 @@ const EmployeeDetailPageReal: React.FC = () => {
                 <button
                   onClick={handleSaveAllocation}
                   disabled={updateAllocationMutation.isPending}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-blue-600/25 disabled:opacity-70"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-70"
                 >
                   {updateAllocationMutation.isPending ? (
                     <LoadingSpinner size="sm" />
@@ -653,248 +461,232 @@ const EmployeeDetailPageReal: React.FC = () => {
                   Save
                 </button>
               </div>
-            ) : (
-              <span className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-200/70 dark:bg-white/5 dark:text-gray-300 dark:ring-white/10">
-                Total: {totalAllocated} Days
-              </span>
-            )
+            ) : undefined
           }
-        >
-          Leave Balance
-        </SectionHeading>
-
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-          {LEAVE_ORDER.map((key) => (
-            <LeaveBalanceCard
-              key={key}
-              leaveKey={key}
-              total={leaveBalance[key].total}
-              used={leaveBalance[key].used}
-              remaining={leaveBalance[key].remaining}
-              editing={isEditingAllocation}
-              editValue={editAllocation[key]}
-              onChange={(v) =>
-                setEditAllocation((prev) => ({ ...prev, [key]: v }))
-              }
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Late Hours. An attendance figure, kept beside the leave record but
-          never charged against it. */}
-      <div className="space-y-4">
-        <SectionHeading>Attendance</SectionHeading>
-        <LateHoursCard
-          summary={lateHours.summary}
-          entries={lateHours.lateEntries}
-          loading={lateHours.isLoading}
-          policy={lateHours.policy}
-          rangeLabel={lateRange.label}
-          title={`Late Hours - ${employee?.name || "Employee"}`}
-          emptyMessage="No late arrivals in the last 3 months."
         />
-      </div>
 
-      {/* Analytics */}
-      <div className="space-y-4">
-        <SectionHeading>Leave Analytics</SectionHeading>
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          {/* Trend */}
-          <div className={`${CARD} p-6 lg:col-span-2`}>
-            <h4 className="text-sm font-bold text-gray-900 dark:text-white">
-              Leave Trend
-            </h4>
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-              Approved leave days across {currentYear}
-            </p>
-            <div className="mt-4 h-60">
-              {hasTrend ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart
-                    data={monthlyData}
-                    margin={{ top: 10, right: 8, left: 8, bottom: 0 }}
-                  >
-                    <defs>
-                      <linearGradient id="edTrend" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={accent} stopOpacity={0.28} />
-                        <stop offset="100%" stopColor={accent} stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis
-                      dataKey="month"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 11, fill: "#9ca3af" }}
-                      interval={0}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: 12,
-                        border: "1px solid #e5e7eb",
-                        fontSize: 12,
-                      }}
-                      formatter={(v: any) => [`${v} days`, "Leave"]}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="leaves"
-                      stroke={accent}
-                      strokeWidth={3}
-                      fill="url(#edTrend)"
-                      dot={false}
-                      activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="flex h-full items-center justify-center text-sm text-gray-400 dark:text-gray-500">
-                  No approved leaves recorded this year
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Distribution */}
-          <div className={`${CARD} p-6`}>
-            <h4 className="text-sm font-bold text-gray-900 dark:text-white">
-              Distribution
-            </h4>
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-              Days used by type
-            </p>
-            <div className="mt-4 flex h-60 flex-col items-center justify-center gap-4">
-              {distribution.length > 0 ? (
-                <>
-                  <div className="h-40 w-40">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={distribution}
-                          dataKey="value"
-                          nameKey="name"
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={48}
-                          outerRadius={70}
-                          paddingAngle={3}
-                          stroke="none"
-                        >
-                          {distribution.map((d, i) => (
-                            <Cell key={i} fill={d.hex} />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          contentStyle={{
-                            borderRadius: 12,
-                            border: "1px solid #e5e7eb",
-                            fontSize: 12,
-                          }}
-                          formatter={(v: any, n: any) => [`${v} days`, n]}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <ul className="flex flex-wrap justify-center gap-x-4 gap-y-2">
-                    {distribution.map((d) => (
-                      <li
-                        key={d.name}
-                        className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300"
-                      >
-                        <span
-                          className="h-2.5 w-2.5 rounded-full"
-                          style={{ backgroundColor: d.hex }}
-                        />
-                        {d.name}
-                        <span className="font-semibold text-gray-900 dark:text-white">
-                          {d.value}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              ) : (
-                <div className="text-sm text-gray-400 dark:text-gray-500">
-                  No leave usage recorded yet
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Leave History */}
-      <div className="space-y-4">
-        <SectionHeading
-          action={
-            <span className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-200/70 dark:bg-white/5 dark:text-gray-300 dark:ring-white/10">
-              {leaveHistory.length} requests
+        <div className="mt-5 flex flex-col gap-6 lg:flex-row lg:gap-8">
+          {/* The one number this card exists to give. */}
+          <div className="flex shrink-0 items-baseline gap-3 lg:w-44 lg:flex-col lg:items-start lg:gap-1 lg:border-r lg:border-gray-100 lg:pr-8 lg:dark:border-white/5">
+            <span className="text-4xl font-bold leading-none tabular-nums text-gray-900 dark:text-white">
+              {totalRemaining}
             </span>
-          }
-        >
-          Leave History
-        </SectionHeading>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              days left of {totalAllocated}
+            </span>
+          </div>
 
-        {leaveHistory.length > 0 ? (
-          <div className="space-y-3">
-            {leaveHistory.map((leave: any) => (
-              <div
-                key={leave._id}
-                className={`${CARD} flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between`}
-              >
-                <div className="flex items-center gap-4">
-                  <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-blue-600 dark:text-blue-400">
-                    <ChartBarIcon className="h-5 w-5" />
-                  </span>
-                  <div>
-                    <p className="font-semibold capitalize text-gray-900 dark:text-gray-100">
-                      {leave.leaveType} Leave
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {formatDate(leave.startDate)} → {formatDate(leave.endDate)}{" "}
-                      · {leave.totalDays || 1}{" "}
-                      {leave.totalDays === 1 ? "day" : "days"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 sm:justify-end">
-                  {leave.reason && (
-                    <span
-                      className="hidden max-w-[220px] truncate text-xs text-gray-400 dark:text-gray-500 md:block"
-                      title={leave.reason}
-                    >
-                      “{leave.reason}”
-                    </span>
-                  )}
-                  <span
-                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold capitalize ${getStatusChip(
-                      leave.status
-                    )}`}
-                  >
-                    {leave.status}
-                  </span>
-                </div>
-              </div>
+          <div className="grid flex-1 grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-3">
+            {LEAVE_ORDER.map((key) => (
+              <LeaveBalanceRow
+                key={key}
+                label={LEAVE_META[key].label}
+                color={LEAVE_META[key].hex}
+                allocated={leaveBalance[key].total}
+                used={leaveBalance[key].used}
+                remaining={leaveBalance[key].remaining}
+                editing={isEditingAllocation}
+                editValue={editAllocation[key]}
+                onChange={(v) =>
+                  setEditAllocation((prev) => ({ ...prev, [key]: v }))
+                }
+              />
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* ---- Attendance ----
+          An attendance figure, kept beside the leave record but never charged
+          against it. The card states its own subject, so it needs no heading
+          above it repeating the word. */}
+      <LateHoursCard
+        summary={lateHours.summary}
+        entries={lateHours.lateEntries}
+        loading={lateHours.isLoading}
+        policy={lateHours.policy}
+        rangeLabel={lateRange.label}
+        title="Late hours"
+        emptyMessage="No late arrivals in the last 3 months."
+      />
+
+      {/* ---- How leave was used ---- */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <div className={`${CARD} p-6 lg:col-span-2`}>
+          <CardHeading
+            title="Leave trend"
+            sub={`Approved leave days across ${currentYear}`}
+          />
+          <div className="mt-5 h-56">
+            {hasTrend ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart
+                  data={monthlyData}
+                  margin={{ top: 10, right: 8, left: 8, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="edTrend" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={accent} stopOpacity={0.28} />
+                      <stop offset="100%" stopColor={accent} stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis
+                    dataKey="month"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 11, fill: "#9ca3af" }}
+                    interval={0}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: "1px solid #e5e7eb",
+                      fontSize: 12,
+                    }}
+                    formatter={(v: any) => [`${v} days`, "Leave"]}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="leaves"
+                    stroke={accent}
+                    strokeWidth={3}
+                    fill="url(#edTrend)"
+                    dot={false}
+                    activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                No approved leave recorded this year
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className={`${CARD} p-6`}>
+          <CardHeading title="Distribution" sub="Days taken, by leave type" />
+          <div className="mt-5 h-56">
+            {distribution.length > 0 ? (
+              <div className="flex h-full flex-col items-center justify-center gap-4">
+                <div className="h-36 w-36">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={distribution}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={44}
+                        outerRadius={64}
+                        paddingAngle={3}
+                        stroke="none"
+                      >
+                        {distribution.map((d, i) => (
+                          <Cell key={i} fill={d.hex} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          borderRadius: 12,
+                          border: "1px solid #e5e7eb",
+                          fontSize: 12,
+                        }}
+                        formatter={(v: any, n: any) => [`${v} days`, n]}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Named as well as coloured, so the split survives a
+                    greyscale print and a colourblind reader. */}
+                <ul className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+                  {distribution.map((d) => (
+                    <li
+                      key={d.name}
+                      className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300"
+                    >
+                      <span
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: d.hex }}
+                      />
+                      {d.name}
+                      <span className="font-semibold tabular-nums text-gray-900 dark:text-white">
+                        {d.value}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <div className="flex h-full items-center justify-center text-sm text-gray-400 dark:text-gray-500">
+                No leave taken yet
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ---- Leave history ----
+          One card of rows. Every request used to be its own raised card with
+          its own icon, so a year of requests read as a wall of cards rather
+          than a list you can scan down. */}
+      <div className={`${CARD} overflow-hidden`}>
+        <div className="p-6 pb-4">
+          <CardHeading
+            title="Leave history"
+            sub={`${leaveHistory.length} ${
+              leaveHistory.length === 1 ? "request" : "requests"
+            } on record`}
+          />
+        </div>
+
+        {leaveHistory.length > 0 ? (
+          <ul className="max-h-[30rem] divide-y divide-gray-100 overflow-y-auto dark:divide-gray-700">
+            {leaveHistory.map((leave: any) => (
+              <li
+                key={leave._id}
+                className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-6 py-3.5"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold capitalize text-gray-900 dark:text-gray-100">
+                    {leave.leaveType} leave
+                    <span className="ml-2 font-normal tabular-nums text-gray-400">
+                      {leave.totalDays || 1}{" "}
+                      {leave.totalDays === 1 ? "day" : "days"}
+                    </span>
+                  </p>
+                  <p className="mt-0.5 truncate text-xs text-gray-500 dark:text-gray-400">
+                    {formatDate(leave.startDate)} - {formatDate(leave.endDate)}
+                    {leave.reason ? ` · ${leave.reason}` : ""}
+                  </p>
+                </div>
+                <span
+                  className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${getStatusChip(
+                    leave.status
+                  )}`}
+                >
+                  {leave.status}
+                </span>
+              </li>
+            ))}
+          </ul>
         ) : (
-          <div className={`${CARD} py-12 text-center`}>
-            <CalendarDaysIcon className="mx-auto mb-3 h-12 w-12 text-gray-400 dark:text-gray-500" />
-            <p className="font-medium text-gray-900 dark:text-gray-200">
+          <div className="px-6 pb-12 pt-4 text-center">
+            <CalendarDaysIcon className="mx-auto mb-3 h-8 w-8 text-gray-300 dark:text-gray-600" />
+            <p className="text-sm font-semibold text-gray-900 dark:text-gray-200">
               No leave history
             </p>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              This employee hasn't submitted any leave requests yet.
+              This employee has not submitted any leave requests yet.
             </p>
           </div>
         )}
       </div>
 
-      {/* Activity */}
-      <EmployeeLeaveActivity
-        employeeId={employee._id}
-        isCurrentUser={user?.id === employee._id}
-      />
+      {/* ---- Every request, filterable ---- */}
+      <EmployeeLeaveActivity employeeId={employee._id} />
     </div>
   );
 };

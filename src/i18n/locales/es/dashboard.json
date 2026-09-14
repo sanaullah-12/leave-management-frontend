@@ -1,6 +1,8 @@
 {
   "actions": {
     "quickApply": "Solicitud rápida",
+    "seeLess": "Ver menos",
+    "seeMore": "Ver más",
     "viewAll": "Ver todo",
     "viewCompanyCalendar": "Ver calendario de la empresa"
   },
@@ -36,6 +38,7 @@
   "kpi": {
     "acrossAllLeaveTypes": "En todos los tipos de ausencia",
     "activeWorkforce": "Plantilla activa",
+    "allLeaveRequests": "Todas las solicitudes de ausencia",
     "annualLeave": "Vacaciones anuales",
     "approved": "Aprobadas",
     "awaitingReview": "Pendientes de su revisión",
@@ -48,12 +51,14 @@
     "requestsGranted": "Solicitudes concedidas",
     "sickLeave": "Baja por enfermedad",
     "thisMonth": "Este mes",
-    "totalEmployees": "Empleados totales"
+    "totalEmployees": "Empleados totales",
+    "totalRequests": "Solicitudes totales"
   },
   "labels": {
     "approved": "Aprobado",
     "availableToday": "Disponible hoy",
     "employees": "Empleados",
+    "onLeaveToday": "De baja hoy",
     "pending": "Pendiente",
     "requests": "Solicitudes"
   },

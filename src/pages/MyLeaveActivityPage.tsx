@@ -233,11 +233,9 @@ const MyLeaveActivityPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Activity (existing functionality - untouched) */}
-      <div className="space-y-4">
-        <SectionHeading>Leave Activity</SectionHeading>
-        <EmployeeLeaveActivity employeeId={user.id} isCurrentUser={true} />
-      </div>
+      {/* Activity. The card states its own subject, so it carries no heading
+          above it repeating the word. */}
+      <EmployeeLeaveActivity employeeId={user.id} />
 
       {/* Read-only info */}
       <div className={`${CARD} p-6`}>

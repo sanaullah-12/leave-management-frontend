@@ -18,12 +18,27 @@ import type {
 /* Settings defaults                                                   */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Payroll settings before anything is configured.
+ *
+ * `companyName` starts empty on purpose: the name that belongs on a payslip is
+ * the employer's, and the module learns it from the signed-in account rather
+ * than shipping one. See adoptCompanyName in payrollService.
+ */
 export const DEFAULT_SETTINGS: PayrollSettings = {
-  companyName: "Nexora",
+  companyName: "",
   currency: "PKR",
   salaryDate: 1,
   defaultTaxPercent: 0,
 };
+
+/**
+ * The product name this module used to stamp on every payslip, back when the
+ * default above was a literal. A stored blob still carrying it was never a
+ * choice anybody made, so it is replaced by the real employer; any other value
+ * is an admin's own wording and is left alone.
+ */
+export const PLACEHOLDER_COMPANY_NAME = "Nexora";
 
 /** Currencies offered in Settings. Extend freely - nothing else depends on it. */
 export const CURRENCIES: { code: string; label: string; symbol: string }[] = [

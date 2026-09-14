@@ -17,6 +17,7 @@ import ThemeModal from "./ThemeModal";
 import VoiceNotificationToaster from "./voice/VoiceNotificationToaster";
 import NexoraAssistant from "./assistant/NexoraAssistant";
 import { useNotifications } from "../hooks/useNotifications";
+import { companyNameOf } from "../lib/company";
 import { pageVariants } from "../lib/motion";
 import {
   Squares2X2Icon,
@@ -90,8 +91,11 @@ const SEARCH_KEYWORDS: Record<string, string> = {
   "/attendance": "punch clock in out hours present",
   "/attendance/late-time": "late arrivals tardy punctuality",
   "/work-from-home": "wfh remote home office",
-  "/employees": "staff people team members roster invite",
-  "/team": "staff people colleagues",
+  "/employees": "staff people team members roster invite manage",
+  // "my team" stays searchable: these two screens were called that until
+  // recently, and a search box that cannot find a page by the name it had
+  // last week is how people conclude the page was removed.
+  "/team": "staff people colleagues my team profiles directory",
   "/departments": "org structure divisions teams",
   "/payroll": "salary pay wages compensation",
   "/payroll/salaries": "salary structure ctc compensation",
@@ -123,6 +127,8 @@ const Layout: React.FC = () => {
   const { unreadCount } = useNotifications({ limit: 12 });
 
   const isAdmin = user?.role === "admin";
+  /** The signed-in user's company, as the API serialises it (a display name). */
+  const companyName = companyNameOf(user);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -447,18 +453,43 @@ const Layout: React.FC = () => {
   // ---- The secondary panel body (title + search + list) ----
   const renderPanelBody = (onNavigate?: () => void, attachRef = false) => (
     <div className="flex h-full flex-col">
-      {/* Brand */}
+      {/* Brand, then whose workspace this is.
+          The product name stays - it is the identity of the thing they are
+          using. The line under it names the employer instead of restating what
+          the product is, because everyone signed in here already knows that
+          and only one of the two lines was telling them anything. */}
       <div className="px-4 pt-4">
         <p className="text-lg font-bold leading-none tracking-tight text-gray-900 dark:text-white">
           {t("brand.name")}
         </p>
-        <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.26em] text-gray-400 dark:text-gray-500">
-          {t("brand.tagline")}
+        <p
+          className="mt-1 truncate text-[10px] font-semibold uppercase tracking-[0.26em] text-gray-400 dark:text-gray-500"
+          title={companyName || undefined}
+        >
+          {companyName
+            ? `${companyName} ${t("brand.workspace")}`
+            : t("brand.tagline")}
         </p>
       </div>
 
+      {/* Search. Above the section heading, not under it: the heading names
+          what the list below is currently showing, and typing a query is what
+          changes that - so the control comes first and the heading answers it. */}
+      <div className="px-3 pb-1 pt-3">
+        <Input
+          icon={MagnifyingGlassIcon}
+          inputSize="sm"
+          ref={attachRef ? searchRef : undefined}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onClear={() => setQuery("")}
+          clearable
+          placeholder={t("search.placeholder")}
+        />
+      </div>
+
       {/* Header */}
-      <div className="mt-3 flex items-center justify-between px-4">
+      <div className="mt-2 flex items-center justify-between px-4">
         <h2 className="truncate text-base font-bold text-gray-900 dark:text-white">
           {query ? t("search.title") : activeGroup.label}
         </h2>
@@ -471,20 +502,6 @@ const Layout: React.FC = () => {
             <ChevronDoubleLeftIcon className="h-4 w-4" />
           </button>
         </div>
-      </div>
-
-      {/* Search */}
-      <div className="px-3 pb-2 pt-3">
-        <Input
-          icon={MagnifyingGlassIcon}
-          inputSize="sm"
-          ref={attachRef ? searchRef : undefined}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onClear={() => setQuery("")}
-          clearable
-          placeholder={t("search.placeholder")}
-        />
       </div>
 
       {/* List */}

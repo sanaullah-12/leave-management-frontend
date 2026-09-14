@@ -15,6 +15,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
 } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -22,7 +23,8 @@ import { usersAPI } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import { usePayrollStore, type PayrollStore } from "./usePayrollStore";
 import { computePayslip, aggregate, type PayrollContext, type PayrollTotals } from "./engine";
-import { toPayrollEmployee } from "./payrollService";
+import { shouldAdoptCompanyName, toPayrollEmployee } from "./payrollService";
+import { companyNameOf } from "../../lib/company";
 import { currentPeriod } from "./formatters";
 import type {
   PayrollEmployee,
@@ -81,6 +83,24 @@ export const PayrollProvider: React.FC<{ children: React.ReactNode }> = ({
     },
     staleTime: 5 * 60 * 1000,
   });
+
+  /**
+   * The employer payroll is running for.
+   *
+   * Payslips, exports and the settings screen all read settings.companyName,
+   * so adopting it once here is what puts the real company on every one of
+   * them. Only an unset or placeholder name is replaced - see
+   * shouldAdoptCompanyName.
+   */
+  const tenantName = companyNameOf(user);
+  const storedName = settings.companyName;
+  const { updateSettings } = store;
+
+  useEffect(() => {
+    if (shouldAdoptCompanyName(storedName, tenantName)) {
+      updateSettings({ companyName: tenantName });
+    }
+  }, [storedName, tenantName, updateSettings]);
 
   // The live period is "now"; history screens pass their own explicitly.
   const period = useMemo(currentPeriod, []);
