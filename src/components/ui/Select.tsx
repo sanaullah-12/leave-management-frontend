@@ -74,7 +74,11 @@ const Select: React.FC<SelectProps> = ({
 
         <ListboxOptions
           anchor="bottom"
-          className="glass-panel z-[110] mt-2 w-[var(--button-width)] rounded-xl p-1.5 focus:outline-none origin-top transition ease-out data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-150 data-[leave]:duration-100"
+          // Capped and scrollable: a long list - times of day, a department
+          // roster - would otherwise run off the bottom of the screen with its
+          // last options unreachable. Short lists are unaffected, since a
+          // max-height only applies to a list that exceeds it.
+          className="glass-panel z-[110] mt-2 max-h-72 w-[var(--button-width)] overflow-y-auto rounded-xl p-1.5 focus:outline-none origin-top transition ease-out data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-150 data-[leave]:duration-100"
         >
           {options.map((opt) => (
             <ListboxOption

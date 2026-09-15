@@ -68,9 +68,6 @@ function readPayload(event) {
       body: parsed.body || FALLBACK.body,
       url: parsed.url || FALLBACK.url,
       tag: parsed.tag,
-      // Set only by the "send me a test" action. Everything else leaves it
-      // unset and is suppressed while the app is on screen.
-      forceShow: parsed.forceShow === true,
       data: parsed.data || {},
     };
   } catch (_) {
@@ -82,42 +79,34 @@ function readPayload(event) {
   }
 }
 
-/** True when a tab of this app is open AND the person is looking at it. */
-async function appIsInForeground() {
-  const clients = await self.clients.matchAll({
-    type: "window",
-    includeUncontrolled: true,
-  });
-  return clients.some(
-    (client) => client.visibilityState === "visible" && client.focused
-  );
-}
-
 self.addEventListener("push", (event) => {
   event.waitUntil(
     (async () => {
       const payload = readPayload(event);
 
-      // This is where the overlap with Socket.IO is resolved, and it is the
-      // only place it can be resolved correctly - the server cannot know
-      // whether a tab is on screen at the moment the push lands.
-      //
-      // With the app in front of the employee, the in-app notification has
-      // already arrived over the socket and the bell has already updated. An
-      // OS notification on top of that is the same news twice. The tab is told
-      // instead, so it can refresh without a second alert.
-      // A test notification is the exception: the employee has just clicked
-      // "send me one" and is therefore certainly looking at the tab. Suppressing
-      // it as a duplicate would mean the one push whose entire purpose is to
-      // prove delivery is the one push they never see.
-      if (!payload.forceShow && (await appIsInForeground())) {
-        const clients = await self.clients.matchAll({ type: "window" });
-        for (const client of clients) {
-          client.postMessage({ type: "push-received", payload });
-        }
-        return;
+      // Every open tab is told, whether or not a notification is drawn, so the
+      // bell and the lists refresh even for a push that arrived while the
+      // socket was down.
+      const clients = await self.clients.matchAll({ type: "window" });
+      for (const client of clients) {
+        client.postMessage({ type: "push-received", payload });
       }
 
+      // The notification itself is always drawn, including while the app is on
+      // screen.
+      //
+      // This worker used to stay silent whenever any Nexora window was focused,
+      // on the reasoning that Socket.IO had already delivered the same news as
+      // an in-app toast. In practice that silenced almost everything: people
+      // keep the app open while they work, so the only push that ever reached
+      // the desktop was the one the test button marked as an exception. A
+      // notification feature that is quiet exactly when somebody is at their
+      // computer is not a notification feature.
+      //
+      // The duplicate it was guarding against is real but small - a toast and a
+      // system notification about one event - and the tag below already stops
+      // the same event stacking twice. Missing the notification entirely is the
+      // larger failure, so it is the one that gets avoided.
       await self.registration.showNotification(payload.title, {
         body: payload.body,
         icon: "/pwa-192x192.png",

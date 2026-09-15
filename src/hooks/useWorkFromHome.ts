@@ -34,6 +34,11 @@ export interface WfhRequest {
   totalDays: number;
   reason: string;
   note?: string;
+  /** Wall-clock "HH:MM" the employee intends to keep. Empty when not given. */
+  plannedStartTime?: string;
+  plannedEndTime?: string;
+  /** What the employee said they would work on. Empty when not given. */
+  plannedTasks?: string[];
   workMode: string;
   status: WfhStatus;
   appliedDate?: string;
@@ -50,6 +55,16 @@ export interface WfhPolicy {
   /** The earliest start date a request may carry, YYYY-MM-DD. */
   earliestStartDate: string;
   today: string;
+  /**
+   * The work timer's rules, carried on the same response so the form and the
+   * card cannot hold a threshold the server has since changed.
+   */
+  session?: {
+    idleTimeoutMinutes: number;
+    idleTimeoutMs: number;
+    heartbeatSeconds: number;
+    maxSessionHours: number;
+  };
 }
 
 export interface WfhStats {
@@ -164,6 +179,9 @@ export function useSubmitWfhRequest() {
       endDate?: string;
       reason: string;
       note?: string;
+      plannedStartTime?: string;
+      plannedEndTime?: string;
+      plannedTasks?: string[];
     }) => {
       const res = await workFromHomeAPI.submitRequest(data);
       return res.data;
