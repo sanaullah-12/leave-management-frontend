@@ -5,9 +5,11 @@ import {
   ArrowPathIcon,
   NoSymbolIcon,
   ExclamationTriangleIcon,
+  ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 import WfhStatusBadge from "./WfhStatusBadge";
 import { CARD } from "../../lib/surfaces";
+import { formatPlannedWindow } from "./sessionFormat";
 import type { WfhRequest } from "../../hooks/useWorkFromHome";
 
 /**
@@ -17,6 +19,11 @@ import type { WfhRequest } from "../../hooks/useWorkFromHome";
  * buttons, an employee sees their own history and can withdraw something still
  * pending. Splitting it in two would have meant maintaining the same columns
  * twice.
+ *
+ * A row opens the request's report. The buttons in the last column stop the
+ * click from reaching the row, so approving something never also opens it - a
+ * drawer sliding out over a decision that has just been made reads as an
+ * error, not as a confirmation.
  */
 
 interface Props {
@@ -26,6 +33,8 @@ interface Props {
   showEmployee?: boolean;
   onReview?: (request: WfhRequest, status: "approved" | "rejected") => void;
   onCancel?: (request: WfhRequest) => void;
+  /** Opens the request's own report. The whole row is the control. */
+  onOpen?: (request: WfhRequest) => void;
   /** Id of the request currently being acted on, so its row can show it. */
   busyId?: string | null;
   emptyMessage?: string;
@@ -44,6 +53,30 @@ const formatRange = (request: WfhRequest) => {
   return from === to ? from : `${from} - ${to}`;
 };
 
+/**
+ * The way in to a request's report, for rows with no decision left to make.
+ *
+ * The row has been the control all along; this is what says so. Absent when the
+ * table has nowhere to open, which is how it renders wherever no drawer is
+ * mounted.
+ */
+const ViewReport: React.FC<{
+  request: WfhRequest;
+  onOpen?: (request: WfhRequest) => void;
+}> = ({ request, onOpen }) =>
+  onOpen ? (
+    <button
+      type="button"
+      onClick={() => onOpen(request)}
+      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-500/10"
+    >
+      View report
+      <ChevronRightIcon className="h-3.5 w-3.5" />
+    </button>
+  ) : (
+    <span className="text-xs text-gray-400">-</span>
+  );
+
 const employeeOf = (request: WfhRequest) =>
   typeof request.employee === "object" && request.employee
     ? request.employee
@@ -55,6 +88,7 @@ const WfhRequestTable: React.FC<Props> = ({
   showEmployee = false,
   onReview,
   onCancel,
+  onOpen,
   busyId = null,
   emptyMessage,
 }) => {
@@ -108,7 +142,10 @@ const WfhRequestTable: React.FC<Props> = ({
                 return (
                   <tr
                     key={request._id}
-                    className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/40"
+                    onClick={onOpen ? () => onOpen(request) : undefined}
+                    className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/40 ${
+                      onOpen ? "cursor-pointer" : ""
+                    }`}
                   >
                     {showEmployee && (
                       <td className={cell}>
@@ -128,6 +165,15 @@ const WfhRequestTable: React.FC<Props> = ({
                       <p className="text-xs text-gray-500 dark:text-gray-400">
                         Requested {formatDate(request.createdAt)}
                       </p>
+                      {request.plannedStartTime && request.plannedEndTime && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Planned{" "}
+                          {formatPlannedWindow(
+                            request.plannedStartTime,
+                            request.plannedEndTime
+                          )}
+                        </p>
+                      )}
                       {request.isBackdated && (
                         <span
                           className="mt-1 inline-flex items-center gap-1 rounded border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300"
@@ -152,6 +198,27 @@ const WfhRequestTable: React.FC<Props> = ({
                           {request.note}
                         </p>
                       )}
+                      {/* What they said they would work on. Shown to the
+                          reviewer because a day of named work is a different
+                          request from a day of unnamed work, and this is the
+                          screen where that judgement is made. */}
+                      {request.plannedTasks &&
+                        request.plannedTasks.length > 0 && (
+                          <ul className="mt-1.5 max-w-[280px] space-y-0.5">
+                            {request.plannedTasks.map((task, index) => (
+                              <li
+                                key={`${task}-${index}`}
+                                className="flex items-start gap-1.5 text-xs text-gray-500 dark:text-gray-400"
+                              >
+                                <span
+                                  className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-gray-300 dark:bg-gray-600"
+                                  aria-hidden="true"
+                                />
+                                <span className="min-w-0 flex-1">{task}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                     </td>
                     <td className={cell}>
                       <WfhStatusBadge status={request.status} />
@@ -162,11 +229,14 @@ const WfhRequestTable: React.FC<Props> = ({
                           </p>
                         )}
                     </td>
-                    <td className={`${cell} text-right`}>
+                    <td
+                      className={`${cell} text-right`}
+                      onClick={(event) => event.stopPropagation()}
+                    >
                       {busy ? (
                         <ArrowPathIcon className="ml-auto h-4 w-4 animate-spin text-gray-400" />
                       ) : request.status !== "pending" ? (
-                        <span className="text-xs text-gray-400">-</span>
+                        <ViewReport request={request} onOpen={onOpen} />
                       ) : onReview ? (
                         <div className="flex items-center justify-end gap-1.5">
                           <button
@@ -196,7 +266,7 @@ const WfhRequestTable: React.FC<Props> = ({
                           Withdraw
                         </button>
                       ) : (
-                        <span className="text-xs text-gray-400">-</span>
+                        <ViewReport request={request} onOpen={onOpen} />
                       )}
                     </td>
                   </tr>

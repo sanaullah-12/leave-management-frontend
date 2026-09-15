@@ -11,6 +11,7 @@ import {
   sendTestPush,
   type PushState,
 } from "../services/pushNotifications";
+import { resetDesktopNoticeRouting } from "../services/desktopNotifications";
 
 /**
  * usePushNotifications
@@ -156,6 +157,9 @@ export function usePushNotifications() {
     try {
       const next = await enablePush();
       setState(next);
+      // Which channel draws a system notification depends on whether this
+      // browser now holds a push subscription. See services/desktopNotifications.
+      resetDesktopNoticeRouting();
 
       if (next === "blocked") {
         setError(
@@ -187,6 +191,7 @@ export function usePushNotifications() {
     setError(null);
     try {
       setState(await disablePush());
+      resetDesktopNoticeRouting();
     } catch {
       setError("Could not turn off browser notifications.");
     } finally {

@@ -15,6 +15,9 @@ import { useAuth } from "../context/AuthContext";
 import Select from "../components/ui/Select";
 import WfhRequestForm from "../components/workFromHome/WfhRequestForm";
 import WfhRequestTable from "../components/workFromHome/WfhRequestTable";
+import WfhTodayCard from "../components/workFromHome/WfhTodayCard";
+import WfhLiveMonitor from "../components/workFromHome/WfhLiveMonitor";
+import WfhRequestDrawer from "../components/workFromHome/WfhRequestDrawer";
 import {
   useWfhRequests,
   useWfhStats,
@@ -29,12 +32,17 @@ import { showSuccessToast, showErrorToast } from "../utils/toastHelpers";
 /**
  * Work From Home
  * --------------
- * One page, two readings. An employee gets the request form above their own
- * history; an admin gets the review queue. Same data, same table, so the two
- * never drift apart.
+ * One page, two readings. An employee gets today's work timer and the request
+ * form above their own history; an admin gets the live monitor and the review
+ * queue. Same data, same table, so the two never drift apart.
+ *
+ * The ordering is by urgency rather than by module. Today's day comes first for
+ * both roles - a running timer and a colleague who has not started yet are the
+ * things that need attention now - and the request queue, which is about days
+ * that have not happened, sits below it.
  *
  * Everything below the header updates over Socket.IO - a decision made in one
- * browser reaches the other without a refresh.
+ * browser, or a timer paused in another, reaches the rest without a refresh.
  */
 
 const STATUS_OPTIONS = [
@@ -52,6 +60,9 @@ const WorkFromHomePage: React.FC = () => {
 
   const [status, setStatus] = useState("all");
   const [busyId, setBusyId] = useState<string | null>(null);
+  // The request whose report is open. Held here rather than in the table so the
+  // drawer is mounted once, outside the scrolling list it was opened from.
+  const [openRequest, setOpenRequest] = useState<WfhRequest | null>(null);
 
   const filters = useMemo(
     () => (status === "all" ? {} : { status }),
@@ -70,6 +81,9 @@ const WorkFromHomePage: React.FC = () => {
     endDate?: string;
     reason: string;
     note?: string;
+    plannedStartTime?: string;
+    plannedEndTime?: string;
+    plannedTasks?: string[];
   }) => {
     try {
       await submit.mutateAsync(data);
@@ -186,6 +200,17 @@ const WorkFromHomePage: React.FC = () => {
         </div>
       </div>
 
+      {/* Today, before anything else. An employee with a running timer and an
+          admin watching who has started are both looking at the same day.
+
+          The card is rendered for admins too. It draws nothing unless the
+          viewer personally has an approved day, so it costs an admin nothing -
+          and an admin who does have one would otherwise have a monitor showing
+          their own name with no way to start the timer it is reporting on. */}
+      <WfhTodayCard />
+
+      {isAdmin && <WfhLiveMonitor />}
+
       {/* Counts */}
       <section aria-label="Work from home summary">
         <StatCardRow
@@ -225,6 +250,7 @@ const WorkFromHomePage: React.FC = () => {
           showEmployee={isAdmin}
           onReview={isAdmin ? handleReview : undefined}
           onCancel={isAdmin ? undefined : handleCancel}
+          onOpen={setOpenRequest}
           busyId={busyId}
           emptyMessage={
             isAdmin
@@ -233,6 +259,14 @@ const WorkFromHomePage: React.FC = () => {
           }
         />
       </section>
+
+      {/* The report behind any request in the list: what was asked for, and
+          what the work timer recorded against it. An overlay, so it is mounted
+          once at the end rather than inside the list it is opened from. */}
+      <WfhRequestDrawer
+        request={openRequest}
+        onClose={() => setOpenRequest(null)}
+      />
     </div>
   );
 };

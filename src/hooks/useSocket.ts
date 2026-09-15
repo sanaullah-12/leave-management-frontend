@@ -9,6 +9,15 @@ import { setConnected, setPresence, markEvent } from "../store/realtimeSlice";
 import { NOTIF_KEY } from "./useNotifications";
 import { VOICES_KEY, VOICE_STATS_KEY } from "./useEmployeeVoice";
 import { WFH_KEY, WFH_STATS_KEY } from "./useWorkFromHome";
+import {
+  WFH_SESSION_KEY,
+  WFH_SESSION_LIVE_KEY,
+  WFH_SESSION_HISTORY_KEY,
+} from "./useWfhSession";
+import {
+  announceWfhSessionOnDesktop,
+  type WfhSessionSignal,
+} from "../components/workFromHome/sessionNotice";
 
 /**
  * useSocket
@@ -24,11 +33,16 @@ import { WFH_KEY, WFH_STATS_KEY } from "./useWorkFromHome";
  *  • full cleanup prevents duplicate listeners and memory leaks
  */
 export function useSocket() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const qc = useQueryClient();
   const dispatch = useAppDispatch();
   const boundRef = useRef(false);
   const hadConnectedRef = useRef(false);
+
+  // Read inside the handlers without re-binding every listener when the user
+  // object is replaced by a profile refresh.
+  const viewerIdRef = useRef<string | undefined>(user?.id);
+  viewerIdRef.current = user?.id;
 
   useEffect(() => {
     // Not signed in → make sure the socket is closed.
@@ -62,6 +76,8 @@ export function useSocket() {
       VOICE_STATS_KEY as unknown as unknown[],
       WFH_KEY as unknown as unknown[],
       WFH_STATS_KEY as unknown as unknown[],
+      WFH_SESSION_KEY as unknown as unknown[],
+      WFH_SESSION_LIVE_KEY as unknown as unknown[],
       ["recent-leaves"],
       ["leaves"],
       ["leave-balance"],
@@ -121,6 +137,23 @@ export function useSocket() {
     socket.on(SOCKET_EVENTS.WFH_NEW, invalidateWfh);
     socket.on(SOCKET_EVENTS.WFH_REVIEWED, invalidateWfh);
 
+    // A work-from-home day started, paused, resumed or finished. Reaches the
+    // admins watching the monitor and the employee's own other tabs, so a
+    // second device can never sit showing a timer the server has stopped.
+    //
+    // These four are also the only moments that earn a system notification. It
+    // is drawn from the payload's own transition list, so a timer ticking
+    // produces nothing - there is no event for it, and there is nothing an
+    // admin needs telling about a number that is merely still going up.
+    socket.on(SOCKET_EVENTS.WFH_SESSION, (signal?: WfhSessionSignal) => {
+      invalidate([
+        WFH_SESSION_KEY as unknown as unknown[],
+        WFH_SESSION_LIVE_KEY as unknown as unknown[],
+        WFH_SESSION_HISTORY_KEY as unknown as unknown[],
+      ]);
+      announceWfhSessionOnDesktop(signal, viewerIdRef.current);
+    });
+
     // -- Employee Voice ----------------------------------------------------
     socket.on(SOCKET_EVENTS.VOICE_NEW, () =>
       invalidate([
@@ -161,6 +194,8 @@ export function useSocket() {
         keys.push(
           WFH_KEY as unknown as unknown[],
           WFH_STATS_KEY as unknown as unknown[],
+          WFH_SESSION_KEY as unknown as unknown[],
+          WFH_SESSION_LIVE_KEY as unknown as unknown[],
           ["attendance"]
         );
       }

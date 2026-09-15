@@ -716,6 +716,11 @@ export const workFromHomeAPI = {
     endDate?: string;
     reason: string;
     note?: string;
+    /** Wall-clock "HH:MM" the employee intends to keep. Optional. */
+    plannedStartTime?: string;
+    plannedEndTime?: string;
+    /** What the employee means to work on, one line per task. Optional. */
+    plannedTasks?: string[];
   }) => api.post("/work-from-home", data),
 
   getRequests: (params?: {
@@ -754,6 +759,69 @@ export const workFromHomeAPI = {
     api.get(
       `/work-from-home/schedule?startDate=${startDate}&endDate=${endDate}`
     ),
+};
+
+/**
+ * The work timer on an approved work-from-home day.
+ *
+ * Every call here is a request for the server to act and report; none of them
+ * sends a time, a duration or a status. The timer on screen renders what comes
+ * back - it is never the source of it.
+ */
+export const wfhSessionAPI = {
+  /** Today's approved day, the plan, and the session if one has been started. */
+  getToday: () => api.get("/work-from-home/sessions/today"),
+
+  start: () => api.post("/work-from-home/sessions/start"),
+  pause: () => api.post("/work-from-home/sessions/pause"),
+  resume: () => api.post("/work-from-home/sessions/resume"),
+  finish: () => api.post("/work-from-home/sessions/finish"),
+
+  /**
+   * "A browser belonging to this employee saw user input."
+   *
+   * Deliberately empty. There is no body because there is nothing about the
+   * activity worth sending - only that it happened.
+   */
+  heartbeat: () => api.post("/work-from-home/sessions/heartbeat"),
+
+  /**
+   * What is being worked on. The title is the only thing the client supplies;
+   * every time on a task is stamped by the server, as the day's own are.
+   */
+  addTask: (title: string) =>
+    api.post("/work-from-home/sessions/tasks", { title }),
+  startTask: (taskId: string) =>
+    api.post(`/work-from-home/sessions/tasks/${taskId}/start`),
+  completeTask: (taskId: string) =>
+    api.post(`/work-from-home/sessions/tasks/${taskId}/complete`),
+
+  /** Admin: every employee approved to work from home today, and their state. */
+  getLive: (date?: string) =>
+    api.get(
+      `/work-from-home/sessions/live${date ? `?date=${date}` : ""}`
+    ),
+
+  getHistory: (params?: {
+    page?: number;
+    limit?: number;
+    employeeId?: string;
+    from?: string;
+    to?: string;
+    status?: string;
+  }) => {
+    const q = new URLSearchParams();
+    q.append("page", String(params?.page ?? 1));
+    q.append("limit", String(params?.limit ?? 50));
+    if (params?.employeeId) q.append("employeeId", params.employeeId);
+    if (params?.from) q.append("from", params.from);
+    if (params?.to) q.append("to", params.to);
+    if (params?.status) q.append("status", params.status);
+    return api.get(`/work-from-home/sessions/history?${q.toString()}`);
+  },
+
+  /** One day in full: every stretch worked, and the audit trail behind it. */
+  getSession: (id: string) => api.get(`/work-from-home/sessions/${id}`),
 };
 
 // Announcements (company notice board)

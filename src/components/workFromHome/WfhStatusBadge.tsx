@@ -58,7 +58,7 @@ const WfhStatusBadge: React.FC<Props> = ({ status, compact = false }) => {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border font-semibold leading-tight ${
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border font-semibold leading-tight ${
         compact ? "px-1.5 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs"
       }`}
       style={{ color: meta.fg, background: meta.bg, borderColor: meta.border }}

@@ -10,6 +10,7 @@ export const SOCKET_EVENTS = {
   LEAVE_REVIEWED: "leave:reviewed",
   WFH_NEW: "wfh:new",
   WFH_REVIEWED: "wfh:reviewed",
+  WFH_SESSION: "wfh:session",
   VOICE_NEW: "voice:new",
   VOICE_UPDATED: "voice:updated",
   ANNOUNCEMENT_NEW: "announcement:new",
