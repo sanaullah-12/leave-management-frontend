@@ -78,5 +78,11 @@
     "teamAvailability": "ٹیم کی دستیابی",
     "thisMonthByCategory": "اس مہینے، زمرے کے لحاظ سے",
     "yourActivity": "حالیہ درخواستوں میں آپ کی چھٹیوں کی سرگرمی"
+  },
+  "tabs": {
+    "activity": "سرگرمی",
+    "charts": "چارٹس",
+    "overview": "جائزہ",
+    "review": "تجزیہ"
   }
 }

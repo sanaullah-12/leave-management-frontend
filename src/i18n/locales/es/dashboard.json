@@ -78,5 +78,11 @@
     "teamAvailability": "Disponibilidad del equipo",
     "thisMonthByCategory": "Este mes, por categoría",
     "yourActivity": "Tu actividad de ausencias"
+  },
+  "tabs": {
+    "activity": "Actividad",
+    "charts": "Gráficos",
+    "overview": "Resumen",
+    "review": "Balance"
   }
 }

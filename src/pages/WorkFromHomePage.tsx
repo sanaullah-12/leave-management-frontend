@@ -7,9 +7,7 @@ import {
   CheckCircleIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
-import { CARD } from "../lib/surfaces";
 import { StatCardRow } from "../components/ui/StatCard";
-import { AccentEdge } from "../components/ui/CardAccents";
 import { useThemeAccent } from "../hooks/useThemeAccent";
 import { useAuth } from "../context/AuthContext";
 import Select from "../components/ui/Select";
@@ -184,22 +182,6 @@ const WorkFromHomePage: React.FC = () => {
         illustration={sectionIllustration("workFromHome")}
       />
 
-      {/* Status filter. A control over the list below, so it sits with the
-          list rather than in the banner. */}
-      <div
-        className={`relative flex justify-end overflow-hidden ${CARD} px-5 py-4`}
-      >
-        <AccentEdge color={accent} />
-        <div className="w-[180px]">
-          <Select
-            value={status}
-            onChange={setStatus}
-            options={STATUS_OPTIONS}
-            placeholder="Filter by status"
-          />
-        </div>
-      </div>
-
       {/* Today, before anything else. An employee with a running timer and an
           admin watching who has started are both looking at the same day.
 
@@ -233,15 +215,31 @@ const WorkFromHomePage: React.FC = () => {
       )}
 
       {/* Requests */}
-      <section className="space-y-2">
-        <div className="flex items-center gap-2 px-1">
-          <HomeIcon className="h-4 w-4 text-gray-400" />
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-            {isAdmin ? "All requests" : "My requests"}
-          </h2>
-          <span className="text-xs text-gray-400">
-            {requests.length} shown
-          </span>
+      <section className="space-y-2.5">
+        {/* The status filter belongs to this list, so it sits on it. It used
+            to be a card of its own at the top of the page, three sections
+            above the rows it changes - on a phone that is far enough that the
+            list appears to have emptied itself. Full width below `sm`: a
+            180px control jammed against the right edge is both hard to hit
+            and hard to read the current value of. */}
+        <div className="flex flex-col gap-2.5 px-1 sm:flex-row sm:items-center sm:gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <HomeIcon className="h-4 w-4 shrink-0 text-gray-400" />
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              {isAdmin ? "All requests" : "My requests"}
+            </h2>
+            <span className="text-xs text-gray-400">
+              {requests.length} shown
+            </span>
+          </div>
+          <div className="w-full sm:w-[190px]">
+            <Select
+              value={status}
+              onChange={setStatus}
+              options={STATUS_OPTIONS}
+              placeholder="Filter by status"
+            />
+          </div>
         </div>
 
         <WfhRequestTable

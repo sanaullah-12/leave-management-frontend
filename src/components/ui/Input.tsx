@@ -20,6 +20,11 @@ import React, { forwardRef, useCallback, useId, useRef, useState } from "react";
  * Works controlled and uncontrolled - a react-hook-form register() spread goes
  * straight onto it, and the clear button writes through the native value setter
  * so react-hook-form sees a real input event.
+ *
+ * Heights step up below `sm`. The field family is drawn at 36-40px, which is
+ * right beside 14px text under a mouse and under the 44px a fingertip can hit
+ * reliably; on a phone each preset gains a step. The `sm:` half restores the
+ * desktop height exactly, so nothing changes above 640px.
  */
 
 export type InputSize = "sm" | "md" | "lg";
@@ -62,7 +67,7 @@ const SIZES: Record<
   }
 > = {
   sm: {
-    shell: "h-9",
+    shell: "h-10 sm:h-9",
     text: "text-[13px]",
     pad: "px-3.5",
     left: "left-3.5",
@@ -70,7 +75,7 @@ const SIZES: Record<
     icon: "h-4 w-4",
   },
   md: {
-    shell: "h-10",
+    shell: "h-11 sm:h-10",
     text: "text-sm",
     pad: "px-4",
     left: "left-4",
@@ -227,7 +232,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               onClick={handleClear}
               tabIndex={-1}
               aria-label="Clear"
-              className={`absolute top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-[rgb(var(--blue-500))] text-white transition-opacity hover:opacity-90 ${size.right}`}
+              className={`tap-target absolute top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-[rgb(var(--blue-500))] text-white transition-opacity hover:opacity-90 ${size.right}`}
             >
               <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor">
                 <path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z" />

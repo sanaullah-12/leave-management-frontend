@@ -6,7 +6,7 @@
  * of the assistant that speaks first, so it is also the only part with a
  * dismissal - the rules for when it may appear live in `assistantService`.
  */
-import React from "react";
+import React, { useCallback } from "react";
 import { useDraggableWidget } from "../../hooks/useDraggableWidget";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChatBubbleLeftRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
@@ -28,7 +28,35 @@ const AssistantBubble: React.FC<Props> = ({
   onDismissGreeting,
 }) => {
   const reduce = useReducedMotion();
-  const drag = useDraggableWidget("assistantLauncherPosition");
+
+  /**
+   * The launcher floats above the whole shell, so wherever it is parked it
+   * takes the taps aimed at whatever is underneath. Dragged into the mobile
+   * app bar it covered the notification bell, install and menu buttons, and
+   * because the position is remembered it stayed there across reloads - the
+   * navbar simply stopped responding. These bands keep it off both pieces of
+   * chrome, measured live so they follow the breakpoint and the safe areas.
+   */
+  const keepClear = useCallback(() => {
+    const read = (name: string) => {
+      const value = getComputedStyle(document.documentElement)
+        .getPropertyValue(name)
+        .trim();
+      const px = parseFloat(value);
+      return Number.isFinite(px) ? px : 0;
+    };
+
+    // From lg up the chrome is a sidebar and a desktop header the launcher
+    // never reaches, so only the viewport edges apply.
+    if (window.innerWidth >= 1024) return {};
+
+    return {
+      top: read("--safe-top") + read("--app-bar-h"),
+      bottom: read("--safe-bottom") + read("--tab-bar-h"),
+    };
+  }, []);
+
+  const drag = useDraggableWidget("assistantLauncherPosition", { keepClear });
 
   return (
     // On phones the bubble must clear the bottom tab bar (52px + safe area)

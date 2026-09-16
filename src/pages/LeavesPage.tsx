@@ -408,7 +408,7 @@ const LeavesPage: React.FC = () => {
           <>
             {/* Desktop Table View - Hidden on mobile */}
             <div className="hidden lg:block">
-              <div className="overflow-x-auto">
+              <div className="table-scroll">
                 <table className="min-w-full divide-y divide-gray-100 dark:divide-gray-700/60">
                   <thead className="bg-gray-50/80 dark:bg-gray-800/60">
                     <tr>

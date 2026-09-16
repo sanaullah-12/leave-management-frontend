@@ -219,7 +219,61 @@ const PayslipsPage: React.FC = () => {
               sub="Try a different month or clear the search."
             />
           ) : (
-            <div className="overflow-x-auto">
+            <>
+            {/* ---------------- Phones and small tablets ----------------
+                Eight columns need 860px. What a payslip is looked up for is
+                the net figure, so on a card it leads; gross and deductions -
+                the two numbers it is the difference of - sit under it as one
+                line, and the rest is in the payslip itself, which the card
+                opens. The row's hover-revealed print and download buttons are
+                not rendered here at all: they are unreachable on a touch
+                screen by construction, and the preview this card opens
+                carries both. */}
+            <ul className="divide-y divide-gray-100 lg:hidden dark:divide-gray-800">
+              {filtered.map((p) => {
+                const c = p.computation;
+                return (
+                  <li key={`m-${p.id}`}>
+                    <button
+                      type="button"
+                      onClick={() => setPreview(p)}
+                      className="press-scale flex w-full items-start gap-3 px-1 py-3 text-start"
+                    >
+                      <Avatar name={p.employee.name} size="sm" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[14px] font-semibold text-gray-900 dark:text-white">
+                          {p.employee.name}
+                        </span>
+                        <span className="mt-0.5 block truncate text-[12px] text-gray-400">
+                          {formatPeriod(p.period)}
+                          {p.employee.department
+                            ? ` - ${p.employee.department}`
+                            : ""}
+                        </span>
+                        <span className="mt-1 block truncate text-[11px] text-gray-400">
+                          {formatMoney(c.grossEarnings, c.currency)} gross
+                          {c.totalDeductions > 0
+                            ? ` - ${formatMoney(
+                                c.totalDeductions,
+                                c.currency
+                              )} deducted`
+                            : ""}
+                        </span>
+                      </span>
+                      <span className="flex shrink-0 flex-col items-end gap-1.5">
+                        <span className="text-[15px] font-bold tabular-nums text-gray-900 dark:text-white">
+                          {formatMoney(c.netSalary, c.currency)}
+                        </span>
+                        <StatusPill status={PAYSLIP_STATUS[p.status]} />
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+
+            {/* ---------------- Desktop ---------------- */}
+            <div className="hidden table-scroll lg:block">
               <table className="w-full min-w-[860px] border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-gray-200/70 text-left dark:border-gray-700/50">
@@ -261,6 +315,7 @@ const PayslipsPage: React.FC = () => {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </PayrollSection>
       </motion.div>
@@ -339,6 +394,9 @@ const PayslipRow: React.FC<RowProps> = React.memo(
           <StatusPill status={PAYSLIP_STATUS[p.status]} />
         </td>
         <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
+          {/* Revealed on hover or keyboard focus. Desktop only by
+              construction - the phone list opens the preview, which carries
+              the same two actions as real buttons. */}
           <div className="flex items-center justify-end gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
             <button
               onClick={() => onView(p)}

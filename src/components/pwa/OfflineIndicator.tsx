@@ -41,8 +41,10 @@ const OfflineIndicator: React.FC = () => {
       initial={{ opacity: 0, y: -16 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -16 }}
-      className="fixed inset-x-0 top-3 z-40 mx-auto w-fit px-4"
-      style={{ marginTop: "env(safe-area-inset-top, 0px)" }}
+      /* Below the mobile app bar rather than over it: at top-3 the pill landed
+         on the screen title, and on an installed iPhone inside the status bar.
+         Desktop has no app bar in the way and keeps the original place. */
+      className="fixed inset-x-0 top-[calc(var(--safe-top)+var(--app-bar-h)+0.5rem)] z-40 mx-auto w-fit px-4 lg:top-[calc(var(--safe-top)+0.75rem)]"
       role="status"
       aria-live="polite"
     >

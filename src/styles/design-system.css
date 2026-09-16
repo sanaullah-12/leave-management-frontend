@@ -2284,3 +2284,54 @@ html.dark .btn-ghost:hover {
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
 }
+
+/* ==============================================================
+   KPI rows of exactly four
+
+   Four tiles across where four fit, two where they do not - and
+   never three with one orphaned underneath, which is what
+   auto-fit gave on every width between roughly 46rem and 52rem.
+   That band is not an edge case: it is a 1024-1280px laptop with
+   the sidebar open, which is most of them.
+
+   Measured against the row's own width rather than the viewport's.
+   The sidebar is 19rem expanded and 4rem collapsed, so one viewport
+   width gives two row widths 15rem apart and no media query can
+   tell them apart. `container-type: inline-size` on the wrapper is
+   what lets the row ask how much room it actually has.
+
+   55rem is measured, not guessed: it is the narrowest row at which
+   all four tiles print their label and figure without either
+   truncating, with the longest label in the product in the row
+   ("Generated Documents"). Below it the row halves rather than
+   shrinking the tiles past legibility - a truncated "PKR 4.2M" is
+   a wrong number on screen, which is worse than a second line.
+   ============================================================== */
+.kpi-measure {
+  container-type: inline-size;
+}
+
+.kpi-four-up {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@container (min-width: 55rem) {
+  .kpi-four-up {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  /* A tile that spans the row - the odd metric that is a name rather
+     than a count, and belongs under the four counts rather than in
+     the first of four empty cells. */
+  .kpi-four-up > .kpi-span {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Two across, so a spanning tile takes the whole of its row here too. */
+.kpi-four-up > .kpi-span {
+  grid-column: 1 / -1;
+}
+
+/* Browsers without container queries keep the two-column row. Two wide
+   tiles read correctly; four cramped ones do not. */

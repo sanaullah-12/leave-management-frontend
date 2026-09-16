@@ -1,7 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import React, { useMemo, useState } from "react";
 import {
-  XMarkIcon,
   MagnifyingGlassIcon,
   BuildingOffice2Icon,
   IdentificationIcon,
@@ -11,20 +9,35 @@ import {
 } from "@heroicons/react/24/outline";
 import StatusBadge from "./StatusBadge";
 import type { DayRow } from "./DayTable";
+import {
+  CardAction,
+  CardHead,
+  DetailBody,
+  DetailCard,
+  DetailHeader,
+  DetailShell,
+  HistoryRow,
+  InfoRow,
+  MiniStat,
+  RangeTrack,
+  RateRow,
+  StatBox,
+} from "../mobile/DetailSheet";
+import { ABSENT_INK, LATE_INK } from "../mobile/primitives";
 
 import Input from "../ui/Input";
 /**
- * Slide-over holding an employee's own attendance in full.
+ * An employee's own attendance, in full.
  *
- * The day-by-day table pages ten rows at a time and the day panel answers a
- * single date, so neither answers "show me everything I have". This panel
- * does: every day of the range in one list.
+ * The day-by-day table pages ten rows at a time and the day sheet answers a
+ * single date, so neither answers "show me everything I have". This one does:
+ * every day of the range in one list.
  *
- * It is laid out as the employee drawer an admin gets - same head, same
- * arrival section, same history table, same statistics - because it answers
- * the same question about the same person; only the reader has changed. The
- * one difference is what the table lists: every day of the range rather than
- * only the days with a punch, so an absence is visible as a row.
+ * It is laid out as the employee sheet an admin gets - same chrome, same
+ * arrival card, same history, same statistics - because it answers the same
+ * question about the same person; only the reader has changed. The one
+ * difference is what the list holds: every day of the range rather than only
+ * the days with a punch, so an absence is visible as a row.
  *
  * Every figure is counted off the rows the list renders, so a number here can
  * never disagree with the list below it.
@@ -48,11 +61,11 @@ interface Props {
   /** The range the rows cover, already formatted for reading. */
   rangeLabel?: string;
   loading?: boolean;
-  /** Open one day in full. The day panel stacks above this one. */
+  /** Open one day in full. The day sheet stacks above this one. */
   onSelectDay?: (row: DayRow) => void;
   /**
-   * True while the single-day panel is open on top. Escape then belongs to
-   * that panel, and closing both layers on one press would lose this list.
+   * True while the single-day sheet is open on top. Escape then belongs to
+   * that sheet, and closing both layers on one press would lose this list.
    */
   detailOpen?: boolean;
   onClose: () => void;
@@ -61,17 +74,8 @@ interface Props {
 /** Days the list opens on. A working week, weekend rows included. */
 const WEEK = 7;
 
-/** Active theme accent; the amber is a status tone and stays fixed. */
-const ACCENT = "rgb(var(--blue-600))";
-const LATE_TONE = "#b45309";
-
-const initialsOf = (name?: string) =>
-  (name || "?")
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("") || "?";
+/** Present follows the theme accent; late and absent carry meaning and do not. */
+const PRESENT_INK = "var(--accent)";
 
 /** "HH:MM" or "HH:MM:SS" to minutes past midnight. */
 const toMinutes = (value?: string | null) => {
@@ -106,37 +110,15 @@ const FullAttendanceDrawer: React.FC<Props> = ({
   detailOpen = false,
   onClose,
 }) => {
-  const closeRef = useRef<HTMLButtonElement>(null);
   const [query, setQuery] = useState("");
   /**
    * The list opens on the last week and expands to the whole range.
    *
    * A week is what an employee checks day to day, and it fits without
-   * scrolling past the arrival section; the rest of the range is one button
-   * away rather than a wall of rows nobody asked for yet.
+   * scrolling past the arrival card; the rest of the range is one button away
+   * rather than a wall of rows nobody asked for yet.
    */
   const [showAll, setShowAll] = useState(false);
-
-  // Mount only. Opening a day on top must not pull focus back here, and the
-  // scroll lock has to remember the value from before any panel opened - a
-  // re-run would capture the "hidden" this effect itself set and restore that.
-  useEffect(() => {
-    closeRef.current?.focus();
-    // The page behind must not scroll while a modal layer is open.
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, []);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !detailOpen) onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose, detailOpen]);
 
   /** How the range actually went, counted off the rows themselves. */
   const totals = useMemo(() => {
@@ -165,7 +147,7 @@ const FullAttendanceDrawer: React.FC<Props> = ({
    * The average arrival across every punch in the range.
    *
    * One bad morning is a bad morning; where the average sits is the habit, and
-   * the habit is what a whole-range panel is opened to see. The verdict on each
+   * the habit is what a whole-range sheet is opened to see. The verdict on each
    * individual day stays the server's and is untouched here.
    */
   const average = useMemo(() => {
@@ -205,7 +187,7 @@ const FullAttendanceDrawer: React.FC<Props> = ({
     };
   }, [average, policy?.cutoffTime]);
 
-  /** The rows the table lists: the last week, or the range and its search. */
+  /** The rows the list holds: the last week, or the range and its search. */
   const historyRows = useMemo(() => {
     if (!showAll) return rows.slice(0, WEEK);
     const q = query.trim().toLowerCase();
@@ -217,320 +199,202 @@ const FullAttendanceDrawer: React.FC<Props> = ({
     );
   }, [rows, showAll, query]);
 
-  return createPortal(
-    // Below the single-day panel z-[60] on purpose: a day opened from this
-    // list has to land on top of it.
-    <div
-      className="fixed inset-0 z-[55] flex justify-end bg-gray-900/60 backdrop-blur-[2px]"
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+  return (
+    // Below the single-day sheet's z on purpose: a day opened from this list
+    // has to land on top of it.
+    <DetailShell
+      onClose={onClose}
+      labelledBy="full-attendance-title"
+      z={55}
+      escapeEnabled={!detailOpen}
     >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="full-attendance-title"
-        className="flex h-full w-[440px] max-w-[92vw] flex-col bg-white shadow-2xl dark:bg-gray-800"
-      >
-        {/* Head */}
-        <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-5 py-4 dark:border-gray-700">
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-50 text-base font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
-              {initialsOf(employee?.name)}
-            </span>
-            <div className="min-w-0">
-              <p
-                id="full-attendance-title"
-                className="truncate text-[15px] font-semibold text-gray-900 dark:text-gray-100"
-              >
-                {employee?.name || "My attendance"}
-              </p>
-              <p className="truncate text-xs text-gray-500 dark:text-gray-400">
-                {employee?.department || "Employee"}
-                {employee?.employeeId ? ` · ID ${employee.employeeId}` : ""}
-              </p>
-            </div>
-          </div>
-          <button
-            ref={closeRef}
-            onClick={onClose}
-            aria-label="Close panel"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-          >
-            <XMarkIcon className="h-4 w-4" />
-          </button>
+      <DetailHeader
+        title="Attendance Detail"
+        onBack={onClose}
+        titleId="full-attendance-title"
+        subject={{
+          name: employee?.name || "My attendance",
+          meta: `${employee?.department || "Employee"}${
+            employee?.employeeId ? ` · ID ${employee.employeeId}` : ""
+          }`,
+        }}
+      />
+
+      <DetailBody>
+        {/* Identity. Unbordered rows rather than a card: this is the caption
+            to the name above it, not a section of its own. */}
+        <div className="-mt-1">
+          <InfoRow icon={BuildingOffice2Icon}>
+            {employee?.department || "Employee"}
+          </InfoRow>
+          <InfoRow icon={IdentificationIcon}>
+            Device slot {employee?.machineId ?? "-"} {"·"} User ID{" "}
+            {employee?.employeeId ?? "-"}
+          </InfoRow>
+          {employee?.enrolledAt ? (
+            <InfoRow icon={CalendarDaysIcon}>
+              Enrolled {new Date(employee.enrolledAt).toLocaleDateString()}
+            </InfoRow>
+          ) : rangeLabel ? (
+            <InfoRow icon={CalendarDaysIcon}>{rangeLabel}</InfoRow>
+          ) : null}
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 pb-8">
-          {/* Identity */}
-          <section className="space-y-2 border-b border-gray-100 py-4 dark:border-gray-700">
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-              <BuildingOffice2Icon className="h-4 w-4 shrink-0 text-gray-400" />
-              <span>{employee?.department || "Employee"}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-              <IdentificationIcon className="h-4 w-4 shrink-0 text-gray-400" />
-              <span>
-                Device slot {employee?.machineId ?? "-"} · User ID{" "}
-                {employee?.employeeId ?? "-"}
-              </span>
-            </div>
-            {employee?.enrolledAt ? (
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                <CalendarDaysIcon className="h-4 w-4 shrink-0 text-gray-400" />
-                <span>
-                  Enrolled {new Date(employee.enrolledAt).toLocaleDateString()}
-                </span>
-              </div>
-            ) : rangeLabel ? (
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                <CalendarDaysIcon className="h-4 w-4 shrink-0 text-gray-400" />
-                <span>{rangeLabel}</span>
-              </div>
-            ) : null}
-          </section>
-
-          {loading ? (
-            <div className="space-y-3 py-6">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="h-16 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-700"
-                />
-              ))}
-            </div>
-          ) : rows.length === 0 ? (
-            <p className="py-6 text-sm text-gray-500 dark:text-gray-400">
+        {loading ? (
+          [0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="h-32 animate-pulse rounded-[20px] bg-black/[0.05] dark:bg-white/[0.06]"
+            />
+          ))
+        ) : rows.length === 0 ? (
+          <DetailCard>
+            <p className="text-[13px] text-gray-500 dark:text-gray-400">
               No attendance loaded for this range.
             </p>
-          ) : (
-            <>
-              {/* Average arrival */}
-              <section className="border-b border-gray-100 py-4 dark:border-gray-700">
-                <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    Average arrival
-                  </h3>
-                  {average && (
+          </DetailCard>
+        ) : (
+          <>
+            {/* Average arrival */}
+            <DetailCard>
+              <CardHead
+                title="Average arrival"
+                action={
+                  average && (
                     <StatusBadge status={average.isLate ? "Late" : "On time"} />
+                  )
+                }
+              />
+
+              {average ? (
+                <>
+                  {timeline && (
+                    <RangeTrack
+                      fillPct={timeline.arrivalPct}
+                      markPct={timeline.cutoffPct}
+                      from={timeline.fromLabel}
+                      to={timeline.toLabel}
+                      mark={`cutoff ${policy?.cutoffTime}`}
+                      late={average.isLate}
+                    />
                   )}
-                </div>
 
-                {average ? (
-                  <>
-                    {timeline && (
-                      <div className="mb-4">
-                        {/* The bar carries the average on its own; a knob on
-                            the end of it only repeated the reading. */}
-                        <div className="relative mb-2 h-1.5 rounded-full bg-gray-200 dark:bg-gray-600">
-                          <div
-                            className="absolute top-0 h-full rounded-full"
-                            style={{
-                              left: 0,
-                              width: `${timeline.arrivalPct}%`,
-                              background: average.isLate ? LATE_TONE : ACCENT,
-                            }}
-                          />
-                          {/* The rule the verdict was made against. */}
-                          <div
-                            className="absolute -top-1 h-3.5 w-0.5 bg-gray-400"
-                            style={{ left: `${timeline.cutoffPct}%` }}
-                            title={`Cutoff ${policy?.cutoffTime}`}
-                          />
-                        </div>
-                        <div className="flex justify-between text-[11px] text-gray-400">
-                          <span>{timeline.fromLabel}</span>
-                          <span>cutoff {policy?.cutoffTime}</span>
-                          <span>{timeline.toLabel}</span>
-                        </div>
-                      </div>
-                    )}
+                  <div className="mt-4 grid grid-cols-3 gap-2">
+                    <MiniStat
+                      icon={ArrowRightOnRectangleIcon}
+                      label="Average"
+                      value={average.display}
+                    />
+                    <MiniStat
+                      icon={ClockIcon}
+                      label="Cutoff"
+                      value={policy?.cutoffTime || "-"}
+                    />
+                    <MiniStat
+                      icon={CalendarDaysIcon}
+                      label={average.isLate ? "Late by" : "Margin"}
+                      value={average.margin || "-"}
+                    />
+                  </div>
+                </>
+              ) : (
+                <p className="text-[13px] text-gray-500 dark:text-gray-400">
+                  No punches in the selected range.
+                </p>
+              )}
+            </DetailCard>
 
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="flex items-start gap-2 rounded-lg bg-gray-50 p-2.5 dark:bg-gray-700/40">
-                        <ArrowRightOnRectangleIcon className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
-                        <div className="min-w-0">
-                          <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                            Average
-                          </p>
-                          <p className="truncate text-[13px] font-semibold text-gray-900 dark:text-gray-100">
-                            {average.display}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-2 rounded-lg bg-gray-50 p-2.5 dark:bg-gray-700/40">
-                        <ClockIcon className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
-                        <div className="min-w-0">
-                          <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                            Cutoff
-                          </p>
-                          <p className="truncate text-[13px] font-semibold text-gray-900 dark:text-gray-100">
-                            {policy?.cutoffTime || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-2 rounded-lg bg-gray-50 p-2.5 dark:bg-gray-700/40">
-                        <CalendarDaysIcon className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
-                        <div className="min-w-0">
-                          <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                            {average.isLate ? "Late by" : "Margin"}
-                          </p>
-                          <p className="truncate text-[13px] font-semibold text-gray-900 dark:text-gray-100">
-                            {average.margin || "-"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    No punches in the selected range.
-                  </p>
-                )}
-              </section>
-
-              {/* History: every day of the range, newest first */}
-              <section className="border-b border-gray-100 py-4 dark:border-gray-700">
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    {showAll ? "All attendance" : "This week"}
-                    <span className="ml-2 text-xs font-normal text-gray-400">
-                      {showAll
-                        ? query
-                          ? `${historyRows.length} of ${rows.length}`
-                          : `${rows.length} day${rows.length === 1 ? "" : "s"}`
-                        : `${historyRows.length} day${
-                            historyRows.length === 1 ? "" : "s"
-                          }`}
-                    </span>
-                  </h3>
-                  {rows.length > WEEK && (
-                    <button
-                      type="button"
+            {/* History: every day of the range, newest first */}
+            <DetailCard>
+              <CardHead
+                className="mb-2.5"
+                title={showAll ? "All attendance" : "This week"}
+                sub={
+                  showAll
+                    ? query
+                      ? `${historyRows.length} of ${rows.length}`
+                      : `${rows.length} day${rows.length === 1 ? "" : "s"}`
+                    : `${historyRows.length} day${
+                        historyRows.length === 1 ? "" : "s"
+                      }`
+                }
+                action={
+                  rows.length > WEEK && (
+                    <CardAction
                       onClick={() => {
                         setShowAll((v) => !v);
                         setQuery("");
                       }}
-                      className="shrink-0 rounded-full border border-gray-200 px-2.5 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 dark:border-gray-600 dark:text-blue-400 dark:hover:bg-blue-500/10"
                     >
-                      {showAll ? "Show this week" : "View full"}
-                    </button>
-                  )}
-                </div>
+                      {showAll ? "This week" : "View all"}
+                    </CardAction>
+                  )
+                }
+              />
 
-                {showAll && (
-                  <Input
-                    icon={MagnifyingGlassIcon}
-                    inputSize="sm"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onClear={() => setQuery("")}
-                    clearable
-                    placeholder="Find a date or status"
-                    aria-label="Search attendance days"
-                    className="mb-2"
-                    inputClassName="text-xs"
-                  />
-                )}
+              {showAll && (
+                <Input
+                  icon={MagnifyingGlassIcon}
+                  inputSize="sm"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onClear={() => setQuery("")}
+                  clearable
+                  placeholder="Find a date or status"
+                  aria-label="Search attendance days"
+                  className="mb-2"
+                  inputClassName="text-xs"
+                />
+              )}
 
-                {historyRows.length ? (
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="bg-white text-gray-400 dark:bg-gray-800">
-                        <th className="border-b border-gray-100 py-1.5 font-medium dark:border-gray-700">
-                          Date
-                        </th>
-                        <th className="border-b border-gray-100 py-1.5 font-medium dark:border-gray-700">
-                          Arrived
-                        </th>
-                        <th className="border-b border-gray-100 py-1.5 font-medium dark:border-gray-700">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {historyRows.map((row) => (
-                        <tr
-                          key={row.date}
-                          onClick={() => onSelectDay?.(row)}
-                          tabIndex={onSelectDay ? 0 : undefined}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") onSelectDay?.(row);
-                          }}
-                          className={
-                            onSelectDay
-                              ? "cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/40"
-                              : undefined
-                          }
-                        >
-                          <td className="border-b border-gray-100 py-2 text-gray-700 dark:border-gray-700 dark:text-gray-200">
-                            {row.dateDisplay}
-                          </td>
-                          <td className="border-b border-gray-100 py-2 font-mono text-gray-700 dark:border-gray-700 dark:text-gray-200">
-                            {row.arrival || "-"}
-                          </td>
-                          <td className="border-b border-gray-100 py-2 dark:border-gray-700">
-                            <StatusBadge status={row.status} compact />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ) : (
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    No day matches that search.
-                  </p>
-                )}
-              </section>
-
-              {/* Statistics */}
-              <section className="py-4">
-                <h3 className="mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                  Statistics
-                  {rangeLabel && (
-                    <span className="ml-2 text-xs font-normal text-gray-400">
-                      {rangeLabel}
-                    </span>
-                  )}
-                </h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { label: "Present", value: totals.present, tone: ACCENT },
-                    { label: "Late", value: totals.late, tone: "#b5650a" },
-                    { label: "Absent", value: totals.absent, tone: "#b42318" },
-                  ].map((chip) => (
-                    <div
-                      key={chip.label}
-                      className="rounded-lg border border-gray-200 p-2.5 dark:border-gray-600"
-                    >
-                      <span
-                        className="mb-1.5 block h-1.5 w-1.5 rounded-full"
-                        style={{ background: chip.tone }}
-                      />
-                      <div className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                        {chip.value}
-                      </div>
-                      <div className="text-[11px] text-gray-500 dark:text-gray-400">
-                        {chip.label}
-                      </div>
-                    </div>
+              {historyRows.length ? (
+                <div className={showAll ? "max-h-72 overflow-y-auto" : undefined}>
+                  {historyRows.map((row) => (
+                    <HistoryRow
+                      key={row.date}
+                      date={row.dateDisplay}
+                      detail={row.arrival || "-"}
+                      badge={<StatusBadge status={row.status} compact />}
+                      onClick={
+                        onSelectDay ? () => onSelectDay(row) : undefined
+                      }
+                    />
                   ))}
-                  <div className="col-span-3 flex items-center justify-between rounded-lg border border-gray-200 p-2.5 dark:border-gray-600">
-                    <span className="text-[11px] text-gray-500 dark:text-gray-400">
-                      Attendance rate over {totals.workingDays} working days
-                    </span>
-                    <span className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                      {totals.rate}%
-                    </span>
-                  </div>
                 </div>
-              </section>
-            </>
-          )}
-        </div>
-      </div>
-    </div>,
-    document.body
+              ) : (
+                <p className="py-2 text-[13px] text-gray-500 dark:text-gray-400">
+                  No day matches that search.
+                </p>
+              )}
+            </DetailCard>
+
+            {/* Statistics */}
+            <DetailCard>
+              <CardHead title="Statistics" sub={rangeLabel} className="mb-3" />
+              <div className="grid grid-cols-3 gap-2">
+                <StatBox
+                  tone={PRESENT_INK}
+                  value={totals.present}
+                  label="Present"
+                />
+                <StatBox tone={LATE_INK} value={totals.late} label="Late" />
+                <StatBox
+                  tone={ABSENT_INK}
+                  value={totals.absent}
+                  label="Absent"
+                />
+              </div>
+              <div className="mt-2">
+                <RateRow
+                  label={`Attendance rate over ${totals.workingDays} working days`}
+                  value={`${totals.rate}%`}
+                />
+              </div>
+            </DetailCard>
+          </>
+        )}
+      </DetailBody>
+    </DetailShell>
   );
 };
 

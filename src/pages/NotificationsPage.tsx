@@ -83,7 +83,7 @@ const NotificationsPage: React.FC = () => {
                   if (!n.read) markRead(n._id);
                   navigate(notificationTarget(n));
                 }}
-                className={`flex w-full items-start gap-4 px-5 py-4 text-left transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-700/30 ${
+                className={`press-scale flex w-full items-start gap-3 px-4 py-3.5 text-left transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-700/30 sm:gap-4 sm:px-5 sm:py-4 ${
                   !n.read ? "bg-blue-50/40 dark:bg-blue-500/5" : ""
                 }`}
               >
@@ -101,12 +101,21 @@ const NotificationsPage: React.FC = () => {
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     {n.message}
                   </p>
+                  {/* On a phone the timestamp moves under the message. Held in
+                      a right-hand column it took about a third of a 320px row
+                      away from the message it dates, for a fact that is read
+                      second. */}
+                  <p className="mt-1 text-[11px] text-gray-400 dark:text-gray-500 sm:hidden">
+                    {formatDistanceToNow(new Date(n.createdAt), {
+                      addSuffix: true,
+                    })}
+                  </p>
                 </div>
-                <div className="flex flex-shrink-0 items-center gap-2">
+                <div className="flex flex-shrink-0 items-center gap-2 pt-1 sm:pt-0">
                   {!n.read && (
                     <span className="h-2 w-2 rounded-full bg-blue-500" />
                   )}
-                  <span className="whitespace-nowrap text-xs text-gray-400 dark:text-gray-500">
+                  <span className="hidden whitespace-nowrap text-xs text-gray-400 dark:text-gray-500 sm:inline">
                     {formatDistanceToNow(new Date(n.createdAt), {
                       addSuffix: true,
                     })}

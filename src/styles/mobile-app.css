@@ -1,0 +1,399 @@
+/* ==============================================================
+   APP SHELL - platform layer
+   ==============================================================
+   Everything here is about the app behaving like an installed app
+   on a phone rather than a page in a browser: safe areas, touch
+   targets, the software keyboard, and scroll behaviour.
+
+   It is deliberately separate from design-system.css (which owns
+   the visual language) and from the density/type block at the end
+   of index.css (which owns mobile sizing). This file owns the
+   device, not the design.
+   ============================================================== */
+
+/* --------------------------------------------------------------
+   Safe-area tokens
+
+   env() can only be read where it is written, which is why the
+   insets were previously re-typed at a dozen call sites - and why
+   they were being applied twice in places (once on <body>, again
+   on the element inside it). Lifting them into custom properties
+   gives one source of truth that calc() can use anywhere.
+   -------------------------------------------------------------- */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  /* Mobile app bar: 56px of chrome above the content. */
+  --app-bar-h: 3.5rem;
+  /* Floating tab bar: 60px pill + 8px float gap. */
+  --tab-bar-h: 4.25rem;
+
+  /* Set by useViewportInsets() to the height the software keyboard
+     is covering. 0 whenever no keyboard is up, and on every device
+     that does not report a visual viewport. */
+  --keyboard-inset: 0px;
+}
+
+/* Installed on iOS the app draws under the status bar, and the inset
+   above is not always substituted through a custom property there -
+   which left the app bar's buttons inside the strip iOS keeps for
+   itself, so tapping them did nothing. This floor holds the chrome
+   clear until useViewportInsets() has measured the real value and
+   written it over these tokens; on a device that reports its inset
+   the measured number simply wins. `display-mode` is false in a
+   browser tab, so nothing changes for Safari. */
+@media (display-mode: standalone) {
+  :root {
+    --safe-top: max(env(safe-area-inset-top, 0px), 20px);
+  }
+}
+
+/* --------------------------------------------------------------
+   Safe-area utilities
+
+   Written as plain classes rather than Tailwind arbitrary values
+   so the same name works in a className, in an @apply, and in the
+   handful of places that build class strings dynamically.
+   -------------------------------------------------------------- */
+.pt-safe { padding-top: var(--safe-top); }
+.pb-safe { padding-bottom: var(--safe-bottom); }
+.px-safe { padding-left: var(--safe-left); padding-right: var(--safe-right); }
+.mt-safe { margin-top: var(--safe-top); }
+.mb-safe { margin-bottom: var(--safe-bottom); }
+
+/* Full-height public pages (login, register, invite, landing). These
+   sit outside the app shell, so nothing else is reserving the insets
+   for them. */
+.page-safe {
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  padding-left: var(--safe-left);
+  padding-right: var(--safe-right);
+}
+
+/* A sheet or drawer that reaches the bottom edge. The keyboard inset
+   is folded in so an action row is lifted above the keyboard instead
+   of being hidden behind it. */
+.pb-safe-action {
+  padding-bottom: calc(1rem + var(--safe-bottom) + var(--keyboard-inset));
+}
+
+/* --------------------------------------------------------------
+   No horizontal scroll, ever
+
+   A single over-wide element used to make the whole app pan
+   sideways, which in a standalone window looks like the app has
+   come loose. `clip` rather than `hidden`: `hidden` would turn
+   <html> into a scroll container and break every `position: sticky`
+   header in the product.
+   -------------------------------------------------------------- */
+html {
+  overflow-x: clip;
+  /* iOS enlarges text in landscape unless this is pinned. */
+  -webkit-text-size-adjust: 100%;
+  /* The grey flash iOS paints over a tapped element. Every control
+     in this app has its own :active state, so the system one is only
+     ever a second, late, differently-coloured response. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  overflow-x: clip;
+}
+
+/* --------------------------------------------------------------
+   Touch behaviour
+   -------------------------------------------------------------- */
+button,
+a,
+[role="button"],
+summary,
+label[for],
+input[type="checkbox"],
+input[type="radio"],
+select {
+  /* Removes the 300ms click delay browsers keep in reserve for a
+     possible double-tap-to-zoom. */
+  touch-action: manipulation;
+}
+
+/* Text in the chrome is not content to be selected; a long-press on a
+   tab label producing a selection handle reads as a glitch. Inputs and
+   page content are excluded. */
+@media (pointer: coarse) {
+  .no-select,
+  nav button,
+  nav a {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* --------------------------------------------------------------
+   Controls revealed on hover
+
+   Several tables reveal their row actions with `group-hover`, which
+   is a good way to keep a dense list quiet under a mouse and a way
+   of hiding a feature outright from a touch screen - a phone never
+   fires hover, so the buttons were simply not there. Deleting a
+   payroll run, exporting a document and archiving a template were
+   all unreachable on a phone for that reason.
+
+   `pointer-events-none` elements are excluded: those are decorative
+   glows and sheens that use the same utility, and they should stay
+   hidden until a real pointer is over them.
+   -------------------------------------------------------------- */
+@media (hover: none) {
+  .group-hover\:opacity-100:not(.pointer-events-none) {
+    opacity: 1;
+  }
+}
+
+/* Chrome that must get out of the keyboard's way. A floating tab bar
+   sitting on top of the keyboard covers the field being typed into and
+   is unreachable anyway. `.keyboard-open` is set by useViewportInsets. */
+html.keyboard-open .hide-on-keyboard {
+  display: none;
+}
+
+/* --------------------------------------------------------------
+   Scrolling
+   -------------------------------------------------------------- */
+/* Momentum scrolling inside panes, and a scroll that stops at the
+   pane's own edge instead of dragging the page behind it. */
+.scroll-pane {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Horizontal rails - filter chips, month strips, a segmented control
+   that outgrew the screen. Snap plus a hidden scrollbar is what
+   separates an intentional rail from an element that overflowed by
+   accident. */
+.snap-rail {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  /* A snap position aligns an item with the edge of the scrollport, and the
+     scrollport ignores the rail own padding - so a bleeding rail snapped its
+     first chip flush against the screen edge and the gutter it had set simply
+     disappeared. scroll-padding is the only thing snapping does respect.
+     0.75rem matches the page gutter; a rail that sets its own overrides this
+     with scroll-px-*. */
+  scroll-padding-inline: 0.75rem;
+}
+.snap-rail::-webkit-scrollbar {
+  display: none;
+}
+.snap-rail > * {
+  scroll-snap-align: start;
+}
+
+/* A table that cannot become cards keeps its horizontal scroll, but
+   says so: the fade at the right edge is the only cue that there is
+   more table off-screen. */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+@media (max-width: 1023px) {
+  .table-scroll {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      #000 0,
+      #000 calc(100% - 1.5rem),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      #000 0,
+      #000 calc(100% - 1.5rem),
+      transparent 100%
+    );
+  }
+}
+
+/* --------------------------------------------------------------
+   Touch targets
+
+   The WCAG floor is 24px and the platform guidance is 44px. Icon
+   buttons in this app are drawn at 32-36px because that is the right
+   optical size next to 14px text; this grows the hit area without
+   growing the shape, using a pseudo-element rather than padding so
+   layout does not move.
+   -------------------------------------------------------------- */
+@media (pointer: coarse) {
+  .tap-target {
+    position: relative;
+  }
+  .tap-target::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* --------------------------------------------------------------
+   Motion
+
+   Short, spatial, and never more than one thing moving at a time.
+   An HRMS is opened dozens of times a day; anything past ~300ms
+   becomes a tax rather than a delight.
+   -------------------------------------------------------------- */
+@keyframes app-fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes app-pop {
+  0% {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.015);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Live values - a running timer, a changing count. Marks the moment a
+   number updates without pulling the eye away from the rest of the
+   screen. */
+@keyframes app-tick {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes app-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 currentColor;
+    opacity: 0.55;
+  }
+  70% {
+    box-shadow: 0 0 0 7px currentColor;
+    opacity: 0;
+  }
+  100% {
+    box-shadow: 0 0 0 0 currentColor;
+    opacity: 0;
+  }
+}
+
+.animate-fade-up {
+  animation: app-fade-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-pop {
+  animation: app-pop 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-tick {
+  animation: app-tick 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The dot next to "Working" on an active session. Needs a positioned
+   parent and a `color` to tint the ring. */
+.status-live::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  animation: app-pulse-ring 2s ease-out infinite;
+}
+
+/* Press feedback on cards and rows that act as buttons. Scale rather
+   than a background change: on a glass surface a tint is invisible,
+   and a 1.5% shrink is legible on any colour. */
+@media (pointer: coarse) {
+  .press-scale {
+    transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .press-scale:active {
+    transform: scale(0.985);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-pop,
+  .animate-tick,
+  .status-live::before {
+    animation: none;
+  }
+  .press-scale:active {
+    transform: none;
+  }
+}
+
+/* --------------------------------------------------------------
+   Forms on a phone
+   -------------------------------------------------------------- */
+@media (max-width: 1023px) {
+  /* A field the keyboard is about to cover should come to rest with a
+     line of context above it, not flush against the top of the
+     viewport. */
+  input,
+  select,
+  textarea {
+    scroll-margin-top: calc(var(--app-bar-h) + var(--safe-top) + 1rem);
+    scroll-margin-bottom: 1.5rem;
+  }
+
+  /* Date and time inputs render at the system font size on iOS and
+     overflow a narrow field; letting them fill the box keeps the
+     picker glyph inside the border. */
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    min-height: 44px;
+    width: 100%;
+  }
+}
+
+/* --------------------------------------------------------------
+   Scrollbars
+
+   The dark theme was inheriting the light scrollbar track, which drew
+   a pale channel down the side of every dark pane.
+   -------------------------------------------------------------- */
+html.dark ::-webkit-scrollbar-track {
+  background-color: rgb(16 18 25);
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background-color: rgb(55 60 73);
+}
+
+@media (pointer: coarse) {
+  /* A touch device has no pointer to grab a scrollbar with, and the
+     8px channel is 8px of a 375px screen. */
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}

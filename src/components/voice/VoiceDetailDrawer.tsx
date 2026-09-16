@@ -155,6 +155,10 @@ const VoiceDetailDrawer: React.FC<Props> = ({ voiceId, open, onClose }) => {
       width="xl"
       icon={<CatIcon className="h-5 w-5" />}
       iconClassName={cat?.tile}
+      /* The submission's own title is user-written and routinely longer than a
+         phone app bar; it belongs on the subject row, with the bar naming the
+         kind of record instead. */
+      screenTitle="Submission"
       title={voice?.title || (isLoading ? "Loading..." : "Submission")}
       description={
         voice ? (

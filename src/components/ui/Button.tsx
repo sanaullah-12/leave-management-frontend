@@ -47,20 +47,26 @@ const VARIANTS: Record<ButtonVariant, string> = {
   ghost: "btn-ghost",
 };
 
-/** Horizontal padding is kept at or above half the height, or a pill pinches. */
+/**
+ * Horizontal padding is kept at or above half the height, or a pill pinches.
+ *
+ * Every preset is a step taller below `sm`. A 32px button is the right optical
+ * weight beside 13px text under a mouse and a coin-flip under a thumb, and the
+ * `sm:` half puts the desktop size back exactly.
+ */
 const SIZES: Record<ButtonSize, string> = {
-  xs: "h-7 px-3 text-xs gap-1",
-  sm: "h-8 px-3.5 text-[13px] gap-1.5",
-  md: "h-8 px-4 text-[13px] gap-1.5 sm:h-9 sm:px-4",
-  lg: "h-10 px-5 text-sm gap-2",
+  xs: "h-8 px-3 text-xs gap-1 sm:h-7",
+  sm: "h-10 px-3.5 text-[13px] gap-1.5 sm:h-8",
+  md: "h-11 px-4 text-[13px] gap-1.5 sm:h-9 sm:px-4",
+  lg: "h-12 px-5 text-sm gap-2 sm:h-10",
 };
 
 /** Icon-only buttons go square-then-round, so they land as true circles. */
 const ICON_ONLY: Record<ButtonSize, string> = {
-  xs: "h-7 w-7 px-0",
-  sm: "h-8 w-8 px-0",
-  md: "h-8 w-8 px-0 sm:h-9 sm:w-9",
-  lg: "h-10 w-10 px-0",
+  xs: "h-8 w-8 px-0 sm:h-7 sm:w-7",
+  sm: "h-10 w-10 px-0 sm:h-8 sm:w-8",
+  md: "h-11 w-11 px-0 sm:h-9 sm:w-9",
+  lg: "h-12 w-12 px-0 sm:h-10 sm:w-10",
 };
 
 const ICON_SIZE: Record<ButtonSize, string> = {

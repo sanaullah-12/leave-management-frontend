@@ -70,7 +70,7 @@ export const PricingSection: React.FC = () => {
           <span className={"text-secondary font-medium " + (!annual ? "text-gray-900 dark:text-white" : "text-gray-400")}>Monthly</span>
           <button
             onClick={() => setAnnual((v) => !v)}
-            className="relative h-7 w-12 rounded-full bg-blue-600 transition-colors"
+            className="tap-target relative h-7 w-12 rounded-full bg-blue-600 transition-colors"
             aria-label="Toggle billing period"
           >
             <motion.span

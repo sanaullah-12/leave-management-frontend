@@ -38,6 +38,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { attendanceAPI } from "../services/api";
 import AttendanceModal from "../components/AttendanceModal";
+import MobileAttendance from "../components/attendance/mobile/MobileAttendance";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 import "../styles/design-system.css";
 
 interface MachineConnection {
@@ -152,6 +154,15 @@ const AttendancePage: React.FC = () => {
   );
 
   const themeAccent = useThemeAccent(600);
+  /**
+   * Which of the two layouts is mounted.
+   *
+   * A CSS-only split would mount both, and the mobile Today screen and the
+   * desktop board each load the roster - two identical requests on every
+   * visit, on the one connection that is worth not wasting. The query is read
+   * synchronously on first render, so there is no flash of the wrong layout.
+   */
+  const isPhoneLayout = useMediaQuery("(max-width: 1023px)");
   const [showSettings, setShowSettings] = useState(false);
   const [showDevicePanel, setShowDevicePanel] = useState(false);
   // Organisation-wide totals for the dashboard, so it has figures before any
@@ -669,22 +680,40 @@ const AttendancePage: React.FC = () => {
    * the reader can see, under the arrival rule they are seeing them under.
    */
   const exportRoster = () => {
-    if (!overview || !overview.records.length) return;
-
     const header = ["Employee", "Date", "Time", "Status", "Late by"];
     const escape = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
 
-    const rows = overview.records.map((r: any) =>
-      [
-        modalEmployee?.name || modalEmployee?.employeeId || "",
-        r.dateDisplay || r.date,
-        r.timeDisplay || r.time,
-        r.isLate ? "Late" : "On time",
-        r.isLate ? r.lateDisplay || "" : "",
-      ]
-        .map(escape)
-        .join(",")
-    );
+    // One employee's punches while the detail panel is open, and otherwise the
+    // roster on screen. Without the second case the button did nothing at all
+    // unless somebody had been opened first, which is not what "Export" on a
+    // page showing a roster says it will do.
+    const perEmployee = !!overview && overview.records.length > 0;
+
+    const rows = perEmployee
+      ? overview!.records.map((r: any) =>
+          [
+            modalEmployee?.name || modalEmployee?.employeeId || "",
+            r.dateDisplay || r.date,
+            r.timeDisplay || r.time,
+            r.isLate ? "Late" : "On time",
+            r.isLate ? r.lateDisplay || "" : "",
+          ]
+            .map(escape)
+            .join(",")
+        )
+      : rosterRows.map((row: any) =>
+          [
+            row.employee.name || row.employee.employeeId || "",
+            dayRangeLabel,
+            row.checkIn || "",
+            row.status,
+            row.lateDisplay || "",
+          ]
+            .map(escape)
+            .join(",")
+        );
+
+    if (!rows.length) return;
 
     const csv = [header.map(escape).join(","), ...rows].join("\r\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -692,9 +721,11 @@ const AttendancePage: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `attendance-${modalEmployee?.employeeId || "export"}-${
-      overview.rangeLabel.replace(/\s+/g, "") || "range"
-    }.csv`;
+    link.download = perEmployee
+      ? `attendance-${modalEmployee?.employeeId || "export"}-${
+          overview!.rangeLabel.replace(/\s+/g, "") || "range"
+        }.csv`
+      : `attendance-roster-${startDate}-to-${endDate}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -1176,8 +1207,156 @@ const AttendancePage: React.FC = () => {
     return `${format(startDate)} - ${format(endDate)}`;
   }, [startDate, endDate]);
 
+  /**
+   * The panels that open over whichever layout is mounted.
+   *
+   * Shared rather than written into each branch: a drawer that only exists on
+   * one of the two is a row that opens nothing on the other, and these four
+   * are the destination of every tap in both.
+   */
+  const overlays = (
+    <>
+      {/* The whole record. Every day of the range, unpaged. */}
+      {showFullAttendance && (
+        <FullAttendanceDrawer
+          rows={dayRows}
+          rangeLabel={dayRangeLabel}
+          employee={{
+            employeeId: currentUser?.employeeId,
+            name: currentUser?.name,
+            department: currentUser?.department,
+            machineId: currentUser?.employeeId,
+          }}
+          policy={selfData?.lateTimePolicy}
+          loading={rosterLoading}
+          onSelectDay={setSelectedDay}
+          detailOpen={!!selectedDay}
+          onClose={() => setShowFullAttendance(false)}
+        />
+      )}
 
+      {/* One day, in full */}
+      {selectedDay && (
+        <DayDrawer
+          row={selectedDay}
+          policy={selfData?.lateTimePolicy}
+          source={selfData?.source}
+          onClose={() => setSelectedDay(null)}
+        />
+      )}
 
+      {/* Employee detail panel */}
+      {modalEmployee && (
+        <EmployeeDrawer
+          employee={modalEmployee as any}
+          data={modalAttendanceData}
+          loading={isLoadingModalData}
+          onClose={handleCloseModal}
+        />
+      )}
+
+      {/* Attendance Modal */}
+      <AttendanceModal
+        isOpen={false}
+        onClose={handleCloseModal}
+        employee={modalEmployee}
+        data={modalAttendanceData}
+        isLoading={isLoadingModalData}
+        defaultStartDate={startDate}
+        defaultEndDate={endDate}
+        onFetchRecords={(employee, forceRefresh, range) =>
+          fetchAttendanceRecords(employee, forceRefresh ?? false, range)
+        }
+      />
+    </>
+  );
+
+  /**
+   * The phone.
+   *
+   * Everything the column below holds, reorganised into four screens under one
+   * segmented control - see components/attendance/mobile/MobileAttendance.
+   * Nothing is recomputed there: the same figures, on the screen each belongs
+   * on.
+   */
+  if (isPhoneLayout) {
+    return (
+      <div className="fade-in">
+        <MobileAttendance
+          isAdmin={isAdmin}
+          startDate={startDate}
+          endDate={endDate}
+          onStartDate={(next) => {
+            setStartDate(next);
+            setActiveRangeDays(null);
+          }}
+          onEndDate={(next) => {
+            setEndDate(next);
+            setActiveRangeDays(null);
+          }}
+          activeRangeDays={activeRangeDays}
+          onPreset={applyRangePreset}
+          onFetchRoster={loadRosterAttendance}
+          canFetchRoster={rosterTargets.length > 0}
+          rosterLoading={rosterLoading}
+          rosterProgress={rosterProgress}
+          rosterFetched={!!rosterFetchedFor}
+          rosterStale={rosterStale}
+          rangeLabel={dayRangeLabel}
+          employeeCount={rosterTargets.length}
+          statusCounts={statusCounts}
+          selfSummary={selfSummary}
+          dayBars={dayBars}
+          rosterRows={rosterRows as any}
+          rosterRowsLoading={isFetchingEmployees || rosterLoading}
+          onSelectEmployee={(employee) =>
+            /* Today's list carries a name and a user ID, not the device record
+               behind them. The panel prints the enrolment details, so the row
+               is resolved back to the roster entry before it opens. */
+            handleEmployeeClick(
+              (employees.find(
+                (e) => String(e.employeeId) === String(employee.employeeId)
+              ) || employee) as any
+            )
+          }
+          dayRows={dayRows}
+          onSelectDay={setSelectedDay}
+          onViewFullRecord={
+            dayRows.length ? () => setShowFullAttendance(true) : undefined
+          }
+          statusFilter={statusFilter ?? "All"}
+          onStatusFilterChange={(next) =>
+            setStatusFilter(next === "All" ? null : next)
+          }
+          ip={selectedIP === "custom" ? customIP : selectedIP}
+          onIpChange={(next) => {
+            setSelectedIP("custom");
+            setCustomIP(next);
+          }}
+          connected={machineStatus?.status === "connected"}
+          connecting={isConnecting}
+          onConnect={handleConnect}
+          onDisconnect={handleDisconnect}
+          deviceStatusText={error || success || undefined}
+          onRefreshEmployees={() =>
+            fetchEmployees(selectedIP === "custom" ? customIP : selectedIP)
+          }
+          refreshingEmployees={isFetchingEmployees}
+          onUnlockDoor={handleUnlockDoor}
+          unlockingDoor={isUnlockingDoor}
+          doorCountdown={doorCountdown}
+          doorMessage={doorMessage}
+          onExport={exportRoster}
+          canExport={rosterRows.length > 0}
+          settings={lateTimeSettings}
+          onSettingsChange={setLateTimeSettings}
+          onSaveSettings={() => updateLateTimeSettings(lateTimeSettings)}
+          formatCutoff={formatCutoff}
+        />
+        {overlays}
+      </div>
+    );
+  }
 
   return (
     <div className="attendance-dashboard space-y-6 fade-in">
@@ -1217,9 +1396,15 @@ const AttendancePage: React.FC = () => {
         }}
       />
 
-      {/* Range toolbar. */}
+      {/* Range toolbar.
+          One column on a phone. Laid out as a wrapping row it produced a
+          150px date field, the word "to", another 150px field and a Fetch
+          button competing for 288px, so the second date ran off the edge -
+          and the two controls that have to be read together ended up on
+          different lines. Stacked, each control gets the full width and the
+          order reads as the sentence it is: which days, then load them. */}
       <div
-        className={`relative flex flex-wrap items-center justify-between gap-3 overflow-hidden ${CARD} px-5 py-4`}
+        className={`relative flex flex-col items-stretch gap-3 overflow-hidden ${CARD} px-5 py-4 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between`}
       >
         <AccentEdge color={themeAccent} />
         {/* Named so the two windows on this page cannot be mistaken for each
@@ -1233,9 +1418,9 @@ const AttendancePage: React.FC = () => {
             Pick a custom range, then fetch to load it
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-2">
-            <div className="w-[150px]">
+        <div className="flex flex-col items-stretch gap-2 lg:flex-row lg:flex-wrap lg:items-center">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 lg:flex">
+            <div className="min-w-0 lg:w-[150px]">
               <DatePicker
                 value={startDate}
                 max={endDate}
@@ -1250,7 +1435,7 @@ const AttendancePage: React.FC = () => {
               />
             </div>
             <span className="text-sm text-gray-400">to</span>
-            <div className="w-[150px]">
+            <div className="min-w-0 lg:w-[150px]">
               <DatePicker
                 value={endDate}
                 min={startDate}
@@ -1270,7 +1455,7 @@ const AttendancePage: React.FC = () => {
                 key={preset.label}
                 type="button"
                 onClick={() => applyRangePreset(preset.days)}
-                className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                className={`min-h-[36px] flex-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors lg:min-h-0 lg:flex-none ${
                   activeRangeDays === preset.days
                     ? "bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-gray-100"
                     : "text-gray-600 hover:text-gray-900 dark:text-gray-300"
@@ -1307,7 +1492,7 @@ const AttendancePage: React.FC = () => {
                       ? `Measure your record against ${option.label}`
                       : "Use the arrival time your administrator set"
                   }
-                  className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+                  className={`min-h-[36px] flex-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors lg:min-h-0 lg:flex-none ${
                     viewPolicy === option.key
                       ? "bg-white text-gray-900 shadow-sm dark:bg-gray-800 dark:text-gray-100"
                       : "text-gray-600 hover:text-gray-900 dark:text-gray-300"
@@ -1328,7 +1513,7 @@ const AttendancePage: React.FC = () => {
                 ? "Load attendance for the selected range"
                 : "Connect to the device to load the roster first"
             }
-            className="flex items-center gap-2 rounded-full bg-blue-600 px-3.5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-blue-600 px-3.5 py-2 text-sm font-medium text-white transition-[background-color,transform] hover:bg-blue-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 lg:min-h-0 lg:justify-start"
           >
             <ArrowPathIcon
               className={`h-4 w-4 ${rosterLoading ? "animate-spin" : ""}`}
@@ -1586,12 +1771,17 @@ const AttendancePage: React.FC = () => {
       />
 
       {/* Toolbar */}
-      <section aria-label="Actions" className="flex flex-wrap items-center gap-2">
+      {/* Two across on a phone rather than a wrapping row of pills that each
+          take a different fraction of the line. */}
+      <section
+        aria-label="Actions"
+        className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center"
+      >
         {isAdmin && (
         <button
           type="button"
           onClick={() => setShowDevicePanel((v) => !v)}
-          className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+          className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 sm:min-h-0 sm:justify-start"
         >
           <ServerIcon className="h-4 w-4" />
           {machineStatus?.status === "connected"
@@ -1608,7 +1798,7 @@ const AttendancePage: React.FC = () => {
               type="button"
               onClick={handleUnlockDoor}
               disabled={isUnlockingDoor}
-              className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+              className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 sm:min-h-0 sm:justify-start"
             >
               <LockOpenIcon className="h-4 w-4" />
               Unlock door
@@ -1619,7 +1809,7 @@ const AttendancePage: React.FC = () => {
                 setShowDevicePanel(true);
                 setShowSettings(true);
               }}
-              className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+              className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 sm:min-h-0 sm:justify-start"
             >
               <Cog6ToothIcon className="h-4 w-4" />
               Late time
@@ -1633,7 +1823,7 @@ const AttendancePage: React.FC = () => {
             fetchEmployees(selectedIP === "custom" ? customIP : selectedIP)
           }
           disabled={isFetchingEmployees}
-          className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+          className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 sm:min-h-0 sm:justify-start"
         >
           <ArrowPathIcon
             className={`h-4 w-4 ${isFetchingEmployees ? "animate-spin" : ""}`}
@@ -1645,7 +1835,7 @@ const AttendancePage: React.FC = () => {
           type="button"
           onClick={exportRoster}
           disabled={!rosterRows.length}
-          className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+          className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 sm:min-h-0 sm:justify-start"
         >
           <ArrowDownTrayIcon className="h-4 w-4" />
           Export
@@ -1707,58 +1897,7 @@ const AttendancePage: React.FC = () => {
           read. This page keeps the per-day late status on each punch, because
           that is attendance data rather than a late-hours report. */}
 
-      {/* The whole record. Every day of the range, unpaged. */}
-      {showFullAttendance && (
-        <FullAttendanceDrawer
-          rows={dayRows}
-          rangeLabel={dayRangeLabel}
-          employee={{
-            employeeId: currentUser?.employeeId,
-            name: currentUser?.name,
-            department: currentUser?.department,
-            machineId: currentUser?.employeeId,
-          }}
-          policy={selfData?.lateTimePolicy}
-          loading={rosterLoading}
-          onSelectDay={setSelectedDay}
-          detailOpen={!!selectedDay}
-          onClose={() => setShowFullAttendance(false)}
-        />
-      )}
-
-      {/* One day, in full */}
-      {selectedDay && (
-        <DayDrawer
-          row={selectedDay}
-          policy={selfData?.lateTimePolicy}
-          source={selfData?.source}
-          onClose={() => setSelectedDay(null)}
-        />
-      )}
-
-      {/* Employee detail panel */}
-      {modalEmployee && (
-        <EmployeeDrawer
-          employee={modalEmployee as any}
-          data={modalAttendanceData}
-          loading={isLoadingModalData}
-          onClose={handleCloseModal}
-        />
-      )}
-
-      {/* Attendance Modal */}
-      <AttendanceModal
-        isOpen={false}
-        onClose={handleCloseModal}
-        employee={modalEmployee}
-        data={modalAttendanceData}
-        isLoading={isLoadingModalData}
-        defaultStartDate={startDate}
-        defaultEndDate={endDate}
-        onFetchRecords={(employee, forceRefresh, range) =>
-          fetchAttendanceRecords(employee, forceRefresh ?? false, range)
-        }
-      />
+      {overlays}
     </div>
   );
 };

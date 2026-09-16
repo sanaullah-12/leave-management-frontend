@@ -1,7 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { useMediaQuery } from "../../hooks/useMediaQuery";
 
 const SIZES = {
   sm: "sm:max-w-md",
@@ -48,6 +49,16 @@ const Modal: React.FC<ModalProps> = ({
   children,
 }) => {
   const reduce = useReducedMotion();
+  /* Below `sm` the panel is a bottom sheet; from `sm` up it is a centred
+     dialog. The distinction drives the drag gesture, which only makes sense
+     for the sheet. */
+  const isSheet = useMediaQuery("(max-width: 639px)");
+  const bodyRef = useRef<HTMLDivElement>(null);
+  /* True only while the sheet's own scroller is at the top. A downward drag
+     should scroll the content when there is content above; it should only
+     start dismissing the sheet once there is nothing left to scroll. Without
+     this the sheet is dragged away every time somebody tries to scroll up. */
+  const [atTop, setAtTop] = useState(true);
 
   // Lock body scroll + close on Escape while open.
   useEffect(() => {
@@ -67,7 +78,7 @@ const Modal: React.FC<ModalProps> = ({
   return createPortal(
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-6">
+        <div className="fixed inset-0 z-[100] flex items-end justify-center px-safe sm:items-center sm:p-6">
           {/* Backdrop */}
           <motion.div
             className="absolute inset-0 bg-gray-900/40 backdrop-blur-md"
@@ -107,11 +118,28 @@ const Modal: React.FC<ModalProps> = ({
                own content into a nested scroller, which is the usual reason
                modals feel cramped on mobile. dvh tracks the visible viewport as
                mobile browser chrome hides and shows. */
-            className={`relative flex max-h-[92dvh] min-h-[40vh] w-full flex-col overflow-hidden border border-gray-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-900 shadow-2xl shadow-gray-900/20 rounded-t-3xl sm:max-h-[94vh] sm:min-h-0 sm:rounded-3xl ${SIZES[size]} ${panelClassName}`}
+            /* Swipe down to dismiss, the gesture every native sheet answers
+               to. Constrained to downward travel, and armed only when the
+               body is scrolled to the top (see `atTop`) so it never competes
+               with reading the sheet's own content. Desktop dialogs are not
+               draggable - there is nothing to swipe with. */
+            drag={reduce || !isSheet ? false : "y"}
+            dragDirectionLock
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.55 }}
+            dragListener={atTop}
+            onDragEnd={(_, info) => {
+              if (info.offset.y > 110 || info.velocity.y > 600) onClose();
+            }}
+            /* The keyboard eats the bottom of the viewport without changing
+               dvh, so the sheet has to give that height back itself or its
+               footer ends up underneath the keys. */
+            style={{ maxHeight: "calc(92dvh - var(--keyboard-inset))" }}
+            className={`relative flex min-h-[40vh] w-full touch-pan-y flex-col overflow-hidden border border-gray-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-900 shadow-2xl shadow-gray-900/20 rounded-t-3xl sm:!max-h-[94vh] sm:min-h-0 sm:rounded-3xl ${SIZES[size]} ${panelClassName}`}
           >
             {/* Grab handle - the standard affordance that marks a sheet as
                 dismissible. Sheet-only, so desktop dialogs are unchanged. */}
-            <div className="flex justify-center pt-2.5 sm:hidden" aria-hidden="true">
+            <div className="flex shrink-0 justify-center pt-2.5 sm:hidden" aria-hidden="true">
               <span className="h-1 w-9 rounded-full bg-gray-300 dark:bg-gray-600" />
             </div>
 
@@ -161,8 +189,17 @@ const Modal: React.FC<ModalProps> = ({
 
             {/* Body */}
             <div
-              className={`flex-1 overflow-y-auto ${
-                hasHeader ? "px-6 pb-6" : ""
+              ref={bodyRef}
+              onScroll={(e) => {
+                const next = e.currentTarget.scrollTop <= 0;
+                if (next !== atTop) setAtTop(next);
+              }}
+              className={`scroll-pane flex-1 ${
+                hasHeader ? "px-4 pb-6 sm:px-6" : ""
+              } ${
+                /* With no footer the body is the last thing above the home
+                   indicator, so it reserves that band itself. */
+                footer ? "" : "pb-[calc(1.5rem+var(--safe-bottom))] sm:pb-6"
               } ${bodyClassName}`}
             >
               {children}
@@ -170,7 +207,7 @@ const Modal: React.FC<ModalProps> = ({
 
             {/* Sticky footer */}
             {footer && (
-              <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 px-6 py-4 backdrop-blur-sm">
+              <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-100 bg-white/80 px-4 pb-[calc(1rem+var(--safe-bottom))] pt-4 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/80 sm:px-6 sm:pb-4">
                 {footer}
               </div>
             )}

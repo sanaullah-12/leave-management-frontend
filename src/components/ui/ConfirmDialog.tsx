@@ -69,12 +69,16 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       open={open}
       onClose={onClose}
       size="sm"
+      /* On a phone the two actions fill the width and stand a thumb's width
+         apart; a destructive confirm sized to its label, next to a Cancel
+         sized to its own, is how the wrong one gets tapped. The sheet's footer
+         already clears the home indicator. */
       footer={
-        <>
+        <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
           <button
             onClick={onClose}
             disabled={loading}
-            className="rounded-full border border-gray-200 dark:border-gray-700 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
+            className="min-h-[46px] rounded-full border border-gray-200 px-3 py-2 text-[15px] font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 sm:min-h-0 sm:px-3.5 sm:text-sm"
           >
             {cancelLabel}
           </button>
@@ -82,14 +86,14 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             whileTap={{ scale: 0.97 }}
             onClick={onConfirm}
             disabled={loading}
-            className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-all disabled:opacity-70 ${s.confirm}`}
+            className={`flex min-h-[46px] items-center justify-center rounded-full px-5 py-2.5 text-[15px] font-semibold transition-all disabled:opacity-70 sm:min-h-0 sm:text-sm ${s.confirm}`}
           >
             {loading ? <InlineLoader label="Working..." /> : confirmLabel}
           </motion.button>
-        </>
+        </div>
       }
     >
-      <div className="px-6 pt-8 pb-2 text-center">
+      <div className="px-5 pb-2 pt-7 text-center sm:px-6 sm:pt-8">
         <motion.div
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}

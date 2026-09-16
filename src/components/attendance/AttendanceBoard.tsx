@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import Select from "../ui/Select";
 import { CARD } from "../../lib/surfaces";
 import { AccentEdge } from "../ui/CardAccents";
 import { useThemeAccent } from "../../hooks/useThemeAccent";
-import { attendanceAPI } from "../../services/api";
 import {
   PERIOD_OPTIONS,
   periodRange,
@@ -15,10 +14,10 @@ import {
   ByDateTable,
   ByEmployeeTable,
   DayRosterTable,
-  type RosterDateTotals,
   type RosterDayRow,
-  type RosterEmployeeTotals,
 } from "./RosterTables";
+import { EMPTY_ROSTER_TOTALS, useRosterDay } from "../../hooks/useRosterDay";
+import MobileAttendanceToday from "./MobileAttendanceToday";
 
 /**
  * Attendance for a chosen period, as one section.
@@ -32,29 +31,6 @@ import {
  * nothing is invented for a day with no data - a period with no records says
  * so rather than drawing an empty grid that reads as a roster of absences.
  */
-
-interface Totals {
-  employees: number;
-  days: number;
-  onTime: number;
-  late: number;
-  absent: number;
-  workFromHome: number;
-  onLeave: number;
-}
-
-interface RosterDayResponse {
-  success: boolean;
-  detail: "day" | "summary";
-  detailTruncated?: boolean;
-  cutoffTime?: string;
-  days: string[];
-  totals: Totals;
-  rows: RosterDayRow[];
-  byEmployee: RosterEmployeeTotals[];
-  byDate: RosterDateTotals[];
-  message?: string;
-}
 
 interface Props {
   /** Which window the section opens on. */
@@ -70,16 +46,6 @@ interface Props {
   footer?: React.ReactNode;
 }
 
-const EMPTY_TOTALS: Totals = {
-  employees: 0,
-  days: 0,
-  onTime: 0,
-  late: 0,
-  absent: 0,
-  workFromHome: 0,
-  onLeave: 0,
-};
-
 const AttendanceBoard: React.FC<Props> = ({
   defaultPeriod = "today",
   onRangeChange,
@@ -94,52 +60,14 @@ const AttendanceBoard: React.FC<Props> = ({
   const [period, setPeriod] = useState<PeriodKey>(defaultPeriod);
   const range = useMemo(() => periodRange(period), [period]);
 
-  const [data, setData] = useState<RosterDayResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  /** Bumped by the refresh button; the fetch effect watches it. */
-  const [reloads, setReloads] = useState(0);
+  const { data, loading, error, refresh } = useRosterDay(
+    range.from,
+    range.to,
+    range.detail
+  );
 
   // "By date" or "By employee", once the period covers more than one day.
   const [grouping, setGrouping] = useState<"date" | "employee">("date");
-
-  useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const response = await attendanceAPI.getRosterDay(
-          range.from,
-          range.to,
-          range.detail
-        );
-        if (cancelled) return;
-
-        if (!response.data?.success) {
-          throw new Error(
-            response.data?.message || "Could not load attendance"
-          );
-        }
-        setData(response.data as RosterDayResponse);
-      } catch (err: any) {
-        if (cancelled) return;
-        setError(
-          err?.response?.data?.message ||
-            err?.message ||
-            "Could not load attendance"
-        );
-        setData(null);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [range.from, range.to, range.detail, reloads]);
 
   const changePeriod = useCallback(
     (next: string) => {
@@ -150,7 +78,7 @@ const AttendanceBoard: React.FC<Props> = ({
     [onRangeChange]
   );
 
-  const totals = data?.totals || EMPTY_TOTALS;
+  const totals = data?.totals || EMPTY_ROSTER_TOTALS;
   const singleDay = (data?.days?.length ?? 0) <= 1 && period === "today";
 
   /** The day rows the server sent, filed under the date they belong to. */
@@ -196,7 +124,7 @@ const AttendanceBoard: React.FC<Props> = ({
       <AccentEdge color={accent} />
 
       {/* Heading, period filter */}
-      <div className="flex flex-wrap items-start justify-between gap-3 p-5 pb-4">
+      <div className="flex flex-wrap items-start justify-between gap-3 p-4 pb-3 sm:p-5 sm:pb-4">
         <div className="min-w-0">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
             {title ||
@@ -217,7 +145,7 @@ const AttendanceBoard: React.FC<Props> = ({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setReloads((n) => n + 1)}
+            onClick={refresh}
             disabled={loading}
             aria-label="Refresh attendance"
             title="Refresh"
@@ -232,13 +160,22 @@ const AttendanceBoard: React.FC<Props> = ({
             value={period}
             onChange={changePeriod}
             options={PERIOD_OPTIONS}
-            className="w-[150px]"
+            className="w-[136px] sm:w-[150px]"
           />
         </div>
       </div>
 
-      {/* Counts for the period on screen */}
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-gray-200/70 px-5 pb-4 dark:border-gray-700">
+      {/* Counts for the period on screen.
+          Desktop only for a single day: below `lg` the mobile list carries
+          these as a rail of chips that also filter it, and two rows of the
+          same five numbers is one row too many on a phone. A multi-day
+          period still shows them here, since the tables below it have no
+          mobile list of their own. */}
+      <div
+        className={`flex-wrap items-center gap-x-5 gap-y-2 border-b border-gray-200/70 px-5 pb-4 dark:border-gray-700 ${
+          singleDay ? "hidden lg:flex" : "flex"
+        }`}
+      >
         {chips.map((chip) => (
           <span key={chip.label} className="flex items-center gap-1.5 text-sm">
             <span
@@ -291,7 +228,7 @@ const AttendanceBoard: React.FC<Props> = ({
           <p className="text-sm text-[#b42318]">{error}</p>
           <button
             type="button"
-            onClick={() => setReloads((n) => n + 1)}
+            onClick={refresh}
             className="mt-3 text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
           >
             Try again
@@ -316,12 +253,26 @@ const AttendanceBoard: React.FC<Props> = ({
           )}
         </div>
       ) : singleDay ? (
-        <DayRosterTable
-          rows={data?.rows || []}
-          loading={loading}
-          maxRows={variant === "dashboard" ? 8 : undefined}
-          emptyMessage="Nothing recorded yet today."
-        />
+        <>
+          {/* Same rows, two readings. The table is a grid of five columns and
+              a phone has room for two of them; the list is the same day with
+              the status carried by grouping and colour instead. */}
+          <MobileAttendanceToday
+            rows={data?.rows || []}
+            totals={totals}
+            loading={loading}
+            isSelfView={isSelfView}
+            maxRows={variant === "dashboard" ? 8 : undefined}
+          />
+          <div className="hidden lg:block">
+            <DayRosterTable
+              rows={data?.rows || []}
+              loading={loading}
+              maxRows={variant === "dashboard" ? 8 : undefined}
+              emptyMessage="Nothing recorded yet today."
+            />
+          </div>
+        </>
       ) : grouping === "date" ? (
         <ByDateTable
           dates={data?.byDate || []}

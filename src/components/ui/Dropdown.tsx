@@ -50,7 +50,12 @@ const DEFAULT_BUTTON =
   "inline-flex items-center gap-2 rounded-full bg-[var(--card-surface)] px-3.5 py-2 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-200/70 transition-colors hover:bg-black/[0.03] dark:text-gray-200 dark:ring-white/10 dark:hover:bg-white/[0.04]";
 
 const PANEL =
-  "glass-panel z-[110] mt-2 rounded-xl p-1.5 focus:outline-none " +
+  "glass-panel scroll-pane z-[110] mt-2 rounded-xl p-1.5 focus:outline-none " +
+  // A menu anchored to a button near the edge of a 320px screen can be wider
+  // than the screen has left; capping it at the viewport is what stops the
+  // account menu running off the side of a phone. The height cap is for the
+  // same situation vertically, on a short screen in landscape.
+  "max-w-[calc(100vw-1.5rem)] max-h-[min(28rem,70dvh)] " +
   "origin-top transition ease-out data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-150 data-[leave]:duration-100";
 
 const Dropdown: React.FC<DropdownProps> = ({
@@ -97,7 +102,7 @@ const Dropdown: React.FC<DropdownProps> = ({
             {section.items.map((item, ii) => {
               const Icon = item.icon;
               const base =
-                "group flex w-full items-center gap-3 rounded-full px-3 py-2 text-left text-sm transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-40";
+                "group flex min-h-[42px] w-full items-center gap-3 rounded-full px-3 py-2 text-left text-sm transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-40 sm:min-h-0";
               const tone = item.danger
                 ? "text-rose-600 data-[focus]:bg-rose-50 dark:text-rose-400 dark:data-[focus]:bg-rose-500/10"
                 : "text-gray-700 data-[focus]:bg-black/[0.04] dark:text-gray-200 dark:data-[focus]:bg-white/[0.06]";

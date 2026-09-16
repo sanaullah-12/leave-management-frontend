@@ -1,4 +1,5 @@
 import React from "react";
+import { motion, useReducedMotion } from "framer-motion";
 
 type Icon = React.ComponentType<{ className?: string }>;
 
@@ -48,6 +49,7 @@ interface MobileTabBarProps {
 const MobileTabBar: React.FC<MobileTabBarProps> = ({ items, center }) => {
   const left = items.slice(0, 2);
   const right = items.slice(2, 4);
+  const reduce = useReducedMotion();
 
   const renderTab = (item: MobileTabItem) => (
     <button
@@ -55,16 +57,26 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({ items, center }) => {
       type="button"
       onClick={item.onClick}
       aria-current={item.active ? "page" : undefined}
-      className="group flex min-w-0 flex-1 flex-col items-center gap-1 py-2.5 select-none"
+      /* min-h-[52px] rather than padding alone: the label can wrap to nothing
+         in some languages, and a tab that shrinks below the thumb-sized
+         minimum in Japanese is not a tab anyone can hit. */
+      className="group flex min-h-[52px] min-w-0 flex-1 select-none flex-col items-center gap-1 py-2.5"
     >
-      <span
-        className={`relative flex h-8 w-8 items-center justify-center rounded-xl transition-[background-color,transform] duration-200 group-active:scale-90 ${
-          item.active ? "" : "bg-transparent"
-        }`}
-        style={item.active ? { backgroundColor: "var(--accent)" } : undefined}
-      >
+      <span className="relative flex h-8 w-8 items-center justify-center">
+        {/* The filled badge travels between tabs instead of appearing and
+            disappearing in place. It is the one piece of motion in the bar,
+            and it is what makes a tap read as "the selection moved here"
+            rather than "the screen changed". */}
+        {item.active && (
+          <motion.span
+            layoutId={reduce ? undefined : "tab-bar-active"}
+            className="absolute inset-0 rounded-xl"
+            style={{ backgroundColor: "var(--accent)" }}
+            transition={{ type: "spring", stiffness: 480, damping: 38 }}
+          />
+        )}
         <item.icon
-          className={`h-[19px] w-[19px] transition-colors ${
+          className={`relative h-[19px] w-[19px] transition-[color,transform] duration-200 group-active:scale-90 ${
             item.active ? "text-white" : "text-gray-400 dark:text-gray-500"
           }`}
         />
@@ -88,8 +100,11 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({ items, center }) => {
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-30 lg:hidden"
-      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+      /* pb-safe keeps the bar above the home indicator. `hidden` while the
+         software keyboard is up: a floating bar sitting on top of a keyboard
+         covers the field being typed into, and nothing in it is reachable
+         anyway. The class is set by useViewportInsets(). */
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-30 px-safe pb-safe hide-on-keyboard lg:hidden"
     >
       <nav
         aria-label="Primary"

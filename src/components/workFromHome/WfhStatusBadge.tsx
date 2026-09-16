@@ -13,35 +13,37 @@ import {
  * so the two read as one system.
  */
 
+/**
+ * Each state is a class pair, not a fixed fill. The light half is the original
+ * palette; the dark half is a low-alpha wash of the same hue with the label a
+ * step lighter, because a #e4f5ec fill on a #1b1e27 card is not a pale tint of
+ * green - it is a white chip.
+ */
 const META: Record<
   string,
-  { fg: string; bg: string; border: string; Icon: typeof CheckCircleIcon; label: string }
+  { className: string; Icon: typeof CheckCircleIcon; label: string }
 > = {
   pending: {
-    fg: "#b5650a",
-    bg: "#fdf0df",
-    border: "#f5d9ae",
+    className:
+      "text-[#b5650a] bg-[#fdf0df] border-[#f5d9ae] dark:text-amber-300 dark:bg-amber-400/15 dark:border-amber-400/25",
     Icon: ClockIcon,
     label: "Pending",
   },
   approved: {
-    fg: "#0f7a4c",
-    bg: "#e4f5ec",
-    border: "#bfe6d3",
+    className:
+      "text-[#0f7a4c] bg-[#e4f5ec] border-[#bfe6d3] dark:text-emerald-300 dark:bg-emerald-400/15 dark:border-emerald-400/25",
     Icon: CheckCircleIcon,
     label: "Approved",
   },
   rejected: {
-    fg: "#b42318",
-    bg: "#fbeaea",
-    border: "#f3c6c3",
+    className:
+      "text-[#b42318] bg-[#fbeaea] border-[#f3c6c3] dark:text-red-300 dark:bg-red-400/15 dark:border-red-400/25",
     Icon: XCircleIcon,
     label: "Rejected",
   },
   cancelled: {
-    fg: "#5c6470",
-    bg: "#f1f3f6",
-    border: "#dde1e7",
+    className:
+      "text-[#5c6470] bg-[#f1f3f6] border-[#dde1e7] dark:text-gray-300 dark:bg-white/10 dark:border-white/15",
     Icon: MinusCircleIcon,
     label: "Cancelled",
   },
@@ -60,8 +62,7 @@ const WfhStatusBadge: React.FC<Props> = ({ status, compact = false }) => {
     <span
       className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border font-semibold leading-tight ${
         compact ? "px-1.5 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs"
-      }`}
-      style={{ color: meta.fg, background: meta.bg, borderColor: meta.border }}
+      } ${meta.className}`}
     >
       <Icon className={compact ? "h-3 w-3" : "h-3.5 w-3.5"} />
       {meta.label}

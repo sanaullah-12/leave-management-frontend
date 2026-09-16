@@ -19,7 +19,11 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           <button
             type="button"
             onClick={() => setVisible((v) => !v)}
-            className="text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            /* `.tap-target` grows the hit box to 44px on a touch screen
+               without moving the glyph, which has to stay optically centred
+               on the field's trailing edge. A miss on a 20px icon lands in
+               the field and re-opens the keyboard. */
+            className="tap-target text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             tabIndex={-1}
             aria-label={visible ? "Hide password" : "Show password"}
           >

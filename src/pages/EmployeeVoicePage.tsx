@@ -44,11 +44,14 @@ const VoiceCard: React.FC<{
     <motion.button
       variants={staggerItem}
       onClick={onOpen}
-      whileHover={{ y: -2 }}
-      className="flex w-full items-start gap-4 surface-card surface-card-interactive p-4 text-left"
+      /* No `whileHover` lift: on a touch screen the hover state latches after
+         the tap and the card stays raised until something else is touched.
+         `.press-scale` gives touch its own answer - a press, not a hover -
+         and `surface-card-interactive` still lifts under a real pointer. */
+      className="press-scale surface-card surface-card-interactive flex w-full items-start gap-3 p-3.5 text-left sm:gap-4 sm:p-4"
     >
       <span
-        className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl ${cat.tile}`}
+        className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl sm:h-11 sm:w-11 ${cat.tile}`}
       >
         <Icon className="h-5 w-5" />
       </span>
@@ -69,22 +72,26 @@ const VoiceCard: React.FC<{
         <p className="mt-0.5 line-clamp-1 text-sm text-gray-500 dark:text-gray-400">
           {voice.description}
         </p>
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-400">
-          <span className="font-medium text-gray-500 dark:text-gray-400">
+        {/* Who, how urgent, and when. The category is dropped on a phone -
+            it is already the colour and glyph of the tile on the left, so it
+            was the one item here that said nothing new, and losing it is what
+            keeps this to a single line at 320px. */}
+        <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px] text-gray-400">
+          <span className="min-w-0 max-w-[45%] truncate font-medium text-gray-500 dark:text-gray-400">
             {employeeDisplayName(voice.employee)}
           </span>
-          <span className="inline-flex items-center gap-1">
+          <span className="inline-flex shrink-0 items-center gap-1">
             <span className={`h-1.5 w-1.5 rounded-full ${PRIORITY_META[voice.priority].dot}`} />
             {PRIORITY_META[voice.priority].label}
           </span>
-          <span>{cat.label}</span>
+          <span className="hidden sm:inline">{cat.label}</span>
           {voice.replies?.length > 0 && (
-            <span className="inline-flex items-center gap-1">
+            <span className="inline-flex shrink-0 items-center gap-1">
               <ChatBubbleLeftRightIcon className="h-3.5 w-3.5" />
               {voice.replies.length}
             </span>
           )}
-          <span className="ml-auto">
+          <span className="ms-auto shrink-0 whitespace-nowrap">
             {formatDistanceToNow(new Date(voice.createdAt), { addSuffix: true })}
           </span>
         </div>
@@ -178,6 +185,7 @@ const EmployeeVoicePage: React.FC = () => {
           animate="animate"
         >
           <StatCardRow
+            fourUp
             tiles={[
               {
                 label: "Pending",
@@ -204,10 +212,15 @@ const EmployeeVoicePage: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Filter tabs */}
+      {/* Filter tabs.
+          A bleeding rail below `sm`: the negative margin lets the row run to
+          both edges of the screen, so the last chip is visibly cut off rather
+          than sitting flush against a padding edge that makes the row look
+          complete when it is not. The scrollbar is hidden and the chips snap;
+          see `.snap-rail`. */}
       <motion.div
         variants={staggerItem}
-        className="flex gap-1.5 overflow-x-auto pb-1"
+        className="snap-rail -mx-3 gap-1.5 px-3 pb-1 sm:mx-0 sm:px-0"
       >
         {FILTERS.map((f) => {
           const active = filter === f.key;
@@ -216,7 +229,8 @@ const EmployeeVoicePage: React.FC = () => {
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className={`inline-flex flex-shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
+              aria-pressed={active}
+              className={`inline-flex min-h-[38px] flex-shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-[background-color,transform] active:scale-95 sm:min-h-0 ${
                 active
                   ? "bg-blue-600 text-white shadow-sm shadow-blue-600/25"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"

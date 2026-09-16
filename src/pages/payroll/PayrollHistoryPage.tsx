@@ -228,7 +228,80 @@ const PayrollHistoryPage: React.FC = () => {
               sub="Try a different year or clear the search."
             />
           ) : (
-            <div className="overflow-x-auto">
+            <>
+            {/* ---------------- Phones and small tablets ----------------
+                Eight columns need 880px, and the run's four actions live in
+                the last of them behind `group-hover` - which a touch screen
+                never fires. On a phone that meant a payroll run could not be
+                marked paid, exported or deleted at all. Here they are real
+                buttons on the card. */}
+            <ul className="divide-y divide-gray-100 lg:hidden dark:divide-gray-800">
+              {filtered.map((run) => (
+                <li key={`m-${run.id}`} className="py-3.5">
+                  <div className="flex items-start gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[15px] font-semibold text-gray-900 dark:text-white">
+                        {formatPeriod(run.period)}
+                      </p>
+                      <p className="mt-0.5 truncate text-[12px] text-gray-400">
+                        Pay date {formatDate(run.payDate)} - {run.employeeCount}{" "}
+                        {run.employeeCount === 1 ? "employee" : "employees"}
+                      </p>
+                      <p className="mt-0.5 truncate text-[11px] text-gray-400">
+                        Generated {formatDate(run.generatedAt)} by{" "}
+                        {run.generatedBy}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1.5">
+                      <span className="text-[15px] font-bold tabular-nums text-gray-900 dark:text-white">
+                        {formatMoney(run.totalNet, run.currency)}
+                      </span>
+                      <StatusPill status={RUN_STATUS[run.status]} />
+                    </div>
+                  </div>
+
+                  <div className="mt-2.5 flex items-center gap-1.5">
+                    {run.status !== "paid" && (
+                      <button
+                        type="button"
+                        onClick={() => handleMarkPaid(run)}
+                        className="flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 text-[13px] font-semibold text-emerald-700 transition-transform active:scale-[0.98] dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400"
+                      >
+                        <CheckCircleIcon className="h-4 w-4" />
+                        Mark paid
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => navigate("/payroll/payslips")}
+                      className="flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-gray-200 text-[13px] font-medium text-gray-600 transition-transform active:scale-[0.98] dark:border-white/10 dark:text-gray-300"
+                    >
+                      <DocumentTextIcon className="h-4 w-4" />
+                      Payslips
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleExport(run)}
+                      aria-label="Export as CSV"
+                      className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-gray-200 text-gray-500 transition-transform active:scale-95 dark:border-white/10 dark:text-gray-400"
+                    >
+                      <TableCellsIcon className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDelete(run)}
+                      aria-label="Delete run"
+                      className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-gray-200 text-rose-500 transition-transform active:scale-95 dark:border-white/10"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            {/* ---------------- Desktop ---------------- */}
+            <div className="hidden table-scroll lg:block">
               <table className="w-full min-w-[880px] border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-gray-200/70 text-left dark:border-gray-700/50">
@@ -272,6 +345,7 @@ const PayrollHistoryPage: React.FC = () => {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </PayrollSection>
       </motion.div>
