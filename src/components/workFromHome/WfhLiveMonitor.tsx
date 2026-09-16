@@ -48,6 +48,14 @@ import {
  * glasses can be taken in at once - how full each one is says how far through
  * the planned day that person is, and the one whose sand has stopped falling is
  * the one an admin is looking for.
+ *
+ * Below `lg` the same rows are cards. An admin checking on the team from a
+ * phone is asking one question - who is working and who has stalled - and six
+ * columns behind a sideways scroll answer it worst of any layout: the status
+ * and the worked time, the two things being compared, end up on opposite sides
+ * of the screen. On the card they sit together on one line, and the rows stay
+ * in the same urgency order the table uses, so whoever needs attention is
+ * still first.
  */
 
 interface Props {
@@ -74,6 +82,63 @@ const dayProgress = (row: WfhMonitorRow, worked: number): number | null => {
   const planned = plannedDurationMs(row.plannedStartTime, row.plannedEndTime);
   if (!planned) return null;
   return Math.min(1, worked / planned);
+};
+
+/** One monitored employee, as a card. */
+const MobileMonitorCard: React.FC<{
+  row: WfhMonitorRow;
+  worked: number;
+  onOpen: () => void;
+}> = ({ row, worked, onOpen }) => {
+  const session = row.session;
+  return (
+    <button
+      type="button"
+      onClick={session ? onOpen : undefined}
+      disabled={!session}
+      className={`press-scale block w-full overflow-hidden px-4 py-3.5 text-start disabled:cursor-default ${CARD}`}
+    >
+      <div className="flex items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[15px] font-bold leading-tight tracking-[-0.01em] text-gray-900 dark:text-white">
+            {row.employee.name}
+          </p>
+          <p className="mt-0.5 truncate text-[12px] text-gray-500 dark:text-gray-400">
+            {session?.currentTask
+              ? session.currentTask.title
+              : `${row.employee.employeeId || "-"}${
+                  row.employee.department ? ` - ${row.employee.department}` : ""
+                }`}
+          </p>
+        </div>
+        <WfhSessionStatusBadge status={row.status} />
+      </div>
+
+      {/* The hourglass and the day it is measuring, on one line. */}
+      <div className="mt-3 flex items-center gap-3 rounded-xl bg-black/[0.025] px-3 py-2.5 dark:bg-white/[0.04]">
+        <WfhHourglass
+          progress={dayProgress(row, worked)}
+          tone={TONE[row.status] || "idle"}
+          label={session ? formatHm(worked) : "0m"}
+        />
+        <div className="min-w-0 flex-1 text-[12px] leading-snug text-gray-500 dark:text-gray-400">
+          <p className="truncate">
+            Planned{" "}
+            {formatPlannedWindow(row.plannedStartTime, row.plannedEndTime)}
+          </p>
+          <p className="truncate">
+            {session ? `Started ${formatClock(session.startedAt)}` : "Not started"}
+            {session && session.idleMs > 0
+              ? ` - ${formatHm(session.idleMs)} paused`
+              : ""}
+          </p>
+        </div>
+        {session && (
+          <ChevronRightIcon className="h-4 w-4 shrink-0 text-gray-300 rtl:-scale-x-100 dark:text-gray-600" />
+        )}
+      </div>
+    </button>
+  );
 };
 
 const WfhLiveMonitor: React.FC<Props> = ({ date }) => {
@@ -132,7 +197,7 @@ const WfhLiveMonitor: React.FC<Props> = ({ date }) => {
           Working from home today
         </h2>
         {summary && (
-          <span className="text-xs text-gray-400">
+          <span className="w-full text-xs text-gray-400 sm:w-auto">
             {summary.working} working - {summary.paused} inactive -{" "}
             {summary.not_started} not started - {summary.completed} completed
           </span>
@@ -150,8 +215,44 @@ const WfhLiveMonitor: React.FC<Props> = ({ date }) => {
         )}
       </div>
 
-      <div className={`overflow-hidden ${CARD}`}>
-        <div className="overflow-x-auto">
+      {/* ---------------- Phones and small tablets ---------------- */}
+      <div className="lg:hidden">
+        {isLoading ? (
+          <div className="flex flex-col gap-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className={`h-[124px] animate-pulse ${CARD}`} />
+            ))}
+          </div>
+        ) : sorted.length === 0 ? (
+          <div className={`px-6 py-10 text-center ${CARD}`}>
+            <p className="text-[15px] font-semibold text-gray-900 dark:text-gray-100">
+              Nobody is working from home today.
+            </p>
+            <p className="mx-auto mt-1.5 max-w-[17rem] text-[13px] leading-relaxed text-gray-500 dark:text-gray-400">
+              Approved work from home days appear here with their live status.
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {sorted.map((row) => (
+              <MobileMonitorCard
+                key={row.employee._id}
+                row={row}
+                worked={workedMs(row, now, grace)}
+                onOpen={() => {
+                  if (!row.session) return;
+                  setOpenId(row.session._id);
+                  setOpenName(row.employee.name);
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ---------------- Desktop ---------------- */}
+      <div className={`hidden overflow-hidden lg:block ${CARD}`}>
+        <div className="table-scroll">
           <table className="w-full min-w-[800px] border-collapse">
             <thead>
               <tr>

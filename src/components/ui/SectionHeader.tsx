@@ -197,15 +197,22 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
     >
       <BannerBackdrop variant={variant} id={id} />
 
-      <div className="relative flex min-h-[8.5rem] items-center px-6 py-4 sm:min-h-[9.5rem] sm:px-8">
+      {/* 136px of gradient at the top of every screen is a tenth of a phone,
+          spent restating a title the app bar is already showing. The banner
+          keeps its job on mobile - it frames the section and holds its
+          actions - in about two thirds of the height. */}
+      <div className="relative flex min-h-[6.5rem] items-center px-4 py-3.5 sm:min-h-[9.5rem] sm:px-8 sm:py-4">
         {/* Copy. `lg:pr-64` is what keeps this column clear of the artwork.
             The prose is capped again inside, but the action row is not: a
             measure that suits a sentence is narrower than three buttons need,
             and capping them wrapped the last action onto its own line on any
             screen with more than two. */}
         <div className="min-w-0 flex-1 lg:pr-64">
+          {/* The eyebrow is a breadcrumb, and on a phone the app bar above it
+              already says which screen this is. Desktop keeps it: there the
+              equivalent context lives in a sidebar the eye has to travel to. */}
           {eyebrow && (
-            <p className="max-w-2xl text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70">
+            <p className="hidden max-w-2xl text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70 sm:block">
               {eyebrow}
             </p>
           )}
@@ -217,13 +224,20 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
             {badge}
           </div>
 
+          {/* Clamped rather than hidden: the first two lines carry the point
+              of every one of these sentences, and a third line on a 375px
+              screen pushes the actions off the banner. */}
           {description && (
-            <p className="mt-1.5 max-w-xl text-sm leading-relaxed text-white/90">
+            <p className="mt-1 line-clamp-2 max-w-xl text-[13px] leading-snug text-white/90 sm:mt-1.5 sm:line-clamp-none sm:text-sm sm:leading-relaxed">
               {description}
             </p>
           )}
 
-          {action && <div className="mt-3 flex flex-wrap gap-2.5">{action}</div>}
+          {action && (
+            <div className="mt-2.5 flex flex-wrap gap-2 sm:mt-3 sm:gap-2.5">
+              {action}
+            </div>
+          )}
         </div>
 
         {/* Artwork. Decorative, so it is out of the accessibility tree - the

@@ -3,7 +3,7 @@ import { Navigate, Outlet, Link, useLocation, useNavigate } from "react-router-d
 import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Avatar from "./Avatar";
 import MobileTabBar from "./MobileTabBar";
 import NotificationBell from "./NotificationBell";
@@ -18,6 +18,7 @@ import VoiceNotificationToaster from "./voice/VoiceNotificationToaster";
 import NexoraAssistant from "./assistant/NexoraAssistant";
 import { useNotifications } from "../hooks/useNotifications";
 import { companyNameOf } from "../lib/company";
+import { useLocale } from "../i18n/LocaleProvider";
 import { pageVariants } from "../lib/motion";
 import {
   Squares2X2Icon,
@@ -54,6 +55,7 @@ import {
   DocumentTextIcon,
   ArchiveBoxIcon,
   ExclamationTriangleIcon,
+  LanguageIcon,
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 
@@ -125,6 +127,8 @@ const Layout: React.FC = () => {
   const searchRef = useRef<HTMLInputElement>(null);
   const globalSearchRef = useRef<HTMLInputElement>(null);
   const { unreadCount } = useNotifications({ limit: 12 });
+  const reduceMotion = useReducedMotion();
+  const { language } = useLocale();
 
   const isAdmin = user?.role === "admin";
   /** The signed-in user's company, as the API serialises it (a display name). */
@@ -149,6 +153,31 @@ const Layout: React.FC = () => {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
+
+  // The drawer is an overlay, so the page behind it must not scroll - on iOS a
+  // scrim without this lets a drag over the scrim scroll the page underneath,
+  // and the drawer then closes onto a screen that has moved. Escape closes it
+  // for anyone on a keyboard-attached tablet.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [mobileOpen]);
+
+  // Navigating from inside the drawer, from the tab bar, or with the back
+  // gesture all end on a new screen; leaving the drawer open over it is never
+  // what was meant.
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   // Areas → each rail icon opens a panel listing its pages.
   const groups: NavGroup[] = useMemo(() => {
@@ -505,7 +534,7 @@ const Layout: React.FC = () => {
       </div>
 
       {/* List */}
-      <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 pb-4">
+      <nav className="scroll-pane flex-1 space-y-0.5 px-2 pb-4">
         {query ? (
           searchResults.length ? (
             searchResults.map((it) => renderRow(it, onNavigate))
@@ -523,13 +552,47 @@ const Layout: React.FC = () => {
           </>
         )}
       </nav>
+
+      {/* Appearance and language, on mobile only.
+          Both used to sit in the app bar, where they cost two of the five
+          slots a 320px bar has. On desktop they are in the account dropdown;
+          this is the drawer's equivalent of that dropdown. */}
+      <div className="border-t border-black/5 px-2 py-2 pb-safe dark:border-white/10 lg:hidden">
+        <button
+          onClick={() => {
+            onNavigate?.();
+            setThemeOpen(true);
+          }}
+          className="flex w-full items-center gap-2.5 rounded-full px-2.5 py-2.5 text-sm text-gray-600 active:bg-black/5 dark:text-gray-400 dark:active:bg-white/5"
+        >
+          <PaintBrushIcon className="h-[18px] w-[18px] flex-shrink-0" />
+          <span className="min-w-0 flex-1 truncate text-left">{t("items.theme")}</span>
+        </button>
+        {/* Language goes to the settings screen rather than opening the header
+            dropdown: that dropdown is anchored right and would open off the
+            edge of a 288px drawer, and the screen it links to holds the same
+            list with room to read it. */}
+        <Link
+          to="/theme"
+          onClick={onNavigate}
+          className="flex w-full items-center gap-2.5 rounded-full px-2.5 py-2.5 text-sm text-gray-600 active:bg-black/5 dark:text-gray-400 dark:active:bg-white/5"
+        >
+          <LanguageIcon className="h-[18px] w-[18px] flex-shrink-0" />
+          <span className="min-w-0 flex-1 truncate text-left">
+            {t("items.language")}
+          </span>
+          <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+            {language}
+          </span>
+        </Link>
+      </div>
     </div>
   );
 
   // ---- The icon rail ----
   const renderRail = () => (
     <div
-      className="flex h-full w-16 flex-col items-center bg-white/70 backdrop-blur-xl dark:bg-gray-900/50"
+      className="flex h-full w-16 flex-col items-center bg-white/70 pb-safe pt-safe backdrop-blur-xl dark:bg-gray-900/50"
       style={{ backgroundImage: "linear-gradient(var(--accent-wash), var(--accent-wash))" }}
     >
       <Link
@@ -633,28 +696,73 @@ const Layout: React.FC = () => {
       </div>
 
       {/* ============ Mobile drawer ============ */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setMobileOpen(false)} />
-      )}
-      <div
-        className={`fixed inset-y-0 left-0 z-50 flex w-[19rem] transition-transform duration-300 lg:hidden ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        {renderRail()}
-        <div className="w-60 border-r border-black/5 bg-white dark:border-white/5 dark:bg-gray-900">
-          <div className="flex justify-end p-2">
-            <button
+      {/* Mounted only while open, and animated in and out together with its
+          scrim. The previous version kept the panel in the tree permanently,
+          parked off-screen with a transform - which meant its search field and
+          every nav link stayed in the tab order behind the page, and the scrim
+          appeared instantly while the panel took 300ms to catch up.
+
+          It drags: a leftward flick past a third of the width, or thrown
+          quickly, dismisses it. That is the gesture people already use to put
+          a drawer away, and having it do nothing is what makes a web app feel
+          like a web app. */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            <motion.div
+              className="absolute inset-0 bg-gray-900/50 backdrop-blur-[2px]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
               onClick={() => setMobileOpen(false)}
-              className="rounded-full p-1 text-gray-500 hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
-              aria-label={t("actions.closeMenu")}
+            />
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-label={t("groups.home")}
+              initial={reduceMotion ? { opacity: 0 } : { x: "-100%" }}
+              animate={
+                reduceMotion
+                  ? { opacity: 1 }
+                  : { x: 0, transition: { type: "spring", stiffness: 340, damping: 34 } }
+              }
+              exit={
+                reduceMotion
+                  ? { opacity: 0 }
+                  : { x: "-100%", transition: { duration: 0.22, ease: [0.4, 0, 1, 1] } }
+              }
+              drag={reduceMotion ? false : "x"}
+              dragDirectionLock
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={{ left: 0.4, right: 0 }}
+              onDragEnd={(_, info) => {
+                if (info.offset.x < -70 || info.velocity.x < -450) {
+                  setMobileOpen(false);
+                }
+              }}
+              /* 19rem is 95% of a 320px screen. Capping at 86vw keeps a strip
+                 of the page visible, which is what tells you the drawer is
+                 over the page rather than a new screen. */
+              className="absolute inset-y-0 left-0 flex w-[min(19rem,86vw)] touch-pan-y shadow-2xl shadow-gray-900/30"
             >
-              <XMarkIcon className="h-5 w-5" />
-            </button>
+              {renderRail()}
+              <div className="flex min-w-0 flex-1 flex-col border-r border-black/5 bg-white pt-safe dark:border-white/5 dark:bg-gray-900">
+                <div className="flex justify-end p-2">
+                  <button
+                    onClick={() => setMobileOpen(false)}
+                    className="flex h-10 w-10 items-center justify-center rounded-full text-gray-500 active:bg-black/5 dark:text-gray-400 dark:active:bg-white/10"
+                    aria-label={t("actions.closeMenu")}
+                  >
+                    <XMarkIcon className="h-5 w-5" />
+                  </button>
+                </div>
+                {renderPanelBody(() => setMobileOpen(false))}
+              </div>
+            </motion.div>
           </div>
-          {renderPanelBody(() => setMobileOpen(false))}
-        </div>
-      </div>
+        )}
+      </AnimatePresence>
 
       {/* ============ Mobile header ============ */}
       {/* Title-first, like a native app bar: the current screen is what a user
@@ -663,10 +771,9 @@ const Layout: React.FC = () => {
           margins keep them visually aligned), and the bar reserves the iOS
           status-bar inset so it is not drawn under the clock. */}
       <header
-        className="fixed left-0 right-0 top-0 z-30 border-b border-gray-200/70 bg-white/80 backdrop-blur-xl dark:border-gray-700/60 dark:bg-gray-900/70 lg:hidden"
-        style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
+        className="fixed left-0 right-0 top-0 z-30 border-b border-gray-200/70 bg-white/80 px-safe pt-safe backdrop-blur-xl dark:border-gray-700/60 dark:bg-gray-900/70 lg:hidden"
       >
-        <div className="flex h-14 items-center gap-2 px-2">
+        <div className="flex h-14 items-center gap-1 px-2">
           <Link
             to="/"
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full active:bg-black/5 dark:active:bg-white/10"
@@ -679,25 +786,21 @@ const Layout: React.FC = () => {
             {activeItem?.name || activeGroup.label}
           </h1>
 
-          <div className="flex shrink-0 items-center">
-            {/* Language. The `menu` variant already drops its label below sm,
-                so it renders icon-only here and keeps the row within 320px. */}
-            <LanguageSwitcher />
-
-            {/* Appearance. On desktop this sits in the account dropdown beside
-                the word "Theme"; here it stands alone with no label, so it uses
-                a paint brush rather than the swatch icon - a swatch on its own
-                reads as a tag or a bookmark, not as "change how this looks". */}
-            <button
-              onClick={() => setThemeOpen(true)}
-              className="flex h-11 w-11 items-center justify-center rounded-full text-gray-600 active:bg-black/5 dark:text-gray-300 dark:active:bg-white/10"
-              aria-label={t("items.theme")}
-            >
-              <PaintBrushIcon className="h-[21px] w-[21px]" />
-            </button>
+          {/* Two controls, not five.
+              The bar previously carried language, appearance, notifications,
+              install and the menu. Five 44px targets plus the logo is 300px of
+              a 320px screen, so the screen title - the one thing the bar exists
+              to tell you - was squeezed to a few characters and the buttons sat
+              edge to edge with nothing to aim between. Appearance and language
+              are settings, changed rarely, and both now live in the drawer
+              where the rest of the settings are. What stays is what is
+              genuinely per-screen: what needs your attention, and the way to
+              everything else. */}
+          <div className="flex shrink-0 items-center gap-0.5">
             <NotificationBell />
-            {/* Icon only here: the mobile header has to stay within 320px. */}
-            <GetAppButton compact className="ml-1 !px-2.5 !py-2" />
+            {/* Renders nothing once installed. Icon-only: the mobile header
+                has to hold at 320px. */}
+            <GetAppButton compact className="!px-2.5 !py-2" />
             <button
               onClick={() => setMobileOpen(true)}
               className="flex h-11 w-11 items-center justify-center rounded-full text-gray-600 active:bg-black/5 dark:text-gray-300 dark:active:bg-white/10"
@@ -812,9 +915,9 @@ const Layout: React.FC = () => {
           clears the tab bar plus the iOS home indicator, so the last row of a
           list is never trapped underneath it. */}
       <main
-        className={`min-h-screen overflow-y-auto pt-[calc(3.5rem+env(safe-area-inset-top,0px))] transition-[margin] duration-300 lg:pt-16 ${mainOffset}`}
+        className={`min-h-[100dvh] pt-[calc(var(--app-bar-h)+var(--safe-top))] transition-[margin] duration-300 lg:pt-16 ${mainOffset}`}
       >
-        <div className="px-3 py-4 pb-[calc(5.75rem+env(safe-area-inset-bottom,0px))] sm:px-4 lg:p-8 lg:pb-8">
+        <div className="px-[max(0.75rem,var(--safe-left))] py-4 pb-[calc(var(--tab-bar-h)+1rem+var(--safe-bottom))] sm:px-4 lg:p-8 lg:pb-8">
           <div className="mx-auto max-w-7xl">
             <motion.div key={location.pathname} variants={pageVariants} initial="initial" animate="animate">
               {/* Routes are lazily loaded (see App.tsx). Keeping the boundary

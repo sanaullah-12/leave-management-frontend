@@ -13,6 +13,7 @@ import {
 } from "./lib/attendanceCache";
 import { MotionConfig } from "framer-motion";
 import { Toaster } from "react-hot-toast";
+import { MorphZone } from "./components/ui/CardMorph";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { LocaleProvider } from "./i18n/LocaleProvider";
@@ -21,9 +22,12 @@ import RealtimeProvider from "./providers/RealtimeProvider";
 import "./styles/themes.css";
 import Layout from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
+import FirstLaunchGate from "./components/onboarding/FirstLaunchGate";
 import LogoLoader from "./components/LogoLoader";
 import PWAManager from "./components/pwa/PWAManager";
 import PWAProvider from "./providers/PWAProvider";
+import { useViewportInsets } from "./hooks/useViewportInsets";
+import { useMediaQuery } from "./hooks/useMediaQuery";
 
 /* ------------------------------------------------------------------ */
 /*  Route-level code splitting                                         */
@@ -41,6 +45,9 @@ import PWAProvider from "./providers/PWAProvider";
 
 // Public
 const LandingPage = React.lazy(() => import("./pages/LandingPage"));
+// The first-launch introduction. Lazy like the landing page - a returning user
+// never loads it, and it is the one screen guaranteed not to be needed twice.
+const OnboardingPage = React.lazy(() => import("./pages/OnboardingPage"));
 const RegisterPage = React.lazy(() => import("./pages/RegisterPage"));
 const ForgotPasswordPage = React.lazy(() => import("./pages/ForgotPasswordPage"));
 const ResetPasswordPage = React.lazy(() => import("./pages/ResetPasswordPage"));
@@ -119,6 +126,11 @@ hydrateAttendanceCache(queryClient);
 startAttendanceCachePersistence(queryClient);
 
 const App: React.FC = () => {
+  // Publishes the software keyboard height as --keyboard-inset for every
+  // bottom-anchored surface in the app. Mounted once, above the router.
+  useViewportInsets();
+  const isPhone = useMediaQuery("(max-width: 639px)");
+
   return (
     <QueryClientProvider client={queryClient}>
       {/* LocaleProvider sits above everything that renders text so a language
@@ -133,12 +145,30 @@ const App: React.FC = () => {
                 usePWA() call registering a second service worker. */}
             <PWAProvider>
             <Router>
+            {/* Inside the router so a morph can drive the URL, but outside
+                <Routes> so it never unmounts on navigation - remounting would
+                drop the layout projection mid-flight. */}
+            <MorphZone>
             <div className="App">
+              {/* Toasts sit under the mobile app bar rather than over it.
+                  `top-right` put them against the right edge at y=0, which on
+                  an installed iPhone is behind the status bar and on any phone
+                  is on top of the notification bell they are often reporting
+                  on. `containerStyle` reserves the safe area plus the bar; the
+                  offset collapses to a normal top margin on desktop, where
+                  --app-bar-h is not in play (the desktop header is 64px, and
+                  the toast is deliberately allowed to overlap it there as it
+                  always has). `containerClassName` centres them on a phone,
+                  where a 90vw toast has nowhere to be but centred - desktop
+                  keeps the top-right corner it has always used. */}
               <Toaster
-                position="top-right"
+                position={isPhone ? "top-center" : "top-right"}
+                containerStyle={{
+                  top: "calc(var(--safe-top) + var(--app-bar-h) + 0.5rem)",
+                }}
                 toastOptions={{
                   duration: 4000,
-                  className: "",
+                  className: "max-w-[calc(100vw-1.5rem)]",
                   // Default styles will be overridden by individual toast functions
                   style: {},
                   success: {
@@ -166,8 +196,15 @@ const App: React.FC = () => {
                   header stay painted while a page chunk downloads. */}
               <React.Suspense fallback={<LogoLoader fullScreen />}>
               <Routes>
-                <Route path="/landing" element={<LandingPage />} />
-                <Route path="/login" element={<LoginPage />} />
+                <Route path="/onboarding" element={<OnboardingPage />} />
+                {/* First launch is sent through the introduction before it
+                    ever reaches a sign-in form. Both public entry points are
+                    behind the gate, since an unauthenticated visitor to any
+                    private route lands on one of them. */}
+                <Route element={<FirstLaunchGate />}>
+                  <Route path="/landing" element={<LandingPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                </Route>
                 <Route path="/register" element={<RegisterPage />} />
                 <Route
                   path="/forgot-password"
@@ -225,6 +262,7 @@ const App: React.FC = () => {
               </Routes>
               </React.Suspense>
             </div>
+            </MorphZone>
             </Router>
 
             {/* Install and update surfaces. Deliberately outside <Router>:

@@ -15,6 +15,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { attendanceAPI, leavesAPI, usersAPI } from "../services/api";
 import { isoDay } from "../lib/attendancePeriod";
+import useMediaQuery from "../hooks/useMediaQuery";
+import MobileDashboard from "../components/dashboard/mobile/MobileDashboard";
 
 /**
  * How a reported day reads in the Team Availability panel.
@@ -163,6 +165,9 @@ const StatusPill: React.FC<{ status?: string; label: string }> = ({
 /*  Presentational helpers - visual only, data is passed in            */
 /* ------------------------------------------------------------------ */
 
+/** A heroicon, before anything has decided how big to draw it. */
+type IconComponent = React.ComponentType<{ className?: string }>;
+
 // Compact KPI tile: label + big value on the left, accent icon chip on
 // the right, supporting caption below. Mirrors the reference top row.
 /**
@@ -176,15 +181,18 @@ const KpiCard: React.FC<{
   value: number | string;
   suffix?: string;
   caption?: string;
-  icon: React.ReactNode;
+  /* The icon arrives as a component, not a node: the phone layout draws the
+     same list at 14px, and a node sized by whoever built the list can only be
+     one of those two sizes. */
+  icon: IconComponent;
   accent?: StatAccent;
   onClick?: () => void;
-}> = ({ label, value, suffix, icon, accent, onClick }) => (
+}> = ({ label, value, suffix, icon: Icon, accent, onClick }) => (
   <StatCard
     label={label}
     value={value}
     suffix={suffix}
-    icon={icon}
+    icon={<Icon className="w-5 h-5" />}
     accent={accent}
     onClick={onClick}
   />
@@ -256,13 +264,15 @@ const SemiGauge: React.FC<{
 const MiniStat: React.FC<{
   label: string;
   value: number;
-  icon: React.ReactNode;
+  icon: IconComponent;
   /** Largest value in the group - the bars are relative to it. */
   max: number;
-}> = ({ label, value, icon, max }) => (
+}> = ({ label, value, icon: Icon, max }) => (
   <div>
     <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
-      <span className="text-blue-600 dark:text-blue-400">{icon}</span>
+      <span className="text-blue-600 dark:text-blue-400">
+        <Icon className="w-4 h-4" />
+      </span>
       <span className="text-[11px] font-medium">{label}</span>
     </div>
     <p className="mt-1 text-lg font-bold tabular-nums text-gray-900 dark:text-white">
@@ -302,6 +312,9 @@ const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { colorScheme, isDark } = useTheme();
+  /* The same breakpoint the attendance page switches on, so the two never
+     disagree about what counts as a phone. */
+  const isPhoneLayout = useMediaQuery("(max-width: 1023px)");
   const { t } = useTranslation("dashboard");
   // Dates follow the chosen language, not the browser locale.
   const fmt = useFormatters();
@@ -434,12 +447,33 @@ const DashboardPage: React.FC = () => {
   // Leave-trend line, derived from the recent leaves we already have.
   // Localised month abbreviations for the trend axis.
   const MONTHS = Array.from({ length: 12 }, (_, i) => fmt.monthShort(i));
-  const monthlyCounts = new Array(12).fill(0);
+
+  /*
+   * Each month split by how its requests were decided, as well as totalled.
+   *
+   * `value` is every request in the month and is what the desktop chart draws.
+   * The split beside it is what lets the phone draw the same two-series chart
+   * the attendance screen uses - granted against still-waiting - without
+   * asking the server for anything it has not already sent. Rejected is
+   * counted here so the tooltip can report it; see the mobile charts screen
+   * for why it is not a third line.
+   */
+  const monthly = MONTHS.map(() => ({
+    value: 0,
+    approved: 0,
+    pending: 0,
+    rejected: 0,
+  }));
   recent.forEach((l) => {
     const d = l?.startDate ? new Date(l.startDate) : null;
-    if (d && !isNaN(d.getTime())) monthlyCounts[d.getMonth()] += 1;
+    if (!d || isNaN(d.getTime())) return;
+    const bucket = monthly[d.getMonth()];
+    bucket.value += 1;
+    if (l?.status === "approved") bucket.approved += 1;
+    else if (l?.status === "pending") bucket.pending += 1;
+    else if (l?.status === "rejected") bucket.rejected += 1;
   });
-  const trendData = MONTHS.map((m, i) => ({ month: m, value: monthlyCounts[i] }));
+  const trendData = MONTHS.map((m, i) => ({ month: m, ...monthly[i] }));
 
   // Status breakdown (admin) from leavesByStatus aggregate.
   const statusMap: Record<string, number> = {};
@@ -500,16 +534,16 @@ const DashboardPage: React.FC = () => {
   // Mini-stat tiles under the bar chart.
   const miniStats = isAdmin
     ? [
-        { label: t("kpi.approved"), value: approved, icon: <CheckCircleIcon className="w-4 h-4" /> },
-        { label: t("labels.pending"), value: pending, icon: <ClockIcon className="w-4 h-4" /> },
-        { label: t("kpi.thisMonth"), value: adminStats.thisMonthLeaves || 0, icon: <CalendarDaysIcon className="w-4 h-4" /> },
-        { label: t("labels.employees"), value: adminStats.totalEmployees || 0, icon: <UsersIcon className="w-4 h-4" /> },
+        { label: t("kpi.approved"), value: approved, icon: CheckCircleIcon },
+        { label: t("labels.pending"), value: pending, icon: ClockIcon },
+        { label: t("kpi.thisMonth"), value: adminStats.thisMonthLeaves || 0, icon: CalendarDaysIcon },
+        { label: t("labels.employees"), value: adminStats.totalEmployees || 0, icon: UsersIcon },
       ]
     : [
-        { label: t("gauges.daysUsed"), value: usedTotal, icon: <ChartBarIcon className="w-4 h-4" /> },
-        { label: t("gauges.remaining"), value: remainingTotal, icon: <CheckCircleIcon className="w-4 h-4" /> },
-        { label: t("labels.requests"), value: recent.length, icon: <CalendarDaysIcon className="w-4 h-4" /> },
-        { label: t("labels.pending"), value: recent.filter((l) => l?.status === "pending").length, icon: <ClockIcon className="w-4 h-4" /> },
+        { label: t("gauges.daysUsed"), value: usedTotal, icon: ChartBarIcon },
+        { label: t("gauges.remaining"), value: remainingTotal, icon: CheckCircleIcon },
+        { label: t("labels.requests"), value: recent.length, icon: CalendarDaysIcon },
+        { label: t("labels.pending"), value: recent.filter((l) => l?.status === "pending").length, icon: ClockIcon },
       ];
 
   // Bars in the mini-stat row are drawn relative to the biggest tile.
@@ -645,28 +679,28 @@ const DashboardPage: React.FC = () => {
           label: t("kpi.totalRequests"),
           value: totalReq,
           caption: t("kpi.allLeaveRequests"),
-          icon: <ChartBarIcon className="w-5 h-5" />,
+          icon: ChartBarIcon,
           onClick: () => navigate("/leaves"),
         },
         {
           label: t("kpi.pendingRequests"),
           value: adminStats.pendingLeaves || 0,
           caption: t("kpi.awaitingReview"),
-          icon: <ClockIcon className="w-5 h-5" />,
+          icon: ClockIcon,
           onClick: () => navigate("/leaves?status=pending"),
         },
         {
           label: t("kpi.thisMonth"),
           value: adminStats.thisMonthLeaves || 0,
           caption: t("kpi.leaveRequestsLogged"),
-          icon: <CalendarDaysIcon className="w-5 h-5" />,
+          icon: CalendarDaysIcon,
           onClick: () => navigate("/leaves"),
         },
         {
           label: t("kpi.approved"),
           value: approved,
           caption: t("kpi.requestsGranted"),
-          icon: <CheckCircleIcon className="w-5 h-5" />,
+          icon: CheckCircleIcon,
           onClick: () => navigate("/leaves?status=approved"),
         },
       ]
@@ -676,7 +710,7 @@ const DashboardPage: React.FC = () => {
           value: balance.annual?.remaining ?? 0,
           suffix: `/ ${balance.annual?.total ?? 0}`,
           caption: t("kpi.daysRemaining"),
-          icon: <ArrowUpRightIcon className="w-5 h-5" />,
+          icon: ArrowUpRightIcon,
           onClick: () => navigate("/my-leave-activity"),
         },
         {
@@ -684,7 +718,7 @@ const DashboardPage: React.FC = () => {
           value: balance.sick?.used ?? 0,
           suffix: `/ ${balance.sick?.total ?? 0}`,
           caption: t("kpi.daysUsed"),
-          icon: <PlusIcon className="w-5 h-5" />,
+          icon: PlusIcon,
           onClick: () => navigate("/my-leave-activity"),
         },
         {
@@ -692,19 +726,97 @@ const DashboardPage: React.FC = () => {
           value: balance.casual?.remaining ?? 0,
           suffix: `/ ${balance.casual?.total ?? 0}`,
           caption: t("kpi.daysRemaining"),
-          icon: <UserIcon className="w-5 h-5" />,
+          icon: UserIcon,
           onClick: () => navigate("/my-leave-activity"),
         },
         {
           label: t("kpi.daysTaken"),
           value: usedTotal,
           caption: t("kpi.acrossAllLeaveTypes"),
-          icon: <ChartBarIcon className="w-5 h-5" />,
+          icon: ChartBarIcon,
           onClick: () => navigate("/my-leave-activity"),
         },
       ];
 
   const showCardsLoading = !isAdmin && balanceLoading;
+
+  /**
+   * The phone reading of everything above.
+   *
+   * Placed here rather than at the top of the component on purpose: the two
+   * layouts are the same dashboard, so they have to be built from the same
+   * figures. Branching before the derivations would have let a count drift
+   * between them one edit at a time - see components/dashboard/mobile.
+   */
+  if (isPhoneLayout) {
+    return (
+      <MobileDashboard
+        isAdmin={isAdmin}
+        role={user?.role}
+        employeeId={user?.employeeId}
+        eyebrow={t("greeting.welcomeBack")}
+        greeting={`${greeting}, ${user?.name?.split(" ")[0] || "there"}`}
+        today={today}
+        primaryAction={{
+          label: isAdmin ? t("hero.viewRequests") : t("hero.requestLeave"),
+          onClick: () => navigate(isAdmin ? "/leaves" : "/apply-leave"),
+        }}
+        kpis={kpis}
+        gauges={gauges}
+        trend={trendData}
+        types={typeData}
+        miniStats={miniStats}
+        trendCaption={
+          isAdmin ? t("sections.companyActivity") : t("sections.yourActivity")
+        }
+        typesCaption={
+          isAdmin
+            ? t("sections.thisMonthByCategory")
+            : t("sections.daysUsedByCategory")
+        }
+        /* An admin's bars count requests raised; an employee's count days
+           they have used. Same chart, two different things being measured. */
+        typesUnit={isAdmin ? "requests" : "days"}
+        recent={recent}
+        recentLoading={leavesLoading}
+        holidays={publicHolidays}
+        team={teamMembers}
+        statusLabel={(status) =>
+          status === "approved"
+            ? t("labels.approved")
+            : status === "pending"
+            ? t("labels.pending")
+            : status || "-"
+        }
+        availabilityLabel={(key) => t(key)}
+        onOpenLeaves={() => navigate("/leaves")}
+        onOpenCalendar={() => navigate("/leave-calendar")}
+        onOpenAttendance={() => navigate("/attendance")}
+        onOpenEmployee={(id) => navigate(`/employees/${id}`)}
+        tabLabels={{
+          overview: t("tabs.overview"),
+          charts: t("tabs.charts"),
+          review: t("tabs.review"),
+          activity: t("tabs.activity"),
+        }}
+        listLabels={{
+          recentActivity: t("sections.recentActivity"),
+          viewAll: t("actions.viewAll"),
+          publicHolidays: t("sections.publicHolidays"),
+          viewCalendar: t("actions.viewCompanyCalendar"),
+          teamAvailability: t("sections.teamAvailability"),
+          seeMore: t("actions.seeMore"),
+          seeLess: t("actions.seeLess"),
+          noRecentActivity: t("empty.noRecentActivity"),
+          requestsWillAppear: t("empty.requestsWillAppear"),
+          noTeamActivity: t("empty.noTeamActivity"),
+        }}
+        accent={accent}
+        accentSoft={accentSoft}
+        isDark={isDark}
+      />
+    );
+  }
 
   return (
     <motion.div

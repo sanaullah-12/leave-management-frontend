@@ -207,7 +207,7 @@ const EmployeeTable: React.FC<Props> = ({
     <div className={`overflow-hidden ${CARD}`}>
       {/* Toolbar */}
       {showFilters && (
-      <div className="flex flex-wrap items-center gap-2 border-b border-gray-200/70 p-4 dark:border-gray-700">
+      <div className="grid grid-cols-2 items-center gap-2 border-b border-gray-200/70 p-3 dark:border-gray-700 sm:flex sm:flex-wrap sm:p-4">
         <Input
           icon={MagnifyingGlassIcon}
           inputSize="sm"
@@ -223,7 +223,7 @@ const EmployeeTable: React.FC<Props> = ({
           clearable
           placeholder="Search by name or ID"
           aria-label="Search employees by name or ID"
-          className="min-w-[180px] max-w-xs flex-1"
+          className="col-span-2 sm:min-w-[180px] sm:max-w-xs sm:flex-1"
         />
 
         <select
@@ -233,7 +233,7 @@ const EmployeeTable: React.FC<Props> = ({
             setPage(1);
           }}
           aria-label="Filter by department"
-          className="rounded-full border border-gray-200 bg-white px-3.5 py-2 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+          className="min-h-[42px] w-full min-w-0 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 sm:min-h-0 sm:w-auto"
         >
           <option value="All">All departments</option>
           {departments.map((d) => (
@@ -247,7 +247,7 @@ const EmployeeTable: React.FC<Props> = ({
           value={status}
           onChange={(e) => setStatus(e.target.value)}
           aria-label="Filter by status"
-          className="rounded-full border border-gray-200 bg-white px-3.5 py-2 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+          className="min-h-[42px] w-full min-w-0 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 sm:min-h-0 sm:w-auto"
         >
           <option value="All">All statuses</option>
           <option value="On time">On time</option>
@@ -263,19 +263,87 @@ const EmployeeTable: React.FC<Props> = ({
               setDepartment("All");
               setStatus("All");
             }}
-            className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+            className="col-span-2 py-1 text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
           >
             Clear filters
           </button>
         )}
 
-        <div className="flex-1" />
+        <div className="hidden flex-1 sm:block" />
 
       </div>
       )}
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* ---------------- Phones and small tablets ----------------
+          Seven columns need 860px. The pair being compared - who, and are
+          they in - sat at opposite ends of that, so on a phone checking the
+          roster meant scrolling right on every row and losing the name. The
+          list puts the person on the left and the status on the right, and
+          drops the columns a phone cannot use: department and slot are in the
+          sub-line, and the full record is one tap away in the panel the row
+          already opened. */}
+      <div className="lg:hidden">
+        {loading ? (
+          <div className="divide-y divide-gray-100 dark:divide-gray-700/60">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="px-4 py-3.5">
+                <div className="h-9 animate-pulse rounded bg-gray-100 dark:bg-gray-700" />
+              </div>
+            ))}
+          </div>
+        ) : pageRows.length === 0 ? (
+          <div className="px-6 py-10 text-center">
+            <p className="text-[15px] font-semibold text-gray-900 dark:text-gray-100">
+              {allRows.length
+                ? "No employees match your filters."
+                : "No employees loaded."}
+            </p>
+            <p className="mx-auto mt-1.5 max-w-[17rem] text-[13px] leading-relaxed text-gray-500 dark:text-gray-400">
+              {allRows.length
+                ? "Try a different search or clear the filters."
+                : "Connect to the device to load the roster."}
+            </p>
+          </div>
+        ) : (
+          <ul className="divide-y divide-gray-100 dark:divide-gray-700/60">
+            {pageRows.map((row) => (
+              <li key={String(row.employee.employeeId)}>
+                <button
+                  type="button"
+                  onClick={() => onSelect(row.employee)}
+                  className="press-scale flex w-full items-center gap-3 px-4 py-3 text-start"
+                >
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-xs font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
+                    {initialsOf(row.employee.name)}
+                  </span>
+
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[14px] font-semibold text-gray-900 dark:text-gray-100">
+                      {row.employee.name || "Unnamed"}
+                    </span>
+                    <span className="mt-0.5 block truncate text-[12px] text-gray-500 dark:text-gray-400">
+                      {row.employee.department || "No department"}
+                      {row.checkIn ? ` - in ${row.checkIn}` : ""}
+                    </span>
+                  </span>
+
+                  <span className="flex shrink-0 flex-col items-end gap-1">
+                    <StatusBadge status={row.status} />
+                    {row.status === "Late" && row.lateDisplay && (
+                      <span className="text-[11px] text-gray-400">
+                        {row.lateDisplay}
+                      </span>
+                    )}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* ---------------- Desktop ---------------- */}
+      <div className="hidden table-scroll lg:block">
         <table className="w-full min-w-[860px] border-collapse">
           <thead>
             <tr>
@@ -389,33 +457,33 @@ const EmployeeTable: React.FC<Props> = ({
 
       {/* Pagination */}
       {!loading && rows.length > PAGE_SIZE && (
-        <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 dark:border-gray-700">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 px-4 py-2.5 dark:border-gray-700">
           <p className="text-xs text-gray-500 dark:text-gray-400">
             Showing {(safePage - 1) * PAGE_SIZE + 1} to{" "}
             {Math.min(safePage * PAGE_SIZE, rows.length)} of {rows.length}{" "}
             employees
           </p>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <button
               type="button"
               disabled={safePage === 1}
               onClick={() => setPage(safePage - 1)}
               aria-label="Previous page"
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-transform active:scale-90 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300 sm:h-8 sm:w-8"
             >
-              <ChevronLeftIcon className="h-4 w-4" />
+              <ChevronLeftIcon className="h-4 w-4 rtl:-scale-x-100" />
             </button>
-            <span className="px-2 text-xs font-medium text-gray-700 dark:text-gray-200">
-              Page {safePage} of {totalPages}
+            <span className="px-1.5 text-xs font-medium tabular-nums text-gray-700 dark:text-gray-200">
+              {safePage} / {totalPages}
             </span>
             <button
               type="button"
               disabled={safePage === totalPages}
               onClick={() => setPage(safePage + 1)}
               aria-label="Next page"
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-transform active:scale-90 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300 sm:h-8 sm:w-8"
             >
-              <ChevronRightIcon className="h-4 w-4" />
+              <ChevronRightIcon className="h-4 w-4 rtl:-scale-x-100" />
             </button>
           </div>
         </div>

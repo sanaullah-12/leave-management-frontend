@@ -97,7 +97,7 @@ const InstallPrompt: React.FC<InstallPromptProps> = ({
             type="button"
             onClick={onDismiss}
             aria-label="Dismiss install prompt"
-            className="-mr-1 -mt-1 rounded-full p-1.5 text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-600 dark:hover:bg-white/5 dark:hover:text-gray-300"
+            className="tap-target -mr-1 -mt-1 rounded-full p-1.5 text-gray-400 transition-colors hover:bg-black/5 hover:text-gray-600 dark:hover:bg-white/5 dark:hover:text-gray-300"
           >
             <XMarkIcon className="h-4 w-4" />
           </button>
@@ -137,7 +137,7 @@ const InstallPrompt: React.FC<InstallPromptProps> = ({
           type="button"
           onClick={handleClick}
           disabled={installing}
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition-all hover:bg-blue-700 disabled:opacity-70"
+          className="mt-3 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-blue-600 px-3 py-2 sm:min-h-0 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition-all hover:bg-blue-700 disabled:opacity-70"
         >
           {manualIOS ? (
             <>

@@ -147,7 +147,7 @@ const ForgotPasswordPage: React.FC = () => {
 
       <Link
         to="/login"
-        className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+        className="mt-5 inline-flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
       >
         <ArrowLeftIcon className="h-4 w-4" />
         Back to login

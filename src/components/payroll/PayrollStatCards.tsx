@@ -1,7 +1,12 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { staggerContainer, staggerItem } from "../../lib/motion";
-import { StatCard, type StatAccent } from "../ui/StatCard";
+import {
+  FOUR_UP_COLUMNS,
+  KPI_MEASURE,
+  StatCard,
+  type StatAccent,
+} from "../ui/StatCard";
 
 /**
  * A single KPI tile. `value` is pre-formatted for money/text tiles; pass a
@@ -42,29 +47,40 @@ interface Props {
  * it never knows what a payroll is.
  */
 const PayrollStatCards: React.FC<Props> = ({ tiles, columnsClassName }) => {
-  // Same rule as StatCardRow, so a payroll KPI row matches every other.
-  const cols =
-    columnsClassName ?? "sm:grid-cols-[repeat(auto-fit,minmax(11rem,1fr))]";
+  // Every payroll screen opens with exactly four metrics, so the row is four
+  // columns rather than auto-fit: auto-fit was breaking them three-and-one on
+  // the widths a laptop actually has with the sidebar open. A caller with a
+  // different count still passes its own rule.
+  const cols = columnsClassName ?? FOUR_UP_COLUMNS;
 
   return (
-    <motion.div
-      variants={staggerContainer}
-      initial="initial"
-      animate="animate"
-      className={`grid grid-cols-1 gap-3 ${cols}`}
-    >
-      {tiles.map((t, i) => (
-        <motion.div key={t.label} variants={staggerItem}>
-          <StatCard
-            label={t.label}
-            value={t.value}
-            icon={t.icon}
-            percent={t.percent}
-            accent={t.accent ?? (i % 2 === 0 ? "indigo" : "teal")}
-          />
-        </motion.div>
-      ))}
-    </motion.div>
+    // A container query measures the nearest container ancestor, so the row
+    // that asks its own width needs one wrapped around it.
+    <div className={KPI_MEASURE}>
+      <motion.div
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
+        /* Two across where four will not fit, as everywhere else. A column
+           of full-width bands is 300px of figures before the screen's actual
+           content. No `grid-cols-2` utility here: `kpi-four-up` carries the
+           two-column base itself, and a utility would win the cascade over
+           its container rule and pin the row at two. */
+        className={`grid gap-2.5 sm:gap-3 ${cols}`}
+      >
+        {tiles.map((t, i) => (
+          <motion.div key={t.label} variants={staggerItem}>
+            <StatCard
+              label={t.label}
+              value={t.value}
+              icon={t.icon}
+              percent={t.percent}
+              accent={t.accent ?? (i % 2 === 0 ? "indigo" : "teal")}
+            />
+          </motion.div>
+        ))}
+      </motion.div>
+    </div>
   );
 };
 

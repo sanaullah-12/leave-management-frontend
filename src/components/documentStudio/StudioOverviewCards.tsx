@@ -8,7 +8,12 @@ import {
   TrophyIcon,
 } from "@heroicons/react/24/outline";
 import { staggerContainer, staggerItem } from "../../lib/motion";
-import { StatCard, type StatCardProps } from "../ui/StatCard";
+import {
+  FOUR_UP_COLUMNS,
+  KPI_MEASURE,
+  StatCard,
+  type StatCardProps,
+} from "../ui/StatCard";
 import type { StudioStats } from "./useStudioStore";
 
 interface Props {
@@ -55,20 +60,33 @@ const StudioOverviewCards: React.FC<Props> = ({ stats }) => {
   ];
 
   return (
-    <motion.div
-      variants={staggerContainer}
-      initial="initial"
-      animate="animate"
-      // Same rule as StatCardRow: auto-fit from 11rem, then share what is
-      // left, so the row ends flush with the content below it.
-      className="grid grid-cols-1 gap-3 sm:grid-cols-[repeat(auto-fit,minmax(11rem,1fr))]"
-    >
-      {tiles.map((t, i) => (
-        <motion.div key={t.label} variants={staggerItem}>
-          <StatCard {...t} accent={i % 2 === 0 ? "indigo" : "teal"} />
-        </motion.div>
-      ))}
-    </motion.div>
+    <div className={KPI_MEASURE}>
+      <motion.div
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
+        /* Four across, as every other KPI row in the product. Two across when
+           four will not fit: a column of full-width bands is 300px of figures
+           before the screen's actual content starts. No `grid-cols-2` utility
+           here - `kpi-four-up` carries the two-column base itself, and a
+           utility would win the cascade over its container rule. */
+        className={`grid gap-2.5 sm:gap-3 ${FOUR_UP_COLUMNS}`}
+      >
+        {tiles.map((t, i) => (
+          <motion.div
+            key={t.label}
+            variants={staggerItem}
+            /* The fifth metric is a template's name rather than a count, so it
+               takes the whole of the row under the four counts instead of
+               sitting in the first of four empty cells. A name needs width a
+               count does not. */
+            className={i === 4 ? "kpi-span" : undefined}
+          >
+            <StatCard {...t} accent={i % 2 === 0 ? "indigo" : "teal"} />
+          </motion.div>
+        ))}
+      </motion.div>
+    </div>
   );
 };
 

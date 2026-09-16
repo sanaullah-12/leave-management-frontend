@@ -37,7 +37,7 @@ const LandingPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-[var(--app-bg)] text-gray-900 antialiased dark:text-white">
+    <div className="relative min-h-[100dvh] overflow-x-clip px-safe pb-safe bg-[var(--app-bg)] text-gray-900 antialiased dark:text-white">
       {/* Scroll progress bar */}
       <motion.div
         style={{ scaleX: progress }}

@@ -78,5 +78,11 @@
     "teamAvailability": "Teamverfügbarkeit",
     "thisMonthByCategory": "Diesen Monat, nach Kategorie",
     "yourActivity": "Ihre Urlaubsaktivität"
+  },
+  "tabs": {
+    "activity": "Aktivität",
+    "charts": "Diagramme",
+    "overview": "Überblick",
+    "review": "Auswertung"
   }
 }

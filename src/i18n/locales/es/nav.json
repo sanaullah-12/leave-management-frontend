@@ -72,6 +72,7 @@
     "profileSettings": "Perfil y ajustes",
     "theme": "Tema",
     "wfhRequests": "Solicitudes de teletrabajo",
-    "workFromHome": "Teletrabajo"
+    "workFromHome": "Teletrabajo",
+    "language": "Idioma"
   }
 }

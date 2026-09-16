@@ -11,6 +11,14 @@ import AnimatedNumber from "../AnimatedNumber";
  *
  * Used by every screen that opens with a figure row, so a metric looks the
  * same whether it is on the dashboard, in payroll or on a report.
+ *
+ * On a phone the band turns into a stack and the row goes two across. Four
+ * full-width bands is 300px of figures before a screen's actual content
+ * starts, which is the single biggest reason these pages read as a desktop
+ * layout poured into a phone - and the band itself does not survive the
+ * narrowing anyway: at 170px wide, a 40px ring beside a label leaves about
+ * eighty pixels of text, so every label truncates. Stacked, the label gets
+ * the full width of the tile and the row halves in height.
  */
 
 /** The two accents the row alternates between, as in the reference design. */
@@ -52,7 +60,11 @@ const Ring: React.FC<{
 
   return (
     <span className="relative grid flex-none place-items-center">
-      <svg width={SIZE} height={SIZE} className="-rotate-90" aria-hidden="true">
+      <svg
+        viewBox={`0 0 ${SIZE} ${SIZE}`}
+        className="h-8 w-8 -rotate-90 sm:h-10 sm:w-10"
+        aria-hidden="true"
+      >
         <circle
           cx={SIZE / 2}
           cy={SIZE / 2}
@@ -75,7 +87,7 @@ const Ring: React.FC<{
         />
       </svg>
       <span
-        className={`absolute grid place-items-center ${ACCENT[accent].text}`}
+        className={`absolute grid place-items-center [&_svg]:h-4 [&_svg]:w-4 sm:[&_svg]:h-5 sm:[&_svg]:w-5 ${ACCENT[accent].text}`}
       >
         {children}
       </span>
@@ -123,15 +135,15 @@ export const StatCard: React.FC<StatCardProps> = ({
       <Ring accent={accent} percent={percent}>
         {icon}
       </Ring>
-      <span className="min-w-0 flex-1">
+      <span className="min-w-0 w-full flex-1">
         <span
-          className="block truncate text-[13px] font-medium text-gray-500 dark:text-gray-400"
+          className="block truncate text-[11.5px] font-medium text-gray-500 dark:text-gray-400 sm:text-[13px]"
           title={label}
         >
           {label}
         </span>
         <span
-          className="mt-0.5 flex items-baseline gap-1 truncate text-xl font-bold tabular-nums leading-tight text-gray-900 dark:text-white"
+          className="mt-0.5 flex items-baseline gap-1 truncate text-[19px] font-bold tabular-nums leading-tight text-gray-900 dark:text-white sm:text-xl"
           title={typeof value === "string" ? value : undefined}
         >
           {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
@@ -141,8 +153,10 @@ export const StatCard: React.FC<StatCardProps> = ({
             </span>
           )}
         </span>
+        {/* A third line does not fit a half-width tile, and it is always a
+            gloss on the label rather than a second fact. */}
         {caption && (
-          <span className="mt-0.5 block truncate text-[11px] text-gray-400 dark:text-gray-500">
+          <span className="mt-0.5 hidden truncate text-[11px] text-gray-400 dark:text-gray-500 sm:block">
             {caption}
           </span>
         )}
@@ -151,12 +165,13 @@ export const StatCard: React.FC<StatCardProps> = ({
   );
 
   const shell =
-    "statcard flex w-full items-center gap-2.5 rounded-xl " +
+    "statcard flex w-full flex-col items-start gap-1.5 rounded-xl " +
+    "sm:flex-row sm:items-center sm:gap-2.5 " +
     "bg-[var(--glass-fill)] backdrop-blur-[18px] backdrop-saturate-[1.8] " +
     "border border-[var(--glass-edge)] " +
     "shadow-[shadow:var(--glass-sheen),var(--glass-drop)] " +
-    "px-3.5 py-4 text-left " +
-    (onClick ? "transition-shadow hover:shadow-md cursor-pointer " : "");
+    "px-3 py-3 text-left sm:px-3.5 sm:py-4 " +
+    (onClick ? "press-scale transition-shadow hover:shadow-md cursor-pointer " : "");
 
   if (onClick) {
     return (
@@ -169,6 +184,27 @@ export const StatCard: React.FC<StatCardProps> = ({
 };
 
 /**
+ * The column rule for a row of exactly four metrics.
+ *
+ * `auto-fit` is right for a row whose length varies: it fits as many tiles as
+ * the room allows. With exactly four that is the problem - on any width where
+ * three fit and four do not, it gives three and orphans the fourth on a line
+ * of its own, and that band is a 1024-1280px laptop with the sidebar open.
+ *
+ * This rule is four or two, never three. It is a container query rather than a
+ * breakpoint because the sidebar is 19rem expanded and 4rem collapsed, so one
+ * viewport width gives two row widths 15rem apart; the row has to ask its own
+ * width. See `.kpi-four-up` in design-system.css.
+ *
+ * Pass it to `columnsClassName` and wrap the row in {@link KPI_MEASURE}, or use
+ * {@link StatCardRow} with `fourUp`, which does both.
+ */
+export const FOUR_UP_COLUMNS = "kpi-four-up";
+
+/** The wrapper a `kpi-four-up` row measures itself against. */
+export const KPI_MEASURE = "kpi-measure";
+
+/**
  * A row of tiles.
  *
  * The accent alternates down the row unless a tile names its own, which is
@@ -178,16 +214,34 @@ export const StatCardRow: React.FC<{
   tiles: Array<Omit<StatCardProps, "accent"> & { accent?: StatAccent }>;
   /** Column count from `lg` up. Defaults to one per tile, capped at six. */
   columnsClassName?: string;
+  /**
+   * Four across wherever four fit, two where they do not - for a row whose
+   * length is known to be four. See {@link FOUR_UP_COLUMNS}.
+   */
+  fourUp?: boolean;
   className?: string;
-}> = ({ tiles, columnsClassName, className = "" }) => {
+}> = ({ tiles, columnsClassName, fourUp = false, className = "" }) => {
   // auto-fit down to 11rem, then share what is left: the row always ends
   // flush with the content below it, and wraps to a second line rather than
   // squeezing tiles when there are more of them than fit.
   const cols =
-    columnsClassName ?? "sm:grid-cols-[repeat(auto-fit,minmax(11rem,1fr))]";
+    columnsClassName ??
+    (fourUp
+      ? FOUR_UP_COLUMNS
+      : "sm:grid-cols-[repeat(auto-fit,minmax(11rem,1fr))]");
 
-  return (
-    <div className={`grid grid-cols-1 gap-3 ${cols} ${className}`}>
+  const fourUpRow = cols.includes(FOUR_UP_COLUMNS);
+
+  const row = (
+    /* `grid-cols-2` is dropped for a four-up row: `kpi-four-up` carries both
+       the two-column base and the four-column container rule, and a Tailwind
+       utility would win the cascade over the container rule and pin the row
+       at two. */
+    <div
+      className={`grid gap-2.5 sm:gap-3 ${
+        fourUpRow ? "" : "grid-cols-2"
+      } ${cols} ${className}`}
+    >
       {tiles.map((tile, i) => (
         <StatCard
           key={tile.label}
@@ -197,6 +251,10 @@ export const StatCardRow: React.FC<{
       ))}
     </div>
   );
+
+  // A container query measures the nearest container ancestor, so a row that
+  // asks its own width needs one wrapped around it.
+  return fourUpRow ? <div className={KPI_MEASURE}>{row}</div> : row;
 };
 
 export default StatCard;

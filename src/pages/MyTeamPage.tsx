@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { usersAPI } from "../services/api";
 import LogoLoader from "../components/LogoLoader";
+import { MorphTrigger } from "../components/ui/CardMorph";
 import MobileTeamList from "../components/team/MobileTeamList";
 import Avatar from "../components/Avatar";
 import Dropdown from "../components/ui/Dropdown";
@@ -260,11 +261,17 @@ const MyTeamPage: React.FC = () => {
             const casual = quota.casual ?? 10;
             const sick = quota.sick ?? 8;
             return (
-              <button
+              // The card becomes the profile rather than handing off to it:
+              // the plate grows to fill the viewport while the route swaps
+              // underneath, so /employees/:id, the back button and deep links
+              // all behave exactly as they did.
+              <MorphTrigger
                 key={m._id}
-                onClick={() => navigate(`/employees/${m._id}`)}
-                className="glass-card group relative flex flex-col overflow-hidden rounded-2xl p-4 text-left transition-all hover:bg-[var(--glass-fill-strong)] hover:shadow-[shadow:var(--glass-sheen),var(--glass-drop-lifted)]"
+                morphId={`employee-${m._id}`}
+                route={`/employees/${m._id}`}
+                label={`Open ${m.name}'s profile`}
               >
+                <div className="glass-card group relative flex flex-col overflow-hidden rounded-2xl p-4 text-left transition-all hover:bg-[var(--glass-fill-strong)] hover:shadow-[shadow:var(--glass-sheen),var(--glass-drop-lifted)]">
                 {/* A violet bloom in the corner, echoing the balance panel
                     below so the card reads as one object. */}
                 <span
@@ -375,7 +382,8 @@ const MyTeamPage: React.FC = () => {
                     value={sick}
                   />
                 </div>
-              </button>
+                </div>
+              </MorphTrigger>
             );
           })}
         </div>

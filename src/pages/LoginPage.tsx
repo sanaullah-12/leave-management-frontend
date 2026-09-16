@@ -72,7 +72,7 @@ const LoginPage: React.FC = () => {
             type="button"
             whileTap={{ scale: 0.97 }}
             onClick={() => handleSSO(name)}
-            className="inline-flex items-center justify-center gap-2.5 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="inline-flex min-h-[44px] items-center justify-center gap-2.5 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 px-3 py-2 sm:min-h-0 sm:px-3.5 text-[13px] sm:text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <Icon className="h-5 w-5" />
             {name}
@@ -126,19 +126,22 @@ const LoginPage: React.FC = () => {
           error={errors.password?.message}
         />
 
-        <div className="flex items-center justify-between pt-1">
-          <label className="flex cursor-pointer select-none items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+        {/* Both controls carry their own vertical padding so the row is two
+            44px targets rather than a 16px box and a line of text. The label
+            wraps the checkbox, so the padding is part of what is tappable. */}
+        <div className="-mx-1 flex items-center justify-between gap-2">
+          <label className="flex min-h-[44px] cursor-pointer select-none items-center gap-2 px-1 text-sm text-gray-600 dark:text-gray-300">
             <input
               type="checkbox"
               checked={remember}
               onChange={(e) => setRemember(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="h-[18px] w-[18px] rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
             Remember me
           </label>
           <Link
             to="/forgot-password"
-            className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+            className="flex min-h-[44px] items-center px-1 text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
           >
             Forgot password?
           </Link>
@@ -148,7 +151,7 @@ const LoginPage: React.FC = () => {
           type="submit"
           disabled={isSubmitting}
           whileTap={{ scale: 0.99 }}
-          className="mt-2 flex w-full items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl disabled:opacity-70"
+          className="mt-2 flex min-h-[48px] w-full items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl disabled:opacity-70"
         >
           {isSubmitting ? <InlineLoader label="Signing in..." /> : "Sign in"}
         </motion.button>

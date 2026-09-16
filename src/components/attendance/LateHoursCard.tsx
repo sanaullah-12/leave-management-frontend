@@ -47,9 +47,13 @@ const LateHoursCard: React.FC<Props> = ({
 
   const rows = showAll ? entries : entries.slice(0, previewRows);
 
+/* Column padding halves below `sm` and the table's min-width only applies
+   from `sm` up. Four short columns of clock times fit a 320px screen
+   comfortably; what did not fit was 16px of padding on each side of each of
+   them, which is what forced these tables to scroll sideways on a phone. */
   const head =
-    "whitespace-nowrap border-b border-gray-100 bg-gray-50/70 px-4 py-2.5 text-left text-xs font-semibold text-gray-600 dark:border-gray-700 dark:bg-gray-700/40 dark:text-gray-300";
-  const cell = "border-b border-gray-100 px-4 py-2.5 dark:border-gray-700";
+    "whitespace-nowrap border-b border-gray-100 bg-gray-50/70 px-2.5 py-2.5 sm:px-4 text-left text-xs font-semibold text-gray-600 dark:border-gray-700 dark:bg-gray-700/40 dark:text-gray-300";
+  const cell = "border-b border-gray-100 px-2.5 py-2.5 dark:border-gray-700 sm:px-4";
 
   return (
     <div className={`overflow-hidden ${CARD}`}>
@@ -98,8 +102,8 @@ const LateHoursCard: React.FC<Props> = ({
         </p>
       ) : (
         <>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[460px] border-collapse">
+          <div className="table-scroll">
+            <table className="w-full border-collapse sm:min-w-[460px]">
               <thead>
                 <tr>
                   <th className={head}>Date</th>

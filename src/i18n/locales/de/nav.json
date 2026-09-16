@@ -72,6 +72,7 @@
     "profileSettings": "Profil & Einstellungen",
     "theme": "Design",
     "wfhRequests": "Homeoffice-Anträge",
-    "workFromHome": "Homeoffice"
+    "workFromHome": "Homeoffice",
+    "language": "Sprache"
   }
 }

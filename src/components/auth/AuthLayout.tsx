@@ -34,7 +34,7 @@ const AuthTabs: React.FC<{ activeTab: Tab }> = ({ activeTab }) => {
       <Link
         to={to}
         aria-current={active ? "page" : undefined}
-        className={`relative rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+        className={`relative flex min-h-[40px] items-center rounded-full px-4 py-1.5 text-sm font-medium transition-colors sm:min-h-0 ${
           active
             ? "text-white"
             : "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
@@ -66,10 +66,14 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ activeTab, children }) => {
   const showBrandPanel = useMediaQuery("(min-width: 1024px)");
 
   return (
-    <div className="min-h-screen w-full bg-white dark:bg-gray-950 lg:grid lg:h-screen lg:min-h-0 lg:grid-cols-[1.05fr_1fr] lg:overflow-hidden">
+    <div className="min-h-[100dvh] w-full bg-white dark:bg-gray-950 lg:grid lg:h-screen lg:min-h-0 lg:grid-cols-[1.05fr_1fr] lg:overflow-hidden">
       {showBrandPanel && <AuthBrandPanel />}
 
-      <div className="relative flex min-h-screen flex-col px-6 py-7 sm:px-10 lg:h-screen lg:min-h-0 lg:overflow-y-auto lg:py-8">
+      {/* The auth screens sit outside the app shell, so nothing else is
+          reserving the iPhone safe areas for them: without this the tab pill
+          at the top lands under the status bar. `100dvh` rather than `100vh`
+          so the form is not pushed below the fold by Safari's own chrome. */}
+      <div className="page-safe relative flex min-h-[100dvh] flex-col px-6 py-7 sm:px-10 lg:h-screen lg:min-h-0 lg:overflow-y-auto lg:py-8">
         {/* Whisper of the active theme accent, so the form side reads as part
             of the product rather than as a blank sheet. */}
         <div
@@ -82,7 +86,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ activeTab, children }) => {
         />
 
         <header className="relative flex shrink-0 items-center justify-between gap-4">
-          <Link to="/landing" className="flex items-center gap-2.5 lg:hidden">
+          <Link to="/landing" className="-my-1 flex min-h-[44px] items-center gap-2.5 py-1 lg:hidden">
             <AppLogo size={34} />
             <span className="leading-none">
               <span className="block text-sm font-bold text-gray-900 dark:text-white">

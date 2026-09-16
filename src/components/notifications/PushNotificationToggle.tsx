@@ -37,14 +37,23 @@ import { usePushNotifications } from "../../hooks/usePushNotifications";
  * The explanation is a modal rather than a popover because the hero card is
  * `overflow-hidden`; a dropdown anchored to this button would be clipped by it.
  *
+ * `compact` is the phone banner's version. It keeps the label - dropping it
+ * would recreate the unlabelled bell this component exists not to be - and
+ * shortens it instead, because "Enable notifications" beside the banner's
+ * primary action is wider than a 360px row and wraps onto a line of its own.
+ * The short wording says "alerts", which is what the modal has always called
+ * the thing this button turns on, and which the header bell is not.
+ *
  * None of this is required for notifications to work. It governs the browser
  * copy only - the header bell and the notification centre are fed by Socket.IO
  * and are unaffected by every state below.
  */
 
-const PushNotificationToggle: React.FC<{ className?: string }> = ({
-  className = "",
-}) => {
+const PushNotificationToggle: React.FC<{
+  className?: string;
+  /** Short wording and tighter padding, for a phone's banner row. */
+  compact?: boolean;
+}> = ({ className = "", compact = false }) => {
   const { state, busy, error, isEnabled, isBlocked, isUnavailable, enable, disable, sendTest } =
     usePushNotifications();
 
@@ -57,16 +66,25 @@ const PushNotificationToggle: React.FC<{ className?: string }> = ({
 
   const Icon = isEnabled ? BellAlertIcon : isBlocked ? BellSlashIcon : BellIcon;
 
-  const label = isEnabled
-    ? "Notifications on"
-    : isBlocked
-      ? "Notifications blocked"
-      : "Enable notifications";
+  const label = compact
+    ? isEnabled
+      ? "Alerts on"
+      : isBlocked
+        ? "Alerts blocked"
+        : "Get alerts"
+    : isEnabled
+      ? "Notifications on"
+      : isBlocked
+        ? "Notifications blocked"
+        : "Enable notifications";
 
   // Same shape and weight as the hero's other secondary action, so it reads as
-  // part of the set rather than as an alert bolted onto the card.
-  const base =
-    "inline-flex items-center gap-2 px-3.5 py-2 sm:px-4 rounded-full text-[13px] sm:text-sm font-medium backdrop-blur border transition-colors";
+  // part of the set rather than as an alert bolted onto the card. Compact is
+  // the geometry of `.sh-action` exactly - 2rem tall, the same padding and
+  // type - so the banner's two actions are one size rather than nearly it.
+  const base = compact
+    ? "inline-flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-full text-[13px] font-semibold whitespace-nowrap backdrop-blur border transition-colors"
+    : "inline-flex items-center gap-2 px-3.5 py-2 sm:px-4 rounded-full text-[13px] sm:text-sm font-medium backdrop-blur border transition-colors";
 
   const tone = isEnabled
     ? "text-emerald-700 dark:text-emerald-400 bg-white/80 dark:bg-gray-800/80 border-emerald-300 dark:border-emerald-500/40 hover:bg-emerald-50 dark:hover:bg-emerald-500/10"

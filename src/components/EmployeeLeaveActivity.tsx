@@ -22,12 +22,22 @@ interface EmployeeLeaveActivityProps {
     dateFrom?: string;
     dateTo?: string;
   };
+  /**
+   * "mobile" renders the same list as a phone card: a scrolling chip rail
+   * instead of a pill group, tighter rows, and the detail-sheet card surface.
+   * The query, the year and status filters and the counts are shared with the
+   * page reading, so the two can never disagree about how many requests there
+   * are.
+   */
+  variant?: 'page' | 'mobile';
 }
 
 const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({ 
   employeeId,
   dateFilter,
+  variant = 'page',
 }) => {
+  const phone = variant === 'mobile';
   const [selectedStatus, setSelectedStatus] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
 
@@ -147,12 +157,18 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
       : String(selectedYear);
 
   return (
-    <div className={`overflow-hidden ${CARD}`}>
+    <div
+      className={
+        phone
+          ? 'overflow-hidden rounded-[20px] border border-black/[0.06] bg-[var(--card-surface)] dark:border-white/[0.07]'
+          : `overflow-hidden ${CARD}`
+      }
+    >
       {/* One card, one heading, one filter row. The counts live on the tabs
           that select them, so the five stat tiles that used to sit above this
           list are gone: a tile whose only job is to label a filter is a filter
           with extra furniture. */}
-      <div className="p-6 pb-4">
+      <div className={phone ? 'p-4 pb-3' : 'p-6 pb-4'}>
         <CardHeading
           title="Leave requests"
           sub={`${filteredRequests.length} ${
@@ -167,15 +183,51 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
                   value: String(year),
                   label: String(year),
                 }))}
-                className="min-w-[110px]"
+                className={phone ? 'min-w-[88px]' : 'min-w-[110px]'}
               />
             ) : undefined
           }
         />
 
-        <div className="mt-4 flex w-fit max-w-full flex-wrap gap-1 rounded-full bg-gray-100 p-1 dark:bg-gray-700/50">
+        {/* On a phone the four filters are a scrolling rail rather than a
+            wrapping pill group: four counted words wrap to two rows at 360px,
+            and a filter row that changes height as you tap through it moves
+            the list under your thumb. */}
+        <div
+          className={
+            phone
+              ? 'snap-rail mt-3 gap-1.5'
+              : 'mt-4 flex w-fit max-w-full flex-wrap gap-1 rounded-full bg-gray-100 p-1 dark:bg-gray-700/50'
+          }
+        >
           {STATUS_TABS.map((tab) => {
             const active = selectedStatus === tab.value;
+            if (phone) {
+              return (
+                <button
+                  key={tab.label}
+                  type="button"
+                  onClick={() => setSelectedStatus(tab.value)}
+                  aria-pressed={active}
+                  className={`flex-none whitespace-nowrap rounded-full border px-3 py-1.5 text-[11.5px] transition-colors ${
+                    active
+                      ? 'border-transparent font-semibold'
+                      : 'border-black/[0.06] bg-black/[0.035] text-gray-500 dark:border-white/[0.07] dark:bg-white/[0.05] dark:text-gray-400'
+                  }`}
+                  style={
+                    active
+                      ? {
+                          backgroundColor: 'var(--accent-wash)',
+                          color: 'var(--accent)',
+                        }
+                      : undefined
+                  }
+                >
+                  {tab.label}
+                  <span className="ms-1.5 tabular-nums">{counts[tab.value]}</span>
+                </button>
+              );
+            }
             return (
               <button
                 key={tab.label}
@@ -198,10 +250,21 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
       </div>
 
       {filteredRequests.length > 0 ? (
-        <ul className="divide-y divide-gray-100 dark:divide-gray-700">
+        <ul
+          className={`divide-y divide-gray-100 dark:divide-gray-700 ${
+            phone ? 'max-h-[24rem] overflow-y-auto' : ''
+          }`}
+        >
           {filteredRequests.map((leave: any) => (
-            <li key={leave._id} className="px-6 py-4">
-              <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+            <li key={leave._id} className={phone ? 'px-4 py-3' : 'px-6 py-4'}>
+              {/* No wrap on a phone: the span plus "applied" is long enough to
+                  push the status chip onto its own line, which reads as a
+                  second row and breaks the scan down the right edge. */}
+              <div
+                className={`flex items-start justify-between gap-x-3 gap-y-1 ${
+                  phone ? '' : 'flex-wrap gap-x-4'
+                }`}
+              >
                 <div className="min-w-0">
                   <p className="text-sm font-semibold capitalize text-gray-900 dark:text-gray-100">
                     {leave.leaveType} leave
@@ -226,16 +289,20 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
                 </div>
 
                 <span
-                  className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${statusChip(
-                    leave.status
-                  )}`}
+                  className={`inline-flex shrink-0 items-center rounded-full font-semibold capitalize ${
+                    phone ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-0.5 text-xs'
+                  } ${statusChip(leave.status)}`}
                 >
                   {leave.status}
                 </span>
               </div>
 
               {leave.reason && (
-                <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                <p
+                  className={`mt-1.5 text-gray-600 dark:text-gray-300 ${
+                    phone ? 'text-[12px]' : 'mt-2 text-sm'
+                  }`}
+                >
                   {leave.reason}
                 </p>
               )}
@@ -256,7 +323,11 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
           ))}
         </ul>
       ) : (
-        <div className="px-6 pb-12 pt-4 text-center">
+        <div
+          className={`text-center ${
+            phone ? 'px-4 pb-8 pt-2' : 'px-6 pb-12 pt-4'
+          }`}
+        >
           <CalendarDaysIcon className="mx-auto mb-3 h-8 w-8 text-gray-300 dark:text-gray-600" />
           <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
             No leave requests

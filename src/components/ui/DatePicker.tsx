@@ -97,7 +97,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
     <Popover className={`relative ${className}`}>
       <PopoverButton
         disabled={disabled}
-        className="flex w-full items-center gap-2.5 rounded-full bg-[var(--card-surface)] h-10 px-4 text-left text-sm font-medium text-gray-800 ring-1 ring-inset ring-gray-200/70 transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60 dark:text-gray-100 dark:ring-white/10"
+        className="flex w-full items-center gap-2.5 rounded-full bg-[var(--card-surface)] h-11 sm:h-10 px-4 text-left text-sm font-medium text-gray-800 ring-1 ring-inset ring-gray-200/70 transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60 dark:text-gray-100 dark:ring-white/10"
       >
         <CalendarDaysIcon className="h-4 w-4 flex-shrink-0 text-gray-400" />
         <span className={`flex-1 truncate ${selected ? "" : "text-gray-400"}`}>
@@ -107,7 +107,11 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
       <PopoverPanel
         anchor="bottom start"
-        className="glass-panel z-[110] mt-2 w-[19rem] rounded-2xl p-4 focus:outline-none origin-top transition ease-out data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-150 data-[leave]:duration-100"
+        /* 19rem is 304px, which does not fit inside the gutters of a 320px
+           screen - the calendar was being clipped at its edge on the
+           narrowest phones. It now takes whatever the screen has, down to
+           that. */
+        className="glass-panel z-[110] mt-2 w-[min(19rem,calc(100vw-1.5rem))] rounded-2xl p-3 focus:outline-none origin-top transition ease-out data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-150 data-[leave]:duration-100 sm:p-4"
       >
         {({ close }) => (
           <>
@@ -120,7 +124,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 <button
                   type="button"
                   onClick={() => setView(new Date(year, month - 1, 1))}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm shadow-blue-600/25 transition-transform hover:scale-105"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm shadow-blue-600/25 transition-transform hover:scale-105 active:scale-95 sm:h-8 sm:w-8"
                   aria-label="Previous month"
                 >
                   <ChevronLeftIcon className="h-4 w-4" />
@@ -128,7 +132,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 <button
                   type="button"
                   onClick={() => setView(new Date(year, month + 1, 1))}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm shadow-blue-600/25 transition-transform hover:scale-105"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm shadow-blue-600/25 transition-transform hover:scale-105 active:scale-95 sm:h-8 sm:w-8"
                   aria-label="Next month"
                 >
                   <ChevronRightIcon className="h-4 w-4" />
@@ -166,7 +170,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                       onChange(toISO(d));
                       close();
                     }}
-                    className={`flex h-9 items-center justify-center rounded-full text-sm font-medium transition-colors ${
+                    className={`flex h-11 items-center justify-center rounded-full text-sm font-medium transition-colors sm:h-9 ${
                       isSel
                         ? "bg-blue-600 text-white shadow-sm shadow-blue-600/30"
                         : isToday

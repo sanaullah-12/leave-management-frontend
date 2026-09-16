@@ -118,7 +118,7 @@ const DocumentHistory: React.FC<Props> = ({
       </div>
 
       {/* Table */}
-      <div className="mt-4 overflow-x-auto">
+      <div className="mt-4">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-14 text-center">
             <div className="mb-3 grid h-14 w-14 place-items-center rounded-2xl text-blue-600 dark:text-blue-400">
@@ -134,6 +134,84 @@ const DocumentHistory: React.FC<Props> = ({
             </p>
           </div>
         ) : (
+          <>
+          {/* ---------------- Phones and small tablets ----------------
+              Seven columns need 720px. The document's name and who it is
+              about are what the history is searched for; the template, the
+              author and the date fold into one sub-line, and the four row
+              actions become a visible row rather than something a hover
+              would have revealed if a phone had one. */}
+          <ul className="divide-y divide-gray-100 lg:hidden dark:divide-gray-800">
+            {filtered.map((d) => (
+              <li key={`m-${d.id}`} className="py-3.5">
+                <div className="flex items-start gap-3">
+                  {d.subject ? (
+                    <Avatar name={d.subject.name} size="sm" />
+                  ) : (
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-black/5 text-gray-400 dark:bg-white/10">
+                      <DocumentDuplicateIcon className="h-4 w-4" />
+                    </span>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[14px] font-semibold text-gray-900 dark:text-white">
+                      {d.name}
+                    </p>
+                    <p className="mt-0.5 truncate text-[12px] text-gray-400">
+                      {d.subject ? `${d.subject.name} - ` : ""}
+                      {d.templateName}
+                    </p>
+                    <p className="mt-0.5 truncate text-[11px] text-gray-400">
+                      {fmt(d.createdAt)} by {d.createdBy}
+                      {d.referenceNo ? ` - ${d.referenceNo}` : ""}
+                    </p>
+                  </div>
+                  <span
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${STATUS_STYLE[d.status]}`}
+                  >
+                    {d.status}
+                  </span>
+                </div>
+
+                <div className="mt-2.5 flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => onOpen(d)}
+                    className="flex min-h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl border border-gray-200 text-[13px] font-medium text-gray-600 transition-transform active:scale-[0.98] dark:border-white/10 dark:text-gray-300"
+                  >
+                    <ArrowUpRightIcon className="h-4 w-4" />
+                    Open
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onExport(d)}
+                    aria-label="Download PDF"
+                    className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-gray-200 text-gray-500 transition-transform active:scale-95 dark:border-white/10 dark:text-gray-400"
+                  >
+                    <ArrowDownTrayIcon className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onPrint(d)}
+                    aria-label="Print"
+                    className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-gray-200 text-gray-500 transition-transform active:scale-95 dark:border-white/10 dark:text-gray-400"
+                  >
+                    <PrinterIcon className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onDelete(d)}
+                    aria-label="Delete"
+                    className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-gray-200 text-red-500 transition-transform active:scale-95 dark:border-white/10"
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          {/* ---------------- Desktop ---------------- */}
+          <div className="hidden table-scroll lg:block">
           <table className="w-full min-w-[720px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-gray-200/70 text-left dark:border-gray-700/50">
@@ -235,6 +313,8 @@ const DocumentHistory: React.FC<Props> = ({
               </AnimatePresence>
             </tbody>
           </table>
+          </div>
+          </>
         )}
       </div>
 

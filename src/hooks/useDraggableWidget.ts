@@ -21,7 +21,26 @@ const DRAG_THRESHOLD = 4;
 /** Keep at least this much of the widget on screen. */
 const EDGE_MARGIN = 8;
 
-export function useDraggableWidget(storageKey: string) {
+/** Bands of the viewport the widget must never come to rest inside. */
+export interface KeepClear {
+  top?: number;
+  bottom?: number;
+  left?: number;
+  right?: number;
+}
+
+interface Options {
+  /**
+   * Chrome the widget must stay out of, measured from each viewport edge and
+   * re-read on every clamp so it can follow a breakpoint or a safe-area
+   * change. Without it a widget dragged into the app bar sits on top of the
+   * header's buttons and silently eats every tap aimed at them - the widget
+   * is only 56px, but it is above the whole shell.
+   */
+  keepClear?: () => KeepClear;
+}
+
+export function useDraggableWidget(storageKey: string, options: Options = {}) {
   const containerRef = useRef<HTMLDivElement>(null!);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
@@ -34,22 +53,34 @@ export function useDraggableWidget(storageKey: string) {
   const origin = useRef({ x: 0, y: 0, offsetX: 0, offsetY: 0 });
   const moved = useRef(false);
 
-  /** Nudge the widget back inside the viewport after a drag or a resize. */
+  // Read through a ref so the callbacks below stay stable while the caller is
+  // free to pass a fresh closure on every render.
+  const keepClearRef = useRef(options.keepClear);
+  keepClearRef.current = options.keepClear;
+
+  /** Nudge the widget back inside the allowed area after a drag or a resize. */
   const clampIntoView = useCallback(() => {
     const el = containerRef.current;
     if (!el) return;
+
+    const clear = keepClearRef.current?.() ?? {};
+    const minX = EDGE_MARGIN + (clear.left ?? 0);
+    const maxX = window.innerWidth - EDGE_MARGIN - (clear.right ?? 0);
+    const minY = EDGE_MARGIN + (clear.top ?? 0);
+    const maxY = window.innerHeight - EDGE_MARGIN - (clear.bottom ?? 0);
 
     const rect = el.getBoundingClientRect();
     let dx = 0;
     let dy = 0;
 
-    if (rect.left < EDGE_MARGIN) dx = EDGE_MARGIN - rect.left;
-    else if (rect.right > window.innerWidth - EDGE_MARGIN)
-      dx = window.innerWidth - EDGE_MARGIN - rect.right;
+    if (rect.left < minX) dx = minX - rect.left;
+    else if (rect.right > maxX) dx = maxX - rect.right;
 
-    if (rect.top < EDGE_MARGIN) dy = EDGE_MARGIN - rect.top;
-    else if (rect.bottom > window.innerHeight - EDGE_MARGIN)
-      dy = window.innerHeight - EDGE_MARGIN - rect.bottom;
+    // On a short screen the two bands can overlap; keeping the top edge
+    // authoritative means the widget is pushed below the app bar rather than
+    // wedged under it.
+    if (rect.bottom > maxY) dy = maxY - rect.bottom;
+    if (rect.top + dy < minY) dy = minY - rect.top;
 
     if (dx || dy) {
       setOffset((current) => ({ x: current.x + dx, y: current.y + dy }));
@@ -69,8 +100,13 @@ export function useDraggableWidget(storageKey: string) {
     } catch {
       // A blocked or corrupt store just means the default position.
     }
-    const id = requestAnimationFrame(clampIntoView);
-    return () => cancelAnimationFrame(id);
+    // After the 160ms settle transition, not on the next frame: the clamp
+    // measures the element, and mid-transition it would measure a position the
+    // widget is only passing through. The wait also lets a position saved
+    // against older chrome - or a larger screen - be corrected on load rather
+    // than only after the next drag.
+    const id = window.setTimeout(clampIntoView, 220);
+    return () => window.clearTimeout(id);
   }, [storageKey, clampIntoView]);
 
   useEffect(() => {

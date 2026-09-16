@@ -92,7 +92,14 @@ const NotificationBell: React.FC<{ compact?: boolean }> = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.97 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="glass-panel absolute right-0 z-50 mt-2 w-[22rem] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl"
+            /* On a phone the panel is pinned to the screen rather than hung
+               off the bell. Anchored to the button it opened leftward from a
+               point ~60px in from the right edge, so a 22rem panel ran off
+               the left of a 375px screen entirely - and the only reason it
+               was not visibly broken is that the page clips its overflow.
+               Pinned under the app bar it gets the full width, which the
+               list wanted anyway. From `sm` up it is the popover it was. */
+            className="glass-panel fixed inset-x-3 top-[calc(var(--app-bar-h)+var(--safe-top)+0.5rem)] z-50 overflow-hidden rounded-2xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:w-[22rem] sm:max-w-[calc(100vw-2rem)]"
           >
             <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-gray-800">
               <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
@@ -108,7 +115,7 @@ const NotificationBell: React.FC<{ compact?: boolean }> = ({
               )}
             </div>
 
-            <div className="max-h-[24rem] overflow-y-auto">
+            <div className="scroll-pane max-h-[min(24rem,60dvh)]">
               {notifications.length === 0 ? (
                 <div className="py-10 text-center">
                   <BellIcon className="mx-auto h-8 w-8 text-gray-300 dark:text-gray-600" />
@@ -122,7 +129,7 @@ const NotificationBell: React.FC<{ compact?: boolean }> = ({
                     <button
                       key={n._id}
                       onClick={() => handleOpen(n)}
-                      className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/60 ${
+                      className={`press-scale flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/60 ${
                         !n.read ? "bg-blue-50/40 dark:bg-blue-500/5" : ""
                       }`}
                     >
@@ -160,7 +167,7 @@ const NotificationBell: React.FC<{ compact?: boolean }> = ({
                 setOpen(false);
                 navigate("/notifications");
               }}
-              className="block w-full border-t border-gray-100 py-2.5 text-center text-xs font-medium text-blue-600 hover:bg-gray-50 dark:border-gray-800 dark:text-blue-400 dark:hover:bg-gray-800/60"
+              className="block w-full border-t border-gray-100 py-3.5 text-center text-xs font-medium text-blue-600 hover:bg-gray-50 dark:border-gray-800 dark:text-blue-400 dark:hover:bg-gray-800/60 sm:py-2.5"
             >
               View all notifications
             </button>

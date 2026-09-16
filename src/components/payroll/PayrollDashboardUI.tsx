@@ -9,6 +9,7 @@
  * accent arrives as a hex because SVG cannot read the themed CSS classes.
  */
 import React from "react";
+import { MorphTabs } from "../ui/MorphTabs";
 import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
@@ -150,25 +151,18 @@ export const RangeTabs: React.FC<{
   value: number;
   onChange: (months: number) => void;
 }> = ({ options, value, onChange }) => (
-  <div className="inline-flex rounded-lg bg-gray-100 p-0.5 dark:bg-gray-700/50">
-    {options.map((o) => {
-      const active = o.months === value;
-      return (
-        <button
-          key={o.label}
-          type="button"
-          onClick={() => onChange(o.months)}
-          className={`rounded-full px-2.5 py-1 text-xs font-semibold transition-colors ${
-            active
-              ? "bg-white text-gray-900 shadow-sm dark:bg-gray-900 dark:text-white"
-              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          }`}
-        >
-          {o.label}
-        </button>
-      );
-    })}
-  </div>
+  // Keyed by label rather than months: MorphTabs works in strings so the
+  // travelling pill has a stable identity per option.
+  <MorphTabs
+    variant="inline"
+    ariaLabel="Trend window"
+    value={options.find((o) => o.months === value)?.label ?? options[0].label}
+    onChange={(label) => {
+      const picked = options.find((o) => o.label === label);
+      if (picked) onChange(picked.months);
+    }}
+    options={options.map((o) => ({ value: o.label, label: o.label }))}
+  />
 );
 
 /* ------------------------------------------------------------------ */

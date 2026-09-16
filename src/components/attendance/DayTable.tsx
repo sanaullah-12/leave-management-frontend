@@ -18,6 +18,13 @@ import { CARD } from "../../lib/surfaces";
  *
  * A weekend is listed but never counted as absent: the office was shut, so a
  * missing punch there says nothing about the person.
+ *
+ * Below `lg` the same days render as rows in a list rather than as a table.
+ * Five columns need 620px; on a phone that put Status - the column the whole
+ * table is scanned for - off the right edge, so the answer to "how did my week
+ * go" required a sideways scroll on every row. The list keeps the date on the
+ * left and the status on the right, which is the comparison being made, and
+ * folds arrival and lateness into one line between them.
  */
 
 export interface DayRow {
@@ -87,8 +94,8 @@ const DayTable: React.FC<Props> = ({
 
   return (
     <div className={`overflow-hidden ${CARD}`}>
-      <div className="flex items-center justify-between border-b border-gray-200/70 px-4 py-3 dark:border-gray-700">
-        <div>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200/70 px-4 py-3 dark:border-gray-700">
+        <div className="min-w-0">
           <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
             {statusFilter ? `${statusFilter} days` : "Day by day"}
           </p>
@@ -96,7 +103,7 @@ const DayTable: React.FC<Props> = ({
             Open a day to see everything recorded for it
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {!loading && rows.length > 0 && (
             <span className="text-xs text-gray-400">
               {rows.length} day{rows.length === 1 ? "" : "s"}
@@ -124,7 +131,73 @@ const DayTable: React.FC<Props> = ({
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* ---------------- Phones and small tablets ---------------- */}
+      <div className="lg:hidden">
+        {loading ? (
+          <div className="divide-y divide-gray-100 dark:divide-gray-700/60">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="px-4 py-3.5">
+                <div className="h-9 animate-pulse rounded bg-gray-100 dark:bg-gray-700" />
+              </div>
+            ))}
+          </div>
+        ) : pageRows.length === 0 ? (
+          <div className="px-6 py-10 text-center">
+            <p className="text-[15px] font-semibold text-gray-900 dark:text-gray-100">
+              {statusFilter
+                ? `No ${statusFilter.toLowerCase()} days in this range.`
+                : "No days to show."}
+            </p>
+            <p className="mx-auto mt-1.5 max-w-[17rem] text-[13px] leading-relaxed text-gray-500 dark:text-gray-400">
+              {statusFilter
+                ? "Clear the filter to see every day."
+                : emptyMessage || "Press Fetch attendance to load your record."}
+            </p>
+          </div>
+        ) : (
+          <ul className="divide-y divide-gray-100 dark:divide-gray-700/60">
+            {pageRows.map((row) => (
+              <li key={row.date}>
+                <button
+                  type="button"
+                  onClick={() => onSelect(row)}
+                  className={`press-scale flex w-full items-center gap-3 px-4 py-3 text-start ${
+                    row.isWeekend ? "bg-gray-50/60 dark:bg-white/[0.02]" : ""
+                  }`}
+                >
+                  {/* The date as a calendar tile: on a list of twenty days the
+                      day number is what the eye lands on, and a tile gives it
+                      a fixed position every row rather than a position that
+                      moves with the length of the month name. */}
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-gray-200 bg-black/[0.02] leading-none dark:border-white/10 dark:bg-white/[0.04]">
+                    <span className="text-[15px] font-bold tabular-nums text-gray-900 dark:text-white">
+                      {row.dateDisplay.match(/\d+/)?.[0] ?? ""}
+                    </span>
+                    <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-gray-400">
+                      {row.weekday.slice(0, 3)}
+                    </span>
+                  </span>
+
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[14px] font-semibold text-gray-900 dark:text-gray-100">
+                      {row.dateDisplay}
+                    </span>
+                    <span className="mt-0.5 block truncate text-[12px] text-gray-500 dark:text-gray-400">
+                      {row.arrival ? `In ${row.arrival}` : "No punch"}
+                      {row.lateDisplay ? ` - ${row.lateDisplay} late` : ""}
+                    </span>
+                  </span>
+
+                  <StatusBadge status={row.status} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* ---------------- Desktop ---------------- */}
+      <div className="hidden table-scroll lg:block">
         <table className="w-full min-w-[620px] border-collapse">
           <thead>
             <tr>
@@ -217,32 +290,32 @@ const DayTable: React.FC<Props> = ({
       </div>
 
       {!loading && rows.length > PAGE_SIZE && (
-        <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3 dark:border-gray-700">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 px-4 py-2.5 dark:border-gray-700">
           <p className="text-xs text-gray-500 dark:text-gray-400">
             Showing {(safePage - 1) * PAGE_SIZE + 1} to{" "}
             {Math.min(safePage * PAGE_SIZE, rows.length)} of {rows.length} days
           </p>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <button
               type="button"
               disabled={safePage === 1}
               onClick={() => setPage(safePage - 1)}
               aria-label="Previous page"
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-transform active:scale-90 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300 sm:h-8 sm:w-8"
             >
-              <ChevronLeftIcon className="h-4 w-4" />
+              <ChevronLeftIcon className="h-4 w-4 rtl:-scale-x-100" />
             </button>
-            <span className="px-2 text-xs font-medium text-gray-700 dark:text-gray-200">
-              Page {safePage} of {totalPages}
+            <span className="px-1.5 text-xs font-medium tabular-nums text-gray-700 dark:text-gray-200">
+              {safePage} / {totalPages}
             </span>
             <button
               type="button"
               disabled={safePage === totalPages}
               onClick={() => setPage(safePage + 1)}
               aria-label="Next page"
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-transform active:scale-90 disabled:opacity-40 dark:border-gray-600 dark:text-gray-300 sm:h-8 sm:w-8"
             >
-              <ChevronRightIcon className="h-4 w-4" />
+              <ChevronRightIcon className="h-4 w-4 rtl:-scale-x-100" />
             </button>
           </div>
         </div>

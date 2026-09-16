@@ -54,9 +54,13 @@ const LateHoursOverview: React.FC<Props> = ({
 
   const rows = showAllEmployees ? employees : employees.slice(0, PREVIEW_ROWS);
 
+/* Column padding halves below `sm` and the table's min-width only applies
+   from `sm` up. Four short columns of clock times fit a 320px screen
+   comfortably; what did not fit was 16px of padding on each side of each of
+   them, which is what forced these tables to scroll sideways on a phone. */
   const head =
-    "whitespace-nowrap border-b border-gray-100 bg-gray-50/70 px-4 py-2.5 text-left text-xs font-semibold text-gray-600 dark:border-gray-700 dark:bg-gray-700/40 dark:text-gray-300";
-  const cell = "border-b border-gray-100 px-4 py-2.5 dark:border-gray-700";
+    "whitespace-nowrap border-b border-gray-100 bg-gray-50/70 px-2.5 py-2.5 sm:px-4 text-left text-xs font-semibold text-gray-600 dark:border-gray-700 dark:bg-gray-700/40 dark:text-gray-300";
+  const cell = "border-b border-gray-100 px-2.5 py-2.5 dark:border-gray-700 sm:px-4";
 
   /**
    * What to call the person a device ID belongs to.
@@ -132,8 +136,8 @@ const LateHoursOverview: React.FC<Props> = ({
         <>
           {/* Who. The caller decides the order - the Late Time page sorts by
               employee ID so a supervisor can look somebody up. */}
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[460px] border-collapse">
+          <div className="table-scroll">
+            <table className="w-full border-collapse sm:min-w-[460px]">
               <thead>
                 <tr>
                   <th className={head}>Employee</th>
@@ -216,13 +220,16 @@ const LateHoursOverview: React.FC<Props> = ({
               <p className="px-4 pb-2 pt-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
                 Recent late entries
               </p>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[520px] border-collapse">
+              <div className="table-scroll">
+                <table className="w-full border-collapse sm:min-w-[520px]">
                   <thead>
                     <tr>
                       <th className={head}>Date</th>
                       <th className={head}>Employee</th>
-                      <th className={head}>Expected</th>
+                      {/* Five columns is one too many for a 320px screen, and
+                          the expected time is the same for every row in the
+                          range. */}
+                      <th className={`${head} hidden sm:table-cell`}>Expected</th>
                       <th className={head}>Punch in</th>
                       <th className={`${head} text-right`}>Late</th>
                     </tr>
@@ -241,7 +248,7 @@ const LateHoursOverview: React.FC<Props> = ({
                           {nameOf(entry)}
                         </td>
                         <td
-                          className={`${cell} font-mono text-sm text-gray-600 dark:text-gray-300`}
+                          className={`${cell} hidden font-mono text-sm text-gray-600 dark:text-gray-300 sm:table-cell`}
                         >
                           {entry.expected}
                         </td>

@@ -65,13 +65,35 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
   }, [open, closePanel]);
 
   /* On phones the panel is a full-screen sheet, so the page behind it must
-     not scroll underneath. Desktop keeps the app usable alongside it. */
+     not scroll underneath. Desktop keeps the app usable alongside it.
+
+     iOS ignores `overflow: hidden` on <body> once a touch scroll is already
+     in flight, so the page is pinned by position instead and its scroll offset
+     restored on close - otherwise closing the sheet dumped the user back at
+     the top of whatever screen they were on. */
   useEffect(() => {
     if (!open || window.innerWidth >= MOBILE_BREAKPOINT) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+
+    const { body } = document;
+    const scrollY = window.scrollY;
+    const previous = {
+      position: body.style.position,
+      top: body.style.top,
+      width: body.style.width,
+      overflow: body.style.overflow,
+    };
+
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
+
     return () => {
-      document.body.style.overflow = previous;
+      body.style.position = previous.position;
+      body.style.top = previous.top;
+      body.style.width = previous.width;
+      body.style.overflow = previous.overflow;
+      window.scrollTo(0, scrollY);
     };
   }, [open]);
 
@@ -98,20 +120,24 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
     ask(question, entryId);
 
   return createPortal(
+    /* Both surfaces are keyed and sit directly under AnimatePresence. Wrapped
+       in a fragment they were one untracked child, so neither ran its exit
+       animation and the scrim could be left behind over the app. */
     <AnimatePresence>
-      {open && (
-        <>
-          {/* Scrim: mobile only. On desktop the panel is a companion to the
-              page, not a modal - the app stays visible and clickable. */}
+      {open && [
+          /* Scrim: mobile only. On desktop the panel is a companion to the
+             page, not a modal - the app stays visible and clickable. */
           <motion.div
+            key="assistant-scrim"
             className="fixed inset-0 z-[85] bg-gray-900/40 backdrop-blur-sm sm:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closePanel}
-          />
+          />,
 
           <motion.section
+            key="assistant-panel"
             role="dialog"
             aria-label={STRINGS.name}
             initial={reduce ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.97 }}
@@ -120,16 +146,23 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
             transition={{ type: "spring", stiffness: 320, damping: 30 }}
             style={{ transformOrigin: "bottom right" }}
             className={
-              "fixed z-[90] flex flex-col overflow-hidden border border-gray-200/80 bg-gray-50/95 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-gray-900/95 " +
-              // Mobile: a sheet filling the screen. Desktop: a card sitting
-              // just above the launcher.
+              "fixed z-[90] flex flex-col overflow-hidden border-gray-200/80 bg-gray-50/95 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-gray-900/95 " +
+              // Mobile: a sheet filling the screen - no border, because there
+              // is no edge for one to sit on. Desktop: a card sitting just
+              // above the launcher.
               "inset-x-0 bottom-0 top-0 rounded-none " +
-              "sm:inset-auto sm:bottom-24 sm:end-6 sm:top-auto sm:h-[min(38rem,calc(100vh-8rem))] sm:w-[24.5rem] sm:rounded-3xl"
+              "sm:inset-auto sm:bottom-24 sm:end-6 sm:top-auto sm:h-[min(38rem,calc(100vh-8rem))] sm:w-[24.5rem] sm:rounded-3xl sm:border"
             }
           >
             {/* ---------------- Header ---------------- */}
+            {/* The sheet starts at y=0, so on a notched iPhone the header was
+                drawn inside the status bar: the close and reset buttons were
+                sitting in the strip iOS keeps for itself and tapping them did
+                nothing, which left the assistant with no way out. The insets
+                are reserved on the sheet layout only - the desktop card floats
+                clear of every edge and must not inherit them. */}
             <header
-              className="flex items-center gap-3 border-b border-black/5 px-4 py-3.5 dark:border-white/10"
+              className="flex items-center gap-3 border-b border-black/5 px-[max(1rem,var(--safe-left))] pb-3.5 pt-[calc(0.875rem+var(--safe-top))] dark:border-white/10 sm:px-4 sm:pt-3.5"
               style={{ backgroundColor: "var(--accent-wash)" }}
             >
               <span className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-2xl text-blue-600 dark:text-blue-400">
@@ -151,7 +184,7 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
                   onClick={reset}
                   title={STRINGS.resetLabel}
                   aria-label={STRINGS.resetLabel}
-                  className="grid h-8 w-8 place-items-center rounded-full text-gray-500 transition-colors hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
+                  className="grid h-11 w-11 flex-shrink-0 place-items-center rounded-full text-gray-500 transition-colors hover:bg-black/5 hover:text-gray-900 active:bg-black/10 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white dark:active:bg-white/20 sm:h-8 sm:w-8"
                 >
                   <ArrowPathIcon className="h-4 w-4" />
                 </button>
@@ -160,7 +193,9 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
                 type="button"
                 onClick={closePanel}
                 aria-label={STRINGS.closeLabel}
-                className="grid h-8 w-8 place-items-center rounded-full text-gray-500 transition-colors hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white"
+                /* 44px on touch, back to 32px next to a mouse. -me-1 keeps the
+                   grown target optically aligned with the sheet's edge. */
+                className="-me-1 grid h-11 w-11 flex-shrink-0 place-items-center rounded-full text-gray-500 transition-colors hover:bg-black/5 hover:text-gray-900 active:bg-black/10 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-white dark:active:bg-white/20 sm:me-0 sm:h-8 sm:w-8"
               >
                 <XMarkIcon className="h-5 w-5" />
               </button>
@@ -169,7 +204,7 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
             {/* ---------------- Transcript ---------------- */}
             <div
               ref={scrollRef}
-              className="flex-1 space-y-3 overflow-y-auto px-4 py-4"
+              className="scroll-pane flex-1 space-y-3 px-[max(1rem,var(--safe-left))] py-4 sm:px-4"
             >
               {messages.length === 0 && (
                 <motion.div
@@ -265,9 +300,13 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
             </div>
 
             {/* ---------------- Composer ---------------- */}
+            {/* The keyboard does not resize the viewport on iOS, so without the
+                inset the field being typed into ends up behind it. --safe-bottom
+                clears the home indicator on the full-screen sheet; the desktop
+                card sits well above both. */}
             <form
               onSubmit={submit}
-              className="flex items-center gap-2 border-t border-black/5 bg-white/80 px-3 py-3 dark:border-white/10 dark:bg-gray-900/70"
+              className="flex items-center gap-2 border-t border-black/5 bg-white/80 px-[max(0.75rem,var(--safe-left))] pb-[calc(0.75rem+var(--safe-bottom)+var(--keyboard-inset))] pt-3 dark:border-white/10 dark:bg-gray-900/70 sm:px-3 sm:pb-3"
             >
               <Input
                 ref={inputRef}
@@ -287,9 +326,8 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
                 <PaperAirplaneIcon className="h-5 w-5 rtl:-scale-x-100" />
               </button>
             </form>
-          </motion.section>
-        </>
-      )}
+          </motion.section>,
+        ]}
     </AnimatePresence>,
     document.body
   );

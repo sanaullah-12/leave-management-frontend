@@ -89,7 +89,7 @@ const RegisterPage: React.FC = () => {
             type="button"
             whileTap={{ scale: 0.97 }}
             onClick={() => handleSSO(name)}
-            className="inline-flex items-center justify-center gap-2.5 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="inline-flex min-h-[44px] items-center justify-center gap-2.5 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 px-3 py-2 sm:min-h-0 sm:px-3.5 text-[13px] sm:text-sm font-medium text-gray-700 dark:text-gray-200 shadow-sm transition-all hover:bg-gray-50 dark:hover:bg-gray-800"
           >
             <Icon className="h-5 w-5" />
             {name}
@@ -214,7 +214,7 @@ const RegisterPage: React.FC = () => {
           type="submit"
           disabled={isSubmitting}
           whileTap={{ scale: 0.99 }}
-          className="mt-2 flex w-full items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl disabled:opacity-70"
+          className="mt-2 flex min-h-[48px] w-full items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl disabled:opacity-70"
         >
           {isSubmitting ? (
             <InlineLoader label="Creating workspace..." />

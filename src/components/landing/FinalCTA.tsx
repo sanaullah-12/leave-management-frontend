@@ -111,7 +111,7 @@ export const LandingFooter: React.FC = () => (
           </p>
           <div className="mt-5 flex gap-2.5">
             {["M22 12a10 10 0 10-11.5 9.9v-7h-2.5V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0022 12z", "M23 5a8 8 0 01-2.4.7A4 4 0 0022.4 3a8 8 0 01-2.6 1A4 4 0 0013 7.7 11 11 0 013 3.6a4 4 0 001.2 5.3A4 4 0 012.4 8.4a4 4 0 003.2 4 4 4 0 01-1.8.1 4 4 0 003.7 2.8A8 8 0 012 17.5a11 11 0 006 1.8c7.2 0 11.2-6 11.2-11.2v-.5A8 8 0 0023 5z", "M16 8a6 6 0 016 6v6h-4v-6a2 2 0 00-4 0v6h-4v-6a6 6 0 016-6zM6 9H2v11h4zM4 3a2 2 0 100 4 2 2 0 000-4z"].map((d, i) => (
-              <a key={i} href="#" className="grid h-9 w-9 place-items-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:border-blue-300 hover:text-blue-600 dark:border-white/10 dark:text-gray-400">
+              <a key={i} href="#" className="grid h-11 w-11 place-items-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:border-blue-300 hover:text-blue-600 dark:border-white/10 dark:text-gray-400 sm:h-9 sm:w-9">
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d={d} /></svg>
               </a>
             ))}
@@ -123,7 +123,15 @@ export const LandingFooter: React.FC = () => (
             <ul className="mt-4 space-y-2.5">
               {col.links.map((l) => (
                 <li key={l}>
-                  <a href="#" className="text-secondary text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">{l}</a>
+                  <a
+                    href="#"
+                    /* Footer links are stacked in a column, so vertical padding
+                       is the whole hit area - without it they are 17px tall
+                       and three of them fall inside one thumb. */
+                    className="text-secondary inline-flex min-h-[40px] items-center text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white sm:min-h-0"
+                  >
+                    {l}
+                  </a>
                 </li>
               ))}
             </ul>

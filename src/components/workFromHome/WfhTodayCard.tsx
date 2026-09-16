@@ -10,6 +10,7 @@ import {
   ListBulletIcon,
 } from "@heroicons/react/24/outline";
 import { CARD } from "../../lib/surfaces";
+import { useMediaQuery } from "../../hooks/useMediaQuery";
 import { AccentEdge } from "../ui/CardAccents";
 import { useThemeAccent } from "../../hooks/useThemeAccent";
 import WfhSessionStatusBadge from "./WfhSessionStatusBadge";
@@ -55,6 +56,9 @@ import { requestDesktopNotices } from "../../services/desktopNotifications";
 
 const WfhTodayCard: React.FC = () => {
   const accent = useThemeAccent(600);
+  // Drives the one piece of layout that differs by screen: whether the privacy
+  // note starts folded. See the note beside the <details> below.
+  const isPhone = useMediaQuery("(max-width: 639px)");
   const accentSoft = useThemeAccent(400);
   const { data, isLoading } = useWfhToday();
   const actions = useWfhSessionActions();
@@ -206,7 +210,7 @@ const WfhTodayCard: React.FC = () => {
             ? run(actions.pause, "Work session paused")
             : run(actions.resume, "Work session resumed")
         }
-        className="grid h-10 w-10 place-items-center rounded-full border border-gray-200 text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-white/15 dark:text-gray-100 dark:hover:bg-white/10"
+        className="grid h-11 w-11 place-items-center rounded-full border border-gray-200 text-gray-700 transition-[background-color,transform] hover:bg-gray-50 active:scale-95 disabled:opacity-50 dark:border-white/15 dark:text-gray-100 dark:hover:bg-white/10"
       >
         {busy ? (
           <ArrowPathIcon className="h-4 w-4 animate-spin" />
@@ -299,14 +303,14 @@ const WfhTodayCard: React.FC = () => {
               the way into the task list - the same arrangement as the reference
               this card is built to: a control for the clock, and a control for
               everything around it. */}
-          <div className="mt-5 flex items-center gap-3">
+          <div className="mt-5 flex items-stretch gap-2.5 sm:gap-3">
             {status !== "not_started" && (
               <button
                 type="button"
                 aria-expanded={showPanel}
                 aria-label="Tasks"
                 onClick={() => setTasksOpen(!showPanel)}
-                className={`relative grid h-11 w-11 shrink-0 place-items-center rounded-full border transition-colors ${
+                className={`relative grid h-12 w-12 shrink-0 place-items-center rounded-full border transition-colors active:scale-95 sm:h-11 sm:w-11 ${
                   showPanel
                     ? "border-transparent bg-gray-900 text-white dark:bg-white dark:text-gray-900"
                     : "border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-white/15 dark:text-gray-300 dark:hover:bg-white/5"
@@ -326,7 +330,7 @@ const WfhTodayCard: React.FC = () => {
                 type="button"
                 disabled={busy || !data?.eligible}
                 onClick={startWork}
-                className="flex flex-1 items-center justify-center gap-2 rounded-full bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-full bg-blue-600 px-4 py-3 text-[15px] font-semibold text-white transition-[background-color,transform] hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0 sm:text-sm"
               >
                 {actions.start.isPending ? (
                   <ArrowPathIcon className="h-4 w-4 animate-spin" />
@@ -340,7 +344,7 @@ const WfhTodayCard: React.FC = () => {
                 type="button"
                 disabled={busy}
                 onClick={() => run(actions.finish, "Work session completed")}
-                className="flex flex-1 items-center justify-center gap-2 rounded-full bg-gray-100 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:bg-white/15"
+                className="flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-full bg-gray-100 px-4 py-3 text-[15px] font-semibold uppercase tracking-wide text-gray-700 transition-[background-color,transform] hover:bg-gray-200 active:scale-[0.98] disabled:opacity-50 dark:bg-white/10 dark:text-gray-100 dark:hover:bg-white/15 sm:min-h-0 sm:text-sm"
               >
                 {actions.finish.isPending ? (
                   <ArrowPathIcon className="h-4 w-4 animate-spin" />
@@ -400,18 +404,28 @@ const WfhTodayCard: React.FC = () => {
       )}
 
       {/* What is and is not being watched. Said on the card rather than in a
-          policy document, because this is where the question occurs to people. */}
-      <p className="mt-4 flex items-start gap-2 text-[11px] leading-relaxed text-gray-400 dark:text-gray-500">
-        <ShieldCheckIcon className="mt-px h-3.5 w-3.5 shrink-0" />
-        <span>
+          policy document, because this is where the question occurs to people.
+
+          Folded on a phone, open on desktop. Six lines of 11px grey directly
+          under the day's only control is most of a thumb's reach spent on text
+          that is read once and then never again - but it has to stay one tap
+          away, because "is this watching me" is the question this card raises
+          and a link to a policy page is not an answer. `open` on the desktop
+          instance rather than a second copy of the words. */}
+      <details className="mt-4" open={!isPhone}>
+        <summary className="flex cursor-pointer list-none items-center gap-2 py-1 text-[11px] font-medium text-gray-400 marker:hidden dark:text-gray-500 [&::-webkit-details-marker]:hidden">
+          <ShieldCheckIcon className="h-3.5 w-3.5 shrink-0" />
+          What this page checks while the timer runs
+        </summary>
+        <p className="mt-1.5 ps-[1.375rem] text-[11px] leading-relaxed text-gray-400 dark:text-gray-500">
           While the timer runs, this page checks only whether your mouse or
           keyboard is being used, to pause after{" "}
           {config?.idleTimeoutMinutes ?? 5} minutes without it. A screen that is
           on, an open tab or a video playing does not count as activity. No
           screenshots, keystrokes, mouse positions or content are recorded - only
           that an interaction happened. All times are recorded by the server.
-        </span>
-      </p>
+        </p>
+      </details>
     </section>
   );
 };

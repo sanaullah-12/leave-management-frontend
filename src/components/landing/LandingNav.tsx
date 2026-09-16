@@ -84,17 +84,19 @@ const LandingNav: React.FC = () => {
       initial={reduce ? undefined : { y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: EASE }}
-      className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-3 sm:pt-4"
+      /* pt-safe keeps the floating nav below the iPhone status bar; it
+         resolves to 0 in a desktop browser. */
+      className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-[calc(0.75rem+var(--safe-top))] sm:pt-[calc(1rem+var(--safe-top))]"
     >
       <nav
         className={
-          "flex w-full max-w-6xl items-center justify-between rounded-2xl px-4 py-2.5 transition-all duration-300 sm:px-5 " +
+          "flex w-full max-w-6xl items-center justify-between gap-2 rounded-2xl px-3 py-2.5 transition-all duration-300 sm:px-5 " +
           (scrolled
             ? "border border-gray-200/70 bg-white/80 shadow-lg shadow-gray-900/5 backdrop-blur-xl dark:border-white/10 dark:bg-[#0f1420]/80"
             : "border border-transparent bg-transparent")
         }
       >
-        <Link to="/landing" className="flex items-center gap-2.5">
+        <Link to="/landing" className="flex min-w-0 shrink items-center gap-2 sm:gap-2.5">
           <AppLogo size={30} />
           <div className="leading-none">
             <span className="block text-[1.05rem] font-bold tracking-tight text-gray-900 dark:text-white">
@@ -115,8 +117,17 @@ const LandingNav: React.FC = () => {
           ))}
         </div>
 
-        <div className="flex items-center gap-1 sm:gap-2">
-          <ThemeToggle />
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          {/* The theme switch moves into the menu below `sm`.
+              The bar carries a wordmark, a theme switch, log in, the primary
+              CTA and a menu button; on a 320px screen that is 372px of
+              content in a 320px bar, and the CTA - the one thing the page
+              exists to get tapped - was the part pushed off the edge. The
+              switch is the only item here that is a preference rather than a
+              destination, so it is the one that moves. */}
+          <span className="hidden sm:block">
+            <ThemeToggle />
+          </span>
           {/* Log in is unconditional and always mounted.
               It was previously gated behind isKnownUser(), so anyone arriving
               for the first time - which is every prospective customer - had no
@@ -129,7 +140,7 @@ const LandingNav: React.FC = () => {
           <Link
             to="/login"
             aria-label="Log in to Nexora"
-            className="group grid h-9 shrink-0 place-items-center rounded-full px-2.5 text-nav font-medium text-gray-700 transition-colors hover:bg-gray-100/70 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/30 active:scale-[0.97] dark:text-gray-200 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:ring-white/40 sm:px-3.5"
+            className="group grid h-10 shrink-0 place-items-center rounded-full px-2.5 text-nav font-medium sm:h-9 text-gray-700 transition-colors hover:bg-gray-100/70 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/30 active:scale-[0.97] dark:text-gray-200 dark:hover:bg-white/5 dark:hover:text-white dark:focus-visible:ring-white/40 sm:px-3.5"
           >
             <svg
               className="h-[18px] w-[18px] sm:hidden"
@@ -148,7 +159,7 @@ const LandingNav: React.FC = () => {
           <Magnetic strength={0.35}>
             <button
               onClick={() => setContactOpen(true)}
-              className="group relative inline-flex items-center gap-1.5 overflow-hidden whitespace-nowrap rounded-full bg-gray-900 px-3 py-2 text-nav font-semibold text-white shadow-sm transition-shadow hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/40 dark:bg-white dark:text-gray-900 dark:focus-visible:ring-white/40 sm:px-4"
+              className="group relative inline-flex min-h-[40px] items-center gap-1.5 overflow-hidden whitespace-nowrap rounded-full bg-gray-900 px-3 py-2 text-nav font-semibold sm:min-h-0 text-white shadow-sm transition-shadow hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/40 dark:bg-white dark:text-gray-900 dark:focus-visible:ring-white/40 sm:px-4"
             >
               <span className="relative z-10">Start free</span>
               <svg className="relative z-10 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
@@ -156,7 +167,7 @@ const LandingNav: React.FC = () => {
           </Magnetic>
           <button
             onClick={() => setOpen((v) => !v)}
-            className="grid h-9 w-9 place-items-center rounded-full text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/5 lg:hidden"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-gray-700 transition-transform active:scale-90 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/5 lg:hidden"
             aria-label="Menu"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d={open ? "M6 6l12 12M18 6L6 18" : "M4 7h16M4 12h16M4 17h16"} /></svg>
@@ -177,11 +188,19 @@ const LandingNav: React.FC = () => {
                 key={n.l}
                 href={n.href}
                 onClick={() => setOpen(false)}
-                className="block rounded-lg px-3 py-2.5 text-nav text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/5"
+                className="block rounded-lg px-3 py-3 text-nav text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-white/5"
               >
                 {n.l}
               </a>
             ))}
+
+            {/* The theme switch the bar gives up below `sm`. */}
+            <div className="mt-1 flex items-center justify-between rounded-lg px-3 py-2 sm:hidden">
+              <span className="text-nav text-gray-700 dark:text-gray-200">
+                Appearance
+              </span>
+              <ThemeToggle />
+            </div>
 
             {/* Also offered here with a full label. The header keeps an
                 always-visible icon, but a labelled row is easier to find for
@@ -190,7 +209,7 @@ const LandingNav: React.FC = () => {
             <Link
               to="/login"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 rounded-full px-3 py-2.5 text-nav font-semibold text-gray-900 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/30 dark:text-white dark:hover:bg-white/5 dark:focus-visible:ring-white/40"
+              className="flex items-center gap-2 rounded-full px-3 py-3 text-nav font-semibold text-gray-900 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/30 dark:text-white dark:hover:bg-white/5 dark:focus-visible:ring-white/40"
             >
               <svg
                 className="h-[18px] w-[18px]"

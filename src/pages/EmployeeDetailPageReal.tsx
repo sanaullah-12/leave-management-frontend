@@ -15,6 +15,8 @@ import LogoLoader from "../components/LogoLoader";
 import Avatar from "../components/Avatar";
 import EmployeeLeaveActivity from "../components/EmployeeLeaveActivity";
 import LateHoursCard from "../components/attendance/LateHoursCard";
+import MobileEmployeeDetail from "../components/employees/mobile/MobileEmployeeDetail";
+import useMediaQuery from "../hooks/useMediaQuery";
 import { useLateHours } from "../hooks/useLateHours";
 import {
   ArrowLeftIcon,
@@ -65,6 +67,7 @@ const EmployeeDetailPageReal: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { colorScheme } = useTheme();
+  const isPhoneLayout = useMediaQuery("(max-width: 1023px)");
   const accent = accentFor(colorScheme);
   const queryClient = useQueryClient();
   const [isEditingAllocation, setIsEditingAllocation] = useState(false);
@@ -300,20 +303,39 @@ const EmployeeDetailPageReal: React.FC = () => {
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
   ];
   const currentYear = new Date().getFullYear();
+
+  /**
+   * The trend, split the way the dashboard's is: approved is the shape, and
+   * pending is the work still waiting on somebody. Counted in days rather than
+   * requests, because days is what the rest of this record is denominated in.
+   */
   const monthlyData = MONTHS.map((month, index) => {
-    const leaves = leaveHistory
-      .filter((leave: any) => {
-        const d = new Date(leave.startDate);
-        return (
-          d.getFullYear() === currentYear &&
-          d.getMonth() === index &&
-          leave.status === "approved"
-        );
-      })
-      .reduce((sum: number, leave: any) => sum + (leave.totalDays || 1), 0);
-    return { month, leaves };
+    const inMonth = leaveHistory.filter((leave: any) => {
+      const d = new Date(leave.startDate);
+      return d.getFullYear() === currentYear && d.getMonth() === index;
+    });
+    const daysWith = (status: string) =>
+      inMonth
+        .filter((leave: any) => leave.status === status)
+        .reduce((sum: number, leave: any) => sum + (leave.totalDays || 1), 0);
+
+    const approved = daysWith("approved");
+    const pending = daysWith("pending");
+    const rejected = daysWith("rejected");
+    return {
+      month,
+      value: approved + pending + rejected,
+      approved,
+      pending,
+      rejected,
+    };
   });
-  const hasTrend = monthlyData.some((m) => m.leaves > 0);
+
+  /* The desktop chart draws approved alone, so a year of nothing but pending
+     requests would give it a flat line to plot and nothing to say. The phone
+     chart draws pending too, so it has something to show either way. */
+  const hasApproved = monthlyData.some((m) => m.approved > 0);
+  const hasTrend = monthlyData.some((m) => m.value > 0);
 
   // Distribution donut - used days by type.
   const distribution = LEAVE_ORDER.map((key) => ({
@@ -346,6 +368,51 @@ const EmployeeDetailPageReal: React.FC = () => {
     updateAllocationMutation.mutate(editAllocation);
 
   const isAdmin = user?.role === "admin";
+
+  /**
+   * The phone reading of everything above.
+   *
+   * Placed here rather than at the top of the component on purpose: the two
+   * layouts are the same record, so they have to be built from the same
+   * figures. Branching before the derivations would have let a balance or a
+   * late total drift between them one edit at a time.
+   */
+  if (isPhoneLayout) {
+    return (
+      <MobileEmployeeDetail
+        employee={employee}
+        departmentName={departmentName}
+        active={active}
+        isAdmin={isAdmin}
+        onBack={() => navigate("/employees")}
+        leaveBalance={leaveBalance}
+        totalRemaining={totalRemaining}
+        totalAllocated={totalAllocated}
+        leaveMeta={LEAVE_META}
+        leaveOrder={LEAVE_ORDER}
+        isEditingAllocation={isEditingAllocation}
+        editAllocation={editAllocation}
+        onEditAllocation={setEditAllocation}
+        onStartEdit={handleStartEdit}
+        onCancelEdit={handleCancelEdit}
+        onSaveAllocation={handleSaveAllocation}
+        savingAllocation={updateAllocationMutation.isPending}
+        accent={accent}
+        currentYear={currentYear}
+        monthlyData={monthlyData}
+        hasTrend={hasTrend}
+        distribution={distribution}
+        lateSummary={lateHours.summary}
+        lateEntries={lateHours.lateEntries}
+        latePolicy={lateHours.policy}
+        lateLoading={lateHours.isLoading}
+        lateRangeLabel={lateRange.label}
+        leaveHistory={leaveHistory}
+        formatDate={formatDate}
+        statusChip={getStatusChip}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6 fade-in">
@@ -518,7 +585,7 @@ const EmployeeDetailPageReal: React.FC = () => {
             sub={`Approved leave days across ${currentYear}`}
           />
           <div className="mt-5 h-56">
-            {hasTrend ? (
+            {hasApproved ? (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
                   data={monthlyData}
@@ -547,7 +614,7 @@ const EmployeeDetailPageReal: React.FC = () => {
                   />
                   <Area
                     type="monotone"
-                    dataKey="leaves"
+                    dataKey="approved"
                     stroke={accent}
                     strokeWidth={3}
                     fill="url(#edTrend)"

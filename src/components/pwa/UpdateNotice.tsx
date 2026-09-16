@@ -23,8 +23,10 @@ const UpdateNotice: React.FC<UpdateNoticeProps> = ({ onReload }) => (
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -16 }}
     transition={{ type: "spring", stiffness: 380, damping: 30 }}
-    className="fixed inset-x-0 top-3 z-40 mx-auto w-fit px-4"
-    style={{ marginTop: "env(safe-area-inset-top, 0px)" }}
+    /* Below the mobile app bar rather than over it: at top-3 the pill landed
+       on the screen title, and on an installed iPhone inside the status bar.
+       Desktop has no app bar in the way and keeps the original place. */
+    className="fixed inset-x-0 top-[calc(var(--safe-top)+var(--app-bar-h)+0.5rem)] z-40 mx-auto w-fit px-4 lg:top-[calc(var(--safe-top)+0.75rem)]"
     role="status"
   >
     <div className="flex items-center gap-3 rounded-full border border-gray-200/70 bg-white/95 py-1.5 pl-4 pr-1.5 shadow-lg shadow-black/5 backdrop-blur-xl dark:border-white/10 dark:bg-gray-900/95">

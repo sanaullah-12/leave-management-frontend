@@ -8,6 +8,12 @@
  *
  * Rows are individually memoised, so selecting one row in a 2,000-employee
  * roster re-renders one row - not the table.
+ *
+ * Below `lg` the same rows are cards. Nine money columns need 900px, and the
+ * two that matter on a phone - who, and what they take home - are at opposite
+ * ends of it. The card leads with the person and the net figure, puts basic,
+ * allowances and deductions on the line beneath as the sum they add up to, and
+ * keeps selection and actions where a thumb can reach them.
  */
 import React, { useCallback, useMemo, useState } from "react";
 import { motion } from "framer-motion";
@@ -114,8 +120,83 @@ const SalaryLedgerTable: React.FC<Props> = ({
     { key: "status", label: "Status" },
   ];
 
+  const money = (value?: number) => formatMoney(value ?? 0, currency);
+
   return (
-    <div className="overflow-x-auto">
+    <>
+    {/* ---------------- Phones and small tablets ---------------- */}
+    <ul className="divide-y divide-gray-100 lg:hidden dark:divide-gray-800">
+      {sorted.map((row) => {
+        const { employee, structure, computation, status } = row;
+        const selected = Boolean(selectedIds?.has(employee.id));
+        const actions = renderActions?.(row);
+        return (
+          <li
+            key={`m-${employee.id}`}
+            className={`px-1 py-3 ${selected ? "bg-[var(--accent-soft)]" : ""}`}
+          >
+            <div className="flex items-start gap-3">
+              {selectable && (
+                <label className="flex h-11 w-6 shrink-0 items-center justify-center">
+                  <input
+                    type="checkbox"
+                    checked={selected}
+                    onChange={() => onToggle?.(employee.id)}
+                    aria-label={`Select ${employee.name}`}
+                    className="h-[18px] w-[18px] cursor-pointer rounded border-gray-300 accent-[var(--accent)]"
+                  />
+                </label>
+              )}
+
+              <button
+                type="button"
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+                disabled={!onRowClick}
+                className="press-scale flex min-w-0 flex-1 items-start gap-3 text-start disabled:cursor-default"
+              >
+                <Avatar
+                  src={employee.profilePicture}
+                  name={employee.name}
+                  size="sm"
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[14px] font-semibold text-gray-900 dark:text-white">
+                    {employee.name}
+                  </span>
+                  <span className="mt-0.5 block truncate text-[12px] text-gray-400">
+                    {employee.designation}
+                    {employee.department ? ` - ${employee.department}` : ""}
+                  </span>
+                  <span className="mt-1 block truncate text-[11px] text-gray-400">
+                    {money(structure?.basicSalary)} basic
+                    {computation
+                      ? ` + ${money(computation.totalAllowances)} - ${money(
+                          computation.totalDeductions
+                        )}`
+                      : ""}
+                  </span>
+                </span>
+                <span className="flex shrink-0 flex-col items-end gap-1.5">
+                  <span className="text-[15px] font-bold tabular-nums text-gray-900 dark:text-white">
+                    {money(computation?.netSalary)}
+                  </span>
+                  <StatusPill status={SALARY_STATUS[status]} />
+                </span>
+              </button>
+            </div>
+
+            {actions !== undefined && actions !== null && (
+              <div className="mt-2 flex items-center justify-end gap-1">
+                {actions}
+              </div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+
+    {/* ---------------- Desktop ---------------- */}
+    <div className="hidden table-scroll lg:block">
       <table className="w-full min-w-[900px] border-collapse text-sm">
         <thead>
           <tr className="border-b border-gray-200/70 text-left dark:border-gray-700/50">
@@ -171,6 +252,7 @@ const SalaryLedgerTable: React.FC<Props> = ({
         </tbody>
       </table>
     </div>
+    </>
   );
 };
 

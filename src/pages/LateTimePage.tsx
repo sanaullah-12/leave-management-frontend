@@ -99,6 +99,12 @@ const Empty: React.FC<{ message: string }> = ({ message }) => (
  * `withEmployee` switches the first column between a person and a date, which
  * is the only difference between the roster feed an admin reads and the
  * personal record an employee reads.
+ *
+ * Below `lg` the same entries are rows in a list. Every cell in this table is
+ * `white-space: nowrap`, so five columns are wider than a phone whatever the
+ * content - and the column the screen is read for, the delay, is the last one.
+ * In the list the delay leads from the right and the two clock times it is the
+ * difference between share one line beneath the name.
  */
 const LateTable: React.FC<{
   rows: Array<LateEntry & { employeeId?: string; name?: string | null }>;
@@ -108,7 +114,44 @@ const LateTable: React.FC<{
 }> = ({ rows, withEmployee, onSelect, emptyMessage }) => {
   if (rows.length === 0) return <Empty message={emptyMessage} />;
   return (
-    <div className="lc-table-wrap">
+    <>
+      {/* ---------------- Phones and small tablets ---------------- */}
+      <ul className="lc-table-wrap divide-y divide-white/5 lg:hidden">
+        {rows.map((row, i) => {
+          const clickable = Boolean(onSelect && row.employeeId);
+          return (
+            <li key={`m-${row.employeeId ?? "self"}-${row.date}-${i}`}>
+              <button
+                type="button"
+                disabled={!clickable}
+                onClick={
+                  clickable ? () => onSelect!(String(row.employeeId)) : undefined
+                }
+                className="press-scale flex w-full items-center gap-3 px-4 py-3 text-start disabled:cursor-default"
+              >
+                {withEmployee && (
+                  <Avatar name={row.name || `ID ${row.employeeId}`} size="sm" />
+                )}
+                <span className="min-w-0 flex-1">
+                  <span className="lc-name block truncate text-[14px]">
+                    {withEmployee
+                      ? row.name || `ID ${row.employeeId}`
+                      : row.dateDisplay}
+                  </span>
+                  <span className="lc-dim block truncate text-[12px]">
+                    {withEmployee ? `${row.dateDisplay} - ` : ""}
+                    in {row.punchInDisplay}, due {row.expected}
+                  </span>
+                </span>
+                <DelayPill minutes={row.lateMinutes} label={row.lateDisplay} />
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+
+      {/* ---------------- Desktop ---------------- */}
+      <div className="lc-table-wrap hidden lg:block">
       <div className="lc-scroll">
         <table className="lc-table">
           <thead>
@@ -161,7 +204,8 @@ const LateTable: React.FC<{
           </tbody>
         </table>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

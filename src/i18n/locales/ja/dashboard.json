@@ -78,5 +78,11 @@
     "teamAvailability": "チームの稼働状況",
     "thisMonthByCategory": "今月、カテゴリ別",
     "yourActivity": "最近の申請におけるあなたの休暇状況"
+  },
+  "tabs": {
+    "activity": "アクティビティ",
+    "charts": "グラフ",
+    "overview": "概要",
+    "review": "集計"
   }
 }

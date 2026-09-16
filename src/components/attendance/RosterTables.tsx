@@ -50,6 +50,22 @@ export interface RosterEmployeeTotals {
   lastCheckIn: string | null;
 }
 
+/**
+ * The period's counts, as the server sends them.
+ *
+ * Exported here alongside the row shapes so the board and the mobile list can
+ * agree on one definition rather than each restating it.
+ */
+export interface RosterTotals {
+  employees: number;
+  days: number;
+  onTime: number;
+  late: number;
+  absent: number;
+  workFromHome: number;
+  onLeave: number;
+}
+
 export interface RosterDateTotals {
   date: string;
   dateDisplay: string;
@@ -62,10 +78,19 @@ export interface RosterDateTotals {
   lastCheckIn: string | null;
 }
 
+/**
+ * Cell tokens.
+ *
+ * Column padding halves below `sm`. These tables already hide their trailing
+ * columns on a narrow screen, but a fixed `min-w` on the table undid that -
+ * the table stayed 520-560px wide with three empty columns' worth of padding,
+ * so the roster scrolled sideways on a phone for no content. The min-width is
+ * now only applied from `sm` up, where the hidden columns come back.
+ */
 const TH =
-  "whitespace-nowrap border-b border-gray-100 bg-gray-50/70 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:border-gray-700 dark:bg-gray-700/40 dark:text-gray-300";
+  "whitespace-nowrap border-b border-gray-100 bg-gray-50/70 px-2.5 py-3 text-left text-xs font-semibold text-gray-600 dark:border-gray-700 dark:bg-gray-700/40 dark:text-gray-300 sm:px-4";
 const TD =
-  "border-b border-gray-100 px-4 py-3 text-sm text-gray-700 dark:border-gray-700 dark:text-gray-200";
+  "border-b border-gray-100 px-2.5 py-3 text-sm text-gray-700 dark:border-gray-700 dark:text-gray-200 sm:px-4";
 const NUM = `${TD} text-right tabular-nums`;
 const NUM_TH = `${TH} text-right`;
 
@@ -150,8 +175,8 @@ export const DayRosterTable: React.FC<{
   const hidden = ordered.length - shown.length;
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[520px] border-collapse">
+    <div className="table-scroll">
+      <table className="w-full border-collapse sm:min-w-[520px]">
         <thead>
           <tr>
             <th className={TH}>Employee</th>
@@ -225,8 +250,8 @@ export const ByDateTable: React.FC<{
   );
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[520px] border-collapse">
+    <div className="table-scroll">
+      <table className="w-full border-collapse sm:min-w-[520px]">
         <thead>
           <tr>
             <th className={TH}>Date</th>
@@ -351,8 +376,8 @@ export const ByEmployeeTable: React.FC<{
   const hidden = ordered.length - shown.length;
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[560px] border-collapse">
+    <div className="table-scroll">
+      <table className="w-full border-collapse sm:min-w-[560px]">
         <thead>
           <tr>
             <th className={TH}>Employee</th>
