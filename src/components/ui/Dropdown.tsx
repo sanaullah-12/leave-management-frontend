@@ -47,7 +47,7 @@ export interface DropdownProps {
 }
 
 const DEFAULT_BUTTON =
-  "inline-flex items-center gap-2 rounded-full bg-[var(--card-surface)] px-3.5 py-2 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-200/70 transition-colors hover:bg-black/[0.03] dark:text-gray-200 dark:ring-white/10 dark:hover:bg-white/[0.04]";
+  "inline-flex items-center gap-2 rounded-full bg-[var(--card-surface)] px-3.5 py-2 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-200/70 transition-[background-color,transform] duration-150 hover:bg-black/[0.03] active:scale-[0.97] dark:text-gray-200 dark:ring-white/10 dark:hover:bg-white/[0.04]";
 
 const PANEL =
   "glass-panel scroll-pane z-[110] mt-2 rounded-xl p-1.5 focus:outline-none " +
@@ -56,7 +56,16 @@ const PANEL =
   // account menu running off the side of a phone. The height cap is for the
   // same situation vertically, on a short screen in landscape.
   "max-w-[calc(100vw-1.5rem)] max-h-[min(28rem,70dvh)] " +
-  "origin-top transition ease-out data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-150 data-[leave]:duration-100";
+  // The panel rises the last few pixels as it scales, so it reads as
+  // coming out of its button rather than materialising over it, and it
+  // leaves faster than it arrives - a menu being dismissed is already
+  // decided, and matching the two makes every dismissal feel sticky.
+  // The same string is used by Select and DatePicker: all three are one
+  // gesture, and three near-identical hand-written transitions is how
+  // they drifted apart in the first place.
+  "origin-top transition duration-[220ms] ease-[cubic-bezier(0.22,1,0.36,1)] " +
+  "data-[closed]:-translate-y-1 data-[closed]:scale-95 data-[closed]:opacity-0 " +
+  "data-[leave]:duration-[160ms] data-[leave]:ease-[cubic-bezier(0.64,0,0.78,0)]";
 
 const Dropdown: React.FC<DropdownProps> = ({
   children,
@@ -70,12 +79,17 @@ const Dropdown: React.FC<DropdownProps> = ({
 }) => {
   return (
     <Menu as="div" className="relative inline-block text-left">
+      {/* `group` is appended rather than baked into DEFAULT_BUTTON so the
+          chevron still turns over when a caller supplies its own trigger
+          styling, which most of them do. */}
       <MenuButton
-        className={bareButton ? buttonClassName : buttonClassName ?? DEFAULT_BUTTON}
+        className={`group ${
+          bareButton ? buttonClassName ?? "" : buttonClassName ?? DEFAULT_BUTTON
+        }`}
       >
         {children}
         {showChevron && (
-          <ChevronDownIcon className="h-4 w-4 text-gray-400" />
+          <ChevronDownIcon className="h-4 w-4 text-gray-400 transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[open]:rotate-180" />
         )}
       </MenuButton>
 

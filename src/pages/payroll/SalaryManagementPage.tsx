@@ -33,6 +33,7 @@ import type {
   SalaryRow,
   SalaryStatus,
 } from "../../components/payroll/types";
+import { LoadSwap } from "../../components/ui/motion";
 
 type StatusFilter = SalaryStatus | "unconfigured" | "all";
 
@@ -215,11 +216,12 @@ const SalaryManagementPage: React.FC = () => {
       </motion.div>
 
       <motion.div variants={staggerItem}>
-        {employeesLoading ? (
-          <PayrollStatsSkeleton count={4} />
-        ) : (
+        <LoadSwap
+          loading={employeesLoading}
+          skeleton={<PayrollStatsSkeleton count={4} />}
+        >
           <PayrollStatCards tiles={tiles} />
-        )}
+        </LoadSwap>
       </motion.div>
 
       <motion.div variants={staggerItem}>

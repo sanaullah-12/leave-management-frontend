@@ -1,7 +1,10 @@
 import React, { useMemo, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import useListRowMotion from "../../hooks/useListRowMotion";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import StatusBadge from "./StatusBadge";
 import { formatIsoDate } from "../../lib/attendancePeriod";
+import { collapseVariants } from "../../lib/motion";
 
 /**
  * The three readings of one attendance range.
@@ -170,6 +173,7 @@ export const DayRosterTable: React.FC<{
   maxRows?: number;
   emptyMessage?: string;
 }> = ({ rows, loading = false, maxRows, emptyMessage }) => {
+  const listRow = useListRowMotion(true);
   const ordered = useMemo(() => [...rows].sort(byArrival), [rows]);
   const shown = maxRows ? ordered.slice(0, maxRows) : ordered;
   const hidden = ordered.length - shown.length;
@@ -194,9 +198,10 @@ export const DayRosterTable: React.FC<{
               message={emptyMessage || "No attendance recorded for this day."}
             />
           ) : (
-            shown.map((row) => (
-              <tr
+            shown.map((row, i) => (
+              <motion.tr
                 key={`${row.employeeId}-${row.date}`}
+                {...listRow(i)}
                 className="transition-colors hover:bg-gray-50/70 dark:hover:bg-gray-700/30"
               >
                 <td className={TD}>
@@ -216,7 +221,7 @@ export const DayRosterTable: React.FC<{
                 <td className={`${NUM} hidden sm:table-cell`}>
                   {row.workedDisplay || <span className="text-gray-400">-</span>}
                 </td>
-              </tr>
+              </motion.tr>
             ))
           )}
         </tbody>
@@ -242,6 +247,7 @@ export const ByDateTable: React.FC<{
   loading?: boolean;
   emptyMessage?: string;
 }> = ({ dates, rowsByDate, loading = false, emptyMessage }) => {
+  const listRow = useListRowMotion(true);
   const [open, setOpen] = useState<string | null>(null);
   // Newest first: the day being asked about is nearly always the recent one.
   const ordered = useMemo(
@@ -271,14 +277,15 @@ export const ByDateTable: React.FC<{
               message={emptyMessage || "No attendance recorded in this period."}
             />
           ) : (
-            ordered.map((day) => {
+            ordered.map((day, i) => {
               const rows = rowsByDate?.[day.date];
               const expandable = !!rows?.length;
               const isOpen = open === day.date;
 
               return (
                 <React.Fragment key={day.date}>
-                  <tr
+                  <motion.tr
+                    {...listRow(i)}
                     className={`transition-colors ${
                       expandable
                         ? "cursor-pointer hover:bg-gray-50/70 dark:hover:bg-gray-700/30"
@@ -329,18 +336,38 @@ export const ByDateTable: React.FC<{
                     <td className={`${NUM} hidden sm:table-cell`}>
                       {day.workFromHome}
                     </td>
-                  </tr>
+                  </motion.tr>
 
-                  {isOpen && expandable && (
-                    <tr>
-                      <td
-                        colSpan={6}
-                        className="border-b border-gray-100 bg-gray-50/40 p-0 dark:border-gray-700 dark:bg-gray-700/20"
-                      >
-                        <DayRosterTable rows={rows} />
-                      </td>
-                    </tr>
-                  )}
+                  {/* The breakdown opens under the day it belongs to rather
+                      than appearing between two rows. A table that gains forty
+                      rows in one frame moves everything below it with no
+                      indication of where they came from; growing the panel out
+                      of its own row is what keeps the connection.
+
+                      The animated element is the div inside the cell, not the
+                      row: a `<tr>` cannot be given `overflow: hidden`, so a
+                      height animation on one spills its content across the
+                      rows underneath for the length of the transition. */}
+                  <AnimatePresence initial={false}>
+                    {isOpen && expandable && (
+                      <tr>
+                        <td
+                          colSpan={6}
+                          className="border-b border-gray-100 bg-gray-50/40 p-0 dark:border-gray-700 dark:bg-gray-700/20"
+                        >
+                          <motion.div
+                            initial="collapsed"
+                            animate="expanded"
+                            exit="collapsed"
+                            variants={collapseVariants}
+                            className="overflow-hidden"
+                          >
+                            <DayRosterTable rows={rows} />
+                          </motion.div>
+                        </td>
+                      </tr>
+                    )}
+                  </AnimatePresence>
                 </React.Fragment>
               );
             })
@@ -361,6 +388,7 @@ export const ByEmployeeTable: React.FC<{
   maxRows?: number;
   emptyMessage?: string;
 }> = ({ employees, loading = false, maxRows, emptyMessage }) => {
+  const listRow = useListRowMotion(true);
   // Most days missed first: a roster is read to find who needs attention.
   const ordered = useMemo(
     () =>
@@ -398,9 +426,10 @@ export const ByEmployeeTable: React.FC<{
               message={emptyMessage || "No employees to report on."}
             />
           ) : (
-            shown.map((person) => (
-              <tr
+            shown.map((person, i) => (
+              <motion.tr
                 key={person.employeeId}
+                {...listRow(i)}
                 className="transition-colors hover:bg-gray-50/70 dark:hover:bg-gray-700/30"
               >
                 <td className={TD}>
@@ -429,7 +458,7 @@ export const ByEmployeeTable: React.FC<{
                 <td className={`${NUM} hidden md:table-cell`}>
                   {person.lateDisplay || <span className="text-gray-400">-</span>}
                 </td>
-              </tr>
+              </motion.tr>
             ))
           )}
         </tbody>

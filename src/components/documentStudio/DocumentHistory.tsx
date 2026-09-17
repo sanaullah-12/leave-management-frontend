@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import useListRowMotion from "../../hooks/useListRowMotion";
 import {
   MagnifyingGlassIcon,
   DocumentDuplicateIcon,
@@ -45,6 +46,7 @@ const DocumentHistory: React.FC<Props> = ({
   onExport,
   onPrint,
 }) => {
+  const listRow = useListRowMotion(true);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
   const [template, setTemplate] = useState("all");
@@ -228,13 +230,12 @@ const DocumentHistory: React.FC<Props> = ({
               </tr>
             </thead>
             <tbody>
-              <AnimatePresence initial={false}>
-                {filtered.map((d) => (
+              <AnimatePresence>
+                {filtered.map((d, i) => (
                   <motion.tr
                     key={d.id}
                     layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                    {...listRow(i)}
                     exit={{ opacity: 0 }}
                     className="group border-b border-gray-100 transition-colors hover:bg-black/[0.02] dark:border-gray-800 dark:hover:bg-white/[0.03]"
                   >

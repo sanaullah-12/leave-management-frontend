@@ -11,6 +11,7 @@ import { useDraggableWidget } from "../../hooks/useDraggableWidget";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChatBubbleLeftRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { STRINGS } from "./config";
+import { spring } from "../../lib/motion";
 
 interface Props {
   open: boolean;
@@ -73,7 +74,7 @@ const AssistantBubble: React.FC<Props> = ({
             initial={reduce ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 300, damping: 24 }}
+            transition={spring}
             style={{ transformOrigin: "bottom right" }}
             className="glass-panel pointer-events-auto relative max-w-[16.5rem] rounded-2xl rounded-ee-md p-3.5 pe-9"
           >
@@ -116,7 +117,7 @@ const AssistantBubble: React.FC<Props> = ({
         title="Drag to move"
         initial={reduce ? false : { opacity: 0, scale: 0.6 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ type: "spring", stiffness: 340, damping: 22, delay: 0.4 }}
+        transition={{ ...spring, delay: 0.4 }}
         whileHover={drag.dragging ? undefined : { scale: 1.06 }}
         whileTap={drag.dragging ? undefined : { scale: 0.94 }}
         className="pointer-events-auto relative grid h-14 w-14 place-items-center rounded-full text-white shadow-lg shadow-black/20 focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--accent-soft)]"

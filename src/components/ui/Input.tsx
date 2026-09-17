@@ -1,4 +1,13 @@
-import React, { forwardRef, useCallback, useId, useRef, useState } from "react";
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { DUR, EASE, pressSpring } from "../../lib/motion";
 
 /**
  * The app's one text input.
@@ -180,6 +189,18 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const showClear = clearable && isFilled && !disabled;
     const hasTrailing = showClear || Boolean(trailing);
 
+    const reduce = useReducedMotion();
+    const hasError = Boolean(error);
+    /* Shake only on the crossing into an invalid state, not on every render
+       that happens to be invalid. Held in a ref rather than in state so
+       noticing the crossing does not itself cause a render - the render that
+       set the error is the one that plays it. */
+    const wasInvalid = useRef(hasError);
+    const shake = !reduce && hasError && !wasInvalid.current;
+    useEffect(() => {
+      wasInvalid.current = hasError;
+    }, [hasError]);
+
     return (
       <div className={wrapperClassName}>
         {label && (
@@ -193,7 +214,15 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
         {/* `isolate` keeps the shell's -z-10 inside this box rather than
             dropping it behind the card the field sits on. */}
-        <div
+        {/* The field shakes once when a message first appears under it.
+            Validation is the one case where the thing that changed is below
+            where the user is looking - they are still on the field, or already
+            on the submit button - and a red line quietly appearing underneath
+            is routinely missed. Two small swings, over in a fifth of a second:
+            a shake of the head, not an alarm. */}
+        <motion.div
+          animate={shake ? { x: [0, -5, 4, -2, 0] } : undefined}
+          transition={{ duration: DUR.base, ease: EASE.inOut }}
           className={`relative isolate flex w-full items-center ${size.shell} ${className}`}
         >
           {/* The input comes first in the DOM so everything after it can react
@@ -220,24 +249,40 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             } ${disabled ? "opacity-60" : ""}`}
           />
 
+          {/* Focus halo. A soft accent ring that grows in behind the shell,
+              so focus arrives rather than switching on. Driven by the peer
+              selector rather than by state: a text field that re-renders on
+              every focus and blur is the last component in the app that should
+              be doing so. */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 -z-10 scale-[0.97] rounded-full opacity-0 ring-4 ring-[rgb(var(--blue-500))]/15 transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] peer-focus:scale-100 peer-focus:opacity-100"
+          />
+
           {Icon && (
             <Icon
-              className={`pointer-events-none absolute top-1/2 -translate-y-1/2 text-gray-400 transition-colors peer-focus:text-[rgb(var(--blue-500))] dark:text-gray-500 ${size.icon} ${size.left}`}
+              className={`pointer-events-none absolute top-1/2 -translate-y-1/2 text-gray-400 transition-[color,transform] duration-200 peer-focus:scale-110 peer-focus:text-[rgb(var(--blue-500))] dark:text-gray-500 ${size.icon} ${size.left}`}
             />
           )}
 
           {showClear ? (
-            <button
+            /* Grows out of the centre the moment there is something to clear,
+               rather than blinking on at the first character typed. */
+            <motion.button
               type="button"
               onClick={handleClear}
               tabIndex={-1}
               aria-label="Clear"
+              initial={reduce ? false : { opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileTap={reduce ? undefined : { scale: 0.85 }}
+              transition={pressSpring}
               className={`tap-target absolute top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-[rgb(var(--blue-500))] text-white transition-opacity hover:opacity-90 ${size.right}`}
             >
               <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor">
                 <path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z" />
               </svg>
-            </button>
+            </motion.button>
           ) : (
             trailing && (
               <div
@@ -247,20 +292,30 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               </div>
             )
           )}
-        </div>
+        </motion.div>
 
-        {(error || hint) && (
-          <p
-            id={`${fieldId}-msg`}
-            className={`mt-1.5 text-xs ${
-              error
-                ? "text-red-600 dark:text-red-400"
-                : "text-gray-500 dark:text-gray-400"
-            }`}
-          >
-            {error || hint}
-          </p>
-        )}
+        {/* The message fades down out of the field rather than appearing
+            under it, so a form that has just been submitted does not snap a
+            line taller in the same frame the error arrives. */}
+        <AnimatePresence initial={false}>
+          {(error || hint) && (
+            <motion.p
+              key={error ? "error" : "hint"}
+              id={`${fieldId}-msg`}
+              initial={reduce ? { opacity: 0 } : { opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: DUR.fast, ease: EASE.out }}
+              className={`mt-1.5 text-xs ${
+                error
+                  ? "text-red-600 dark:text-red-400"
+                  : "text-gray-500 dark:text-gray-400"
+              }`}
+            >
+              {error || hint}
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
     );
   }

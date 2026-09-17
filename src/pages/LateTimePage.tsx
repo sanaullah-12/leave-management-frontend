@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import SectionHeader from "../components/ui/SectionHeader";
 import { sectionIllustration } from "../components/ui/illustrations";
 import {
@@ -14,6 +15,7 @@ import type { LateEntry, LateSummary } from "../hooks/useLateHours";
 import Avatar from "../components/Avatar";
 import DatePicker from "../components/ui/DatePicker";
 import { StatCardRow } from "../components/ui/StatCard";
+import useListRowMotion from "../hooks/useListRowMotion";
 import "../styles/late-console.css";
 
 /**
@@ -112,6 +114,10 @@ const LateTable: React.FC<{
   onSelect?: (employeeId: string) => void;
   emptyMessage: string;
 }> = ({ rows, withEmployee, onSelect, emptyMessage }) => {
+  // Declared above the empty-list return: hooks cannot sit after it.
+  const phoneRow = useListRowMotion();
+  const tableRow = useListRowMotion(true);
+
   if (rows.length === 0) return <Empty message={emptyMessage} />;
   return (
     <>
@@ -120,7 +126,10 @@ const LateTable: React.FC<{
         {rows.map((row, i) => {
           const clickable = Boolean(onSelect && row.employeeId);
           return (
-            <li key={`m-${row.employeeId ?? "self"}-${row.date}-${i}`}>
+            <motion.li
+              key={`m-${row.employeeId ?? "self"}-${row.date}-${i}`}
+              {...phoneRow(i)}
+            >
               <button
                 type="button"
                 disabled={!clickable}
@@ -145,7 +154,7 @@ const LateTable: React.FC<{
                 </span>
                 <DelayPill minutes={row.lateMinutes} label={row.lateDisplay} />
               </button>
-            </li>
+            </motion.li>
           );
         })}
       </ul>
@@ -167,8 +176,9 @@ const LateTable: React.FC<{
           </thead>
           <tbody>
             {rows.map((row, i) => (
-              <tr
+              <motion.tr
                 key={`${row.employeeId ?? "self"}-${row.date}-${i}`}
+                {...tableRow(i)}
                 onClick={
                   onSelect && row.employeeId
                     ? () => onSelect(String(row.employeeId))
@@ -199,7 +209,7 @@ const LateTable: React.FC<{
                   <DelayPill minutes={row.lateMinutes} label={row.lateDisplay} />
                 </td>
                 <td>{row.expected}</td>
-              </tr>
+              </motion.tr>
             ))}
           </tbody>
         </table>
@@ -369,7 +379,7 @@ const LateTimePage: React.FC = () => {
   const noDeviceId = !isAdmin && !user?.employeeId;
 
   return (
-    <div className="lateconsole space-y-6">
+    <div className="lateconsole space-y-6 stagger-children">
       {/* ---------------- Banner ----------------
           The same SectionHeader every other screen opens with, so Late
           arrivals is recognisably part of Attendance and not a separate

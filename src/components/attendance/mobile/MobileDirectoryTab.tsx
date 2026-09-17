@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import useListRowMotion from "../../../hooks/useListRowMotion";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -47,6 +49,7 @@ const MobileDirectoryTab: React.FC<Props> = ({
   statusFilter,
   onStatusFilterChange,
 }) => {
+  const listRow = useListRowMotion();
   const [search, setSearch] = useState("");
   const [department, setDepartment] = useState("All");
   const [page, setPage] = useState(1);
@@ -143,8 +146,8 @@ const MobileDirectoryTab: React.FC<Props> = ({
         <>
           {/* A card per person, the same shape the Today list uses. */}
           <ul className="flex flex-col gap-2.5">
-            {shown.map((row) => (
-              <li key={String(row.employee.employeeId)}>
+            {shown.map((row, i) => (
+              <motion.li key={String(row.employee.employeeId)} {...listRow(i)}>
                 <button
                   type="button"
                   onClick={() => onSelect(row.employee)}
@@ -177,7 +180,7 @@ const MobileDirectoryTab: React.FC<Props> = ({
                     <StatusBadge status={row.status} compact />
                   </span>
                 </button>
-              </li>
+              </motion.li>
             ))}
           </ul>
 

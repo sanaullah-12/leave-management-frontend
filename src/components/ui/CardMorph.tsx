@@ -8,12 +8,7 @@ import {
 } from "framer-motion";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  morphSpring,
-  morphRevealSpring,
-  MORPH_REVEAL_DELAY,
-  MORPH_REVEAL_STAGGER,
-} from "../../lib/motion";
+import { EASE, MORPH_REVEAL_DELAY, MORPH_REVEAL_STAGGER, morphRevealSpring, morphSpring } from "../../lib/motion";
 
 /**
  * Card to full screen, as one object.
@@ -273,7 +268,7 @@ const MorphHandoff: React.FC<{ morphId: string; onDone: () => void }> = ({
       onLayoutAnimationComplete={finish}
       className="pointer-events-none fixed inset-0 z-[120] bg-[var(--glass-fill)] backdrop-blur-[18px] backdrop-saturate-[1.8]"
       style={{ borderRadius: SCREEN_RADIUS }}
-      exit={{ opacity: 0, transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] } }}
+      exit={{ opacity: 0, transition: { duration: 0.22, ease: EASE.out } }}
     />
   );
 };

@@ -1,5 +1,7 @@
 import React from "react";
-import AnimatedNumber from "../AnimatedNumber";
+import { motion, useReducedMotion } from "framer-motion";
+import { EASE, pressSpring } from "../../lib/motion";
+import RollingNumber from "./motion/RollingNumber";
 
 /**
  * The product's KPI tile.
@@ -58,6 +60,8 @@ const Ring: React.FC<{
       ? 0.75
       : Math.max(0, Math.min(100, Number.isFinite(percent) ? percent : 0)) / 100;
 
+  const reduce = useReducedMotion();
+
   return (
     <span className="relative grid flex-none place-items-center">
       <svg
@@ -73,7 +77,13 @@ const Ring: React.FC<{
           strokeWidth={STROKE}
           stroke={ACCENT[accent].track}
         />
-        <circle
+        {/* The arc draws rather than appearing. A CSS transition on the offset
+            cannot do this: the element is painted at its final value, so there
+            is no change for the transition to run on, and the ring only ever
+            animated when a tile's percentage changed while it was on screen -
+            which is to say almost never. Sweeping it out from zero is also
+            what ties the tile's own entrance to the figure inside it. */}
+        <motion.circle
           cx={SIZE / 2}
           cy={SIZE / 2}
           r={r}
@@ -82,8 +92,17 @@ const Ring: React.FC<{
           strokeLinecap="round"
           stroke={ACCENT[accent].stroke}
           strokeDasharray={c}
-          strokeDashoffset={c - c * sweep}
-          style={{ transition: "stroke-dashoffset 0.7s ease" }}
+          initial={reduce ? false : { strokeDashoffset: c }}
+          animate={{ strokeDashoffset: c - c * sweep }}
+          transition={
+            reduce
+              ? { duration: 0 }
+              : // Slower than the scale's ceiling on purpose: this is the one
+                // thing on the tile still moving after everything else has
+                // landed, and a ring that sweeps at page speed reads as a
+                // loading spinner rather than as a measure.
+                { duration: 0.7, ease: EASE.out, delay: 0.1 }
+          }
         />
       </svg>
       <span
@@ -98,9 +117,9 @@ const Ring: React.FC<{
 export interface StatCardProps {
   label: string;
   /**
-   * A number counts up; a string (money, a month) is printed as given. A node
-   * is rendered as-is, which is how a caller shows a shimmer while the figure
-   * is still unknown - a zero would be a claim.
+   * A number rolls into place; a string (money, a month) is printed as given.
+   * A node is rendered as-is, which is how a caller shows a shimmer while the
+   * figure is still unknown - a zero would be a claim.
    */
   value: React.ReactNode;
   icon: React.ReactNode;
@@ -146,7 +165,11 @@ export const StatCard: React.FC<StatCardProps> = ({
           className="mt-0.5 flex items-baseline gap-1 truncate text-[19px] font-bold tabular-nums leading-tight text-gray-900 dark:text-white sm:text-xl"
           title={typeof value === "string" ? value : undefined}
         >
-          {typeof value === "number" ? <AnimatedNumber value={value} /> : value}
+          {/* A number rolls; anything else is printed as given. The roll, not a
+              count-up: these are counts of people and days, and counting up to
+              eleven pending requests through every number below it claims a
+              sequence that did not happen. See RollingNumber. */}
+          {typeof value === "number" ? <RollingNumber value={value} /> : value}
           {suffix && (
             <span className="text-[13px] font-medium text-gray-400 dark:text-gray-500">
               {suffix}
@@ -174,10 +197,23 @@ export const StatCard: React.FC<StatCardProps> = ({
     (onClick ? "press-scale transition-shadow hover:shadow-md cursor-pointer " : "");
 
   if (onClick) {
+    /* A tile that navigates gets both halves of the feedback: it lifts under a
+       mouse, where there is a cursor to answer, and shrinks under a finger,
+       where there is not. `.press-scale` stays on the class list because it
+       covers the touch case with no JavaScript at all, and it is harmless
+       alongside this - it only applies on a coarse pointer, where `whileHover`
+       never fires. */
     return (
-      <button type="button" onClick={onClick} className={shell + className}>
+      <motion.button
+        type="button"
+        onClick={onClick}
+        whileHover={{ y: -3 }}
+        whileTap={{ scale: 0.985, y: 0 }}
+        transition={pressSpring}
+        className={shell + className}
+      >
         {body}
-      </button>
+      </motion.button>
     );
   }
   return <div className={shell + className}>{body}</div>;

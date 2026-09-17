@@ -12,6 +12,7 @@ import { STRINGS } from "./config";
 import { iconFor, ExternalIcon } from "./icons";
 import { resolveActions, isCurrentRoute } from "./navigation";
 import type { AssistantMessage as Turn, AssistantRole } from "./types";
+import { spring } from "../../lib/motion";
 
 interface Props {
   message: Turn;
@@ -26,7 +27,7 @@ interface Props {
 const enter = {
   initial: { opacity: 0, y: 8 },
   animate: { opacity: 1, y: 0 },
-  transition: { type: "spring" as const, stiffness: 320, damping: 30 },
+  transition: spring,
 };
 
 const AssistantTurn: React.FC<Props> = ({

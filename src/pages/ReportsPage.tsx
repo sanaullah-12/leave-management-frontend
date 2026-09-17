@@ -40,6 +40,7 @@ import {
   Tooltip,
 } from "recharts";
 import "../styles/design-system.css";
+import useChartMotion from "../hooks/useChartMotion";
 
 interface EmployeeReportData {
   employee: any;
@@ -251,6 +252,8 @@ const ActivityTimeline: React.FC<{
 /* ------------------------------------------------------------------ */
 
 const ReportsPage: React.FC = () => {
+  /* Recharts animates by default, to its own timing. See useChartMotion. */
+  const chartMotion = useChartMotion();
   const { user } = useAuth();
   const { colorScheme } = useTheme();
   const accent = accentFor(colorScheme);
@@ -344,7 +347,7 @@ const ReportsPage: React.FC = () => {
 
   if (!reportData) {
     return (
-      <div className="space-y-6 fade-in">
+      <div className="space-y-6 stagger-children">
         <SectionHeader
           variant="reports"
           eyebrow="Insights"
@@ -539,7 +542,7 @@ const ReportsPage: React.FC = () => {
     });
 
   return (
-    <div className="space-y-6 fade-in">
+    <div className="space-y-6 stagger-children">
       {/* Export progress overlay - shared by both download paths */}
       {isExporting && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/40 p-4 backdrop-blur-sm">
@@ -777,6 +780,7 @@ const ReportsPage: React.FC = () => {
                       formatter={(v: any) => [`${v} days`, "Leave"]}
                     />
                     <Bar
+                      {...chartMotion}
                       dataKey="days"
                       fill={accent}
                       radius={[6, 6, 0, 0]}
@@ -804,6 +808,7 @@ const ReportsPage: React.FC = () => {
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
+                          {...chartMotion}
                           data={distribution}
                           dataKey="value"
                           nameKey="name"

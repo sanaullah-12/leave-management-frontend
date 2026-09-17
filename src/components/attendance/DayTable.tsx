@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import useListRowMotion from "../../hooks/useListRowMotion";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -71,6 +73,8 @@ const DayTable: React.FC<Props> = ({
   onClearFilter,
   onViewFull,
 }) => {
+  const phoneRow = useListRowMotion();
+  const tableRow = useListRowMotion(true);
   const [page, setPage] = useState(1);
 
   // A new range or filter is a new list; page 4 of a shorter one shows nothing.
@@ -156,8 +160,8 @@ const DayTable: React.FC<Props> = ({
           </div>
         ) : (
           <ul className="divide-y divide-gray-100 dark:divide-gray-700/60">
-            {pageRows.map((row) => (
-              <li key={row.date}>
+            {pageRows.map((row, i) => (
+              <motion.li key={row.date} {...phoneRow(i)}>
                 <button
                   type="button"
                   onClick={() => onSelect(row)}
@@ -190,7 +194,7 @@ const DayTable: React.FC<Props> = ({
 
                   <StatusBadge status={row.status} />
                 </button>
-              </li>
+              </motion.li>
             ))}
           </ul>
         )}
@@ -236,9 +240,10 @@ const DayTable: React.FC<Props> = ({
                 </td>
               </tr>
             ) : (
-              pageRows.map((row) => (
-                <tr
+              pageRows.map((row, i) => (
+                <motion.tr
                   key={row.date}
+                  {...tableRow(i)}
                   onClick={() => onSelect(row)}
                   tabIndex={0}
                   onKeyDown={(e) => {
@@ -282,7 +287,7 @@ const DayTable: React.FC<Props> = ({
                       <EyeIcon className="h-4 w-4" />
                     </button>
                   </td>
-                </tr>
+                </motion.tr>
               ))
             )}
           </tbody>

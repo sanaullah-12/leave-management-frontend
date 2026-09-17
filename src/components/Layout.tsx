@@ -19,7 +19,7 @@ import NexoraAssistant from "./assistant/NexoraAssistant";
 import { useNotifications } from "../hooks/useNotifications";
 import { companyNameOf } from "../lib/company";
 import { useLocale } from "../i18n/LocaleProvider";
-import { pageVariants } from "../lib/motion";
+import { DUR, EASE, panelSpring, routeVariants } from "../lib/motion";
 import {
   Squares2X2Icon,
   ClipboardDocumentListIcon,
@@ -688,11 +688,39 @@ const Layout: React.FC = () => {
         }`}
       >
         {renderRail()}
-        {!collapsed && (
-          <div className="w-60 border-r border-black/5 bg-white/70 backdrop-blur-xl dark:border-white/5 dark:bg-gray-900/50">
-            {renderPanelBody(undefined, true)}
-          </div>
-        )}
+        {/* The panel opens and closes by width rather than appearing and
+            disappearing. The page's own left margin has always been animated
+            (see <main>), so a panel that snapped was the one piece of the
+            collapse not moving - the content slid out from under a sidebar
+            that had already gone.
+
+            It still unmounts when closed rather than sitting at zero width:
+            a collapsed panel that is merely invisible keeps its search field
+            and every nav link in the tab order, behind the page.
+
+            The body inside is pinned at its full 15rem while the frame around
+            it narrows. Without that the nav labels re-wrap on every frame of
+            the close, which is both expensive and visibly wrong. */}
+        <AnimatePresence initial={false}>
+          {!collapsed && (
+            <motion.div
+              key="nav-panel"
+              initial={{ width: 0 }}
+              animate={{ width: "15rem" }}
+              exit={{ width: 0 }}
+              transition={
+                reduceMotion
+                  ? { duration: 0 }
+                  : { duration: DUR.slow, ease: EASE.out }
+              }
+              className="overflow-hidden border-r border-black/5 bg-white/70 backdrop-blur-xl dark:border-white/5 dark:bg-gray-900/50"
+            >
+              <div className="h-full w-60">
+                {renderPanelBody(undefined, true)}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* ============ Mobile drawer ============ */}
@@ -714,7 +742,7 @@ const Layout: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: DUR.base }}
               onClick={() => setMobileOpen(false)}
             />
             <motion.div
@@ -725,12 +753,12 @@ const Layout: React.FC = () => {
               animate={
                 reduceMotion
                   ? { opacity: 1 }
-                  : { x: 0, transition: { type: "spring", stiffness: 340, damping: 34 } }
+                  : { x: 0, transition: panelSpring }
               }
               exit={
                 reduceMotion
                   ? { opacity: 0 }
-                  : { x: "-100%", transition: { duration: 0.22, ease: [0.4, 0, 1, 1] } }
+                  : { x: "-100%", transition: { duration: DUR.base, ease: EASE.in } }
               }
               drag={reduceMotion ? false : "x"}
               dragDirectionLock
@@ -821,7 +849,7 @@ const Layout: React.FC = () => {
           holds the one control that earns permanent residence: a field that
           reaches every page in the product. */}
       <header
-        className={`fixed right-0 top-0 z-30 hidden h-16 items-center gap-4 border-b border-gray-200/70 bg-white/70 px-6 backdrop-blur-xl dark:border-gray-700/60 dark:bg-gray-900/55 lg:flex ${leftOffset}`}
+        className={`fixed right-0 top-0 z-30 hidden h-16 items-center gap-4 border-b border-gray-200/70 bg-white/70 px-6 backdrop-blur-xl transition-[left] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] dark:border-gray-700/60 dark:bg-gray-900/55 lg:flex ${leftOffset}`}
       >
         <GlobalSearch
           entries={searchEntries}
@@ -915,18 +943,36 @@ const Layout: React.FC = () => {
           clears the tab bar plus the iOS home indicator, so the last row of a
           list is never trapped underneath it. */}
       <main
-        className={`min-h-[100dvh] pt-[calc(var(--app-bar-h)+var(--safe-top))] transition-[margin] duration-300 lg:pt-16 ${mainOffset}`}
+        className={`min-h-[100dvh] pt-[calc(var(--app-bar-h)+var(--safe-top))] transition-[margin] duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] lg:pt-16 ${mainOffset}`}
       >
         <div className="px-[max(0.75rem,var(--safe-left))] py-4 pb-[calc(var(--tab-bar-h)+1rem+var(--safe-bottom))] sm:px-4 lg:p-8 lg:pb-8">
           <div className="mx-auto max-w-7xl">
-            <motion.div key={location.pathname} variants={pageVariants} initial="initial" animate="animate">
-              {/* Routes are lazily loaded (see App.tsx). Keeping the boundary
-                  here means only the content area swaps to a skeleton - the
-                  rail, panel and header never unmount during navigation. */}
-              <Suspense fallback={<RouteFallback />}>
-                <Outlet />
-              </Suspense>
-            </motion.div>
+            {/* The screen leaves before the next one arrives. `mode="wait"` is
+                the whole reason this reads as navigation rather than as a
+                repaint: two dashboards cross-dissolving through each other is
+                legible on a phone and unreadable at 1600px, where the eye has
+                nowhere to settle while both are half-present.
+
+                The exit is a bare fade lasting a tenth of a second. The screen
+                being left is already irrelevant, and giving it the same weight
+                as the arrival would double how long every navigation feels -
+                see `routeVariants`. */}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={location.pathname}
+                variants={routeVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                {/* Routes are lazily loaded (see App.tsx). Keeping the boundary
+                    here means only the content area swaps to a skeleton - the
+                    rail, panel and header never unmount during navigation. */}
+                <Suspense fallback={<RouteFallback />}>
+                  <Outlet />
+                </Suspense>
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
       </main>

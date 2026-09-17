@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import useListRowMotion from "../hooks/useListRowMotion";
 import {
   ClockIcon,
   ArrowPathIcon,
@@ -103,6 +105,7 @@ const AttendanceModal: React.FC<AttendanceModalProps> = ({
   defaultEndDate,
   onFetchRecords,
 }) => {
+  const listRow = useListRowMotion(true);
   const today = new Date().toISOString().split("T")[0];
   const monthAgo = useMemo(() => {
     const d = new Date();
@@ -260,8 +263,9 @@ const AttendanceModal: React.FC<AttendanceModalProps> = ({
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800/70">
                   {records.map((r, i) => (
-                    <tr
+                    <motion.tr
                       key={r.recordId || r.id || i}
+                      {...listRow(i)}
                       className="transition-colors hover:bg-gray-50/70 dark:hover:bg-gray-800/40"
                     >
                       <td className="whitespace-nowrap px-4 py-2.5 text-gray-900 dark:text-gray-100">
@@ -284,7 +288,7 @@ const AttendanceModal: React.FC<AttendanceModalProps> = ({
                           </span>
                         )}
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))}
                 </tbody>
               </table>

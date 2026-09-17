@@ -227,17 +227,6 @@ export const CORE_RADIUS = 13;
 /** Where the notification pill sits - clear of the core rings and the top row. */
 export const NOTIFICATION_ANCHOR = { x: 50, y: 23 };
 
-/** Modules named on the compact mobile / tablet composition. */
-export const MOBILE_MODULE_CHIPS = [
-  { label: "Employees", icon: UsersIcon },
-  { label: "Leave", icon: CalendarDaysIcon },
-  { label: "Attendance", icon: ClockIcon },
-  { label: "Payroll", icon: BanknotesIcon },
-  { label: "Documents", icon: DocumentTextIcon },
-  { label: "Employee Voice", icon: ChatBubbleLeftRightIcon },
-  { label: "Reports", icon: ChartBarSquareIcon },
-];
-
 /** Geometry for one connector: where it starts, ends, and how long it is. */
 export function connectorGeometry(m: EcosystemModule) {
   const dx = m.x - CORE.x;

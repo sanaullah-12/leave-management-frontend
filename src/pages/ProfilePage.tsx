@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import OrganizationProfile from "../components/profile/OrganizationProfile";
 import ProfileSettings from "../components/profile/ProfileSettings";
+import { DUR, EASE, spring } from "../lib/motion";
 
 type Tab = "organization" | "profile";
 
@@ -30,7 +31,7 @@ const ProfilePage: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 stagger-children">
       <SectionHeader
         variant="profile"
         eyebrow="Account"
@@ -55,7 +56,7 @@ const ProfilePage: React.FC = () => {
                 <motion.span
                   layoutId="profileTab"
                   className="absolute inset-0 rounded-lg bg-white dark:bg-gray-700 shadow-sm"
-                  transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                  transition={spring}
                 />
               )}
               <span className="relative">{t.label}</span>
@@ -68,7 +69,7 @@ const ProfilePage: React.FC = () => {
         key={tab}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: DUR.slow, ease: EASE.out }}
       >
         {isAdmin && tab === "organization" ? (
           <OrganizationProfile />

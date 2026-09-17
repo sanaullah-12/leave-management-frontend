@@ -10,6 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { announcementsAPI } from "../services/api";
 import { categoryIcon } from "./announcements/categoryIcons";
+import { DUR, EASE } from "../lib/motion";
 
 interface Item {
   _id: string;
@@ -47,7 +48,7 @@ const DashboardAnnouncements: React.FC = () => {
     <motion.section
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: DUR.slow, ease: EASE.out }}
       className="announce-attn overflow-hidden rounded-2xl bg-white dark:bg-gray-800/60"
     >
       <div className="h-1 w-full" style={{ background: "var(--accent)" }} />

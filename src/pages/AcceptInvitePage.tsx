@@ -18,6 +18,7 @@ import {
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 import { authAPI } from "../services/api";
+import { EASE, popSpring, spring } from "../lib/motion";
 
 interface AcceptInviteForm {
   password: string;
@@ -47,7 +48,7 @@ const initialsOf = (name?: string) =>
 const fade = (delay = 0) => ({
   initial: { opacity: 0, y: 12 },
   animate: { opacity: 1, y: 0 },
-  transition: { delay, duration: 0.45, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+  transition: { delay, duration: 0.45, ease: EASE.out as [number, number, number, number] },
 });
 
 const AcceptInvitePage: React.FC = () => {
@@ -180,7 +181,7 @@ const AcceptInvitePage: React.FC = () => {
           <motion.div
             initial={{ scale: 0, rotate: -20 }}
             animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: "spring", stiffness: 260, damping: 18 }}
+            transition={popSpring}
             className="relative mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-500/10"
           >
             <motion.span
@@ -233,7 +234,7 @@ const AcceptInvitePage: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.12, type: "spring", stiffness: 280, damping: 26 }}
+          transition={{ ...spring, delay: 0.12 }}
           className="mt-6 overflow-hidden rounded-2xl border border-blue-200/50 dark:border-blue-500/20 bg-gradient-to-br from-blue-50/70 via-gray-50/40 to-transparent dark:from-blue-500/[0.07] dark:via-gray-900/30 dark:to-transparent p-5"
         >
           <div className="flex items-center gap-3.5">

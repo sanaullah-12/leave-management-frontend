@@ -1,8 +1,10 @@
 import React from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 import Input from "../ui/Input";
+import { DUR, EASE, spring } from "../../lib/motion";
 /**
  * The header's global search.
  *
@@ -54,6 +56,7 @@ const GlobalSearch: React.FC<Props> = ({
   placeholder = "Search pages, settings, actions...",
   className = "",
 }) => {
+  const reduce = useReducedMotion();
   const navigate = useNavigate();
   const [query, setQuery] = React.useState("");
   const [open, setOpen] = React.useState(false);
@@ -178,12 +181,21 @@ const GlobalSearch: React.FC<Props> = ({
         )}
       </div>
 
-      {open && (
-        <div
+      {/* The panel grows out of the field rather than appearing over it, on
+          the same curve as every other menu in the app - see the POPOVER note
+          in Dropdown. Search is the one surface people summon and dismiss
+          dozens of times a day, so it also leaves faster than it arrives. */}
+      <AnimatePresence>
+        {open && (
+        <motion.div
           id="global-search-results"
           ref={listRef}
           role="listbox"
-          className="glass-panel absolute left-0 right-0 top-full z-[60] mt-2 max-h-[24rem] overflow-y-auto rounded-2xl p-1.5"
+          initial={reduce ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={reduce ? { opacity: 0 } : { opacity: 0, y: -4, scale: 0.98 }}
+          transition={{ duration: DUR.base, ease: EASE.out }}
+          className="glass-panel absolute left-0 right-0 top-full z-[60] mt-2 max-h-[24rem] origin-top overflow-y-auto rounded-2xl p-1.5"
         >
           {results.length === 0 ? (
             <div className="px-3 py-8 text-center">
@@ -225,14 +237,27 @@ const GlobalSearch: React.FC<Props> = ({
                           e.preventDefault();
                           go(entry);
                         }}
-                        className={`flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors ${
+                        className={`relative flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition-colors ${
                           isActive
-                            ? "bg-[rgb(var(--blue-600))]/10 text-gray-900 dark:text-white"
+                            ? "text-gray-900 dark:text-white"
                             : "text-gray-700 dark:text-gray-300"
                         }`}
                       >
+                        {/* The highlight slides down the list with the arrow
+                            keys instead of switching rows. On a list that is
+                            navigated by keyboard as often as this one, a tint
+                            that jumps gives no sense of direction - which is
+                            the only thing arrow keys are communicating. */}
+                        {isActive && (
+                          <motion.span
+                            layoutId={reduce ? undefined : "global-search-active"}
+                            transition={spring}
+                            aria-hidden="true"
+                            className="absolute inset-0 rounded-xl bg-[rgb(var(--blue-600))]/10"
+                          />
+                        )}
                         <span
-                          className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg transition-colors ${
+                          className={`relative z-10 grid h-7 w-7 shrink-0 place-items-center rounded-lg transition-colors ${
                             isActive
                               ? "bg-[rgb(var(--blue-600))] text-white"
                               : "bg-black/[0.04] text-gray-500 dark:bg-white/10 dark:text-gray-400"
@@ -240,14 +265,14 @@ const GlobalSearch: React.FC<Props> = ({
                         >
                           <Icon className="h-4 w-4" />
                         </span>
-                        <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                        <span className="relative z-10 min-w-0 flex-1 truncate text-sm font-medium">
                           {entry.name}
                         </span>
                         {/* Only where there is no heading above to say it.
                             Searching prints the area once per group; repeating
                             it on every row under that heading is noise. */}
                         {!query && (
-                          <span className="shrink-0 text-[11px] text-gray-400">
+                          <span className="relative z-10 shrink-0 text-[11px] text-gray-400">
                             {entry.group}
                           </span>
                         )}
@@ -258,8 +283,9 @@ const GlobalSearch: React.FC<Props> = ({
               ))}
             </>
           )}
-        </div>
-      )}
+        </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -10,6 +10,7 @@ import AuthLayout from "../components/auth/AuthLayout";
 import InlineLoader from "../components/InlineLoader";
 import { showInfoToast } from "../utils/toastHelpers";
 import { GoogleIcon, MicrosoftIcon } from "../components/BrandIcons";
+import Checkbox from "../components/ui/Checkbox";
 
 interface LoginCredentials {
   email: string;
@@ -130,15 +131,12 @@ const LoginPage: React.FC = () => {
             44px targets rather than a 16px box and a line of text. The label
             wraps the checkbox, so the padding is part of what is tappable. */}
         <div className="-mx-1 flex items-center justify-between gap-2">
-          <label className="flex min-h-[44px] cursor-pointer select-none items-center gap-2 px-1 text-sm text-gray-600 dark:text-gray-300">
-            <input
-              type="checkbox"
-              checked={remember}
-              onChange={(e) => setRemember(e.target.checked)}
-              className="h-[18px] w-[18px] rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            Remember me
-          </label>
+          <Checkbox
+            checked={remember}
+            onChange={setRemember}
+            label="Remember me"
+            className="min-h-[44px] px-1 text-sm text-gray-600 dark:text-gray-300"
+          />
           <Link
             to="/forgot-password"
             className="flex min-h-[44px] items-center px-1 text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"

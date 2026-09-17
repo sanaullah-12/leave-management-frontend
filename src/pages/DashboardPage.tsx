@@ -119,6 +119,8 @@ import {
   Tooltip,
 } from "recharts";
 import "../styles/design-system.css";
+import useChartMotion from "../hooks/useChartMotion";
+import { LoadSwap } from "../components/ui/motion";
 
 /*
  * Dashboard layout: 4-up KPI row, hero + gauges, chart + breakdown, then
@@ -309,6 +311,8 @@ const PanelCard: React.FC<{
 );
 
 const DashboardPage: React.FC = () => {
+  /* Recharts animates by default, to its own timing. See useChartMotion. */
+  const chartMotion = useChartMotion();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { colorScheme, isDark } = useTheme();
@@ -870,9 +874,13 @@ const DashboardPage: React.FC = () => {
       </motion.div>
 
       {/* ---------------- Top KPI row (4-up) ---------------- */}
-      {showCardsLoading ? (
-        <StatCardsSkeleton count={4} />
-      ) : (
+      {/* The figures cross over their own placeholders. The skeleton is
+          already the right shape, so nothing moves - only the shimmer gives
+          way to the numbers, which then roll up from zero on their own. */}
+      <LoadSwap
+        loading={showCardsLoading}
+        skeleton={<StatCardsSkeleton count={4} />}
+      >
         <motion.div
           variants={staggerItem}
           className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4"
@@ -881,7 +889,7 @@ const DashboardPage: React.FC = () => {
             <KpiCard key={i} {...c} accent={i % 2 === 0 ? "indigo" : "teal"} />
           ))}
         </motion.div>
-      )}
+      </LoadSwap>
 
       {/* ---------------- Announcements highlight (fresh 24h + pinned) ---------------- */}
       <DashboardAnnouncements />
@@ -982,6 +990,7 @@ const DashboardPage: React.FC = () => {
                   formatter={(v: any) => [`${v} requests`, "Leaves"]}
                 />
                 <Area
+                  {...chartMotion}
                   type="monotone"
                   dataKey="value"
                   stroke={accent}
@@ -1038,6 +1047,7 @@ const DashboardPage: React.FC = () => {
                   {/* One gradient for every bar: leave types aren't ranked,
                       so per-bar shading would imply an order. */}
                   <Bar
+                    {...chartMotion}
                     dataKey="value"
                     radius={[6, 6, 0, 0]}
                     maxBarSize={26}

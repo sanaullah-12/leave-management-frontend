@@ -28,6 +28,7 @@ import type {
   CompanyProfile,
   PageSettings,
 } from "./types";
+import { spring } from "../../lib/motion";
 
 interface Props {
   open: boolean;
@@ -365,7 +366,7 @@ const LetterheadManager: React.FC<Props> = ({
                   <motion.span
                     layoutId="brand-tab"
                     className="absolute inset-0 rounded-md bg-white shadow-sm dark:bg-gray-800"
-                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                    transition={spring}
                   />
                 )}
                 <t.icon className="relative z-10 h-4 w-4" />

@@ -1,4 +1,6 @@
 import React, { useMemo } from "react";
+import { motion } from "framer-motion";
+import useListRowMotion from "../../hooks/useListRowMotion";
 import {
   ArrowPathIcon,
   InboxIcon,
@@ -51,6 +53,7 @@ const MobileLeaveList: React.FC<Props> = ({
   isRefreshing,
   onOpen,
 }) => {
+  const listRow = useListRowMotion();
   // Derived from the unfiltered list, so every chip keeps a real number
   // whatever tab is active.
   const counts = useMemo(() => {
@@ -152,14 +155,15 @@ const MobileLeaveList: React.FC<Props> = ({
         </div>
       ) : (
         <div className="flex flex-col gap-3.5">
-          {leaves.map((leave) => {
+          {leaves.map((leave, i) => {
             const emp = employeeOf(leave);
             const tone = toneFor(leave.leaveType);
             const isPending = leave.status === "pending";
 
             return (
-              <button
+              <motion.button
                 key={leave._id}
+                {...listRow(i)}
                 type="button"
                 onClick={() => onOpen(leave)}
                 className="glass-card relative w-full overflow-hidden rounded-[18px] px-4 pb-3.5 pt-4 text-left transition-colors active:bg-black/[0.02] dark:active:bg-white/[0.03]"
@@ -185,7 +189,7 @@ const MobileLeaveList: React.FC<Props> = ({
                     {leave.leaveType}
                   </span>
                 </div>
-              </button>
+              </motion.button>
             );
           })}
         </div>

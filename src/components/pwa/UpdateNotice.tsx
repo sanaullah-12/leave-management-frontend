@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { spring } from "../../lib/motion";
 
 /**
  * UpdateNotice
@@ -22,7 +23,7 @@ const UpdateNotice: React.FC<UpdateNoticeProps> = ({ onReload }) => (
     initial={{ opacity: 0, y: -16 }}
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -16 }}
-    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+    transition={spring}
     /* Below the mobile app bar rather than over it: at top-3 the pill landed
        on the screen title, and on an installed iPhone inside the status bar.
        Desktop has no app bar in the way and keeps the original place. */

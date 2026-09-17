@@ -17,6 +17,7 @@ import type { VoiceCategory, VoicePriority } from "../../types/employeeVoice";
 
 import Input from "../ui/Input";
 import Button from "../ui/Button";
+import { popSpring, pressSpring } from "../../lib/motion";
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -146,7 +147,7 @@ const SubmitVoiceModal: React.FC<Props> = ({ open, onClose }) => {
             <motion.div
               initial={{ scale: 0.4, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 260, damping: 18 }}
+              transition={popSpring}
               className="relative"
             >
               <span className="absolute inset-0 -z-10 animate-ping rounded-full bg-emerald-400/30" />
@@ -404,7 +405,7 @@ const SubmitVoiceModal: React.FC<Props> = ({ open, onClose }) => {
               >
                 <motion.span
                   layout
-                  transition={{ type: "spring", stiffness: 500, damping: 32 }}
+                  transition={pressSpring}
                   className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow ${
                     isAnonymous ? "right-0.5" : "left-0.5"
                   }`}

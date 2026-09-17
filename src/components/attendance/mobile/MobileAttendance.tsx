@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import {
   ArrowDownTrayIcon,
   ArrowPathIcon,
@@ -26,6 +27,7 @@ import MobileDirectoryTab from "./MobileDirectoryTab";
 import MobileDaysTab from "./MobileDaysTab";
 import MobileDeviceTab from "./MobileDeviceTab";
 import { ABSENT_INK, IconButton, LATE_INK, WELL, WFH_INK } from "../../mobile/primitives";
+import { spring } from "../../../lib/motion";
 
 /**
  * Attendance on a phone.
@@ -405,13 +407,25 @@ const MobileAttendance: React.FC<Props> = (props) => {
               role="tab"
               aria-selected={on}
               onClick={() => setTab(item.key)}
-              className={`min-h-[36px] flex-1 rounded-[11px] px-1 text-[12px] font-semibold transition-colors ${
-                on
-                  ? "bg-[var(--card-surface)] text-gray-900 shadow-sm dark:text-white"
-                  : "text-gray-500 dark:text-gray-400"
+              className={`relative min-h-[36px] flex-1 rounded-[11px] px-1 text-[12px] font-semibold transition-colors ${
+                on ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400"
               }`}
             >
-              {item.label}
+              {/* One pill travelling between the tabs, not a background
+                  switching off one and on to another. Every selection strip in
+                  the app now does this on the same spring - the bottom bar's
+                  badge, the mobile filter chips, the leave status filter - so
+                  choosing a tab, a filter and a screen are recognisably the
+                  same gesture. */}
+              {on && (
+                <motion.span
+                  layoutId="attendance-screen-pill"
+                  transition={spring}
+                  aria-hidden="true"
+                  className="absolute inset-0 rounded-[11px] bg-[var(--card-surface)] shadow-sm"
+                />
+              )}
+              <span className="relative z-10">{item.label}</span>
             </button>
           );
         })}

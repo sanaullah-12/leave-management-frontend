@@ -96,9 +96,10 @@ const MobileEmployeeList: React.FC<Props> = ({
         }}
         isEmpty={employees.length === 0}
       >
-        {employees.map((e) => (
+        {employees.map((e, i) => (
           <MobileRow
             key={e._id}
+            index={i}
             title={e.name || "Unknown"}
             subtitle={`ID ${e.employeeId || "-"}`}
             tag={{

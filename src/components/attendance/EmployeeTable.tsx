@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import useListRowMotion from "../../hooks/useListRowMotion";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -77,6 +79,8 @@ const EmployeeTable: React.FC<Props> = ({
   statusFilter,
   onStatusFilterChange,
 }) => {
+  const phoneRow = useListRowMotion();
+  const tableRow = useListRowMotion(true);
   const [search, setSearch] = useState("");
   const [department, setDepartment] = useState("All");
   const [ownStatus, setOwnStatus] = useState("All");
@@ -306,8 +310,8 @@ const EmployeeTable: React.FC<Props> = ({
           </div>
         ) : (
           <ul className="divide-y divide-gray-100 dark:divide-gray-700/60">
-            {pageRows.map((row) => (
-              <li key={String(row.employee.employeeId)}>
+            {pageRows.map((row, i) => (
+              <motion.li key={String(row.employee.employeeId)} {...phoneRow(i)}>
                 <button
                   type="button"
                   onClick={() => onSelect(row.employee)}
@@ -336,7 +340,7 @@ const EmployeeTable: React.FC<Props> = ({
                     )}
                   </span>
                 </button>
-              </li>
+              </motion.li>
             ))}
           </ul>
         )}
@@ -390,9 +394,10 @@ const EmployeeTable: React.FC<Props> = ({
                 </td>
               </tr>
             ) : (
-              pageRows.map((row) => (
-                <tr
+              pageRows.map((row, i) => (
+                <motion.tr
                   key={String(row.employee.employeeId)}
+                  {...tableRow(i)}
                   onClick={() => onSelect(row.employee)}
                   tabIndex={0}
                   onKeyDown={(e) => {
@@ -448,7 +453,7 @@ const EmployeeTable: React.FC<Props> = ({
                       <EyeIcon className="h-4 w-4" />
                     </button>
                   </td>
-                </tr>
+                </motion.tr>
               ))
             )}
           </tbody>

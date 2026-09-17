@@ -16,6 +16,7 @@ import {
 import Select from "../../components/ui/Select";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import { staggerContainer, staggerItem } from "../../lib/motion";
+import useListRowMotion from "../../hooks/useListRowMotion";
 import { relativeTime } from "../../lib/surfaces";
 import { showSuccessToast } from "../../utils/toastHelpers";
 import { usePayroll } from "../../components/payroll/PayrollProvider";
@@ -329,11 +330,12 @@ const PayrollHistoryPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <AnimatePresence initial={false}>
-                    {filtered.map((run) => (
+                  <AnimatePresence>
+                    {filtered.map((run, i) => (
                       <RunRow
                         key={run.id}
                         run={run}
+                        index={i}
                         payslipCount={payslipsByRun.get(run.id)?.length ?? 0}
                         onExport={handleExport}
                         onMarkPaid={handleMarkPaid}
@@ -381,6 +383,8 @@ const PayrollHistoryPage: React.FC = () => {
 
 interface RowProps {
   run: PayrollRun;
+  /** Position in the list, which staggers the row's entrance. */
+  index: number;
   payslipCount: number;
   onExport: (run: PayrollRun) => void;
   onMarkPaid: (run: PayrollRun) => void;
@@ -389,11 +393,12 @@ interface RowProps {
 }
 
 const RunRow: React.FC<RowProps> = React.memo(
-  ({ run, payslipCount, onExport, onMarkPaid, onDelete, onOpenPayslips }) => (
+  ({ run, index, payslipCount, onExport, onMarkPaid, onDelete, onOpenPayslips }) => {
+    const listRow = useListRowMotion(true);
+    return (
     <motion.tr
       layout="position"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      {...listRow(index)}
       exit={{ opacity: 0 }}
       className="group border-b border-gray-100 transition-colors hover:bg-black/[0.02] dark:border-gray-800 dark:hover:bg-white/[0.03]"
     >
@@ -461,7 +466,8 @@ const RunRow: React.FC<RowProps> = React.memo(
         </div>
       </td>
     </motion.tr>
-  )
+    );
+  }
 );
 RunRow.displayName = "RunRow";
 

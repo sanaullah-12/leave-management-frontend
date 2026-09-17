@@ -215,7 +215,7 @@ const ApplyLeavePage: React.FC = () => {
   const bankUsedPct = bank.total > 0 ? (bank.used / bank.total) * 100 : 0;
 
   return (
-    <div className="space-y-6 fade-in">
+    <div className="space-y-6 stagger-children">
       {/* Header */}
       <SectionHeader
         variant="leave"

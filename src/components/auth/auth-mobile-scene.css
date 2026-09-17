@@ -1,0 +1,363 @@
+/* ==============================================================
+   AUTH MOBILE SCENE - ambient vignette above the phone login form
+   ==============================================================
+   The desktop hero (auth-hero.css + GSAP) never mounts below `lg`.
+   This is the phone's own, far cheaper answer: one inline SVG whose
+   ambient motion is pure CSS keyframes, so nothing but the markup
+   is downloaded and no timeline library runs on a handset.
+
+   Two rules hold everything here together:
+
+   1. Every animation touches only `transform`, `opacity` or `fill`.
+      Nothing in this file can trigger layout or paint of anything
+      but its own node, which is what keeps a permanently looping
+      illustration off the main thread of a mid-range phone.
+
+   2. Colour lives in CSS, never in the SVG markup. `var()` does not
+      resolve inside SVG presentation attributes, so a `fill="..."`
+      attribute would be frozen at one theme. Driving fill and
+      stop-color from these classes instead is what lets the whole
+      scene recolour with `--blue-*` across all thirteen themes.
+
+   The four fixed hues are the ecosystem palette from `ecosystem.ts`
+   - the Nexora mark's own blue and green plus the two brand tints.
+   Only the theme accent is variable, exactly as on the form side.
+   ============================================================== */
+
+/* --- geometry ------------------------------------------------ */
+
+/* The SVG carries its own viewBox, so the scene scales with the
+   card and needs no container query. The height is the one thing
+   worth pinning: it is the slice of a 390px-tall-ish fold this
+   illustration is allowed to spend before the fields are pushed
+   out of thumb reach. */
+.nxs-scene {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Every animated node rotates or scales about its own centre.
+   Without `fill-box` an SVG transform-origin resolves against the
+   viewport, which throws the spinner and the sway off-stage. */
+.nxs-spin,
+.nxs-twinkle,
+.nxs-sway,
+.nxs-pop {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* The frond bends from where it meets the ground, not its middle. */
+.nxs-sway {
+  transform-origin: bottom center;
+}
+
+/* --- palette ------------------------------------------------- */
+
+/* Two of the four hues in the sweep are the active theme's, so the
+   doorway itself shifts with the palette rather than only the props
+   around it. The other two are the brand green and violet that
+   `.hrms-gradient` uses for the wordmark, which is what keeps every
+   theme still reading as Nexora. */
+.nxs-arch-stop-a {
+  stop-color: rgb(var(--blue-300));
+}
+.nxs-arch-stop-b {
+  stop-color: #2fc98d;
+}
+.nxs-arch-stop-c {
+  stop-color: rgb(var(--blue-500));
+}
+.nxs-arch-stop-d {
+  stop-color: #a78bfa;
+}
+/* Repeats stop A so the flowing gradient meets itself seamlessly
+   when it wraps, the same trick `.hrms-gradient` uses. */
+.nxs-arch-stop-e {
+  stop-color: rgb(var(--blue-300));
+}
+
+.nxs-arch-rim {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.28);
+  stroke-width: 1.5;
+}
+
+/* Theme-tinted halo behind the doorway. Kept well under 0.2 alpha: it is
+   meant to lift the arch off the card, not to be seen as a shape. */
+.nxs-glow-stop-in {
+  stop-color: rgb(var(--blue-400) / 0.28);
+}
+.nxs-glow-stop-out {
+  stop-color: rgb(var(--blue-400) / 0);
+}
+
+.nxs-step {
+  fill: rgb(var(--blue-500) / 0.5);
+}
+.nxs-step-edge {
+  fill: rgb(var(--blue-300) / 0.85);
+}
+
+.nxs-ground {
+  stroke: rgb(255 255 255 / 0.14);
+  stroke-width: 1;
+}
+
+.nxs-climber {
+  fill: rgb(255 255 255 / 0.92);
+}
+
+.nxs-toggle-track {
+  fill: rgb(255 255 255 / 0.13);
+  stroke: rgb(255 255 255 / 0.16);
+  stroke-width: 1;
+}
+
+.nxs-field-line {
+  stroke: rgb(255 255 255 / 0.2);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+.nxs-field-text {
+  stroke: rgb(255 255 255 / 0.38);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.nxs-caret {
+  fill: rgb(var(--blue-300));
+}
+
+.nxs-burst {
+  stroke: rgb(var(--blue-300) / 0.8);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.nxs-burst-core {
+  fill: rgb(var(--blue-400));
+}
+
+.nxs-frond {
+  stroke: #2fc98d;
+  stroke-width: 2;
+  stroke-linecap: round;
+  fill: none;
+  opacity: 0.6;
+}
+
+.nxs-sparkle {
+  fill: #a78bfa;
+}
+
+.nxs-check {
+  fill: none;
+  stroke: #2fc98d;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.nxs-check-ring {
+  fill: rgb(47 201 141 / 0.14);
+  stroke: rgb(47 201 141 / 0.4);
+  stroke-width: 1;
+}
+
+/* --- ambient motion ------------------------------------------ */
+
+/* The arch gradient flows rather than sits. A clipped rect twice
+   the stage width slides one stage width and restarts; because the
+   gradient's first and last stop are the same colour the wrap is
+   invisible and the loop needs no reverse. */
+@keyframes nxs-flow {
+  to {
+    transform: translateX(-160px);
+  }
+}
+.nxs-flow {
+  animation: nxs-flow 9s linear infinite;
+}
+
+/* A dot climbing the three steps towards the arch, with a small
+   hop off each tread. Percentages are paired so the dot sits still
+   for a beat on each step instead of gliding continuously. */
+@keyframes nxs-climb {
+  0%,
+  6% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  10% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  20% {
+    transform: translate(15px, -19px);
+  }
+  30%,
+  36% {
+    transform: translate(30px, -14px);
+  }
+  46% {
+    transform: translate(45px, -33px);
+  }
+  56%,
+  62% {
+    transform: translate(60px, -28px);
+  }
+  72% {
+    transform: translate(75px, -47px);
+  }
+  82%,
+  86% {
+    transform: translate(90px, -42px);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(112px, -60px);
+    opacity: 0;
+  }
+}
+.nxs-climb {
+  animation: nxs-climb 7s cubic-bezier(0.45, 0, 0.35, 1) infinite;
+}
+
+/* The clock-in toggle: the knob slides the width of the track and
+   changes colour with it, slate while off and brand green once in.
+   One keyframe drives both so they can never fall out of step. */
+@keyframes nxs-toggle {
+  0%,
+  34% {
+    transform: translateX(0);
+    fill: #94a3b8;
+  }
+  50%,
+  84% {
+    transform: translateX(17px);
+    fill: #2fc98d;
+  }
+  100% {
+    transform: translateX(0);
+    fill: #94a3b8;
+  }
+}
+.nxs-toggle-knob {
+  animation: nxs-toggle 6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* A caret in the field below it. `steps(1)` keeps the edge hard -
+   a fading caret reads as a glow, not as a cursor. */
+@keyframes nxs-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+.nxs-blink {
+  animation: nxs-blink 1.1s steps(1, end) infinite;
+}
+
+@keyframes nxs-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.nxs-spin {
+  animation: nxs-spin 24s linear infinite;
+}
+
+@keyframes nxs-sway {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+.nxs-sway {
+  animation: nxs-sway 5.5s ease-in-out infinite;
+}
+
+@keyframes nxs-twinkle {
+  0%,
+  100% {
+    transform: scale(0.72) rotate(0deg);
+    opacity: 0.32;
+  }
+  50% {
+    transform: scale(1) rotate(45deg);
+    opacity: 0.95;
+  }
+}
+.nxs-twinkle {
+  animation: nxs-twinkle 3.6s ease-in-out infinite;
+}
+
+/* The approval chip lands, holds, and leaves - the one event in an
+   otherwise continuous scene, so the eye has something to catch. */
+@keyframes nxs-pop {
+  0%,
+  8% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  18%,
+  70% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  84%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+}
+.nxs-pop {
+  animation: nxs-pop 8s ease-in-out infinite;
+}
+
+/* The whole arch breathes, a couple of pixels, off the same clock
+   as nothing else in the scene - so the composition never lines up
+   into a visible pulse. */
+@keyframes nxs-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+.nxs-float {
+  animation: nxs-float 6.5s ease-in-out infinite;
+}
+
+/* --- reduced motion ------------------------------------------ */
+/* The scene is decoration, so the honest reduced-motion answer is
+   the composition at rest, not a slower version of it. The climber
+   and the approval chip are keyframe-positioned and would sit in a
+   half-finished pose, so they are hidden outright; everything else
+   is already drawn in its resting state. */
+
+@media (prefers-reduced-motion: reduce) {
+  .nxs-flow,
+  .nxs-toggle-knob,
+  .nxs-blink,
+  .nxs-spin,
+  .nxs-sway,
+  .nxs-twinkle,
+  .nxs-float {
+    animation: none;
+  }
+
+  .nxs-climb,
+  .nxs-pop {
+    animation: none;
+    opacity: 0;
+  }
+}

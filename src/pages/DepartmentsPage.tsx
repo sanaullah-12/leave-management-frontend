@@ -43,7 +43,7 @@ const DepartmentsPage: React.FC = () => {
   const totalMembers = departments.reduce((n, d) => n + d.members.length, 0);
 
   return (
-    <div className="space-y-6 fade-in">
+    <div className="space-y-6 stagger-children">
       {/* Header */}
       <SectionHeader
         variant="departments"

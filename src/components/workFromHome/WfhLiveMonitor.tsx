@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { motion } from "framer-motion";
+import useListRowMotion from "../../hooks/useListRowMotion";
 import {
   BellAlertIcon,
   ChevronRightIcon,
@@ -142,6 +144,7 @@ const MobileMonitorCard: React.FC<{
 };
 
 const WfhLiveMonitor: React.FC<Props> = ({ date }) => {
+  const listRow = useListRowMotion(true);
   const { data, isLoading } = useWfhLiveMonitor(true, date);
   const [openId, setOpenId] = useState<string | null>(null);
   const [openName, setOpenName] = useState<string>("");
@@ -288,12 +291,13 @@ const WfhLiveMonitor: React.FC<Props> = ({ date }) => {
                   </td>
                 </tr>
               ) : (
-                sorted.map((row) => {
+                sorted.map((row, i) => {
                   const session = row.session;
                   const worked = workedMs(row, now, grace);
                   return (
-                    <tr
+                    <motion.tr
                       key={row.employee._id}
+                      {...listRow(i)}
                       onClick={() => {
                         if (!session) return;
                         setOpenId(session._id);
@@ -379,7 +383,7 @@ const WfhLiveMonitor: React.FC<Props> = ({ date }) => {
                           <span className="text-sm text-gray-400">-</span>
                         )}
                       </td>
-                    </tr>
+                    </motion.tr>
                   );
                 })
               )}

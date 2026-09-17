@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import NexoraLoaderMark from "./NexoraLoaderMark";
+import { EASE } from "../lib/motion";
 
 interface BrandedLoaderProps {
   /** Fixed message (disables cycling). */
@@ -88,7 +89,7 @@ const BrandedLoader: React.FC<BrandedLoaderProps> = ({
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.6, ease: EASE.out }}
           style={{ filter: "drop-shadow(0 12px 30px rgba(37,99,235,0.16))" }}
         >
           <NexoraLoaderMark size={104} />
@@ -98,7 +99,7 @@ const BrandedLoader: React.FC<BrandedLoaderProps> = ({
         <motion.p
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ delay: 0.15, duration: 0.5, ease: EASE.out }}
           className="mt-5 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
         >
           Nexora
@@ -108,7 +109,7 @@ const BrandedLoader: React.FC<BrandedLoaderProps> = ({
         <motion.p
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 0.6, y: 0 }}
-          transition={{ delay: 0.28, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ delay: 0.28, duration: 0.5, ease: EASE.out }}
           className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.32em] text-gray-500 dark:text-gray-400"
         >
           The HRMS System

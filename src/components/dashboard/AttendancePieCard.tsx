@@ -4,6 +4,7 @@ import { CARD } from "../../lib/surfaces";
 import { AccentEdge } from "../ui/CardAccents";
 import { useThemeAccent } from "../../hooks/useThemeAccent";
 import { attendanceAPI } from "../../services/api";
+import useChartMotion from "../../hooks/useChartMotion";
 
 /**
  * This month's attendance so far, as a donut.
@@ -62,6 +63,8 @@ function monthToDateRange() {
 }
 
 const AttendancePieCard: React.FC<Props> = ({ role, employeeId }) => {
+  /* Recharts animates by default, to its own timing. See useChartMotion. */
+  const chartMotion = useChartMotion();
   const accent = useThemeAccent(600);
   const [slices, setSlices] = useState<
     { name: string; value: number; color: string }[]
@@ -202,6 +205,7 @@ const AttendancePieCard: React.FC<Props> = ({ role, employeeId }) => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
+                  {...chartMotion}
                   data={shown}
                   dataKey="value"
                   nameKey="name"

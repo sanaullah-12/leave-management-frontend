@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import StatusBadge from "./StatusBadge";
 import type { RosterDayRow, RosterTotals } from "./RosterTables";
 import { byArrival, groupByStatus } from "./rosterGrouping";
+import { spring } from "../../lib/motion";
 
 /**
  * Today's attendance, for a phone.
@@ -136,11 +138,28 @@ const StatusTabs: React.FC<{
               role="tab"
               aria-selected={on}
               onClick={() => onSelect(tab.key)}
-              className={`flex min-h-[34px] flex-none items-center gap-1.5 whitespace-nowrap rounded-[11px] px-2.5 text-[12px] font-semibold transition-colors ${
+              className={`relative flex min-h-[34px] flex-none items-center gap-1.5 whitespace-nowrap rounded-[11px] px-2.5 text-[12px] font-semibold transition-colors ${
                 on ? "text-white" : "text-gray-500 dark:text-gray-400"
               }`}
-              style={on ? { backgroundColor: tab.color } : undefined}
             >
+              {/* One pill travelling between the tabs, not a background
+                  switching off one and on to another. Every selection strip in
+                  the app now does this on the same spring - the bottom bar's
+                  badge, the mobile filter chips, the leave status filter - so
+                  choosing a tab, a filter and a screen are recognisably the
+                  same gesture. */}
+              {/* The fill carries the status colour, so it recolours as it
+                  travels rather than after it lands - the tab you picked is
+                  the colour it is going to be for the whole trip. */}
+              {on && (
+                <motion.span
+                  layoutId="attendance-status-pill"
+                  transition={spring}
+                  aria-hidden="true"
+                  animate={{ backgroundColor: tab.color }}
+                  className="absolute inset-0 rounded-[11px]"
+                />
+              )}
               {/* The dot carries the status colour while the tab is not
                   selected; selected, the tab itself is that colour, so a dot
                   would be printing it twice. */}

@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import AppLogo from "../AppLogo";
 import { EASE } from "./primitives";
+import { popSpring } from "../../lib/motion";
 
 /* ============================================================
    Nexora is an invite-only, enterprise HRMS - there's no
@@ -80,7 +81,7 @@ export const ContactModal: React.FC<{ open: boolean; onClose: () => void }> = ({
               <motion.div
                 initial={{ scale: 0.6, opacity: 0, rotate: -8 }}
                 animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                transition={{ delay: 0.05, type: "spring", stiffness: 260, damping: 18 }}
+                transition={{ ...popSpring, delay: 0.05 }}
                 className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-emerald-500 shadow-lg shadow-blue-500/30"
               >
                 {!reduce && (

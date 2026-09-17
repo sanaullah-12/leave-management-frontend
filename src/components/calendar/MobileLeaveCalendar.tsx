@@ -1,4 +1,6 @@
 import React, { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import useListRowMotion from "../../hooks/useListRowMotion";
 import {
   startOfMonth,
   endOfMonth,
@@ -101,6 +103,7 @@ const MobileLeaveCalendar: React.FC<Props> = ({
   cursor,
   onCursorChange,
 }) => {
+  const listRow = useListRowMotion();
   const [view, setView] = useState<"month" | "agenda">("month");
   const [selected, setSelected] = useState<Date>(() => new Date());
 
@@ -313,10 +316,14 @@ const MobileLeaveCalendar: React.FC<Props> = ({
               </p>
             ) : (
               <div className="mt-3.5 flex flex-col gap-3">
-                {selectedItems.map((lv) => {
+                {selectedItems.map((lv, i) => {
                   const progress = progressOf(lv, selected);
                   return (
-                    <div key={lv._id} className="flex items-center gap-3">
+                    <motion.div
+                      key={lv._id}
+                      {...listRow(i)}
+                      className="flex items-center gap-3"
+                    >
                       <InitialsTile name={nameOf(lv)} />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-[14px] font-bold text-gray-900 dark:text-white">
@@ -335,7 +342,7 @@ const MobileLeaveCalendar: React.FC<Props> = ({
                       >
                         {lv.leaveType}
                       </span>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>
@@ -350,10 +357,14 @@ const MobileLeaveCalendar: React.FC<Props> = ({
               No leave booked in {format(cursor, "MMMM")}.
             </p>
           ) : (
-            agenda.map(({ day, items }) => {
+            agenda.map(({ day, items }, i) => {
               const isToday = isSameDay(day, today);
               return (
-                <div key={day.toISOString()} className="flex gap-3 p-3.5">
+                <motion.div
+                  key={day.toISOString()}
+                  {...listRow(i)}
+                  className="flex gap-3 p-3.5"
+                >
                   <div className="w-9 shrink-0 text-center">
                     <div
                       className={`text-[19px] font-extrabold tabular-nums leading-none ${
@@ -393,7 +404,7 @@ const MobileLeaveCalendar: React.FC<Props> = ({
                       );
                     })}
                   </div>
-                </div>
+                </motion.div>
               );
             })
           )}

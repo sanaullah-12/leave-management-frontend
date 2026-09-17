@@ -43,6 +43,12 @@ export interface SelectProps {
   disabled?: boolean;
 }
 
+/** Shared with Dropdown and DatePicker - see the note in Dropdown. */
+const POPOVER =
+  "origin-top transition duration-[220ms] ease-[cubic-bezier(0.22,1,0.36,1)] " +
+  "data-[closed]:-translate-y-1 data-[closed]:scale-95 data-[closed]:opacity-0 " +
+  "data-[leave]:duration-[160ms] data-[leave]:ease-[cubic-bezier(0.64,0,0.78,0)]";
+
 const Select: React.FC<SelectProps> = ({
   value,
   onChange,
@@ -56,7 +62,7 @@ const Select: React.FC<SelectProps> = ({
   return (
     <Listbox value={value} onChange={onChange} disabled={disabled}>
       <div className={`relative ${className}`}>
-        <ListboxButton className="flex w-full items-center gap-2.5 rounded-full bg-[var(--card-surface)] h-11 sm:h-10 px-4 text-left text-sm font-medium text-gray-800 ring-1 ring-inset ring-gray-200/70 transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60 dark:text-gray-100 dark:ring-white/10">
+        <ListboxButton className="group flex w-full items-center gap-2.5 rounded-full bg-[var(--card-surface)] h-11 sm:h-10 px-4 text-left text-sm font-medium text-gray-800 ring-1 ring-inset ring-gray-200/70 transition-[box-shadow,transform] duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500/50 active:scale-[0.98] disabled:opacity-60 dark:text-gray-100 dark:ring-white/10">
           {selected?.dotColor && (
             <span
               className="h-2 w-2 flex-shrink-0 rounded-full"
@@ -70,7 +76,7 @@ const Select: React.FC<SelectProps> = ({
           <span className={`flex-1 truncate ${selected ? "" : "text-gray-400"}`}>
             {selected ? selected.label : placeholder}
           </span>
-          <ChevronUpDownIcon className="h-4 w-4 flex-shrink-0 text-gray-400" />
+          <ChevronUpDownIcon className="h-4 w-4 flex-shrink-0 text-gray-400 transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[open]:rotate-180" />
         </ListboxButton>
 
         <ListboxOptions
@@ -79,7 +85,7 @@ const Select: React.FC<SelectProps> = ({
           // roster - would otherwise run off the bottom of the screen with its
           // last options unreachable. Short lists are unaffected, since a
           // max-height only applies to a list that exceeds it.
-          className="glass-panel scroll-pane z-[110] mt-2 max-h-[min(18rem,55dvh)] w-[var(--button-width)] rounded-xl p-1.5 focus:outline-none origin-top transition ease-out data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-150 data-[leave]:duration-100"
+          className={`glass-panel scroll-pane z-[110] mt-2 max-h-[min(18rem,55dvh)] w-[var(--button-width)] rounded-xl p-1.5 focus:outline-none ${POPOVER}`}
         >
           {options.map((opt) => (
             <ListboxOption
@@ -108,7 +114,7 @@ const Select: React.FC<SelectProps> = ({
                   {opt.badge}
                 </span>
               )}
-              <CheckIcon className="h-4 w-4 flex-shrink-0 text-blue-500 opacity-0 group-data-[selected]:opacity-100" />
+              <CheckIcon className="h-4 w-4 flex-shrink-0 scale-75 text-blue-500 opacity-0 transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[selected]:scale-100 group-data-[selected]:opacity-100" />
             </ListboxOption>
           ))}
         </ListboxOptions>

@@ -190,7 +190,7 @@ const MyLeaveActivityPage: React.FC = () => {
       : user.department;
 
   return (
-    <div className="space-y-6 fade-in">
+    <div className="space-y-6 stagger-children">
       {/* Header */}
       <SectionHeader
         variant="leave"

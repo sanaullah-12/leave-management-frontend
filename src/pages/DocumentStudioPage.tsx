@@ -22,7 +22,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { usersAPI } from "../services/api";
 import { showSuccessToast, showErrorToast } from "../utils/toastHelpers";
-import { staggerContainer, staggerItem } from "../lib/motion";
+import { panelSpring, staggerContainer, staggerItem } from "../lib/motion";
 import Modal from "../components/ui/Modal";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
 import { useStudioStore } from "../components/documentStudio/useStudioStore";
@@ -661,7 +661,7 @@ const DocumentStudioPage: React.FC = () => {
                 initial={{ x: -28, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: -28, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 320, damping: 34 }}
+                transition={panelSpring}
                 className="absolute inset-y-0 left-0 z-30 w-[320px] max-w-[88%] p-2"
               >
                 <div className="relative h-full rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10">
@@ -703,7 +703,7 @@ const DocumentStudioPage: React.FC = () => {
                 initial={{ x: 28, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: 28, opacity: 0 }}
-                transition={{ type: "spring", stiffness: 320, damping: 34 }}
+                transition={panelSpring}
                 className="absolute inset-y-0 right-0 z-30 w-[330px] max-w-[88%] p-2"
               >
                 <div className="relative h-full rounded-2xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10">

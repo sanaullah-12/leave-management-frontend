@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { motion } from "framer-motion";
+import useListRowMotion from "../../hooks/useListRowMotion";
 import { ClockIcon } from "@heroicons/react/24/outline";
 import LateHoursSummary from "./LateHoursSummary";
 import type { LateEntry, LateSummary } from "../../hooks/useLateHours";
@@ -44,6 +46,7 @@ const LateHoursCard: React.FC<Props> = ({
   emptyMessage,
 }) => {
   const [showAll, setShowAll] = useState(false);
+  const listRow = useListRowMotion(true);
 
   const rows = showAll ? entries : entries.slice(0, previewRows);
 
@@ -113,8 +116,8 @@ const LateHoursCard: React.FC<Props> = ({
                 </tr>
               </thead>
               <tbody>
-                {rows.map((entry) => (
-                  <tr key={entry.date}>
+                {rows.map((entry, i) => (
+                  <motion.tr key={entry.date} {...listRow(i)}>
                     <td
                       className={`${cell} text-sm text-gray-700 dark:text-gray-200`}
                     >
@@ -135,7 +138,7 @@ const LateHoursCard: React.FC<Props> = ({
                     >
                       {entry.lateDisplay}
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))}
               </tbody>
               <tfoot>
