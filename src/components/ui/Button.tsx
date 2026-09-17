@@ -1,4 +1,7 @@
 import React, { forwardRef } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { CheckIcon } from "@heroicons/react/24/solid";
+import { DUR, EASE, pressSpring } from "../../lib/motion";
 
 /**
  * The app's one button.
@@ -6,12 +9,32 @@ import React, { forwardRef } from "react";
  * The material - glass fill, hairline edge, sheen, accent gradient - lives in
  * the shared .btn-* classes in design-system.css, so this component and the
  * plain `className="btn-primary"` call sites stay the same thing. What the
- * component adds is a typed API over it: variant, size, icons and a loading
- * state that cannot get out of sync with `disabled`.
+ * component adds is a typed API over it: variant, size, icons, and busy and
+ * done states that cannot get out of sync with `disabled`.
  *
  * Shape is a pill at every size. Tailwind utilities are emitted after
  * design-system.css, so the size classes here override the default height and
  * padding the .btn-* rules set.
+ *
+ * MOTION
+ * ------
+ * A button is the control the whole product is judged on, because it is the
+ * one the user is touching at the moment they are waiting to find out whether
+ * anything happened. Three things are animated, and nothing else is:
+ *
+ *   Press. A 4% shrink on a spring stiff enough to finish before the finger
+ *   lifts. This is feedback, not animation - it exists so the tap is
+ *   acknowledged in the same frame it lands, well before the request it
+ *   started comes back.
+ *
+ *   Busy. The label is replaced rather than the whole button, and the button
+ *   holds its width while that happens. A button that resizes when it starts
+ *   working moves the thing next to it, and on a footer of two actions that
+ *   means Cancel sliding out from under a finger that is already on its way.
+ *
+ *   Done. The brief tick in `success`. Worth having because the alternative -
+ *   a toast - appears somewhere else on the screen, and the user is looking
+ *   here. It is the same mark as `<SuccessCheck>`, one size down.
  */
 
 export type ButtonVariant =
@@ -23,8 +46,27 @@ export type ButtonVariant =
 
 export type ButtonSize = "xs" | "sm" | "md" | "lg";
 
-export interface ButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "size"> {
+/**
+ * React's animation and drag handlers collide with Framer's props of the same
+ * names, so they are dropped rather than left to resolve to the wrong one.
+ * Nothing in the app passes them to a button.
+ */
+type NativeButtonProps = Omit<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  | "size"
+  | "onAnimationStart"
+  | "onAnimationEnd"
+  | "onAnimationIteration"
+  | "onDrag"
+  | "onDragStart"
+  | "onDragEnd"
+  | "onDragEnter"
+  | "onDragLeave"
+  | "onDragOver"
+  | "onDrop"
+>;
+
+export interface ButtonProps extends NativeButtonProps {
   variant?: ButtonVariant;
   size?: ButtonSize;
   /** Leading icon, e.g. PlusIcon from @heroicons. */
@@ -33,6 +75,13 @@ export interface ButtonProps
   iconRight?: React.ComponentType<{ className?: string }>;
   /** Swaps the leading icon for a spinner and disables the button. */
   loading?: boolean;
+  /**
+   * Shows a tick in place of the label. The caller owns the timing: set it
+   * when the work lands and clear it a second or so later.
+   */
+  success?: boolean;
+  /** Label for the done state. Defaults to keeping the button's own children. */
+  successLabel?: string;
   /** Stretch to the container width. */
   fullWidth?: boolean;
   /** Square pill for an icon with no label. */
@@ -95,6 +144,9 @@ const Spinner: React.FC<{ className?: string }> = ({ className = "" }) => (
   </svg>
 );
 
+/** How the three states cross over. Short: this is a swap, not a journey. */
+const SWAP = { duration: DUR.fast, ease: EASE.out } as const;
+
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
@@ -103,6 +155,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       icon: Icon,
       iconRight: IconRight,
       loading = false,
+      success = false,
+      successLabel,
       fullWidth = false,
       iconOnly = false,
       disabled,
@@ -113,29 +167,79 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
+    const reduce = useReducedMotion();
     const iconClass = ICON_SIZE[size];
 
+    /* Which of the three faces is showing. A single key rather than nested
+       ternaries inside the tree, so AnimatePresence sees one swap and not a
+       different element identity for every combination. */
+    const state = loading ? "loading" : success ? "success" : "idle";
+
+    const face = (() => {
+      if (state === "loading") {
+        return (
+          <>
+            <Spinner className={iconClass} />
+            {!iconOnly && children}
+          </>
+        );
+      }
+      if (state === "success") {
+        return (
+          <>
+            <CheckIcon className={iconClass} />
+            {!iconOnly && (successLabel ?? children)}
+          </>
+        );
+      }
+      return (
+        <>
+          {Icon && <Icon className={iconClass} />}
+          {!iconOnly && children}
+          {IconRight && <IconRight className={iconClass} />}
+        </>
+      );
+    })();
+
     return (
-      <button
+      <motion.button
         {...props}
         ref={ref}
         type={type}
         disabled={disabled || loading}
         aria-busy={loading || undefined}
-        className={`inline-flex items-center justify-center rounded-full font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+        /* Press is suppressed while busy or done: a control that still answers
+           a tap it is not going to act on is worse than one that plainly does
+           not respond. */
+        whileTap={
+          reduce || disabled || loading || success ? undefined : { scale: 0.96 }
+        }
+        transition={pressSpring}
+        className={`relative inline-flex items-center justify-center rounded-full font-semibold transition-[background-color,box-shadow,opacity,color] duration-200 disabled:cursor-not-allowed disabled:opacity-60 ${
           VARIANTS[variant]
         } ${iconOnly ? ICON_ONLY[size] : SIZES[size]} ${
           fullWidth ? "w-full" : ""
         } ${className}`}
       >
-        {loading ? (
-          <Spinner className={iconClass} />
-        ) : (
-          Icon && <Icon className={iconClass} />
-        )}
-        {!iconOnly && children}
-        {!loading && IconRight && <IconRight className={iconClass} />}
-      </button>
+        {/* `mode="popLayout"` takes the outgoing face out of the flow while it
+            leaves, so the incoming one is centred from its first frame instead
+            of being shouldered aside by the label it is replacing. The two
+            faces differ only by which glyph leads them, so the button's width
+            moves by an icon at most - and it moves once, on the swap, rather
+            than tracking a spinner in and out. */}
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.span
+            key={state}
+            className="inline-flex items-center justify-center gap-[inherit]"
+            initial={reduce ? { opacity: 0 } : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6 }}
+            transition={SWAP}
+          >
+            {face}
+          </motion.span>
+        </AnimatePresence>
+      </motion.button>
     );
   }
 );

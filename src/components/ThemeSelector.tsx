@@ -5,6 +5,7 @@ import { SunIcon, MoonIcon, ComputerDesktopIcon } from "@heroicons/react/24/outl
 import { useTheme, COLOR_SCHEMES } from "../context/ThemeContext";
 import type { ColorScheme, ThemeMode } from "../context/ThemeContext";
 import { ACCENT_HEX, SCHEME_LABEL } from "../lib/themeTokens";
+import { popSpring } from "../lib/motion";
 
 interface ColorOption {
   key: ColorScheme;
@@ -165,7 +166,7 @@ const ThemeSelector: React.FC<{ showPreview?: boolean }> = () => {
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 22 }}
+                    transition={popSpring}
                     className="ml-auto flex h-5 w-5 items-center justify-center rounded-full text-white"
                     style={{ backgroundColor: c.color }}
                   >

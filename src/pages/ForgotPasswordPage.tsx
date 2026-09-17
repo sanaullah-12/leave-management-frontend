@@ -12,6 +12,7 @@ import {
 import AuthLayout from "../components/auth/AuthLayout";
 import Input from "../components/ui/Input";
 import InlineLoader from "../components/InlineLoader";
+import { popSpring } from "../lib/motion";
 
 interface ForgotPasswordForm {
   email: string;
@@ -48,7 +49,7 @@ const ForgotPasswordPage: React.FC = () => {
           <motion.div
             initial={{ scale: 0.4, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 320, damping: 20 }}
+            transition={popSpring}
             className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-500/10"
           >
             <CheckCircleIcon className="h-9 w-9 text-emerald-500" />

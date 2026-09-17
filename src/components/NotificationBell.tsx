@@ -6,6 +6,7 @@ import { BellIcon } from "@heroicons/react/24/outline";
 import { useNotifications, voiceIdOf } from "../hooks/useNotifications";
 import { NOTIFICATION_META, isVoiceNotification } from "../lib/voiceMeta";
 import type { AppNotification } from "../types/employeeVoice";
+import { panelSpring } from "../lib/motion";
 
 /**
  * Where opening a notification should take you.
@@ -91,7 +92,7 @@ const NotificationBell: React.FC<{ compact?: boolean }> = ({
             initial={{ opacity: 0, y: -8, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.97 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            transition={panelSpring}
             /* On a phone the panel is pinned to the screen rather than hung
                off the bell. Anchored to the button it opened leftward from a
                point ~60px in from the right edge, so a 22rem panel ran off

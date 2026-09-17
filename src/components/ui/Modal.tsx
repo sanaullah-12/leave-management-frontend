@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
+import { DUR, EASE, panelSpring, pressSpring } from "../../lib/motion";
 
 const SIZES = {
   sm: "sm:max-w-md",
@@ -85,7 +86,7 @@ const Modal: React.FC<ModalProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: DUR.base, ease: EASE.out }}
             onClick={closeOnBackdrop ? onClose : undefined}
           />
 
@@ -101,17 +102,17 @@ const Modal: React.FC<ModalProps> = ({
             animate={
               reduce
                 ? { opacity: 1 }
-                : {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    transition: { type: "spring", stiffness: 320, damping: 30 },
-                  }
+                : { opacity: 1, y: 0, scale: 1, transition: panelSpring }
             }
             exit={
               reduce
                 ? { opacity: 0 }
-                : { opacity: 0, y: 16, scale: 0.98, transition: { duration: 0.15 } }
+                : {
+                    opacity: 0,
+                    y: 16,
+                    scale: 0.98,
+                    transition: { duration: DUR.fast, ease: EASE.in },
+                  }
             }
             /* On phones this is a near-full-height sheet rather than a small
                centred box: a dialog occupying a third of the screen forces its
@@ -148,7 +149,7 @@ const Modal: React.FC<ModalProps> = ({
               <motion.button
                 whileHover={{ rotate: 90, scale: 1.05 }}
                 whileTap={{ scale: 0.9 }}
-                transition={{ type: "spring", stiffness: 500, damping: 24 }}
+                transition={pressSpring}
                 onClick={onClose}
                 aria-label="Close"
                 // 44px hit area on touch, the original 32px box from sm up.

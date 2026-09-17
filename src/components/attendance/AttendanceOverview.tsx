@@ -14,6 +14,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import useChartMotion from "../../hooks/useChartMotion";
 
 /**
  * The overview pair: a chart of the range beside the split by status.
@@ -123,6 +124,8 @@ const AttendanceOverview: React.FC<Props> = ({
   loading = false,
   emptyMessage,
 }) => {
+  /* Recharts animates by default, to its own timing. See useChartMotion. */
+  const chartMotion = useChartMotion();
   const accent = useThemeAccent(600);
 
   // A zero slice draws nothing but still adds a legend entry, so it is dropped
@@ -156,6 +159,7 @@ const AttendanceOverview: React.FC<Props> = ({
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
+                  {...chartMotion}
                   data={pieSlices}
                   dataKey="count"
                   nameKey="label"
@@ -239,8 +243,15 @@ const AttendanceOverview: React.FC<Props> = ({
                 cursor={{ fill: "rgb(var(--blue-600) / 0.06)" }}
                 content={<TooltipCard />}
               />
-              <Bar dataKey="onTime" stackId="a" fill={ON_TIME} name="On time" />
               <Bar
+                {...chartMotion}
+                dataKey="onTime"
+                stackId="a"
+                fill={ON_TIME}
+                name="On time"
+              />
+              <Bar
+                {...chartMotion}
                 dataKey="late"
                 stackId="a"
                 fill={LATE}

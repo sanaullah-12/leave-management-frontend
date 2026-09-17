@@ -28,6 +28,7 @@ import TypingDots from "./TypingDots";
 import { useAssistant } from "./useAssistant";
 
 import Input from "../ui/Input";
+import { panelSpring } from "../../lib/motion";
 interface Props {
   open: boolean;
   closePanel: () => void;
@@ -143,7 +144,7 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
             initial={reduce ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 320, damping: 30 }}
+            transition={panelSpring}
             style={{ transformOrigin: "bottom right" }}
             className={
               "fixed z-[90] flex flex-col overflow-hidden border-gray-200/80 bg-gray-50/95 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-gray-900/95 " +

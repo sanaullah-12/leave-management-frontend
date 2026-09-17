@@ -1,6 +1,9 @@
 import React from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { InboxIcon } from "@heroicons/react/24/outline";
 import Modal from "../ui/Modal";
+import useListRowMotion from "../../hooks/useListRowMotion";
+import { fadeIn, popIn, pressSpring, spring } from "../../lib/motion";
 
 /**
  * Mobile list primitives.
@@ -59,6 +62,12 @@ export interface MobileRowProps {
   /** Overrides the initials tile (e.g. a real avatar or an icon). */
   leading?: React.ReactNode;
   onClick?: () => void;
+  /**
+   * Position in the list, which is what staggers the entrance. Pass the map
+   * index. Left off, every row arrives at once - correct for a row that is not
+   * part of a list, wrong for one that is.
+   */
+  index?: number;
 }
 
 export const MobileRow: React.FC<MobileRowProps> = ({
@@ -69,37 +78,51 @@ export const MobileRow: React.FC<MobileRowProps> = ({
   flagClassName = "bg-amber-500",
   leading,
   onClick,
-}) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className="glass-card relative w-full overflow-hidden rounded-[18px] px-4 pb-3.5 pt-4 text-left transition-colors active:bg-black/[0.02] dark:active:bg-white/[0.03]"
-  >
-    {flagged && (
-      <span className={`absolute inset-y-0 left-0 w-[3px] ${flagClassName}`} />
-    )}
-    <div className="flex items-center gap-3">
-      {leading ?? <InitialsTile name={title} />}
-      <div className="min-w-0 flex-1">
-        <h3 className="truncate text-[15px] font-bold leading-tight tracking-[-0.01em] text-gray-900 dark:text-white">
-          {title}
-        </h3>
-        {subtitle && (
-          <p className="mt-[3px] truncate text-[11px] tracking-wide text-gray-400 dark:text-gray-500">
-            {subtitle}
-          </p>
+  index = 0,
+}) => {
+  // Safe to call here, unlike at the call site: a row is its own component, so
+  // the hook runs once per row rather than in a loop whose length changes.
+  const row = useListRowMotion();
+
+  return (
+    <motion.button
+      {...row(index)}
+      type="button"
+      onClick={onClick}
+      /* The row is the primary control on every mobile screen in the product -
+         it is how a leave request, an employee and a document are all opened -
+         so it gets the press, not just the tint. A background change on glass
+         is close to invisible; the shrink is not. */
+      whileTap={{ scale: 0.985 }}
+      transition={pressSpring}
+      className="glass-card relative w-full overflow-hidden rounded-[18px] px-4 pb-3.5 pt-4 text-left transition-colors active:bg-black/[0.02] dark:active:bg-white/[0.03]"
+    >
+      {flagged && (
+        <span className={`absolute inset-y-0 left-0 w-[3px] ${flagClassName}`} />
+      )}
+      <div className="flex items-center gap-3">
+        {leading ?? <InitialsTile name={title} />}
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-[15px] font-bold leading-tight tracking-[-0.01em] text-gray-900 dark:text-white">
+            {title}
+          </h3>
+          {subtitle && (
+            <p className="mt-[3px] truncate text-[11px] tracking-wide text-gray-400 dark:text-gray-500">
+              {subtitle}
+            </p>
+          )}
+        </div>
+        {tag && (
+          <span
+            className={`shrink-0 rounded-lg px-2.5 py-[5px] text-[11px] font-bold capitalize ${tag.className}`}
+          >
+            {tag.label}
+          </span>
         )}
       </div>
-      {tag && (
-        <span
-          className={`shrink-0 rounded-lg px-2.5 py-[5px] text-[11px] font-bold capitalize ${tag.className}`}
-        >
-          {tag.label}
-        </span>
-      )}
-    </div>
-  </button>
-);
+    </motion.button>
+  );
+};
 
 export interface MobileFilter {
   key: string;
@@ -133,7 +156,12 @@ export const MobileList: React.FC<MobileListProps> = ({
   empty,
   children,
   isEmpty,
-}) => (
+}) => {
+  const reduce = useReducedMotion();
+  // Scoped so two lists on one screen do not hand the chip fill to each other.
+  const strip = React.useId();
+
+  return (
   <div className="lg:hidden">
     <div className="mb-3.5 flex items-start justify-between gap-3">
       <div className="min-w-0">
@@ -155,14 +183,16 @@ export const MobileList: React.FC<MobileListProps> = ({
       </div>
 
       {action && (
-        <button
+        <motion.button
           onClick={action.onClick}
           disabled={action.busy}
           aria-label={action.label}
+          whileTap={reduce || action.busy ? undefined : { scale: 0.9 }}
+          transition={pressSpring}
           className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-full border border-gray-200 bg-[var(--card-surface)] text-gray-500 transition-colors active:bg-black/5 disabled:opacity-60 dark:border-white/10 dark:text-gray-400 dark:active:bg-white/10"
         >
           <action.icon className={`h-[17px] w-[17px] ${action.busy ? "animate-spin" : ""}`} />
-        </button>
+        </motion.button>
       )}
     </div>
 
@@ -172,21 +202,38 @@ export const MobileList: React.FC<MobileListProps> = ({
           const active = activeFilter === f.key;
           const count = counts ? counts[f.key] ?? 0 : null;
           return (
-            <button
+            <motion.button
               key={f.key}
               onClick={() => onFilterChange?.(f.key)}
               aria-pressed={active}
-              className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-[13px] font-semibold transition-colors ${
+              whileTap={reduce ? undefined : { scale: 0.94 }}
+              transition={pressSpring}
+              className={`relative flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-[13px] font-semibold transition-colors ${
                 active
                   ? "border-transparent text-white"
                   : "border-gray-200 bg-[var(--card-surface)] text-gray-500 dark:border-white/10 dark:text-gray-400"
               }`}
-              style={active ? { backgroundColor: "var(--accent)" } : undefined}
             >
-              {f.label}
+              {/* The accent fill is one element that travels between chips
+                  rather than a background switching off one and on another.
+                  Same reasoning as the tab bar's badge and the tab strip's
+                  pill: the eye follows a selection that moves, and has to
+                  re-find one that teleports. All three now use the same
+                  spring, so changing a filter, a tab and a screen are
+                  recognisably the same gesture. */}
+              {active && (
+                <motion.span
+                  layoutId={reduce ? undefined : `${strip}-chip`}
+                  transition={spring}
+                  aria-hidden="true"
+                  className="absolute inset-0 rounded-full"
+                  style={{ backgroundColor: "var(--accent)" }}
+                />
+              )}
+              <span className="relative z-10">{f.label}</span>
               {count !== null && (
                 <span
-                  className={`rounded-md px-1.5 py-px text-[11px] font-bold tabular-nums ${
+                  className={`relative z-10 rounded-md px-1.5 py-px text-[11px] font-bold tabular-nums ${
                     active
                       ? "bg-black/20 text-white"
                       : "bg-black/5 text-gray-400 dark:bg-white/10 dark:text-gray-500"
@@ -195,29 +242,63 @@ export const MobileList: React.FC<MobileListProps> = ({
                   {count}
                 </span>
               )}
-            </button>
+            </motion.button>
           );
         })}
       </div>
     )}
 
-    {isEmpty ? (
-      <div className="px-6 pt-12 text-center">
-        <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-[20px] border border-gray-200 bg-[var(--card-surface)] text-gray-400 dark:border-white/10 dark:text-gray-500">
-          <InboxIcon className="h-6 w-6" />
-        </div>
-        <h4 className="text-[16px] font-bold text-gray-900 dark:text-white">
-          {empty.title}
-        </h4>
-        <p className="mx-auto mt-2 max-w-[16rem] text-[13px] leading-relaxed text-gray-500 dark:text-gray-400">
-          {empty.body}
-        </p>
-      </div>
-    ) : (
-      <div className="flex flex-col gap-3.5">{children}</div>
-    )}
+    {/* Empty and populated are two states of one region, so they cross over
+        rather than replacing each other. Switching a filter to something with
+        no matches is the common case, and a list blinking straight to an empty
+        panel reads as an error until the copy is read. */}
+    <AnimatePresence mode="wait" initial={false}>
+      {isEmpty ? (
+        <motion.div
+          key="empty"
+          variants={fadeIn}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          className="px-6 pt-12 text-center"
+        >
+          {/* The icon lands after the panel it sits in, which is what stops an
+              empty state reading as a failed load. */}
+          <motion.div
+            variants={reduce ? undefined : popIn}
+            initial="initial"
+            animate="animate"
+            transition={{ delay: 0.05 }}
+            className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-[20px] border border-gray-200 bg-[var(--card-surface)] text-gray-400 dark:border-white/10 dark:text-gray-500"
+          >
+            <InboxIcon className="h-6 w-6" />
+          </motion.div>
+          <h4 className="text-[16px] font-bold text-gray-900 dark:text-white">
+            {empty.title}
+          </h4>
+          <p className="mx-auto mt-2 max-w-[16rem] text-[13px] leading-relaxed text-gray-500 dark:text-gray-400">
+            {empty.body}
+          </p>
+        </motion.div>
+      ) : (
+        <motion.div
+          key="rows"
+          variants={fadeIn}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          className="flex flex-col gap-3.5"
+        >
+          {/* Rows that are removed shrink out and the column closes over them.
+              Rows opt into that themselves - see useListRowMotion - so a list
+              that never deletes anything pays nothing for the wrapper. */}
+          <AnimatePresence initial={false}>{children}</AnimatePresence>
+        </motion.div>
+      )}
+    </AnimatePresence>
   </div>
-);
+  );
+};
 
 /** Section label inside a detail sheet. */
 export const SheetLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (

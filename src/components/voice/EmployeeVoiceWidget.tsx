@@ -16,6 +16,7 @@ import { useVoices, useVoiceStats } from "../../hooks/useEmployeeVoice";
 import AnimatedNumber from "../AnimatedNumber";
 import SubmitVoiceModal from "./SubmitVoiceModal";
 import { STATUS_META } from "../../lib/voiceMeta";
+import { DUR, EASE } from "../../lib/motion";
 
 // The shared glass card surface. Same tokens as CARD/CARD_HOVER in
 // lib/surfaces, so this widget tracks the dashboard cards beside it rather
@@ -86,7 +87,7 @@ const EmployeeVoiceWidget: React.FC = () => {
     return (
       <motion.div
         whileHover={{ y: -4 }}
-        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: DUR.slow, ease: EASE.out }}
         className={cardShell}
       >
         {header}
@@ -129,7 +130,7 @@ const EmployeeVoiceWidget: React.FC = () => {
     <>
       <motion.div
         whileHover={{ y: -4 }}
-        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: DUR.slow, ease: EASE.out }}
         className={cardShell}
       >
         {header}

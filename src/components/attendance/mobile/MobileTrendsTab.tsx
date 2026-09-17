@@ -14,6 +14,7 @@ import {
 import DatePicker from "../../ui/DatePicker";
 import type { DayBar } from "../AttendanceOverview";
 import { EmptyNote, GroupLabel, PrimaryButton, SHEET, WELL } from "../../mobile/primitives";
+import useChartMotion from "../../../hooks/useChartMotion";
 
 /**
  * The range, its headline figures and its two charts.
@@ -121,6 +122,8 @@ const MobileTrendsTab: React.FC<Props> = ({
   rangeLabel,
   accent,
 }) => {
+  /* Recharts animates by default, to its own timing. See useChartMotion. */
+  const chartMotion = useChartMotion();
   const drawn = slices.filter((slice) => slice.count > 0);
   const marked = drawn.reduce((sum, slice) => sum + slice.count, 0);
 
@@ -259,6 +262,7 @@ const MobileTrendsTab: React.FC<Props> = ({
                   />
                   <Tooltip content={<ChartTooltip />} cursor={false} />
                   <Area
+                    {...chartMotion}
                     type="monotone"
                     dataKey="onTime"
                     stroke={accent}
@@ -266,6 +270,7 @@ const MobileTrendsTab: React.FC<Props> = ({
                     fill="url(#mobOnTime)"
                   />
                   <Area
+                    {...chartMotion}
                     type="monotone"
                     dataKey="late"
                     stroke="#b5650a"

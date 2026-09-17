@@ -19,6 +19,7 @@ import { PANEL, tintFor, relativeTime } from "./ui";
 import type { DocumentTemplate, TemplateCategory } from "./types";
 
 import Input from "../ui/Input";
+import { spring } from "../../lib/motion";
 interface Props {
   templates: DocumentTemplate[];
   activeId: string | null;
@@ -52,7 +53,7 @@ const TemplateCard: React.FC<{
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.97 }}
-      transition={{ type: "spring", stiffness: 320, damping: 30 }}
+      transition={spring}
       whileHover={{ y: -3 }}
       onClick={onUse}
       className={`group relative cursor-pointer rounded-xl border p-3 transition-colors ${

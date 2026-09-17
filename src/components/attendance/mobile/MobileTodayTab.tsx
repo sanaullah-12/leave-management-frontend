@@ -1,4 +1,6 @@
 import React, { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import useListRowMotion from "../../../hooks/useListRowMotion";
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import StatusBadge from "../StatusBadge";
 import type { RosterDayRow, RosterTotals } from "../RosterTables";
@@ -66,17 +68,21 @@ interface Chip {
   statuses: string[];
 }
 
-const PersonRow: React.FC<{ row: RosterDayRow; onClick?: () => void }> = ({
-  row,
-  onClick,
-}) => {
+const PersonRow: React.FC<{
+  row: RosterDayRow;
+  onClick?: () => void;
+  /** Position within its status group, which staggers the entrance. */
+  index?: number;
+}> = ({ row, onClick, index = 0 }) => {
+  const listRow = useListRowMotion();
   const tone = toneOf(row.status);
   /* Whether the device saw this person. It decides the shape of the row, not
      just one line of it - see the two branches below. */
   const hasArrival = Boolean(row.checkIn);
 
   return (
-    <button
+    <motion.button
+      {...listRow(index)}
       type="button"
       onClick={onClick}
       disabled={!onClick}
@@ -132,7 +138,7 @@ const PersonRow: React.FC<{ row: RosterDayRow; onClick?: () => void }> = ({
           </p>
         )}
       </div>
-    </button>
+    </motion.button>
   );
 };
 
@@ -300,10 +306,11 @@ const MobileTodayTab: React.FC<Props> = ({
           <section key={group.status}>
             <GroupLabel className="px-1 pb-2 pt-1.5">{group.status}</GroupLabel>
             <div className="flex flex-col gap-2.5">
-              {group.rows.map((row) => (
+              {group.rows.map((row, i) => (
                 <PersonRow
                   key={`${row.employeeId}-${row.date}`}
                   row={row}
+                  index={i}
                   onClick={onSelectRow ? () => onSelectRow(row) : undefined}
                 />
               ))}

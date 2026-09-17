@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import {
   ArrowLeftIcon,
@@ -18,6 +19,8 @@ import LeaveTrendChart, {
 import { EmptyNote, initialsOf } from "../../mobile/primitives";
 import EmployeeLeaveActivity from "../../EmployeeLeaveActivity";
 import type { LateEntry, LateSummary } from "../../../hooks/useLateHours";
+import useChartMotion from "../../../hooks/useChartMotion";
+import { spring } from "../../../lib/motion";
 
 /**
  * One employee's record, as a phone screen.
@@ -230,6 +233,8 @@ const MobileEmployeeDetail: React.FC<MobileEmployeeDetailProps> = ({
   formatDate,
   statusChip,
 }) => {
+  /* Recharts animates by default, to its own timing. See useChartMotion. */
+  const chartMotion = useChartMotion();
   const [tab, setTab] = useState<TabKey>("profile");
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
@@ -341,21 +346,31 @@ const MobileEmployeeDetail: React.FC<MobileEmployeeDetailProps> = ({
               role="tab"
               aria-selected={selected}
               onClick={() => selectTab(t.key)}
-              className={`min-h-[36px] flex-1 rounded-[10px] text-[11.5px] font-semibold transition-colors ${
+              className={`relative min-h-[36px] flex-1 rounded-[10px] text-[11.5px] font-semibold transition-colors ${
                 selected
                   ? "text-white"
                   : "text-gray-500 active:bg-black/5 dark:text-gray-400 dark:active:bg-white/10"
               }`}
-              style={
-                selected
-                  ? {
-                      backgroundImage:
-                        "linear-gradient(135deg, color-mix(in srgb, var(--accent) 78%, white) 0%, var(--accent) 100%)",
-                    }
-                  : undefined
-              }
             >
-              {t.label}
+              {/* One pill travelling between the tabs, not a background
+                  switching off one and on to another. Every selection strip in
+                  the app now does this on the same spring - the bottom bar's
+                  badge, the mobile filter chips, the leave status filter - so
+                  choosing a tab, a filter and a screen are recognisably the
+                  same gesture. */}
+              {selected && (
+                <motion.span
+                  layoutId="employee-record-pill"
+                  transition={spring}
+                  aria-hidden="true"
+                  className="absolute inset-0 rounded-[10px]"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(135deg, color-mix(in srgb, var(--accent) 78%, white) 0%, var(--accent) 100%)",
+                  }}
+                />
+              )}
+              <span className="relative z-10">{t.label}</span>
             </button>
           );
         })}
@@ -579,6 +594,7 @@ const MobileEmployeeDetail: React.FC<MobileEmployeeDetailProps> = ({
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
+                          {...chartMotion}
                           data={distribution}
                           dataKey="value"
                           nameKey="name"

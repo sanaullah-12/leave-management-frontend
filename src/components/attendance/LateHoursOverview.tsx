@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { motion } from "framer-motion";
+import useListRowMotion from "../../hooks/useListRowMotion";
 import { ClockIcon } from "@heroicons/react/24/outline";
 import LateHoursSummary from "./LateHoursSummary";
 import type { LateEntry, LateSummary } from "../../hooks/useLateHours";
@@ -50,6 +52,7 @@ const LateHoursOverview: React.FC<Props> = ({
   rangeLabel,
   onSelectEmployee,
 }) => {
+  const listRow = useListRowMotion(true);
   const [showAllEmployees, setShowAllEmployees] = useState(false);
 
   const rows = showAllEmployees ? employees : employees.slice(0, PREVIEW_ROWS);
@@ -147,9 +150,10 @@ const LateHoursOverview: React.FC<Props> = ({
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row) => (
-                  <tr
+                {rows.map((row, i) => (
+                  <motion.tr
                     key={row.employeeId}
+                    {...listRow(i)}
                     onClick={() => onSelectEmployee?.(row.employeeId)}
                     tabIndex={onSelectEmployee ? 0 : undefined}
                     onKeyDown={(e) => {
@@ -194,7 +198,7 @@ const LateHoursOverview: React.FC<Props> = ({
                     >
                       {row.totalLateDisplay}
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))}
               </tbody>
             </table>
@@ -235,8 +239,11 @@ const LateHoursOverview: React.FC<Props> = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {recentLateEntries.map((entry) => (
-                      <tr key={`${entry.employeeId}-${entry.date}`}>
+                    {recentLateEntries.map((entry, i) => (
+                      <motion.tr
+                        key={`${entry.employeeId}-${entry.date}`}
+                        {...listRow(i)}
+                      >
                         <td
                           className={`${cell} text-sm text-gray-700 dark:text-gray-200`}
                         >
@@ -262,7 +269,7 @@ const LateHoursOverview: React.FC<Props> = ({
                         >
                           {entry.lateDisplay}
                         </td>
-                      </tr>
+                      </motion.tr>
                     ))}
                   </tbody>
                 </table>

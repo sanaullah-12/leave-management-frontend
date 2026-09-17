@@ -1359,7 +1359,7 @@ const AttendancePage: React.FC = () => {
   }
 
   return (
-    <div className="attendance-dashboard space-y-6 fade-in">
+    <div className="attendance-dashboard space-y-6 stagger-children">
       {/* Page header. The section's identity only - the date range that
           drives every figure below is a control, so it stays in the toolbar
           under the banner where it sits next to what it filters. */}

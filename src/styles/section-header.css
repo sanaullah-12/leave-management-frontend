@@ -91,6 +91,102 @@
 }
 
 /* ==========================================================================
+   Banner ground and copy
+   --------------------------------------------------------------------------
+   The artwork above has always moved; the banner it sits on did not, which
+   left a flat swatch of colour under a bobbing illustration on every screen
+   in the product.
+
+   Two additions, both deliberately quiet. A banner is on screen the entire
+   time a page is, so anything here is seen for minutes rather than the
+   half-second a transition gets, and the bar for "is this still pleasant on
+   the hundredth viewing" is much higher than for an entrance.
+   ========================================================================== */
+
+/* A light source drifting across the ground. Slow and shallow enough that it
+   reads as depth rather than as a shimmer: a wipe that crosses and restarts
+   would look like a loading skeleton, so this eases out and back instead,
+   and never travels more than half the banner. */
+@keyframes sh-sheen {
+  0%,
+  100% {
+    transform: translateX(-120px);
+  }
+  50% {
+    transform: translateX(520px);
+  }
+}
+
+.sh-sheen {
+  animation: sh-sheen 26s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* The banner's copy deals in rather than appearing whole. The page container
+   in Layout already fades the whole screen up, so this is a short cascade
+   *inside* that - four steps of 55ms, finished well before the fade is - and
+   not a second entrance competing with it. `both` holds the first frame so
+   nothing flashes at full opacity before its delay elapses. */
+@keyframes sh-rise {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.sh-rise {
+  animation: sh-rise 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.sh-rise-1 {
+  animation-delay: 0.05s;
+}
+.sh-rise-2 {
+  animation-delay: 0.11s;
+}
+.sh-rise-3 {
+  animation-delay: 0.17s;
+}
+
+/* The artwork comes from the right, towards its resting place, so the banner
+   assembles from the outside in rather than everything rising together. */
+@keyframes sh-art-in {
+  from {
+    opacity: 0;
+    transform: translateX(18px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.sh-art-in {
+  animation: sh-art-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sh-sheen {
+    animation: none;
+  }
+
+  /* Entrances are removed rather than shortened, and because each uses
+     `both` the element would otherwise be left holding its `from` frame -
+     invisible. Resetting to the finished state is what keeps the banner
+     readable with motion turned off. */
+  .sh-rise,
+  .sh-art-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ==========================================================================
    Banner actions
    --------------------------------------------------------------------------
    A banner is painted in the theme accent, so the app's `btn-primary` /

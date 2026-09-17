@@ -14,6 +14,7 @@ import LeaveTrendChart, {
   TooltipCard,
 } from "../../mobile/LeaveTrendChart";
 import type { DashboardMiniStat, TrendPoint, TypePoint } from "./types";
+import useChartMotion from "../../../hooks/useChartMotion";
 
 /**
  * The two charts, on a screen of their own.
@@ -87,6 +88,8 @@ const MobileChartsTab: React.FC<Props> = ({
   typesUnit,
   accent,
 }) => {
+  /* Recharts animates by default, to its own timing. See useChartMotion. */
+  const chartMotion = useChartMotion();
   const hasTypes = types.some((entry) => entry.value > 0);
   const miniStatMax = Math.max(...miniStats.map((stat) => stat.value), 1);
   /* What the bars add up to - the badge's figure. */
@@ -147,7 +150,13 @@ const MobileChartsTab: React.FC<Props> = ({
                     the same amber on "sick leave" here would be two meanings
                     for one colour on a single screen. Each type is named on the
                     axis under its own bar, which is where a name belongs. */}
-                <Bar dataKey="value" fill={accent} radius={6} maxBarSize={18} />
+                <Bar
+                  {...chartMotion}
+                  dataKey="value"
+                  fill={accent}
+                  radius={6}
+                  maxBarSize={18}
+                />
               </BarChart>
             </ResponsiveContainer>
           ) : (

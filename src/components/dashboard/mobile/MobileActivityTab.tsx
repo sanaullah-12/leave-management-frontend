@@ -1,4 +1,6 @@
 import React from "react";
+import { motion } from "framer-motion";
+import useListRowMotion from "../../../hooks/useListRowMotion";
 import { CalendarDaysIcon } from "@heroicons/react/24/outline";
 import Avatar from "../../Avatar";
 import EmployeeVoiceWidget from "../../voice/EmployeeVoiceWidget";
@@ -102,6 +104,7 @@ const MobileActivityTab: React.FC<Props> = ({
   onOpenEmployee,
   labels,
 }) => {
+  const listRow = useListRowMotion();
   const [showAllTeam, setShowAllTeam] = React.useState(false);
   const visibleTeam = showAllTeam ? team : team.slice(0, TEAM_PREVIEW);
 
@@ -131,8 +134,9 @@ const MobileActivityTab: React.FC<Props> = ({
                   typeof leave.employee === "object" ? leave.employee?.name : null;
                 const started = leave.startDate ? new Date(leave.startDate) : null;
                 return (
-                  <li
+                  <motion.li
                     key={leave._id || i}
+                    {...listRow(i)}
                     className="flex items-start gap-2.5 border-b border-black/5 py-3 last:border-0 dark:border-white/[0.07]"
                   >
                     <span
@@ -164,7 +168,7 @@ const MobileActivityTab: React.FC<Props> = ({
                         ? started.toLocaleDateString()
                         : ""}
                     </span>
-                  </li>
+                  </motion.li>
                 );
               })}
             </ul>
@@ -182,8 +186,12 @@ const MobileActivityTab: React.FC<Props> = ({
         <ListHead title={labels.publicHolidays} />
         <div className={`${SHEET} px-4 py-1.5`}>
           <ul>
-            {holidays.map((holiday) => (
-              <li key={holiday.name} className="flex items-center gap-3 py-2.5">
+            {holidays.map((holiday, i) => (
+              <motion.li
+                key={holiday.name}
+                {...listRow(i)}
+                className="flex items-center gap-3 py-2.5"
+              >
                 {/* The date block is the row's identity, so it carries the
                     accent rather than the name beside it. */}
                 <span
@@ -210,7 +218,7 @@ const MobileActivityTab: React.FC<Props> = ({
                     {holiday.sub}
                   </p>
                 </div>
-              </li>
+              </motion.li>
             ))}
           </ul>
           <button
@@ -229,9 +237,10 @@ const MobileActivityTab: React.FC<Props> = ({
           {team.length ? (
             <>
               <ul>
-                {visibleTeam.map((member) => (
-                  <li
+                {visibleTeam.map((member, i) => (
+                  <motion.li
                     key={member._id}
+                    {...listRow(i)}
                     className="flex items-center gap-3 py-2.5"
                   >
                     <span className="relative flex-none">
@@ -270,7 +279,7 @@ const MobileActivityTab: React.FC<Props> = ({
                         member.position ||
                         "Team"}
                     </span>
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
 

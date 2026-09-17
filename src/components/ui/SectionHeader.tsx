@@ -131,10 +131,25 @@ const BannerBackdrop: React.FC<{ variant: SectionVariant; id: string }> = ({
         <stop offset="0%" stopColor="#fff" stopOpacity="0.38" />
         <stop offset="100%" stopColor="#fff" stopOpacity="0" />
       </radialGradient>
+
+      {/* The drifting sheen, kept to a third of the fixed glow's strength -
+          it is meant to be noticed only as the ground not being flat. */}
+      <radialGradient id={`${id}-sheen`}>
+        <stop offset="0%" stopColor="#fff" stopOpacity="0.13" />
+        <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+      </radialGradient>
     </defs>
 
     <rect width="1200" height="200" fill={`url(#${id}-ground)`} />
     <rect width="1200" height="200" fill={`url(#${id}-glow)`} />
+    <ellipse
+      className="sh-sheen"
+      cx="300"
+      cy="60"
+      rx="430"
+      ry="200"
+      fill={`url(#${id}-sheen)`}
+    />
 
     {/* Three sweeps at increasing opacity. Drawn well outside the viewBox so
         the curve reads as a slice of something larger passing through. */}
@@ -212,12 +227,12 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
               already says which screen this is. Desktop keeps it: there the
               equivalent context lives in a sidebar the eye has to travel to. */}
           {eyebrow && (
-            <p className="hidden max-w-2xl text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70 sm:block">
+            <p className="sh-rise hidden max-w-2xl text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70 sm:block">
               {eyebrow}
             </p>
           )}
 
-          <div className="flex max-w-2xl flex-wrap items-center gap-3">
+          <div className="sh-rise sh-rise-1 flex max-w-2xl flex-wrap items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
               {title}
             </h1>
@@ -228,13 +243,13 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
               of every one of these sentences, and a third line on a 375px
               screen pushes the actions off the banner. */}
           {description && (
-            <p className="mt-1 line-clamp-2 max-w-xl text-[13px] leading-snug text-white/90 sm:mt-1.5 sm:line-clamp-none sm:text-sm sm:leading-relaxed">
+            <p className="sh-rise sh-rise-2 mt-1 line-clamp-2 max-w-xl text-[13px] leading-snug text-white/90 sm:mt-1.5 sm:line-clamp-none sm:text-sm sm:leading-relaxed">
               {description}
             </p>
           )}
 
           {action && (
-            <div className="mt-2.5 flex flex-wrap gap-2 sm:mt-3 sm:gap-2.5">
+            <div className="sh-rise sh-rise-3 mt-2.5 flex flex-wrap gap-2 sm:mt-3 sm:gap-2.5">
               {action}
             </div>
           )}
@@ -247,7 +262,11 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
             aria-hidden="true"
             className="pointer-events-none absolute right-4 top-1/2 hidden -translate-y-1/2 lg:block xl:right-8"
           >
-            {illustration}
+            {/* Two elements on purpose: the outer one owns the placement, and
+                its `-translate-y-1/2` is a transform. The entrance animates
+                `transform` too and resolves to `none`, so sharing one element
+                would drop the centring the moment the animation finished. */}
+            <div className="sh-art-in">{illustration}</div>
           </div>
         )}
       </div>

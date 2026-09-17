@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import SectionHeader from "../components/ui/SectionHeader";
 import { sectionIllustration } from "../components/ui/illustrations";
 import { useAuth } from "../context/AuthContext";
@@ -17,6 +18,7 @@ import LeaveDetailSheet from "../components/leaves/LeaveDetailSheet";
 import type { LeaveRow } from "../components/leaves/leaveParts";
 import InlineLoader from "../components/InlineLoader";
 import LogoLoader from "../components/LogoLoader";
+import useListRowMotion from "../hooks/useListRowMotion";
 import {
   PlusIcon,
   ArrowPathIcon,
@@ -26,9 +28,11 @@ import {
   EyeIcon,
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
+import { spring } from "../lib/motion";
 
 const LeavesPage: React.FC = () => {
   const { user } = useAuth();
+  const listRow = useListRowMotion(true);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   // const { addNotification } = useNotifications(); // Removed for Socket.IO implementation
@@ -314,7 +318,7 @@ const LeavesPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 fade-in">
+    <div className="space-y-6 stagger-children">
       {/* Desktop chrome. The mobile list carries its own header, refresh
           control and filter chips, so this banner would otherwise be shown
           twice on a phone. */}
@@ -359,23 +363,41 @@ const LeavesPage: React.FC = () => {
       {/* Status Filter (desktop only - the mobile list renders chips) */}
       <div className="hidden flex-wrap gap-1 rounded-full border border-gray-200/60 bg-gray-100 p-1 dark:border-gray-700/60 dark:bg-gray-800/80 lg:inline-flex">
         {[
-          { key: "", label: "All", active: "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm" },
-          { key: "pending", label: "Pending", active: "bg-white dark:bg-gray-700 text-amber-600 dark:text-amber-400 shadow-sm" },
-          { key: "approved", label: "Approved", active: "bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 shadow-sm" },
-          { key: "rejected", label: "Rejected", active: "bg-white dark:bg-gray-700 text-red-600 dark:text-red-400 shadow-sm" },
-        ].map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setSelectedStatus(tab.key)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-              selectedStatus === tab.key
-                ? tab.active
-                : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+          { key: "", label: "All", active: "text-blue-600 dark:text-blue-400" },
+          { key: "pending", label: "Pending", active: "text-amber-600 dark:text-amber-400" },
+          { key: "approved", label: "Approved", active: "text-emerald-600 dark:text-emerald-400" },
+          { key: "rejected", label: "Rejected", active: "text-red-600 dark:text-red-400" },
+        ].map((tab) => {
+          const on = selectedStatus === tab.key;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setSelectedStatus(tab.key)}
+              className={`relative rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                on
+                  ? tab.active
+                  : "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+              }`}
+            >
+              {/* One pill that slides between the four, rather than a white
+                  background switching off one button and on to another. The
+                  strip then reads as a horizontal axis with a position on it,
+                  which is what a segmented control is - and it is the same
+                  gesture as the mobile filter chips and the tab bar, on the
+                  same spring. The text colour still changes per status, so
+                  the pill travels while the label recolours under it. */}
+              {on && (
+                <motion.span
+                  layoutId="leave-status-pill"
+                  transition={spring}
+                  aria-hidden="true"
+                  className="absolute inset-0 rounded-full bg-white shadow-sm dark:bg-gray-700"
+                />
+              )}
+              <span className="relative z-10">{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
 
@@ -440,9 +462,10 @@ const LeavesPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
-                    {leaves.map((leave: any) => (
-                      <tr
+                    {leaves.map((leave: any, i: number) => (
+                      <motion.tr
                         key={leave._id}
+                        {...listRow(i)}
                         className="group transition-colors duration-200 hover:bg-gray-50/80 dark:hover:bg-gray-700/30"
                       >
                         {user?.role === "admin" && (
@@ -607,7 +630,7 @@ const LeavesPage: React.FC = () => {
                             )}
                           </td>
                         )}
-                      </tr>
+                      </motion.tr>
                     ))}
                   </tbody>
                 </table>

@@ -9,6 +9,7 @@ import { useNotifications } from "../../hooks/useNotifications";
 import { notificationTarget } from "../NotificationBell";
 import { NOTIFICATION_META, isVoiceNotification } from "../../lib/voiceMeta";
 import type { AppNotification } from "../../types/employeeVoice";
+import { spring } from "../../lib/motion";
 
 const MAX_VISIBLE = 3;
 
@@ -112,7 +113,7 @@ const VoiceNotificationToaster: React.FC = () => {
               initial={{ opacity: 0, x: 60, scale: 0.95 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 60, scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 320, damping: 28 }}
+              transition={spring}
               className="glass-panel voice-toast pointer-events-auto relative overflow-hidden rounded-2xl p-4"
             >
               {/* unread accent bar */}

@@ -39,6 +39,7 @@ import {
   Tooltip,
 } from "recharts";
 import "../styles/design-system.css";
+import useChartMotion from "../hooks/useChartMotion";
 
 interface LeaveAllocation {
   casual: number;
@@ -63,6 +64,8 @@ const LEAVE_ORDER: LeaveKey[] = ["annual", "sick", "casual"];
 /* ------------------------------------------------------------------ */
 
 const EmployeeDetailPageReal: React.FC = () => {
+  /* Recharts animates by default, to its own timing. See useChartMotion. */
+  const chartMotion = useChartMotion();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -232,7 +235,7 @@ const EmployeeDetailPageReal: React.FC = () => {
 
   if (employeesError || !employee) {
     return (
-      <div className="space-y-6 fade-in">
+      <div className="space-y-6 stagger-children">
         <div className="mb-6 flex items-center gap-4">
           <button
             onClick={() => navigate("/employees")}
@@ -415,7 +418,7 @@ const EmployeeDetailPageReal: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 fade-in">
+    <div className="space-y-6 stagger-children">
       {/* Header */}
       <SectionHeader
         variant="employees"
@@ -613,6 +616,7 @@ const EmployeeDetailPageReal: React.FC = () => {
                     formatter={(v: any) => [`${v} days`, "Leave"]}
                   />
                   <Area
+                    {...chartMotion}
                     type="monotone"
                     dataKey="approved"
                     stroke={accent}
@@ -640,6 +644,7 @@ const EmployeeDetailPageReal: React.FC = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
+                        {...chartMotion}
                         data={distribution}
                         dataKey="value"
                         nameKey="name"

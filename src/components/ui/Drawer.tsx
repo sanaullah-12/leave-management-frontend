@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useMediaQuery } from "../../hooks/useMediaQuery";
+import { DUR, EASE, panelSpring, pressSpring } from "../../lib/motion";
 import { SheetIconButton } from "../mobile/DetailSheet";
 
 const WIDTHS = {
@@ -99,7 +100,7 @@ const Drawer: React.FC<DrawerProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: DUR.base, ease: EASE.out }}
             onClick={onClose}
           />
           <motion.aside
@@ -109,12 +110,13 @@ const Drawer: React.FC<DrawerProps> = ({
             animate={
               reduce
                 ? { opacity: 1 }
-                : {
-                    x: 0,
-                    transition: { type: "spring", stiffness: 320, damping: 34 },
-                  }
+                : { x: 0, transition: panelSpring }
             }
-            exit={reduce ? { opacity: 0 } : { x: "100%", transition: { duration: 0.2 } }}
+            exit={
+              reduce
+                ? { opacity: 0 }
+                : { x: "100%", transition: { duration: DUR.base, ease: EASE.in } }
+            }
             /* Swipe right to go back, on phones only. */
             drag={reduce || !isPhone ? false : "x"}
             dragDirectionLock
@@ -212,7 +214,7 @@ const Drawer: React.FC<DrawerProps> = ({
               <motion.button
                 whileHover={{ rotate: 90, scale: 1.05 }}
                 whileTap={{ scale: 0.9 }}
-                transition={{ type: "spring", stiffness: 500, damping: 24 }}
+                transition={pressSpring}
                 onClick={onClose}
                 aria-label="Close"
                 className="absolute right-4 top-4 hidden h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-200 sm:flex"

@@ -1,5 +1,6 @@
 import React from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { pressSpring, spring } from "../lib/motion";
 
 type Icon = React.ComponentType<{ className?: string }>;
 
@@ -72,7 +73,11 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({ items, center }) => {
             layoutId={reduce ? undefined : "tab-bar-active"}
             className="absolute inset-0 rounded-xl"
             style={{ backgroundColor: "var(--accent)" }}
-            transition={{ type: "spring", stiffness: 480, damping: 38 }}
+            /* The general-purpose spring rather than the press one: the badge
+               is travelling the width of a tab, not acknowledging a finger,
+               and the press spring is tuned to be over before a finger lifts -
+               which across 80px reads as a jump. */
+            transition={spring}
           />
         )}
         <item.icon
@@ -115,11 +120,13 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({ items, center }) => {
         {/* Centre action. It sits in the flow so the two tab pairs stay evenly
             balanced, and lifts out of the bar with a negative margin. */}
         <div className="flex w-[74px] shrink-0 items-start justify-center">
-          <button
+          <motion.button
             type="button"
             onClick={center.onClick}
             aria-label={center.label}
-            className="-mt-5 flex h-14 w-14 items-center justify-center rounded-full ring-4 ring-[var(--card-surface)] transition-transform duration-200 active:scale-90"
+            whileTap={reduce ? undefined : { scale: 0.9 }}
+            transition={pressSpring}
+            className="-mt-5 flex h-14 w-14 items-center justify-center rounded-full ring-4 ring-[var(--card-surface)]"
             style={{
               // Three stops travelling from a lightened accent through the
               // accent itself into the brand green of the Nexora mark. A single
@@ -134,7 +141,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({ items, center }) => {
             }}
           >
             <center.icon className="h-6 w-6 text-white" />
-          </button>
+          </motion.button>
         </div>
 
         {right.map(renderTab)}

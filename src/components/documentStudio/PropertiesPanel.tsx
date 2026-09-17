@@ -19,6 +19,7 @@ import type {
   TemplateField,
   TemplateVariant,
 } from "./types";
+import { pressSpring, spring } from "../../lib/motion";
 
 type Tab = "insert" | "page" | "brand";
 
@@ -70,7 +71,7 @@ const Toggle: React.FC<{
     >
       <motion.span
         layout
-        transition={{ type: "spring", stiffness: 500, damping: 32 }}
+        transition={pressSpring}
         className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow ${
           checked ? "right-0.5" : "left-0.5"
         }`}
@@ -139,7 +140,7 @@ const PropertiesPanel: React.FC<Props> = ({
                   <motion.span
                     layoutId="prop-tab"
                     className="absolute inset-0 rounded-md bg-white shadow-sm dark:bg-gray-800"
-                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                    transition={spring}
                   />
                 )}
                 <t.icon className="relative z-10 h-4 w-4" />

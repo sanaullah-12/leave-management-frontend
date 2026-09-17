@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import { motion } from "framer-motion";
 import AppLogo from "../AppLogo";
+import { EASE } from "../../lib/motion";
 
 const EcosystemVisual = React.lazy(() => import("./EcosystemVisual"));
 
@@ -63,7 +64,7 @@ const AuthBrandPanel: React.FC = () => (
     <motion.div
       initial={{ opacity: 0, x: -12 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.5, ease: EASE.out }}
       className="relative z-10 flex shrink-0 items-center gap-3 px-8 pt-7"
     >
       <AppLogo size={48} />
@@ -86,7 +87,7 @@ const AuthBrandPanel: React.FC = () => (
     <motion.div
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ delay: 0.3, duration: 0.6, ease: EASE.out }}
       className="relative z-10 shrink-0 px-8 pb-7 xl:pb-8"
     >
       <p className="mb-3 text-[10px] text-white/30">

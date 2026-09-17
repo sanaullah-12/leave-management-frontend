@@ -7,6 +7,7 @@ import {
   useReducedMotion,
   type Variants,
 } from "framer-motion";
+import { EASE as MOTION_EASE } from "../../lib/motion";
 
 /* ============================================================
    Nexora landing - shared design primitives
@@ -16,7 +17,12 @@ import {
    gracefully under prefers-reduced-motion.
    ============================================================ */
 
-export const EASE = [0.22, 1, 0.36, 1] as const;
+/**
+ * The landing sections were written against this name and there are a dozen
+ * of them, so it stays - but it is now the app's entrance curve rather than
+ * a second copy of the same four numbers. See EASE in lib/motion.
+ */
+export const EASE = MOTION_EASE.out;
 
 /* ---------- Scroll reveal ---------- */
 

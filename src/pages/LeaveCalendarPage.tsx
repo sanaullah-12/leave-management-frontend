@@ -90,7 +90,7 @@ const LeaveCalendarPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 fade-in">
+    <div className="space-y-6 stagger-children">
       {/* Mobile: month grid + agenda, in the Leave Requests design language. */}
       <MobileLeaveCalendar
         leaves={leaves as any}

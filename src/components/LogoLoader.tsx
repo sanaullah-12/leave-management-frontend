@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import NexoraLoaderMark from "./NexoraLoaderMark";
+import { EASE } from "../lib/motion";
 
 interface LogoLoaderProps {
   /** Mark size in px. Default 76. */
@@ -37,7 +38,7 @@ const LogoLoader: React.FC<LogoLoaderProps> = ({
     <motion.div
       initial={{ opacity: 0, scale: 0.92 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.5, ease: EASE.out }}
       style={{ filter: "drop-shadow(0 10px 26px rgba(37,99,235,0.14))" }}
     >
       <NexoraLoaderMark size={size} />

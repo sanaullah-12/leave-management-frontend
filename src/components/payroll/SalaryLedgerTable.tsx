@@ -27,6 +27,8 @@ import { StatusPill, PayrollEmptyState } from "./PayrollUI";
 import { SALARY_STATUS } from "./constants";
 import { formatMoney } from "./formatters";
 import type { SalaryRow } from "./types";
+import useListRowMotion from "../../hooks/useListRowMotion";
+import Checkbox from "../ui/Checkbox";
 
 export type SortKey = "name" | "department" | "basic" | "net" | "status";
 type SortDir = "asc" | "desc";
@@ -137,15 +139,12 @@ const SalaryLedgerTable: React.FC<Props> = ({
           >
             <div className="flex items-start gap-3">
               {selectable && (
-                <label className="flex h-11 w-6 shrink-0 items-center justify-center">
-                  <input
-                    type="checkbox"
-                    checked={selected}
-                    onChange={() => onToggle?.(employee.id)}
-                    aria-label={`Select ${employee.name}`}
-                    className="h-[18px] w-[18px] cursor-pointer rounded border-gray-300 accent-[var(--accent)]"
-                  />
-                </label>
+                <Checkbox
+                  checked={selected}
+                  onChange={() => onToggle?.(employee.id)}
+                  aria-label={`Select ${employee.name}`}
+                  className="h-11 w-6 shrink-0 justify-center"
+                />
               )}
 
               <button
@@ -202,12 +201,10 @@ const SalaryLedgerTable: React.FC<Props> = ({
           <tr className="border-b border-gray-200/70 text-left dark:border-gray-700/50">
             {selectable && (
               <th className="w-10 px-3 py-2">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={!!allSelected}
-                  onChange={(e) => onToggleAll?.(e.target.checked)}
+                  onChange={(next) => onToggleAll?.(next)}
                   aria-label="Select all employees"
-                  className="h-4 w-4 cursor-pointer rounded border-gray-300 accent-[var(--accent)]"
                 />
               </th>
             )}
@@ -237,9 +234,10 @@ const SalaryLedgerTable: React.FC<Props> = ({
           </tr>
         </thead>
         <tbody>
-          {sorted.map((row) => (
+          {sorted.map((row, i) => (
             <LedgerRow
               key={row.employee.id}
+              index={i}
               row={row}
               currency={currency}
               selectable={selectable}
@@ -271,6 +269,8 @@ const SortGlyph: React.FC<{ active: boolean; dir: SortDir }> = ({ active, dir })
 
 interface RowProps {
   row: SalaryRow;
+  /** Position in the ledger, which staggers the row's entrance. */
+  index?: number;
   currency: string;
   selectable: boolean;
   selected: boolean;
@@ -280,13 +280,15 @@ interface RowProps {
 }
 
 const LedgerRow: React.FC<RowProps> = React.memo(
-  ({ row, currency, selectable, selected, onToggle, onRowClick, actions }) => {
+  ({ row, index = 0, currency, selectable, selected, onToggle, onRowClick, actions }) => {
     const { employee, structure, computation, status } = row;
+    const listRow = useListRowMotion(true);
     const money = (v: number | undefined) =>
       computation ? formatMoney(v ?? 0, currency) : "-";
 
     return (
       <motion.tr
+        {...listRow(index)}
         layout="position"
         className={`group border-b border-gray-100 transition-colors dark:border-gray-800 ${
           selected
@@ -297,12 +299,10 @@ const LedgerRow: React.FC<RowProps> = React.memo(
       >
         {selectable && (
           <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
-            <input
-              type="checkbox"
+            <Checkbox
               checked={selected}
               onChange={() => onToggle?.(employee.id)}
               aria-label={`Select ${employee.name}`}
-              className="h-4 w-4 cursor-pointer rounded border-gray-300 accent-[var(--accent)]"
             />
           </td>
         )}

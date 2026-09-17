@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -30,6 +30,7 @@ import {
   showErrorToast,
 } from "../utils/toastHelpers";
 import { staggerContainer, staggerItem } from "../lib/motion";
+import useListRowMotion from "../hooks/useListRowMotion";
 import Avatar from "../components/Avatar";
 import Modal from "../components/ui/Modal";
 import Select from "../components/ui/Select";
@@ -40,6 +41,7 @@ import LogoLoader from "../components/LogoLoader";
 
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
+import { DUR, EASE } from "../lib/motion";
 /* ------------------------------------------------------------------ */
 /*  Types & metadata                                                   */
 /* ------------------------------------------------------------------ */
@@ -160,13 +162,17 @@ const ReactionBar: React.FC<{
 /* ------------------------------------------------------------------ */
 const AnnouncementCard: React.FC<{
   a: Announcement;
+  /** Position in the feed, which staggers the card's entrance. */
+  index: number;
   canManage: boolean;
   onRead: () => void;
   onReact: (emoji: string) => void;
   onEdit: () => void;
   onPin: () => void;
   onDelete: () => void;
-}> = ({ a, canManage, onRead, onReact, onEdit, onPin, onDelete }) => {
+}> = ({ a, index, canManage, onRead, onReact, onEdit, onPin, onDelete }) => {
+  const listRow = useListRowMotion();
+  const reduce = useReducedMotion();
   const [expanded, setExpanded] = useState(false);
   const meta = catMeta(a.category);
   const long = a.body.length > 260;
@@ -178,7 +184,7 @@ const AnnouncementCard: React.FC<{
 
   return (
     <motion.article
-      variants={staggerItem}
+      {...listRow(index)}
       layout
       className="glass-card group relative overflow-hidden rounded-2xl transition-shadow transition-all hover:bg-[var(--glass-fill-strong)] hover:shadow-[shadow:var(--glass-sheen),var(--glass-drop-lifted)]"
     >
@@ -263,17 +269,26 @@ const AnnouncementCard: React.FC<{
           {a.title}
         </h3>
 
-        <p
-          className={`mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-gray-600 dark:text-gray-300 ${
+        {/* `layout` on the paragraph is what animates the clamp. Height is
+            not a value React can tween, and the alternative - measuring the
+            full text into a max-height - gets it wrong the moment the card is
+            resized or the font loads late. Framer measures the two states it
+            actually rendered, so a long post opening and closing is the same
+            animation either way. */}
+        <motion.p
+          layout={reduce ? false : true}
+          transition={{ duration: DUR.slow, ease: EASE.out }}
+          className={`mt-1.5 overflow-hidden whitespace-pre-wrap text-sm leading-relaxed text-gray-600 dark:text-gray-300 ${
             !expanded && long ? "line-clamp-3" : ""
           }`}
         >
           {a.body}
-        </p>
+        </motion.p>
         {long && (
           <button
             onClick={toggle}
-            className="mt-1.5 text-xs font-semibold text-blue-600 hover:underline dark:text-blue-400"
+            aria-expanded={expanded}
+            className="mt-1.5 text-xs font-semibold text-blue-600 transition-colors hover:underline dark:text-blue-400"
           >
             {expanded ? "Show less" : "Read more"}
           </button>
@@ -685,10 +700,11 @@ const AnnouncementsPage: React.FC = () => {
       ) : (
         <motion.div variants={staggerContainer} className="grid gap-4 lg:grid-cols-2">
           <AnimatePresence mode="popLayout">
-            {items.map((a) => (
+            {items.map((a, i) => (
               <AnnouncementCard
                 key={a._id}
                 a={a}
+                index={i}
                 canManage={canManage}
                 onRead={() => readMut.mutate(a._id)}
                 onReact={(emoji) => reactMut.mutate({ id: a._id, emoji })}

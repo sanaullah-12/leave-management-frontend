@@ -1,4 +1,6 @@
 import React from "react";
+import { motion } from "framer-motion";
+import useListRowMotion from "../../hooks/useListRowMotion";
 import {
   ClockIcon,
   PlayCircleIcon,
@@ -84,6 +86,7 @@ const WfhSessionDrawer: React.FC<Props> = ({
   onClose,
 }) => {
   const { data: session, isLoading } = useWfhSessionDetail(sessionId);
+  const listRow = useListRowMotion(true);
 
   return (
     <Drawer
@@ -127,8 +130,9 @@ const WfhSessionDrawer: React.FC<Props> = ({
                 </thead>
                 <tbody>
                   {session.segments.map((segment, index) => (
-                    <tr
+                    <motion.tr
                       key={`${segment.startedAt}-${index}`}
+                      {...listRow(index)}
                       className="border-t border-gray-100 dark:border-white/10"
                     >
                       <td className="px-3 py-2 text-gray-400">{index + 1}</td>
@@ -152,7 +156,7 @@ const WfhSessionDrawer: React.FC<Props> = ({
                           ? ENDED_BY_LABEL[segment.endedBy] || segment.endedBy
                           : "-"}
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))}
                 </tbody>
               </table>

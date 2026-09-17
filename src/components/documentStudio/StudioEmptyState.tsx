@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { PlusIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import { DUR, EASE } from "../../lib/motion";
 
 interface Props {
   onCreate: () => void;
@@ -23,7 +24,7 @@ const StudioEmptyState: React.FC<Props> = ({
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: DUR.slow, ease: EASE.out }}
       className="flex flex-col items-center justify-center px-6 py-16 text-center"
     >
       <div className="relative mb-8 h-44 w-44">

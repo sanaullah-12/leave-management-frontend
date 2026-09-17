@@ -28,6 +28,7 @@ import {
   PHONE_PLACEHOLDER,
   phoneValidationRules,
 } from "../../utils/phone";
+import Toggle from "../ui/Toggle";
 
 interface ProfileForm {
   name: string;
@@ -72,27 +73,6 @@ const LANGUAGES = [
 ];
 const TIMEZONE_OPTIONS = TIMEZONES.map((t) => ({ value: t, label: t }));
 const LANGUAGE_OPTIONS = LANGUAGES.map((l) => ({ value: l, label: l }));
-
-const Toggle: React.FC<{ on: boolean; onChange: (v: boolean) => void }> = ({
-  on,
-  onChange,
-}) => (
-  <button
-    type="button"
-    onClick={() => onChange(!on)}
-    className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${
-      on ? "bg-blue-600" : "bg-gray-300 dark:bg-gray-600"
-    }`}
-    role="switch"
-    aria-checked={on}
-  >
-    <span
-      className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 ${
-        on ? "translate-x-6" : "translate-x-1"
-      }`}
-    />
-  </button>
-);
 
 const loadPrefs = (userId?: string): Prefs => {
   try {
@@ -414,7 +394,11 @@ const ProfileSettings: React.FC = () => {
                   </p>
                 </div>
               </div>
-              <Toggle on={prefs.emailNotif} onChange={(v) => savePrefs({ ...prefs, emailNotif: v })} />
+              <Toggle
+                checked={prefs.emailNotif}
+                onChange={(v) => savePrefs({ ...prefs, emailNotif: v })}
+                label="Email notifications"
+              />
             </div>
 
             <div className="flex items-center justify-between rounded-xl border border-gray-100 dark:border-gray-700/60 px-4 py-3">
@@ -429,7 +413,11 @@ const ProfileSettings: React.FC = () => {
                   </p>
                 </div>
               </div>
-              <Toggle on={prefs.calendarSync} onChange={(v) => savePrefs({ ...prefs, calendarSync: v })} />
+              <Toggle
+                checked={prefs.calendarSync}
+                onChange={(v) => savePrefs({ ...prefs, calendarSync: v })}
+                label="Calendar sync"
+              />
             </div>
           </div>
         </div>

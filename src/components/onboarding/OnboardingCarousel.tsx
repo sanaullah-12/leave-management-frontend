@@ -1,12 +1,7 @@
 import React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { XMarkIcon, ArrowRightIcon, CheckIcon } from "@heroicons/react/24/solid";
-import {
-  morphSpring,
-  morphRevealSpring,
-  MORPH_REVEAL_DELAY,
-  MORPH_REVEAL_STAGGER,
-} from "../../lib/motion";
+import { EASE, MORPH_REVEAL_DELAY, MORPH_REVEAL_STAGGER, morphRevealSpring, morphSpring } from "../../lib/motion";
 import { SCENES } from "./scenes";
 import CharacterBlob from "./CharacterBlob";
 
@@ -82,7 +77,7 @@ export const OnboardingCarousel: React.FC<OnboardingCarouselProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.45, ease: EASE.out }}
         />
       </AnimatePresence>
 

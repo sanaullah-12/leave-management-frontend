@@ -29,6 +29,7 @@ import {
 import type { PayrollPeriod } from "./types";
 
 import Input from "../ui/Input";
+import { DUR, EASE } from "../../lib/motion";
 /* ------------------------------------------------------------------ */
 /* Status pill                                                         */
 /* ------------------------------------------------------------------ */
@@ -278,7 +279,7 @@ export const PayrollEmptyState: React.FC<EmptyProps> = ({
   <motion.div
     initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+    transition={{ duration: DUR.slow, ease: EASE.out }}
     className={`flex flex-col items-center justify-center px-6 text-center ${
       compact ? "py-12" : "py-16"
     }`}

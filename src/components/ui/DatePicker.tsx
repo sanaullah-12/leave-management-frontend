@@ -97,7 +97,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
     <Popover className={`relative ${className}`}>
       <PopoverButton
         disabled={disabled}
-        className="flex w-full items-center gap-2.5 rounded-full bg-[var(--card-surface)] h-11 sm:h-10 px-4 text-left text-sm font-medium text-gray-800 ring-1 ring-inset ring-gray-200/70 transition-shadow focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-60 dark:text-gray-100 dark:ring-white/10"
+        className="flex w-full items-center gap-2.5 rounded-full bg-[var(--card-surface)] h-11 sm:h-10 px-4 text-left text-sm font-medium text-gray-800 ring-1 ring-inset ring-gray-200/70 transition-[box-shadow,transform] duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500/50 active:scale-[0.98] disabled:opacity-60 dark:text-gray-100 dark:ring-white/10"
       >
         <CalendarDaysIcon className="h-4 w-4 flex-shrink-0 text-gray-400" />
         <span className={`flex-1 truncate ${selected ? "" : "text-gray-400"}`}>
@@ -111,7 +111,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
            screen - the calendar was being clipped at its edge on the
            narrowest phones. It now takes whatever the screen has, down to
            that. */
-        className="glass-panel z-[110] mt-2 w-[min(19rem,calc(100vw-1.5rem))] rounded-2xl p-3 focus:outline-none origin-top transition ease-out data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-150 data-[leave]:duration-100 sm:p-4"
+        className="glass-panel z-[110] mt-2 w-[min(19rem,calc(100vw-1.5rem))] rounded-2xl p-3 focus:outline-none sm:p-4 origin-top transition duration-[220ms] ease-[cubic-bezier(0.22,1,0.36,1)] data-[closed]:-translate-y-1 data-[closed]:scale-95 data-[closed]:opacity-0 data-[leave]:duration-[160ms] data-[leave]:ease-[cubic-bezier(0.64,0,0.78,0)]"
       >
         {({ close }) => (
           <>

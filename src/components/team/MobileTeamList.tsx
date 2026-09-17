@@ -112,9 +112,10 @@ const MobileTeamList: React.FC<Props> = ({
         }}
         isEmpty={members.length === 0}
       >
-        {members.map((m) => (
+        {members.map((m, i) => (
           <MobileRow
             key={m._id}
+            index={i}
             title={m.name || "Unknown"}
             subtitle={m.position || "-"}
             tag={{

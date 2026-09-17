@@ -7,6 +7,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import AppLogo from "../AppLogo";
+import { spring } from "../../lib/motion";
 
 /**
  * InstallPrompt
@@ -68,7 +69,7 @@ const InstallPrompt: React.FC<InstallPromptProps> = ({
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 24 }}
-      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+      transition={spring}
       // Sits above the mobile bottom navigation and clear of the iOS home
       // indicator. z-40 keeps it under modals and toasts.
       className="fixed inset-x-4 bottom-4 z-40 mx-auto max-w-md sm:left-auto sm:right-6 sm:mx-0"

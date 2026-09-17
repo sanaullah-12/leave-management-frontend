@@ -1,4 +1,6 @@
 import React from "react";
+import { motion } from "framer-motion";
+import useListRowMotion from "../../hooks/useListRowMotion";
 import {
   CheckIcon,
   XMarkIcon,
@@ -256,6 +258,7 @@ const WfhRequestTable: React.FC<Props> = ({
   busyId = null,
   emptyMessage,
 }) => {
+  const listRow = useListRowMotion(true);
   const head =
     "whitespace-nowrap border-b border-gray-100 bg-gray-50/70 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:border-gray-700 dark:bg-gray-700/40 dark:text-gray-300";
   const cell = "border-b border-gray-100 px-4 py-3 dark:border-gray-700";
@@ -336,13 +339,14 @@ const WfhRequestTable: React.FC<Props> = ({
                 </td>
               </tr>
             ) : (
-              requests.map((request) => {
+              requests.map((request, i) => {
                 const employee = employeeOf(request);
                 const busy = busyId === request._id;
 
                 return (
-                  <tr
+                  <motion.tr
                     key={request._id}
+                    {...listRow(i)}
                     onClick={onOpen ? () => onOpen(request) : undefined}
                     className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/40 ${
                       onOpen ? "cursor-pointer" : ""
@@ -470,7 +474,7 @@ const WfhRequestTable: React.FC<Props> = ({
                         <ViewReport request={request} onOpen={onOpen} />
                       )}
                     </td>
-                  </tr>
+                  </motion.tr>
                 );
               })
             )}

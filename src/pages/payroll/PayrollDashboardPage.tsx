@@ -60,6 +60,7 @@ import {
   recentPeriods,
 } from "../../components/payroll/formatters";
 import { findRunForPeriod } from "../../components/payroll/payrollService";
+import useChartMotion from "../../hooks/useChartMotion";
 
 /** Trend windows offered above the cost chart. */
 const RANGES: readonly RangeOption[] = [
@@ -80,6 +81,8 @@ const RECENT_PAYSLIPS = 5;
  * disagree with the salary table or the payslips.
  */
 const PayrollDashboardPage: React.FC = () => {
+  /* Recharts animates by default, to its own timing. See useChartMotion. */
+  const chartMotion = useChartMotion();
   const { t } = useTranslation("payroll");
   const navigate = useNavigate();
   const { colorScheme, isDark } = useTheme();
@@ -311,6 +314,7 @@ const PayrollDashboardPage: React.FC = () => {
                         ]}
                       />
                       <Area
+                        {...chartMotion}
                         type="monotone"
                         dataKey="amount"
                         stroke={accent}

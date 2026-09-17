@@ -7,6 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Modal from "./Modal";
 import InlineLoader from "../InlineLoader";
+import { popSpring } from "../../lib/motion";
 
 type Variant = "danger" | "warning" | "info";
 
@@ -97,7 +98,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         <motion.div
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 320, damping: 20 }}
+          transition={popSpring}
           className={`mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl ${s.ring}`}
         >
           {s.icon}

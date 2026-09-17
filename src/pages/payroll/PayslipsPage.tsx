@@ -12,6 +12,7 @@ import {
 import Avatar from "../../components/Avatar";
 import Select from "../../components/ui/Select";
 import { staggerContainer, staggerItem } from "../../lib/motion";
+import useListRowMotion from "../../hooks/useListRowMotion";
 import { showSuccessToast, showErrorToast } from "../../utils/toastHelpers";
 import { usePayroll } from "../../components/payroll/PayrollProvider";
 import PayslipPreviewModal from "../../components/payroll/PayslipPreviewModal";
@@ -301,11 +302,12 @@ const PayslipsPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <AnimatePresence initial={false}>
-                    {filtered.map((p) => (
+                  <AnimatePresence>
+                    {filtered.map((p, i) => (
                       <PayslipRow
                         key={p.id}
                         payslip={p}
+                        index={i}
                         onView={setPreview}
                         onPrint={handlePrint}
                         onDownload={handleDownload}
@@ -339,6 +341,8 @@ const PayslipsPage: React.FC = () => {
 
 interface RowProps {
   payslip: Payslip;
+  /** Position in the list, which staggers the row's entrance. */
+  index: number;
   onView: (p: Payslip) => void;
   onPrint: (p: Payslip) => void;
   onDownload: (p: Payslip) => void;
@@ -346,13 +350,13 @@ interface RowProps {
 
 /** Memoised so downloading one payslip doesn't re-render the whole list. */
 const PayslipRow: React.FC<RowProps> = React.memo(
-  ({ payslip: p, onView, onPrint, onDownload }) => {
+  ({ payslip: p, index, onView, onPrint, onDownload }) => {
     const c = p.computation;
+    const listRow = useListRowMotion(true);
     return (
       <motion.tr
         layout="position"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        {...listRow(index)}
         exit={{ opacity: 0 }}
         onClick={() => onView(p)}
         className="group cursor-pointer border-b border-gray-100 transition-colors hover:bg-black/[0.02] dark:border-gray-800 dark:hover:bg-white/[0.03]"

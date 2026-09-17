@@ -7,6 +7,7 @@ import {
   XAxis,
 } from "recharts";
 import { LATE_INK } from "./primitives";
+import useChartMotion from "../../hooks/useChartMotion";
 
 /**
  * Leave over twelve months, as a phone chart.
@@ -152,6 +153,8 @@ const LeaveTrendChart: React.FC<Props> = ({
   accent,
   unit = { one: "request", many: "requests" },
 }) => {
+  /* Recharts animates by default, to its own timing. See useChartMotion. */
+  const chartMotion = useChartMotion();
   // Two of these on one page would otherwise share a <defs> id and the second
   // would paint with the first one's gradient. The colons React puts in an id
   // are not safe inside url(), so they come out.
@@ -182,6 +185,7 @@ const LeaveTrendChart: React.FC<Props> = ({
             />
             <Tooltip content={<TrendTooltip unit={unit} />} cursor={false} />
             <Area
+              {...chartMotion}
               type="monotone"
               dataKey="approved"
               stroke={accent}
@@ -189,6 +193,7 @@ const LeaveTrendChart: React.FC<Props> = ({
               fill={`url(#${gradientId})`}
             />
             <Area
+              {...chartMotion}
               type="monotone"
               dataKey="pending"
               stroke={LATE_INK}

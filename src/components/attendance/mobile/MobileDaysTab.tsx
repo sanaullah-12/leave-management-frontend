@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import useListRowMotion from "../../../hooks/useListRowMotion";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -51,6 +53,7 @@ const MobileDaysTab: React.FC<Props> = ({
   onStatusFilterChange,
   onViewFull,
 }) => {
+  const listRow = useListRowMotion();
   const [page, setPage] = useState(1);
 
   const filtered = useMemo(
@@ -111,8 +114,8 @@ const MobileDaysTab: React.FC<Props> = ({
         <>
           {/* A card per day, the same shape the roster lists use. */}
           <ul className="flex flex-col gap-2.5">
-            {shown.map((row) => (
-              <li key={row.date}>
+            {shown.map((row, i) => (
+              <motion.li key={row.date} {...listRow(i)}>
                 <button
                   type="button"
                   onClick={() => onSelect(row)}
@@ -140,7 +143,7 @@ const MobileDaysTab: React.FC<Props> = ({
                     <StatusBadge status={row.status} compact />
                   </span>
                 </button>
-              </li>
+              </motion.li>
             ))}
           </ul>
 

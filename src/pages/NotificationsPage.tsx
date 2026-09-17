@@ -10,10 +10,13 @@ import { notificationTarget } from "../components/NotificationBell";
 import { NOTIFICATION_META } from "../lib/voiceMeta";
 import LogoLoader from "../components/LogoLoader";
 import { staggerContainer, staggerItem } from "../lib/motion";
+import useListRowMotion from "../hooks/useListRowMotion";
 import "../styles/design-system.css";
 
 const NotificationsPage: React.FC = () => {
   const navigate = useNavigate();
+  // Above the loading return: hooks cannot sit after an early exit.
+  const listRow = useListRowMotion();
   const { notifications, unreadCount, isLoading, markRead, markAllRead } =
     useNotifications({ limit: 50 });
 
@@ -73,12 +76,13 @@ const NotificationsPage: React.FC = () => {
           variants={staggerItem}
           className="surface-card divide-y divide-gray-100 overflow-hidden dark:divide-gray-700/50"
         >
-          {notifications.map((n) => {
+          {notifications.map((n, i) => {
             const meta = NOTIFICATION_META[n.type];
             const Icon = meta?.icon || BellIcon;
             return (
-              <button
+              <motion.button
                 key={n._id}
+                {...listRow(i)}
                 onClick={() => {
                   if (!n.read) markRead(n._id);
                   navigate(notificationTarget(n));
@@ -121,7 +125,7 @@ const NotificationsPage: React.FC = () => {
                     })}
                   </span>
                 </div>
-              </button>
+              </motion.button>
             );
           })}
         </motion.div>

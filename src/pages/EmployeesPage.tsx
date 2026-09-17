@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion } from "framer-motion";
 import SectionHeader from "../components/ui/SectionHeader";
 import { sectionIllustration } from "../components/ui/illustrations";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +12,7 @@ import LogoLoader from "../components/LogoLoader";
 import EmployeeInviteModal from "../components/EmployeeInviteModal";
 import AdminInviteModal from "../components/AdminInviteModal";
 import Avatar from "../components/Avatar";
+import useListRowMotion from "../hooks/useListRowMotion";
 import DatePicker from "../components/ui/DatePicker";
 import MobileEmployeeList from "../components/employees/MobileEmployeeList";
 import {
@@ -36,6 +38,7 @@ const FIELD_LABEL =
 const EmployeesPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const listRow = useListRowMotion(true);
   const queryClient = useQueryClient();
   // const { addNotification } = useNotifications(); // Removed for Socket.IO implementation
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -234,7 +237,7 @@ const EmployeesPage: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6 fade-in">
+    <div className="space-y-6 stagger-children">
       <SectionHeader
         variant="employees"
         eyebrow="Workforce"
@@ -527,9 +530,10 @@ const EmployeesPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
-                    {filteredUsers.map((employee: any) => (
-                      <tr
+                    {filteredUsers.map((employee: any, i: number) => (
+                      <motion.tr
                         key={employee._id}
+                        {...listRow(i)}
                         className="group transition-colors duration-200 hover:bg-gray-50/80 dark:hover:bg-gray-700/30"
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -639,7 +643,7 @@ const EmployeesPage: React.FC = () => {
                               )}
                             </div>
                           </td>
-                        </tr>
+                        </motion.tr>
                       ))}
                   </tbody>
                 </table>
