@@ -16,19 +16,26 @@ import { NOTIF_KEY } from "./useNotifications";
  *
  * -- What is watched, and what is not -------------------------------------
  *
- * `useActivityPulse` listens for one thing: a person operating an input device.
- * Mouse movement, mouse buttons, the wheel, key presses, and their touch
- * equivalents. Nothing else counts - not a screen that is on, not an open or
- * focused tab, not a video playing, not a page updating itself, not an
- * animation, not a request in flight. None of those can produce any of the
- * events it listens for, so a machine nobody is sitting at goes quiet on its
- * own rather than being kept alive by whatever is on screen.
+ * Nothing, as things currently stand. The server's `inactivityAutoPause` is
+ * off, so `useActivityPulse` attaches no input listeners at all: the timer runs
+ * from Start until the employee pauses or finishes it, and the heartbeat is a
+ * plain "this timer is still running" on a fixed interval. One switch decides
+ * it for both halves - the page asks the server rather than holding an opinion
+ * of its own, so the two can never be doing different things.
  *
- * It reads NOTHING from the events themselves. Which key, where the pointer
- * went, what is on screen, what is in the page - none of it is inspected,
- * stored or sent. What is kept is a single timestamp meaning "input happened",
- * and the only thing that leaves the browser is an empty request saying the
- * same, at most once per heartbeat interval.
+ * With the rule switched back on, `useActivityPulse` listens for one thing: a
+ * person operating an input device. Mouse movement, mouse buttons, the wheel,
+ * key presses, and their touch equivalents. Nothing else counts - not a screen
+ * that is on, not an open or focused tab, not a video playing, not a page
+ * updating itself, not an animation, not a request in flight. None of those can
+ * produce any of the events it listens for, so a machine nobody is sitting at
+ * goes quiet on its own rather than being kept alive by whatever is on screen.
+ *
+ * Even then it reads NOTHING from the events themselves. Which key, where the
+ * pointer went, what is on screen, what is in the page - none of it is
+ * inspected, stored or sent. What is kept is a single timestamp meaning "input
+ * happened", and the only thing that leaves the browser is an empty request
+ * saying the same, at most once per heartbeat interval.
  *
  * -- Why the timer on screen is not the timer -----------------------------
  *
@@ -118,7 +125,10 @@ export interface WfhSession {
   segmentCount: number;
   /** The instant `activeMs` is counted up to while the timer runs. */
   countingSince: string | null;
-  /** When the server will stop counting if nothing else arrives. */
+  /**
+   * When the server will stop counting if nothing else arrives. Null while the
+   * inactivity rule is off - nothing is coming.
+   */
   idleDeadline: string | null;
   segments: WfhSessionSegment[];
   tasks: WfhSessionTask[];
@@ -130,6 +140,11 @@ export interface WfhSession {
 export interface WfhSessionConfig {
   idleTimeoutMinutes: number;
   idleTimeoutMs: number;
+  /**
+   * Whether a stretch of silence stops the timer. False while the rule is off,
+   * and the page watches no input at all when it is.
+   */
+  inactivityAutoPause: boolean;
   heartbeatSeconds: number;
   maxSessionHours: number;
 }
@@ -375,31 +390,38 @@ export interface ActivityPulse {
 }
 
 /**
- * Keeps the server informed that the employee is present, and tells the caller
- * when the browser thinks they are not.
+ * Keeps the server informed that the timer is still running, and - when it is
+ * asked to watch input - tells the caller when the browser thinks nobody is
+ * there.
  *
- * Two rules make this honest rather than decorative:
+ * `watchInput` is the server's own `inactivityAutoPause`, and it decides which
+ * of two things this is:
  *
- *   1. A heartbeat is sent ONLY when there has been input since the last one.
- *      A loop that pinged unconditionally would mean a forgotten open tab
- *      reported a full working day, which is the exact failure this feature
- *      exists to prevent.
+ *   - Off, as it currently is. No listeners are attached, nothing about the
+ *     mouse or the keyboard is looked at, `locallyActive` stays true, and the
+ *     heartbeat goes out on its interval for as long as the timer runs. Only
+ *     the employee stops the clock.
  *
- *   2. Crossing the idle threshold sends one final heartbeat immediately. The
- *      server has been waiting on a signal that never came, and this is what
- *      makes it pause the timer and tell the admin now rather than on the next
- *      sweep.
+ *   - On. Two rules then make it honest rather than decorative. A heartbeat is
+ *     sent ONLY when there has been input since the last one, because a loop
+ *     that pinged unconditionally would mean a forgotten open tab reported a
+ *     full working day. And crossing the idle threshold sends one final
+ *     heartbeat immediately, so the server pauses and tells the admin now
+ *     rather than on the next sweep.
  *
  * Nothing is sent while the session is paused or finished. A resume is a
  * deliberate act, never something a stray pointer movement can cause.
  */
 export function useActivityPulse({
   enabled,
+  watchInput,
   heartbeatSeconds,
   idleTimeoutMs,
   onBeat,
 }: {
   enabled: boolean;
+  /** Whether input decides anything. The server's `inactivityAutoPause`. */
+  watchInput: boolean;
   heartbeatSeconds: number;
   idleTimeoutMs: number;
   onBeat: () => void;
@@ -439,6 +461,11 @@ export function useActivityPulse({
     lastBeatRef.current = Date.now();
     setLocallyActive(true);
 
+    // Nothing is listened to while the inactivity rule is off. Not a listener
+    // that ignores what it hears - none attached at all, which is the only
+    // version of "this page is not watching your keyboard" worth saying.
+    if (!watchInput) return;
+
     const options = { passive: true, capture: true } as const;
     // Capture phase, so input still counts on a page whose own handler stops
     // the event before it bubbles back up to the document.
@@ -451,7 +478,7 @@ export function useActivityPulse({
         document.removeEventListener(event, markActive, options)
       );
     };
-  }, [enabled, markActive]);
+  }, [enabled, watchInput, markActive]);
 
   useEffect(() => {
     if (!enabled) {
@@ -464,7 +491,10 @@ export function useActivityPulse({
       setNow(current);
 
       const silentFor = current - lastActivityRef.current;
-      const idle = silentFor >= idleTimeoutMs;
+      // Silence means nothing while the rule is off: the timer is running, and
+      // the browser has no opinion about who is or is not sitting in front of
+      // it.
+      const idle = watchInput && silentFor >= idleTimeoutMs;
       setLocallyActive(!idle);
 
       if (idle) {
@@ -480,7 +510,12 @@ export function useActivityPulse({
 
       idleReportedRef.current = false;
       const dueFor = current - lastBeatRef.current;
-      if (dueFor >= heartbeatSeconds * 1000 && activitySinceBeatRef.current) {
+      // With the rule off the beat is unconditional - it reports that the timer
+      // is still running, which is true whether or not a key has been touched.
+      if (
+        dueFor >= heartbeatSeconds * 1000 &&
+        (!watchInput || activitySinceBeatRef.current)
+      ) {
         lastBeatRef.current = current;
         activitySinceBeatRef.current = false;
         onBeatRef.current();
@@ -489,7 +524,7 @@ export function useActivityPulse({
 
     const timer = window.setInterval(tick, 1000);
     return () => window.clearInterval(timer);
-  }, [enabled, heartbeatSeconds, idleTimeoutMs]);
+  }, [enabled, watchInput, heartbeatSeconds, idleTimeoutMs]);
 
   return { locallyActive, now };
 }
@@ -543,8 +578,9 @@ export function useWfhHeartbeat() {
  * that figure is counted up to - and moves it forward locally so the display
  * ticks once a second instead of once a heartbeat. It is a rendering of the
  * server's number, never a second opinion about it: every heartbeat replaces
- * both inputs, and the moment the browser stops seeing activity it stops
- * advancing, which is exactly when the server stops counting too.
+ * both inputs. While the inactivity rule is on it stops advancing the moment
+ * the browser stops seeing activity, which is exactly when the server stops
+ * counting too; with the rule off neither of them ever stops on its own.
  */
 export function displayedActiveMs(
   session: WfhSession | null | undefined,
