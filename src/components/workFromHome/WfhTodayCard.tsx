@@ -49,9 +49,9 @@ import { requestDesktopNotices } from "../../services/desktopNotifications";
  * outside it.
  *
  * The number is a rendering of the server's figure moving, not a timer of its
- * own - see hooks/useWfhSession. It stops advancing the moment this browser
- * stops seeing mouse or keyboard input, which is the same moment the server
- * stops counting.
+ * own - see hooks/useWfhSession. It runs from Start until the employee pauses
+ * or finishes the day: the inactivity rule that used to stop it is off, and the
+ * server is not counting on any other basis either.
  */
 
 const WfhTodayCard: React.FC = () => {
@@ -71,11 +71,19 @@ const WfhTodayCard: React.FC = () => {
   const config = data?.config;
   const working = session?.status === "working";
 
-  // Only a running timer needs the browser watching. A paused or finished day
-  // has nothing to report, and a resume must be a deliberate act rather than
+  /**
+   * Whether input decides anything at all, which is the server's call and not
+   * this card's. It is currently off, so the pulse attaches no listeners and
+   * only keeps the heartbeat going; see hooks/useWfhSession.
+   */
+  const watchesInput = config?.inactivityAutoPause ?? false;
+
+  // Only a running timer needs the heartbeat. A paused or finished day has
+  // nothing to report, and a resume must be a deliberate act rather than
   // something a stray pointer movement can cause.
   const pulse = useActivityPulse({
     enabled: working,
+    watchInput: watchesInput,
     heartbeatSeconds: config?.heartbeatSeconds ?? 60,
     idleTimeoutMs: config?.idleTimeoutMs ?? 5 * 60 * 1000,
     onBeat: beat,
@@ -418,12 +426,25 @@ const WfhTodayCard: React.FC = () => {
           What this page checks while the timer runs
         </summary>
         <p className="mt-1.5 ps-[1.375rem] text-[11px] leading-relaxed text-gray-400 dark:text-gray-500">
-          While the timer runs, this page checks only whether your mouse or
-          keyboard is being used, to pause after{" "}
-          {config?.idleTimeoutMinutes ?? 5} minutes without it. A screen that is
-          on, an open tab or a video playing does not count as activity. No
-          screenshots, keystrokes, mouse positions or content are recorded - only
-          that an interaction happened. All times are recorded by the server.
+          {watchesInput ? (
+            <>
+              While the timer runs, this page checks only whether your mouse or
+              keyboard is being used, to pause after{" "}
+              {config?.idleTimeoutMinutes ?? 5} minutes without it. A screen that
+              is on, an open tab or a video playing does not count as activity.
+              No screenshots, keystrokes, mouse positions or content are recorded
+              - only that an interaction happened. All times are recorded by the
+              server.
+            </>
+          ) : (
+            <>
+              This page does not check your mouse or keyboard. While the timer
+              runs it tells the server only that the timer is still running, and
+              the timer stops when you pause or finish it - never on its own. No
+              screenshots, keystrokes, mouse positions or content are recorded.
+              All times are recorded by the server.
+            </>
+          )}
         </p>
       </details>
     </section>
