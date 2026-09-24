@@ -2,12 +2,12 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// Brand primary (--blue-600 of the default theme, see styles/design-system.css)
-// and the light app background (--app-bg in index.css). Duplicated here as
-// literals because the manifest is generated at build time and cannot read CSS
-// custom properties; keep them in step if the default theme ever changes.
-const THEME_COLOR = '#2563eb'
-const BACKGROUND_COLOR = '#e9edf5'
+// Brand primary (--brand-600) and the light app background (--surface-base),
+// both from src/styles/tokens.css. Duplicated here as literals because the
+// manifest is generated at build time and cannot read CSS custom properties;
+// keep them in step if the palette moves.
+const THEME_COLOR = '#ed5f0c'
+const BACKGROUND_COLOR = '#eef1f6'
 
 // https://vite.dev/config/
 export default defineConfig({

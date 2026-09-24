@@ -15,20 +15,25 @@ import Avatar from "../components/Avatar";
 import Modal from "../components/ui/Modal";
 import MobileLeaveList from "../components/leaves/MobileLeaveList";
 import LeaveDetailSheet from "../components/leaves/LeaveDetailSheet";
-import type { LeaveRow } from "../components/leaves/leaveParts";
+import LeaveReviewModal from "../components/leaves/LeaveReviewModal";
+import { toneFor, type LeaveRow } from "../components/leaves/leaveParts";
+import { formatRequestRange, previewReason } from "../lib/requestList";
 import InlineLoader from "../components/InlineLoader";
 import LogoLoader from "../components/LogoLoader";
 import useListRowMotion from "../hooks/useListRowMotion";
 import {
   PlusIcon,
   ArrowPathIcon,
-  CheckCircleIcon,
   XCircleIcon,
   ClockIcon,
-  EyeIcon,
+  ChatBubbleBottomCenterTextIcon,
 } from "@heroicons/react/24/outline";
 import "../styles/design-system.css";
 import { spring } from "../lib/motion";
+
+/** Every column heading, so the row of them cannot drift apart. */
+const TH =
+  "px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400";
 
 const LeavesPage: React.FC = () => {
   const { user } = useAuth();
@@ -41,14 +46,10 @@ const LeavesPage: React.FC = () => {
   const [showRejectionPopup, setShowRejectionPopup] = useState(false);
   const [selectedLeaveId, setSelectedLeaveId] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
-  const [showCommentsPopup, setShowCommentsPopup] = useState(false);
   /** The request shown in the mobile detail sheet. */
   const [detailLeave, setDetailLeave] = useState<LeaveRow | null>(null);
-  const [popupContent, setPopupContent] = useState({
-    title: "",
-    content: "",
-    type: "",
-  });
+  /** The request shown in the desktop review dialog. */
+  const [reviewLeave, setReviewLeave] = useState<LeaveRow | null>(null);
 
   // Initialize selectedStatus from URL parameters on mount
   useEffect(() => {
@@ -58,52 +59,34 @@ const LeavesPage: React.FC = () => {
     }
   }, [searchParams]);
 
-  // Function to get badge colors for leave types - soft tinted pills
-  const getLeaveTypeBadge = (leaveType: string) => {
-    switch (leaveType.toLowerCase()) {
-      case "annual":
-        return "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 ring-1 ring-inset ring-blue-200/60 dark:ring-blue-500/20";
-      case "sick":
-        return "bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400 ring-1 ring-inset ring-red-200/60 dark:ring-red-500/20";
-      case "casual":
-        return "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 ring-1 ring-inset ring-emerald-200/60 dark:ring-emerald-500/20";
-      case "maternity":
-        return "bg-pink-50 text-pink-700 dark:bg-pink-500/10 dark:text-pink-400 ring-1 ring-inset ring-pink-200/60 dark:ring-pink-500/20";
-      case "paternity":
-        return "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400 ring-1 ring-inset ring-indigo-200/60 dark:ring-indigo-500/20";
-      case "emergency":
-        return "bg-orange-50 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400 ring-1 ring-inset ring-orange-200/60 dark:ring-orange-500/20";
-      default:
-        return "bg-gray-100 text-gray-700 dark:bg-gray-500/10 dark:text-gray-300 ring-1 ring-inset ring-gray-200/60 dark:ring-gray-500/20";
-    }
-  };
-
-  // Function to get status icons and colors - soft tinted pills with a leading dot
+  /* Status pill: a dot rather than an icon. At 12px a check, a cross and a
+     clock read as three different shapes competing with the word beside
+     them; a dot carries the colour and lets the label do the naming. */
   const getStatusDisplay = (status: string) => {
     const base =
       "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ring-1 ring-inset";
     switch (status.toLowerCase()) {
       case "approved":
         return {
-          icon: <CheckCircleIcon className="w-3.5 h-3.5" />,
+          dot: "bg-emerald-500",
           className: `${base} bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 ring-emerald-200/60 dark:ring-emerald-500/20`,
           text: "Approved",
         };
       case "rejected":
         return {
-          icon: <XCircleIcon className="w-3.5 h-3.5" />,
+          dot: "bg-red-500",
           className: `${base} bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 ring-red-200/60 dark:ring-red-500/20`,
           text: "Rejected",
         };
       case "pending":
         return {
-          icon: <ClockIcon className="w-3.5 h-3.5" />,
+          dot: "bg-amber-500",
           className: `${base} bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 ring-amber-200/60 dark:ring-amber-500/20`,
           text: "Pending",
         };
       default:
         return {
-          icon: <ClockIcon className="w-3.5 h-3.5" />,
+          dot: "bg-gray-400",
           className: `${base} bg-gray-100 text-gray-700 dark:bg-gray-500/10 dark:text-gray-300 ring-gray-200/60 dark:ring-gray-500/20`,
           text: status,
         };
@@ -289,29 +272,6 @@ const LeavesPage: React.FC = () => {
     setRejectionReason("");
   };
 
-  const showRejectionCommentsPopup = (comments: string) => {
-    setPopupContent({
-      title: "Rejection Reason",
-      content: comments,
-      type: "rejection",
-    });
-    setShowCommentsPopup(true);
-  };
-
-  const showLeaveReasonPopup = (reason: string) => {
-    setPopupContent({
-      title: "Leave Reason",
-      content: reason,
-      type: "reason",
-    });
-    setShowCommentsPopup(true);
-  };
-
-  const closeCommentsPopup = () => {
-    setShowCommentsPopup(false);
-    setPopupContent({ title: "", content: "", type: "" });
-  };
-
   // Only the very first load reaches this now - tab switches never refetch.
   if (isLoading) {
     return <LogoLoader label="Loading leave requests..." />;
@@ -424,227 +384,131 @@ const LeavesPage: React.FC = () => {
         onReject={(id) => handleRejectClick(id)}
       />
 
-      {/* Leave Requests Section */}
-      <div className="mt-8 hidden backdrop-blur-sm surface-card overflow-hidden lg:block">
+      {/* Leave Requests Section
+          One row, one decision: the reason sits in the row as a readable chip
+          and every other detail lives behind a single Review dialog, rather
+          than the two separate eye-icon popups this table used to carry. */}
+      <div className="mt-8 hidden overflow-hidden backdrop-blur-sm surface-card lg:block">
         {leaves.length > 0 ? (
-          <>
-            {/* Desktop Table View - Hidden on mobile */}
-            <div className="hidden lg:block">
-              <div className="table-scroll">
-                <table className="min-w-full divide-y divide-gray-100 dark:divide-gray-700/60">
-                  <thead className="bg-gray-50/80 dark:bg-gray-800/60">
-                    <tr>
+          <div className="table-scroll">
+            <table className="min-w-full">
+              <thead>
+                <tr className="border-b border-gray-100 dark:border-gray-700/60">
+                  {user?.role === "admin" && <th className={TH}>Employee</th>}
+                  <th className={TH}>Type</th>
+                  <th className={TH}>Duration</th>
+                  <th className={TH}>Days</th>
+                  <th className={TH}>Reason</th>
+                  <th className={TH}>Status</th>
+                  <th className={`${TH} text-right`}>Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white dark:divide-gray-800/60">
+                {leaves.map((leave: any, i: number) => {
+                  const employee =
+                    typeof leave.employee === "object" && leave.employee
+                      ? leave.employee
+                      : null;
+                  const status = getStatusDisplay(leave.status);
+                  return (
+                    <motion.tr
+                      key={leave._id}
+                      {...listRow(i)}
+                      className="bg-blue-50/40 transition-colors hover:bg-blue-50/80 dark:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.09]"
+                    >
                       {user?.role === "admin" && (
-                        <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                          Employee
-                        </th>
-                      )}
-                      <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                        Type
-                      </th>
-                      <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                        Duration
-                      </th>
-                      <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                        Days
-                      </th>
-                      <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                        Reason
-                      </th>
-                      <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                        Status
-                      </th>
-                      {user?.role === "admin" && (
-                        <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                          Actions
-                        </th>
-                      )}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
-                    {leaves.map((leave: any, i: number) => (
-                      <motion.tr
-                        key={leave._id}
-                        {...listRow(i)}
-                        className="group transition-colors duration-200 hover:bg-gray-50/80 dark:hover:bg-gray-700/30"
-                      >
-                        {user?.role === "admin" && (
-                          <td className="pl-2 pr-4 py-4 whitespace-nowrap">
-                            <div className="flex items-center gap-3">
-                              <Avatar
-                                src={
-                                  typeof leave.employee === "object"
-                                    ? leave.employee?.profilePicture
-                                    : null
+                        <td className="whitespace-nowrap px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <Avatar
+                              src={employee?.profilePicture}
+                              name={employee?.name || "Unknown"}
+                              size="md"
+                              className="flex-shrink-0"
+                            />
+                            <div className="flex flex-col">
+                              <button
+                                onClick={() =>
+                                  employee?._id &&
+                                  navigate(`/employees/${employee._id}`)
                                 }
-                                name={
-                                  typeof leave.employee === "object" &&
-                                  leave.employee?.name
-                                    ? leave.employee.name
-                                    : "Unknown"
-                                }
-                                size="md"
-                                className="flex-shrink-0"
-                              />
-                              <div className="flex flex-col">
-                                <button
-                                  onClick={() => {
-                                    if (
-                                      typeof leave.employee === "object" &&
-                                      leave.employee?._id
-                                    ) {
-                                      navigate(
-                                        `/employees/${leave.employee._id}`
-                                      );
-                                    }
-                                  }}
-                                  className="text-left text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer underline-offset-2 hover:underline"
-                                >
-                                  {typeof leave.employee === "object" &&
-                                  leave.employee?.name
-                                    ? leave.employee.name
-                                    : "Unknown"}
-                                </button>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">
-                                  {typeof leave.employee === "object" &&
-                                  leave.employee?.employeeId
-                                    ? leave.employee.employeeId
-                                    : "N/A"}
-                                </span>
-                              </div>
-                            </div>
-                          </td>
-                        )}
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium capitalize ${getLeaveTypeBadge(
-                              leave.leaveType
-                            )}`}
-                          >
-                            {leave.leaveType}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                          <div>
-                            <span className="text-xs text-gray-600 dark:text-gray-300">
-                              From:{" "}
-                            </span>
-                            <span>
-                              {new Date(leave.startDate).toLocaleDateString()}
-                            </span>
-                            <span className="mx-2">-</span>
-                            <span className="text-xs text-gray-600 dark:text-gray-300">
-                              To:{" "}
-                            </span>
-                            <span>
-                              {new Date(leave.endDate).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-baseline gap-1">
-                            <span className="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">
-                              {leave.totalDays}
-                            </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {leave.totalDays === 1 ? "day" : "days"}
-                            </span>
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="max-w-xs">
-                            <div className="flex items-center space-x-2">
-                              <div
-                                className="text-sm line-clamp-2 text-gray-900 dark:text-gray-100 flex-1"
-                                title={leave.reason}
+                                className="text-left text-[15px] font-semibold text-gray-900 underline-offset-2 transition-colors hover:text-blue-700 hover:underline dark:text-gray-100 dark:hover:text-blue-400"
                               >
-                                {leave.reason}
-                              </div>
-                              {leave.reason && (
-                                <button
-                                  onClick={() =>
-                                    showLeaveReasonPopup(leave.reason)
-                                  }
-                                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors flex-shrink-0"
-                                  title="View full reason"
-                                >
-                                  <EyeIcon className="w-4 h-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
-                                </button>
-                              )}
+                                {employee?.name || "Unknown"}
+                              </button>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {employee?.employeeId || "N/A"}
+                              </span>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center space-x-2">
-                            <span
-                              className={
-                                getStatusDisplay(leave.status).className
-                              }
-                            >
-                              {getStatusDisplay(leave.status).icon}
-                              {getStatusDisplay(leave.status).text}
-                            </span>
-                            {leave.status === "rejected" &&
-                              leave.reviewComments && (
-                                <button
-                                  onClick={() =>
-                                    showRejectionCommentsPopup(
-                                      leave.reviewComments
-                                    )
-                                  }
-                                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                                  title="View rejection reason"
-                                >
-                                  <EyeIcon className="w-4 h-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" />
-                                </button>
-                              )}
-                          </div>
-                        </td>
-                        {user?.role === "admin" && (
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {leave.status === "pending" ? (
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() =>
-                                    handleReview(leave._id, "approved")
-                                  }
-                                  disabled={reviewLeaveMutation.isPending}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-full text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 ring-1 ring-inset ring-emerald-200/70 dark:ring-emerald-500/30 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                  <CheckCircleIcon className="w-4 h-4" />
-                                  Approve
-                                </button>
-                                <button
-                                  onClick={() => handleRejectClick(leave._id)}
-                                  disabled={reviewLeaveMutation.isPending}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-full text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 ring-1 ring-inset ring-red-200/70 dark:ring-red-500/30 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                  <XCircleIcon className="w-4 h-4" />
-                                  Reject
-                                </button>
-                              </div>
-                            ) : (
-                              <span className="text-sm text-gray-400 dark:text-gray-500">
-                                Reviewed
-                              </span>
-                            )}
-                          </td>
-                        )}
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                      )}
 
-            {/* Mobile Card View - Shown on mobile and tablet */}
-            {/* Mobile list.
-                A native list, not a stack of framed cards: rows separated by
-                hairlines inside the surrounding panel. The previous version
-                nested a p-6 card inside a p-8 container, so every request cost
-                56px of padding before any content and one row filled half a
-                phone screen. */}
-          </>
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <span
+                          className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium capitalize ${
+                            toneFor(leave.leaveType).tag
+                          }`}
+                        >
+                          {leave.leaveType}
+                        </span>
+                      </td>
+
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <span className="text-sm font-medium tabular-nums text-gray-900 dark:text-gray-100">
+                          {formatRequestRange(leave.startDate, leave.endDate)}
+                        </span>
+                      </td>
+
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <span className="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">
+                          {leave.totalDays}{" "}
+                          {leave.totalDays === 1 ? "day" : "days"}
+                        </span>
+                      </td>
+
+                      {/* The reason is the cell people actually read, so it
+                          gets a surface of its own and opens the dialog. */}
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => setReviewLeave(leave)}
+                          title={leave.reason || undefined}
+                          className="inline-flex max-w-[13rem] items-center gap-2 rounded-full bg-blue-50/80 px-3 py-1.5 text-left ring-1 ring-inset ring-blue-100 transition-colors hover:bg-blue-100/70 dark:bg-blue-500/10 dark:ring-blue-500/15 dark:hover:bg-blue-500/20"
+                        >
+                          <ChatBubbleBottomCenterTextIcon className="h-4 w-4 flex-none text-blue-600 dark:text-blue-400" />
+                          <span className="min-w-0 truncate text-sm text-blue-900 dark:text-blue-100">
+                            {previewReason(leave.reason)}
+                          </span>
+                          {leave.status === "rejected" && (
+                            <span className="flex-none text-xs font-medium text-red-600 dark:text-red-400">
+                              View rejection
+                            </span>
+                          )}
+                        </button>
+                      </td>
+
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <span className={status.className}>
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${status.dot}`}
+                          />
+                          {status.text}
+                        </span>
+                      </td>
+
+                      <td className="whitespace-nowrap px-6 py-4 text-right">
+                        <button
+                          onClick={() => setReviewLeave(leave)}
+                          className="inline-flex items-center rounded-full bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
+                        >
+                          Review
+                        </button>
+                      </td>
+                    </motion.tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         ) : (
           <div className="text-center py-16 px-8">
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-400">
@@ -661,6 +525,32 @@ const LeavesPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Row detail, and the only place a request is approved or rejected
+          from on desktop. */}
+      <LeaveReviewModal
+        leave={reviewLeave}
+        onClose={() => setReviewLeave(null)}
+        isAdmin={user?.role === "admin"}
+        isBusy={reviewLeaveMutation.isPending}
+        onApprove={async (id) => {
+          // Closed on success only - a failed approval leaves the dialog up
+          // rather than dropping the reviewer back to an unchanged row.
+          try {
+            await reviewLeaveMutation.mutateAsync({
+              id,
+              data: { status: "approved" },
+            });
+            setReviewLeave(null);
+          } catch {
+            /* reported by the mutation's onError */
+          }
+        }}
+        onReject={(id) => {
+          setReviewLeave(null);
+          handleRejectClick(id);
+        }}
+      />
 
       {/* Rejection Reason Modal */}
       <Modal
@@ -707,39 +597,6 @@ const LeavesPage: React.FC = () => {
         </div>
       </Modal>
 
-      {/* Comments / Reason Modal */}
-      <Modal
-        open={showCommentsPopup}
-        onClose={closeCommentsPopup}
-        size="lg"
-        title={popupContent.title}
-        footer={
-          <button
-            onClick={closeCommentsPopup}
-            className="rounded-full border border-gray-200 dark:border-gray-700 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
-          >
-            Close
-          </button>
-        }
-      >
-        <div
-          className={`rounded-xl border-l-4 p-4 ${
-            popupContent.type === "rejection"
-              ? "border-red-400 bg-red-50 dark:bg-red-900/20"
-              : "border-blue-400 bg-blue-50 dark:bg-blue-900/20"
-          }`}
-        >
-          <div
-            className={`text-sm leading-relaxed ${
-              popupContent.type === "rejection"
-                ? "text-red-700 dark:text-red-300"
-                : "text-blue-700 dark:text-blue-300"
-            }`}
-          >
-            {popupContent.content}
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 };

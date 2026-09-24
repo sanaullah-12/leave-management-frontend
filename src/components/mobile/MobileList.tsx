@@ -227,7 +227,7 @@ export const MobileList: React.FC<MobileListProps> = ({
                   transition={spring}
                   aria-hidden="true"
                   className="absolute inset-0 rounded-full"
-                  style={{ backgroundColor: "var(--accent)" }}
+                  style={{ backgroundColor: "var(--brand-solid)" }}
                 />
               )}
               <span className="relative z-10">{f.label}</span>

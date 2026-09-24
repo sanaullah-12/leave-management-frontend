@@ -1,5 +1,6 @@
 import React, { useId } from "react";
 import { useReducedMotion } from "framer-motion";
+import { useThemeAccent } from "../../hooks/useThemeAccent";
 
 /**
  * A work-from-home day, drawn as an hourglass.
@@ -35,10 +36,13 @@ interface Props {
   className?: string;
 }
 
-const SAND: Record<HourglassTone, string> = {
+/**
+ * The sand, per state. `done` is the theme accent, so it is resolved at render
+ * rather than written here - see the `accent` argument below.
+ */
+const SAND: Record<Exclude<HourglassTone, "done">, string> = {
   working: "#10b981",
   paused: "#f59e0b",
-  done: "#3b82f6",
   idle: "#94a3b8",
 };
 
@@ -59,7 +63,8 @@ const WfhHourglass: React.FC<Props> = ({
   const uid = useId().replace(/:/g, "");
   const reduce = useReducedMotion();
 
-  const colour = SAND[tone];
+  const accent = useThemeAccent(600);
+  const colour = tone === "done" ? accent : SAND[tone];
   const drained = progress === null ? 0 : Math.min(1, Math.max(0, progress));
   const running = tone === "working" && !reduce;
 

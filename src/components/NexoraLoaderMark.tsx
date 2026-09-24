@@ -78,10 +78,28 @@ interface Props {
   /** Rendered pixel size (square). Default 96. */
   size?: number;
   className?: string;
+  /**
+   * Run the orbit. Default true - this is the loading mark, and a loading
+   * state that does not move is not one.
+   *
+   * Pass `false` wherever the mark is identity rather than progress. The orbit
+   * animates `cx`, `cy` and `r` on two circles under a Gaussian blur filter:
+   * SVG geometry is not compositable, so each frame is a layout and a
+   * re-rasterisation of the filtered subtree. That is the right price for a
+   * loader the user is waiting on, and the wrong one for a logo that sits in
+   * the sidebar for the whole session. `AppLogo` is the static entry point.
+   */
+  animated?: boolean;
 }
 
-const NexoraLoaderMark: React.FC<Props> = ({ size = 96, className = "" }) => {
-  const reduce = useReducedMotion();
+const NexoraLoaderMark: React.FC<Props> = ({
+  size = 96,
+  className = "",
+  animated = true,
+}) => {
+  // Either reason lands in the same place: the mark drawn at rest, in its
+  // complete form, with no animation attached.
+  const still = useReducedMotion() || !animated;
   const uid = "nx" + useId().replace(/:/g, "");
   const idBlue = `${uid}b`;
   const idGreen = `${uid}g`;
@@ -131,7 +149,7 @@ const NexoraLoaderMark: React.FC<Props> = ({ size = 96, className = "" }) => {
 
       {/* Two orbiting nodes */}
       <g filter={`url(#${idGlow})`}>
-        {reduce ? (
+        {still ? (
           <>
             <circle cx={CX + Vx} cy={CY + Vy} r={RD} fill={`url(#${idBlue})`} />
             <circle cx={CX - Vx} cy={CY - Vy} r={RD} fill={`url(#${idGreen})`} />

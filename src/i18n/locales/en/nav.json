@@ -7,10 +7,8 @@
   "search": {
     "placeholder": "Search",
     "title": "Search",
-    "noResults": "No results for “{{query}}”"
-  },
-  "sections": {
-    "pages": "Pages"
+    "noResults": "No results for “{{query}}”",
+    "clear": "Clear search"
   },
   "actions": {
     "collapse": "Collapse",
@@ -19,12 +17,19 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "manageAccount": "Manage Account",
-    "more": "More"
+    "more": "More",
+    "switchToDark": "Switch to dark mode",
+    "switchToLight": "Switch to light mode"
   },
   "header": {
     "welcome": "Welcome back, {{name}}",
     "administrator": "Administrator",
     "employee": "Employee"
+  },
+  "bands": {
+    "workspace": "Workspace",
+    "people": "People",
+    "operations": "Operations"
   },
   "groups": {
     "home": "Home",

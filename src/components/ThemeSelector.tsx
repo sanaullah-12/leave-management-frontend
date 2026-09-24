@@ -1,25 +1,28 @@
 import React from "react";
-import { motion } from "framer-motion";
-import { CheckIcon } from "@heroicons/react/24/solid";
 import { SunIcon, MoonIcon, ComputerDesktopIcon } from "@heroicons/react/24/outline";
-import { useTheme, COLOR_SCHEMES } from "../context/ThemeContext";
-import type { ColorScheme, ThemeMode } from "../context/ThemeContext";
-import { ACCENT_HEX, SCHEME_LABEL } from "../lib/themeTokens";
-import { popSpring } from "../lib/motion";
+import { CheckIcon } from "@heroicons/react/24/solid";
+import { useTheme } from "../context/ThemeContext";
+import type { Accent, ThemeMode } from "../context/ThemeContext";
 
-interface ColorOption {
-  key: ColorScheme;
-  name: string;
-  color: string;
-}
-
-// Derived from the single scheme vocabulary + palette, so a new colour scheme
-// appears here automatically instead of needing a second hand-kept list.
-const COLORS: ColorOption[] = COLOR_SCHEMES.map((key) => ({
-  key,
-  name: SCHEME_LABEL[key],
-  color: ACCENT_HEX[key],
-}));
+/**
+ * Appearance picker: the mode, then the accent.
+ *
+ * The accent section used to offer ten arbitrary hues. It offers three now,
+ * and all three come from the brand mark, so the app and its logo are never
+ * two unrelated colours.
+ */
+/**
+ * The three accents, in the order they are offered. The swatch is a token
+ * rather than a hex: the ramps live in styles/tokens.css and a second copy
+ * here would be one more thing to keep in step, which is how the previous
+ * ten-colour picker ended up painting three swatches that no longer matched
+ * the app.
+ */
+const ACCENT_OPTIONS: { key: Accent; label: string; swatch: string }[] = [
+  { key: "orange", label: "Orange", swatch: "var(--swatch-orange)" },
+  { key: "blue", label: "Blue", swatch: "var(--swatch-blue)" },
+  { key: "green", label: "Green", swatch: "var(--swatch-green)" },
+];
 
 const MODES: {
   key: ThemeMode;
@@ -34,30 +37,30 @@ const MODES: {
 // A tiny window mock used inside each appearance card.
 const ModePreview: React.FC<{ mode: ThemeMode }> = ({ mode }) => {
   const light = (
-    <div className="flex h-full w-full gap-1 bg-white p-1.5">
+    <div className="flex h-full w-full gap-1 bg-[#ffffff] p-1.5">
       <div className="flex w-1/3 flex-col gap-1">
-        <div className="h-2 w-2 rounded-sm bg-amber-700/50" />
-        <div className="h-1 w-full rounded-full bg-gray-200" />
-        <div className="h-1 w-3/4 rounded-full bg-gray-200" />
+        <div className="h-2 w-2 rounded-sm bg-brand-600" />
+        <div className="h-1 w-full rounded-full bg-[#e4e7ee]" />
+        <div className="h-1 w-3/4 rounded-full bg-[#e4e7ee]" />
       </div>
       <div className="flex flex-1 flex-col gap-1">
-        <div className="h-1.5 w-full rounded-full bg-gray-200" />
-        <div className="h-1.5 w-2/3 rounded-full bg-amber-700/40" />
-        <div className="h-1.5 w-full rounded-full bg-gray-100" />
+        <div className="h-1.5 w-full rounded-full bg-[#e4e7ee]" />
+        <div className="h-1.5 w-2/3 rounded-full bg-brand-600/60" />
+        <div className="h-1.5 w-full rounded-full bg-[#f1f3f7]" />
       </div>
     </div>
   );
   const dark = (
-    <div className="flex h-full w-full gap-1 bg-gray-900 p-1.5">
+    <div className="flex h-full w-full gap-1 bg-[#0b0b0d] p-1.5">
       <div className="flex w-1/3 flex-col gap-1">
-        <div className="h-2 w-2 rounded-sm bg-amber-600/70" />
-        <div className="h-1 w-full rounded-full bg-gray-700" />
-        <div className="h-1 w-3/4 rounded-full bg-gray-700" />
+        <div className="h-2 w-2 rounded-sm bg-brand-500" />
+        <div className="h-1 w-full rounded-full bg-[#232327]" />
+        <div className="h-1 w-3/4 rounded-full bg-[#232327]" />
       </div>
       <div className="flex flex-1 flex-col gap-1">
-        <div className="h-1.5 w-full rounded-full bg-gray-700" />
-        <div className="h-1.5 w-2/3 rounded-full bg-amber-600/60" />
-        <div className="h-1.5 w-full rounded-full bg-gray-800" />
+        <div className="h-1.5 w-full rounded-full bg-[#232327]" />
+        <div className="h-1.5 w-2/3 rounded-full bg-brand-500/60" />
+        <div className="h-1.5 w-full rounded-full bg-[#141416]" />
       </div>
     </div>
   );
@@ -78,11 +81,10 @@ const ModePreview: React.FC<{ mode: ThemeMode }> = ({ mode }) => {
 };
 
 const ThemeSelector: React.FC<{ showPreview?: boolean }> = () => {
-  const { colorScheme, setColorScheme, themeMode, setThemeMode } = useTheme();
+  const { themeMode, setThemeMode, accent, setAccent } = useTheme();
 
   return (
     <div className="space-y-8">
-      {/* Appearance */}
       <section>
         <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
           Appearance
@@ -122,58 +124,39 @@ const ThemeSelector: React.FC<{ showPreview?: boolean }> = () => {
         </div>
       </section>
 
-      {/* Color theme */}
       <section>
         <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-          Theme color
+          Accent colour
         </h3>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {COLORS.map((c) => {
-            const active = colorScheme === c.key;
+        <div className="grid grid-cols-3 gap-3">
+          {ACCENT_OPTIONS.map((a) => {
+            const active = accent === a.key;
             return (
-              <motion.button
-                key={c.key}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => setColorScheme(c.key)}
-                className="relative flex items-center gap-3 rounded-xl border p-3 text-left transition-colors"
-                style={{
-                  borderColor: active ? c.color : undefined,
-                  backgroundColor: active ? `${c.color}14` : undefined,
-                }}
+              <button
+                key={a.key}
+                onClick={() => setAccent(a.key)}
+                className={`flex items-center gap-3 rounded-xl border-2 p-3 text-left transition-all ${
+                  active
+                    ? "border-brand-500 bg-brand-500/10"
+                    : "border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600"
+                }`}
               >
-                {!active && (
-                  <span className="pointer-events-none absolute inset-0 rounded-xl border border-gray-200 dark:border-gray-700" />
-                )}
                 <span
-                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
-                  style={{ backgroundColor: `${c.color}1f` }}
+                  className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-lg"
+                  style={{ backgroundColor: a.swatch }}
                 >
-                  <span
-                    className="h-4 w-4 rounded-md"
-                    style={{ backgroundColor: c.color }}
-                  />
+                  {active && <CheckIcon className="h-4 w-4 text-white" />}
                 </span>
                 <span
-                  className={`text-sm font-medium ${
+                  className={`text-sm font-semibold ${
                     active
                       ? "text-gray-900 dark:text-white"
-                      : "text-gray-700 dark:text-gray-300"
+                      : "text-gray-600 dark:text-gray-300"
                   }`}
                 >
-                  {c.name}
+                  {a.label}
                 </span>
-                {active && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={popSpring}
-                    className="ml-auto flex h-5 w-5 items-center justify-center rounded-full text-white"
-                    style={{ backgroundColor: c.color }}
-                  >
-                    <CheckIcon className="h-3.5 w-3.5" />
-                  </motion.span>
-                )}
-              </motion.button>
+              </button>
             );
           })}
         </div>

@@ -7,10 +7,8 @@
   "search": {
     "placeholder": "تلاش کریں",
     "title": "تلاش",
-    "noResults": "“{{query}}” کے لیے کوئی نتیجہ نہیں"
-  },
-  "sections": {
-    "pages": "صفحات"
+    "noResults": "“{{query}}” کے لیے کوئی نتیجہ نہیں",
+    "clear": "تلاش صاف کریں"
   },
   "actions": {
     "collapse": "سکیڑیں",
@@ -19,12 +17,19 @@
     "openMenu": "مینو کھولیں",
     "closeMenu": "مینو بند کریں",
     "manageAccount": "اکاؤنٹ کا انتظام",
-    "more": "مزید"
+    "more": "مزید",
+    "switchToDark": "ڈارک موڈ پر جائیں",
+    "switchToLight": "لائٹ موڈ پر جائیں"
   },
   "header": {
     "welcome": "خوش آمدید، {{name}}",
     "administrator": "منتظم",
     "employee": "ملازم"
+  },
+  "bands": {
+    "workspace": "ورک اسپیس",
+    "people": "افراد",
+    "operations": "آپریشنز"
   },
   "groups": {
     "home": "ہوم",

@@ -25,6 +25,7 @@ import {
   departmentName,
 } from "../../lib/voiceMeta";
 import { showErrorToast, showSuccessToast } from "../../utils/toastHelpers";
+import api from "../../services/api";
 import type { VoiceReply, VoiceStatus } from "../../types/employeeVoice";
 
 interface Props {
@@ -33,10 +34,29 @@ interface Props {
   onClose: () => void;
 }
 
-const API_ORIGIN = (
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api"
-).replace(/\/api\/?$/, "");
-const fileUrl = (p: string) => (p.startsWith("http") ? p : `${API_ORIGIN}${p}`);
+/**
+ * Attachments are confidential and only served to an authenticated owner or
+ * admin, so they are fetched with the session token and handed to the browser
+ * as a download - never opened from a public URL.
+ */
+const downloadAttachment = async (path: string, name: string) => {
+  const relative = path.replace(/^\/api(?=\/)/, "");
+  if (!relative.startsWith("/employee-voice/")) return;
+  try {
+    const res = await api.get(relative, { responseType: "blob" });
+    const url = URL.createObjectURL(res.data as Blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = name || "attachment";
+    link.rel = "noopener";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  } catch {
+    showErrorToast("Could not download the attachment");
+  }
+};
 
 const initials = (name: string) =>
   name
@@ -253,19 +273,18 @@ const VoiceDetailDrawer: React.FC<Props> = ({ voiceId, open, onClose }) => {
               </p>
               <div className="space-y-1.5">
                 {voice.attachments.map((a, i) => (
-                  <a
+                  <button
                     key={i}
-                    href={fileUrl(a.path)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-2 rounded-lg border border-gray-100 bg-white px-3 py-2 text-sm text-gray-700 transition-colors hover:border-blue-300 hover:text-blue-600 dark:border-gray-700/60 dark:bg-gray-800/50 dark:text-gray-200"
+                    type="button"
+                    onClick={() => downloadAttachment(a.path, a.originalName)}
+                    className="flex w-full items-center gap-2 rounded-lg border border-gray-100 bg-white px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:border-blue-300 hover:text-blue-600 dark:border-gray-700/60 dark:bg-gray-800/50 dark:text-gray-200"
                   >
                     <PaperClipIcon className="h-4 w-4 flex-shrink-0 text-gray-400" />
                     <span className="min-w-0 flex-1 truncate">{a.originalName}</span>
                     <span className="flex-shrink-0 text-[11px] text-gray-400">
                       {(a.size / 1024).toFixed(0)} KB
                     </span>
-                  </a>
+                  </button>
                 ))}
               </div>
             </div>

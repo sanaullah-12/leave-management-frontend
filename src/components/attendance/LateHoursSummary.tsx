@@ -1,5 +1,6 @@
 import React from "react";
 import type { LateSummary } from "../../hooks/useLateHours";
+import { statusColor } from "../../lib/themeTokens";
 
 /**
  * LateHoursSummary
@@ -26,8 +27,8 @@ interface Props {
 }
 
 /** Late is amber wherever it appears in this app; the tone is fixed, not themed. */
-const LATE_TONE = "#b5650a";
-const NEUTRAL_TONE = "#5c6470";
+const LATE_TONE = statusColor("warning");
+const NEUTRAL_TONE = statusColor("neutral");
 
 const LateHoursSummary: React.FC<Props> = ({
   summary,

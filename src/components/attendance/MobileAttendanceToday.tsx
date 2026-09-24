@@ -4,6 +4,7 @@ import StatusBadge from "./StatusBadge";
 import type { RosterDayRow, RosterTotals } from "./RosterTables";
 import { byArrival, groupByStatus } from "./rosterGrouping";
 import { spring } from "../../lib/motion";
+import { statusColor } from "../../lib/themeTokens";
 
 /**
  * Today's attendance, for a phone.
@@ -305,35 +306,35 @@ const MobileAttendanceToday: React.FC<Props> = ({
         key: "present",
         label: "Present",
         value: totals.onTime,
-        color: "#0f7a4c",
+        color: statusColor("success"),
         statuses: ["On time", "Present"],
       },
       {
         key: "late",
         label: "Late",
         value: totals.late,
-        color: "#b5650a",
+        color: statusColor("warning"),
         statuses: ["Late"],
       },
       {
         key: "absent",
         label: "Absent",
         value: totals.absent,
-        color: "#b42318",
+        color: statusColor("danger"),
         statuses: ["Absent", "No record"],
       },
       {
         key: "leave",
         label: "Leave",
         value: totals.onLeave,
-        color: "#0e7490",
+        color: statusColor("leave"),
         statuses: ["On leave"],
       },
       {
         key: "wfh",
         label: "WFH",
         value: totals.workFromHome,
-        color: "#4c3fc7",
+        color: statusColor("remote"),
         statuses: ["Work from home"],
       },
     ],

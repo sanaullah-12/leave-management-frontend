@@ -121,7 +121,7 @@ const GetAppButton: React.FC<{ className?: string; compact?: boolean }> = ({
           className
         }
       >
-        <ArrowDownTrayIcon className="h-4 w-4 shrink-0 text-[rgb(var(--blue-600))]" />
+        <ArrowDownTrayIcon className="h-4 w-4 shrink-0 text-[rgb(var(--brand-600))]" />
         {!compact && (
           <span className="whitespace-nowrap">
             {installing ? "Installing..." : "Get app"}

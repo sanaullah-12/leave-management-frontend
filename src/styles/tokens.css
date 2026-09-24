@@ -1,0 +1,669 @@
+/* ==========================================================================
+   Design tokens - the single source of truth for colour in this app
+   --------------------------------------------------------------------------
+   Everything that has a colour reads from this file, directly or through a
+   Tailwind utility. Nothing else in the codebase should define a palette.
+
+   HOW IT IS LAYERED
+
+     1. RAMPS     Raw 25-950 scales as space-separated RGB channels, so a
+                  Tailwind utility can apply an alpha to them
+                  (`rgb(var(--gray-200) / <alpha-value>)`).
+
+                  Three ramps are re-declared under `html.dark`: the neutrals
+                  and the status hues. A dark theme is not a light theme with
+                  the steps reversed - a surface ladder has to be built for
+                  the ground it sits on, and a status hue has to be
+                  desaturated and lifted or it glows. Declaring them per mode
+                  is what lets the ~700 `gray-*`, `emerald-*`, `amber-*` and
+                  `red-*` utilities already written into the components land
+                  on the right value in both modes, with no `dark:` variant
+                  and no override rule.
+
+     2. SEMANTIC  What the ramps MEAN: surface, text, border, brand, status,
+                  interactive. New code should reach for these, because a
+                  semantic token survives a palette change and a raw step
+                  does not.
+
+     3. ALIASES   Names older code already calls. They point at the tokens
+                  above, so there is still exactly one place a colour is
+                  decided.
+
+   THE SURFACE LADDER
+
+   Both modes use the same five rungs, so a component written once is correct
+   in both:
+
+       sunken    the well a raised thing sits in - table heads, tracks, code
+       base      the page ground
+       raised    a card
+       overlay   a thing floating above a card - menu, modal, toast
+       hover     the same surface under a pointer
+
+   Each rung is a small, even step. Separation comes from the ladder plus a
+   hairline, not from a heavy border or a drop shadow.
+   ========================================================================== */
+
+/* ==========================================================================
+   1a. NEUTRAL RAMP - light
+   --------------------------------------------------------------------------
+   Very slightly cool, and deliberately not built on pure white. A white page
+   under a white card has no hierarchy, so the ground is held a few levels
+   down and the card gets to be the white thing on screen.
+
+   All four text steps (400/500/600/900) clear 4.5:1 on a white card. 400
+   matters most: it is the app's single most-used text colour (~810 call
+   sites), and at Tailwind's own value it sits at 2.9:1 - which is the "muted
+   text is difficult to read" complaint, in light mode. It is the same tone
+   used for placeholder text and small icons, so it is set to just clear the
+   threshold rather than pushed down onto 500, which would delete a rung of the
+   hierarchy to buy contrast that decorative glyphs did not need. It is set
+   against the page ground rather than the card, because that is the darker of
+   the two backgrounds it lands on.
+   ========================================================================== */
+:root {
+  --gray-25:  252 252 253;
+  --gray-50:  247 248 250;
+  --gray-100: 241 243 247;
+  --gray-200: 228 231 238;
+  --gray-300: 205 210 221;
+  --gray-400: 102 109 121;  /* muted text     - 5.2:1 on a card, 4.6:1 on the page */
+  --gray-500: 92 99 113;    /* secondary text - 6.0:1 */
+  --gray-600: 69 77 91;     /* strong text    - 8.5:1 */
+  --gray-700: 56 65 80;
+  --gray-800: 36 43 56;
+  --gray-900: 19 25 36;
+  --gray-950: 8 12 20;
+}
+
+/* ==========================================================================
+   1b. NEUTRAL RAMP - dark
+   --------------------------------------------------------------------------
+   The ground is #0b0b0d. That is a deliberate move down from the #191c24 it
+   used to be: the design this mode is built to is a near-black product, where
+   a card is the only lit surface and the accent is the only colour. Holding
+   the ground several levels higher, as the previous ramp did, made every
+   card a mid-grey box and left nothing for the accent to sit against.
+
+   Pure #000 is still avoided. It gives a card nowhere to sit below it, kills
+   every shadow, and at 21:1 against white text it smears at small sizes.
+   #0b0b0d keeps a hair of headroom in both directions.
+
+   The surface steps (950/900/800/700/600) are spaced about four L* apart -
+   far enough to see the edge of a card without a border, close enough that a
+   page of stacked panels does not read as a staircase.
+
+   The ramp is neutral rather than the blue-grey it was. The blue cast was
+   there to carry a brand hue through the greys, which made sense when the
+   brand was one of ten selectable hues; with a single warm accent a cool grey
+   fights it, so the greys are held at near-zero chroma and the warmth is
+   spent on the accent alone.
+
+   The text steps are pulled well up from where Tailwind's defaults land.
+   Reused as-is on a dark ground, `gray-400` and `gray-500` are the "muted text
+   I cannot read" complaint: #6b7280 on a card is 2.7:1.
+
+   Both are set from the card (#141416), which is where nearly all text in the
+   app sits: 400 lands at 5.4:1 and 500 at 4.8:1, so every step of the text
+   hierarchy clears AA and muted still reads as muted. The two are kept a
+   rung apart rather than both pushed to the same safe value, because
+   collapsing them would buy contrast by deleting a rung of the hierarchy.
+   ========================================================================== */
+html.dark {
+  --gray-25:  250 250 251;
+  --gray-50:  244 244 246;
+  --gray-100: 237 237 239;  /* primary text */
+  --gray-200: 212 212 218;
+  --gray-300: 169 169 176;  /* secondary text */
+  --gray-400: 139 139 147;  /* muted text     - 5.4:1 on a card */
+  --gray-500: 130 130 139;  /* faint text     - 4.8:1 on a card */
+  --gray-600: 52 52 58;     /* strong border, filled track */
+  --gray-700: 35 35 39;     /* default border, hover fill, input */
+  --gray-800: 20 20 23;     /* card */
+  --gray-900: 11 11 13;     /* page ground */
+  --gray-950: 9 9 11;       /* sunken */
+}
+
+/* ==========================================================================
+   1c. BRAND RAMPS - the three accents
+   --------------------------------------------------------------------------
+   Three ramps, selected by an `accent-<name>` class that ThemeContext puts on
+   <html>. Orange is the default and the two others are the brand mark's own
+   colours, lifted straight off the gradient stops in NexoraLoaderMark: the
+   blue is #3E5BF6 and the green is #08AF6C. That is the whole vocabulary, and
+   it is deliberately small.
+
+   The app used to ship ten accents (blue, purple, pink, violet, indigo,
+   orange, teal, bronze, mint, black), which is a different thing from three.
+   At ten, every surface built on the brand - the sidebar, the section
+   banners, the charts - had to hold up in ten arbitrary hues, so each was
+   tuned for the worst case and none was tuned for the product. At three, all
+   of them come from the mark, so there is no case where the accent and the
+   logo are two unrelated colours.
+
+   WHICH RUNG DOES WHAT
+
+     500  the live accent, and the one the product reads as. Chart strokes,
+          the active nav mark, icons, the focus ring, the KPI arrow.
+     600  solid fills under white label text.
+     700  accent-coloured TEXT in light mode; 300 is its dark-mode twin.
+
+   The 500s are bright on purpose. An earlier pass set orange 500/600 to
+   #F26B1F / #CB4C06, picked so white on the fill cleared 4.5:1 - which it did,
+   at the cost of a rust-brown button. These are a rung up. White on the orange
+   fill now sits at about 3.4:1, under the AA threshold for 13px label text,
+   which is the trade the brightness costs; the blue (5.2:1) and the green
+   (5.0:1) both clear it, because blue and green can be bright and dark at once
+   and orange cannot. Accent-coloured text is unaffected either way - it comes
+   off 700/300, not off the fill.
+
+   `--blue-*` is an alias of the active ramp, not a second palette. The
+   Tailwind scale named `blue` has been the brand scale in this codebase for a
+   long time and is spelled that way in several hundred class names; renaming
+   the utility would touch every file for no visual change. New code should
+   write `brand-*`, which is the same colour with an honest name.
+   ========================================================================== */
+:root,
+html.accent-orange {
+  --brand-25:  255 247 240; --brand-50:  255 240 229; --brand-100: 255 226 204;
+  --brand-200: 255 201 158; --brand-300: 255 173 112; --brand-400: 255 145 71;
+  --brand-500: 255 122 47;  --brand-600: 237 95 12;   --brand-700: 194 76 10;
+  --brand-800: 156 62 12;   --brand-900: 128 52 14;   --brand-950: 71 27 7;
+}
+
+/* The mark's blue stop, #3E5BF6, as the 600. */
+html.accent-blue {
+  --brand-25:  245 247 255; --brand-50:  238 242 255; --brand-100: 222 229 255;
+  --brand-200: 195 206 255; --brand-300: 158 175 255; --brand-400: 122 142 255;
+  --brand-500: 91 116 255;  --brand-600: 62 91 246;   --brand-700: 45 68 206;
+  --brand-800: 39 57 166;   --brand-900: 36 51 130;   --brand-950: 22 30 79;
+}
+
+/* The mark's green stops: #2FC98D is the 400 and #08AF6C the 500, so the logo
+   and the accent are the same colour rather than two greens. The solid fill
+   sits a rung below both - a green bright enough to be the mark is not one
+   white text can stand on. */
+html.accent-green {
+  --brand-25:  240 253 247; --brand-50:  232 251 242; --brand-100: 202 246 225;
+  --brand-200: 152 236 198; --brand-300: 96 220 166;  --brand-400: 47 201 141;
+  --brand-500: 8 175 108;   --brand-600: 6 128 78;    --brand-700: 6 105 65;
+  --brand-800: 8 84 53;     --brand-900: 8 69 45;     --brand-950: 3 40 26;
+}
+
+/* The picker has to paint all three at once, and only the active one is on
+   <html>. These are the 600 of each ramp above, declared where the ramps are
+   so the swatch and the app cannot disagree. */
+:root {
+  --swatch-orange: rgb(237 95 12);
+  --swatch-blue:   rgb(62 91 246);
+  --swatch-green:  rgb(6 128 78);
+}
+
+/* The Tailwind scale named `blue` IS the brand scale. See the note above. */
+:root {
+  --blue-25:  var(--brand-25);  --blue-50:  var(--brand-50);
+  --blue-100: var(--brand-100); --blue-200: var(--brand-200);
+  --blue-300: var(--brand-300); --blue-400: var(--brand-400);
+  --blue-500: var(--brand-500); --blue-600: var(--brand-600);
+  --blue-700: var(--brand-700); --blue-800: var(--brand-800);
+  --blue-900: var(--brand-900); --blue-950: var(--brand-950);
+}
+
+/* ==========================================================================
+   1d. STATUS RAMPS
+   --------------------------------------------------------------------------
+   Three hues, each declared once per mode.
+
+   The app had grown two spellings for each of them - `emerald` and `green`
+   for success, `red` and `rose` for danger, `amber` and `yellow` for warning
+   - which is why an approved badge and a paid badge were different greens.
+   The Tailwind config now points all six names at the ramps below, so the
+   duplicates collapse without editing the ~800 class names that use them.
+
+   The dark ramp is not the light one. A saturated hue on a dark ground reads
+   far brighter than its contrast number suggests, so the mid steps here are
+   pulled back in chroma, and the light steps - which are text on dark - are
+   softened well clear of neon.
+   ========================================================================== */
+:root {
+  /* success */
+  --success-25:  240 253 246; --success-50:  236 253 245; --success-100: 209 250 229;
+  --success-200: 167 243 208; --success-300: 110 231 183; --success-400: 52 199 149;
+  --success-500: 16 167 118;  --success-600: 5 137 97;    --success-700: 4 111 80;
+  --success-800: 6 89 66;     --success-900: 6 73 55;     --success-950: 2 43 32;
+
+  /* warning */
+  --warning-25:  255 252 242; --warning-50:  255 250 235; --warning-100: 254 240 199;
+  --warning-200: 253 226 146; --warning-300: 250 199 76;  --warning-400: 237 165 23;
+  --warning-500: 209 133 8;   --warning-600: 178 104 7;   --warning-700: 148 80 11;
+  --warning-800: 122 64 16;   --warning-900: 102 53 17;   --warning-950: 58 28 6;
+
+  /* danger */
+  --danger-25:  254 247 247; --danger-50:  254 242 242; --danger-100: 254 226 226;
+  --danger-200: 254 202 202; --danger-300: 252 165 165; --danger-400: 243 110 110;
+  --danger-500: 226 72 72;   --danger-600: 203 46 46;   --danger-700: 170 35 35;
+  --danger-800: 141 32 32;   --danger-900: 118 31 31;   --danger-950: 66 15 15;
+}
+
+html.dark {
+  --success-25:  236 253 245; --success-50:  222 247 236; --success-100: 190 240 219;
+  --success-200: 147 227 196; --success-300: 101 209 169; --success-400: 63 186 143;
+  --success-500: 36 158 117;  --success-600: 24 128 95;   --success-700: 20 102 77;
+  --success-800: 19 80 62;    --success-900: 18 64 51;    --success-950: 12 40 33;
+
+  --warning-25:  255 251 240; --warning-50:  253 245 228; --warning-100: 250 235 198;
+  --warning-200: 244 215 145; --warning-300: 235 190 92;  --warning-400: 221 163 52;
+  --warning-500: 196 136 30;  --warning-600: 165 110 22;  --warning-700: 136 89 20;
+  --warning-800: 109 72 21;   --warning-900: 89 59 20;    --warning-950: 53 34 12;
+
+  --danger-25:  255 245 245; --danger-50:  252 236 236; --danger-100: 250 216 216;
+  --danger-200: 245 184 184; --danger-300: 237 145 145; --danger-400: 227 110 110;
+  --danger-500: 211 82 82;   --danger-600: 185 60 60;   --danger-700: 154 47 47;
+  --danger-800: 125 41 41;   --danger-900: 103 37 37;   --danger-950: 60 21 21;
+}
+
+/* ==========================================================================
+   2a. SEMANTIC TOKENS - light
+   ========================================================================== */
+:root {
+  /* --- surfaces ---------------------------------------------------------- */
+  --surface-sunken:   rgb(var(--gray-100));
+  --surface-base:     #eef1f6;
+  --surface-raised:   #ffffff;
+  --surface-overlay:  #ffffff;
+  --surface-hover:    rgb(var(--gray-100));
+  --surface-active:   rgb(var(--gray-200));
+  --surface-input:    #ffffff;
+  --surface-disabled: rgb(var(--gray-100));
+
+  /* --- text -------------------------------------------------------------- */
+  --text-primary:   rgb(var(--gray-900));
+  --text-secondary: rgb(var(--gray-600));
+  --text-muted:     rgb(var(--gray-500));
+  --text-faint:     rgb(var(--gray-400));
+  --text-disabled:  rgb(var(--gray-400));
+  --text-on-brand:  #ffffff;
+
+  /* --- borders ----------------------------------------------------------- */
+  --border-subtle:  rgb(var(--gray-100));
+  --border-default: rgb(var(--gray-200));
+  --border-strong:  rgb(var(--gray-300));
+
+  /* --- brand -------------------------------------------------------------
+     In light mode the brand sits at 600: dark enough to carry white text on a
+     solid fill, saturated enough to be unmistakably the action on the page.
+     The `soft` pair is what a brand-tinted surface uses, and it is a tint of
+     the page rather than a block of colour - a card is not an advert. */
+  --brand:          rgb(var(--brand-600));
+  --brand-hover:    rgb(var(--brand-700));
+  --brand-active:   rgb(var(--brand-800));
+  /* The fill for anything that puts --brand-contrast (white) ON the brand: the
+     primary button, a solid badge, an avatar. It is deliberately NOT mode
+     dependent, and deliberately not the same token as --brand.
+
+     --brand is an accent - a dot, an icon, a border, a line of brand-coloured
+     text - so in dark mode it has to move up the ramp to stay visible. A fill
+     under white text has the opposite requirement: move it up and the white
+     stops being readable. Dark mode was using brand-500 for both, which put
+     white-on-brand at 3.6:1 on the default theme and 2.9:1 on Teal.
+
+     600 is the lightest step at which white clears 4.5:1 on all ten schemes
+     (the four warm ramps are nudged a shade above for exactly this), and
+     hover/active go DOWN rather than up, so the contrast only ever improves
+     as the control is engaged. */
+  --brand-solid:        rgb(var(--brand-600));
+  --brand-solid-hover:  rgb(var(--brand-700));
+  --brand-solid-active: rgb(var(--brand-800));
+  --brand-soft:     rgb(var(--brand-500) / 0.10);
+  --brand-softer:   rgb(var(--brand-500) / 0.05);
+  --brand-border:   rgb(var(--brand-500) / 0.28);
+  --brand-text:     rgb(var(--brand-700));
+  --brand-contrast: #ffffff;
+
+  /* --- status ------------------------------------------------------------ */
+  --success:        rgb(var(--success-600));
+  --success-soft:   rgb(var(--success-500) / 0.10);
+  --success-border: rgb(var(--success-500) / 0.28);
+  --success-text:   rgb(var(--success-700));
+
+  --warning:        rgb(var(--warning-600));
+  --warning-soft:   rgb(var(--warning-500) / 0.12);
+  --warning-border: rgb(var(--warning-500) / 0.30);
+  --warning-text:   rgb(var(--warning-700));
+
+  --danger:         rgb(var(--danger-600));
+  --danger-soft:    rgb(var(--danger-500) / 0.10);
+  --danger-border:  rgb(var(--danger-500) / 0.28);
+  --danger-text:    rgb(var(--danger-700));
+
+  --info:           var(--brand);
+  --info-soft:      var(--brand-soft);
+  --info-border:    var(--brand-border);
+  --info-text:      var(--brand-text);
+
+  /* --- categorical tones -------------------------------------------------
+     Not statuses. "On leave" and "working remotely" are kinds of day, not
+     verdicts on one, so they must not borrow success/warning/danger - and not
+     the brand either, or "on leave" would turn green on the Mint theme and
+     stop meaning anything. They are the only two hues in the app that are
+     deliberately outside both the brand and the status sets. */
+  --tone-leave:        rgb(14 116 144);
+  --tone-leave-soft:   rgb(14 116 144 / 0.10);
+  --tone-leave-text:   rgb(14 116 144);
+  --tone-remote:       rgb(76 63 199);
+  --tone-remote-soft:  rgb(76 63 199 / 0.10);
+  --tone-remote-text:  rgb(76 63 199);
+
+  /* --- interactive ------------------------------------------------------- */
+  --focus-ring:        rgb(var(--brand-500) / 0.45);
+  --focus-ring-offset: var(--surface-raised);
+  --selected:          rgb(var(--brand-500) / 0.12);
+  --overlay-scrim:     rgb(var(--gray-950) / 0.45);
+
+  /* --- elevation ---------------------------------------------------------
+     Three steps, all tinted with the neutral rather than pure black, because
+     a black shadow on a cool ground reads as dirt. */
+  --shadow-sm: 0 1px 2px rgb(16 24 40 / 0.05);
+  --shadow-md: 0 1px 2px rgb(16 24 40 / 0.05), 0 4px 10px -2px rgb(16 24 40 / 0.07);
+  --shadow-lg: 0 2px 4px rgb(16 24 40 / 0.05), 0 12px 28px -6px rgb(16 24 40 / 0.12);
+}
+
+/* ==========================================================================
+   2b. SEMANTIC TOKENS - dark
+   ========================================================================== */
+html.dark {
+  --surface-sunken:   rgb(var(--gray-950));
+  --surface-base:     rgb(var(--gray-900));
+  --surface-raised:   rgb(var(--gray-800));
+  --surface-overlay:  rgb(var(--gray-700));
+  --surface-hover:    rgb(var(--gray-700));
+  --surface-active:   rgb(var(--gray-600));
+  --surface-input:    rgb(var(--gray-700) / 0.55);
+  --surface-disabled: rgb(var(--gray-800));
+
+  --text-primary:   rgb(var(--gray-100));
+  --text-secondary: rgb(var(--gray-300));
+  --text-muted:     rgb(var(--gray-400));
+  --text-faint:     rgb(var(--gray-500));
+  --text-disabled:  rgb(var(--gray-500));
+  --text-on-brand:  #ffffff;
+
+  /* Each rung moved up one step when the ground dropped to #0b0b0d. At the
+     previous mapping `subtle` was `gray-800`, which is now the card itself -
+     a hairline painted in the surface it sits on draws nothing. */
+  --border-subtle:  rgb(var(--gray-700) / 0.6);
+  --border-default: rgb(var(--gray-700));
+  --border-strong:  rgb(var(--gray-600));
+
+  /* The brand moves UP the ramp in dark mode rather than keeping its light
+     value. `brand-600` is a solid fill under white text on a white page; on a
+     dark ground the same colour is a dim smudge, and brand-coloured TEXT at
+     600 fails contrast outright. So as an ACCENT: 500 marks, 400 hovers, 300
+     letters. Solid fills under white text are a separate token, below. */
+  --brand:          rgb(var(--brand-500));
+  --brand-hover:    rgb(var(--brand-400));
+  --brand-active:   rgb(var(--brand-300));
+  /* Unchanged from light on purpose - see the note there. */
+  --brand-solid:        rgb(var(--brand-600));
+  --brand-solid-hover:  rgb(var(--brand-700));
+  --brand-solid-active: rgb(var(--brand-800));
+  --brand-soft:     rgb(var(--brand-400) / 0.14);
+  --brand-softer:   rgb(var(--brand-400) / 0.07);
+  --brand-border:   rgb(var(--brand-400) / 0.30);
+  --brand-text:     rgb(var(--brand-300));
+  --brand-contrast: #ffffff;
+
+  --success:        rgb(var(--success-500));
+  --success-soft:   rgb(var(--success-400) / 0.14);
+  --success-border: rgb(var(--success-400) / 0.30);
+  --success-text:   rgb(var(--success-300));
+
+  --warning:        rgb(var(--warning-500));
+  --warning-soft:   rgb(var(--warning-400) / 0.14);
+  --warning-border: rgb(var(--warning-400) / 0.30);
+  --warning-text:   rgb(var(--warning-300));
+
+  --danger:         rgb(var(--danger-500));
+  --danger-soft:    rgb(var(--danger-400) / 0.14);
+  --danger-border:  rgb(var(--danger-400) / 0.30);
+  --danger-text:    rgb(var(--danger-300));
+
+  --info:           var(--brand);
+  --info-soft:      var(--brand-soft);
+  --info-border:    var(--brand-border);
+  --info-text:      var(--brand-text);
+
+  /* Lifted and desaturated for a dark ground, like the status hues above. */
+  --tone-leave:        rgb(71 191 222);
+  --tone-leave-soft:   rgb(71 191 222 / 0.14);
+  --tone-leave-text:   rgb(125 211 235);
+  --tone-remote:       rgb(139 130 240);
+  --tone-remote-soft:  rgb(139 130 240 / 0.14);
+  --tone-remote-text:  rgb(173 167 246);
+
+  --focus-ring:        rgb(var(--brand-400) / 0.55);
+  --focus-ring-offset: var(--surface-raised);
+  --selected:          rgb(var(--brand-400) / 0.16);
+  --overlay-scrim:     rgb(0 0 0 / 0.62);
+
+  /* Dark shadows go deeper but never opaque. A shadow's job here is to say
+     "this floats"; on a ground this dark it needs help from the surface
+     ladder rather than doing the whole job itself. */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.30);
+  --shadow-md: 0 1px 2px rgb(0 0 0 / 0.30), 0 4px 12px -2px rgb(0 0 0 / 0.40);
+  --shadow-lg: 0 2px 4px rgb(0 0 0 / 0.34), 0 14px 32px -6px rgb(0 0 0 / 0.52);
+}
+
+/* ==========================================================================
+   3. ALIASES
+   --------------------------------------------------------------------------
+   Names that predate the semantic layer. Each is a pointer, so there is still
+   exactly one decision behind it. New code should use the semantic token;
+   these exist so the ~150 call sites that already use them did not have to be
+   rewritten in order to pick up the corrected palette.
+   ========================================================================== */
+:root {
+  --app-bg:           var(--surface-base);
+  --card-surface:     var(--surface-raised);
+  --surface:          var(--surface-base);
+  --surface-elevated: var(--surface-raised);
+  --hairline:         var(--border-default);
+
+  /* These three were referenced across index.css but never defined anywhere,
+     so every rule using them was silently dropped. The worst of it was
+     `* { border-color: var(--border-color) }`, which fell back to
+     `currentColor` and gave every unstyled border the colour of the text
+     beside it - the reason borders looked heavier on some cards than others. */
+  --border-color:  var(--border-default);
+  --text-tertiary: var(--text-muted);
+
+  /* `--accent` used to be a second, hand-maintained list of brand hexes that
+     had drifted from the brand ramp (they disagreed outright on two schemes).
+     It is now the same value the rest of the app resolves to. */
+  --accent:      var(--brand);
+  --accent-soft: var(--brand-soft);
+  --accent-wash: var(--brand-softer);
+}
+
+/* --------------------------------------------------------------------------
+   Section banner ground
+   --------------------------------------------------------------------------
+   Every major screen opens with a full-width banner, which makes it the
+   largest single area of brand colour in the product after the sidebar. It
+   used to run brand-600 into brand-500 - the two most saturated steps on the
+   scale - and then into a second hue at full strength, so the first thing on
+   every page was a bright two-colour block.
+
+   It now sits two rungs deeper and lets the per-section tint in at about half
+   strength: the banner still identifies the section and still carries the
+   theme, but it reads as a deep header rather than as the loudest thing on
+   screen. Going deeper also buys contrast, since the title on top is white.
+
+   Dark mode drops another rung. A banner that keeps its light-mode
+   saturation on a dark page does not look branded, it looks lit.
+   -------------------------------------------------------------------------- */
+:root {
+  --banner-from: rgb(var(--brand-800));
+  --banner-mid: rgb(var(--brand-700));
+  --banner-tint-opacity: 0.5;
+}
+
+/* Dark mode takes the banner off the brand entirely. On a near-black page a
+   saturated header is the one thing that breaks the surface ladder - it reads
+   as a lit panel dropped onto an unlit product. It sits on the card rung
+   instead, with the section tint left just strong enough to tell two screens
+   apart. */
+html.dark {
+  --banner-from: rgb(var(--gray-900));
+  --banner-mid: rgb(var(--gray-800));
+  --banner-tint-opacity: 0.22;
+}
+
+/* ==========================================================================
+   4. THE SIDEBAR
+   --------------------------------------------------------------------------
+   The rail is a full ink set, not just a background, and it follows the mode
+   in both directions.
+
+   TWO THINGS CHANGED HERE
+
+   It used to derive itself from the accent - three declarations per token, a
+   static hex then `color-mix()` then `oklch(from ...)`, so that an engine took
+   whichever it understood, with lightness pinned and chroma cut to under a
+   third. All of that existed to solve one problem: the same percentage mix is
+   not the same panel in every hue, so a blend that gave a comfortable deep
+   indigo landed several steps lighter on Mint and Teal, where white body text
+   dropped under 4.5:1. Pinning L in oklch was how one panel was made to
+   survive ten accents. With a single accent there is nothing to survive, so
+   the panel is stated once, as a flat value.
+
+   And it used to be dark in BOTH modes - a near-black slab down the side of a
+   white app. The ink was written into the component as `text-white`,
+   `text-white/60`, `hover:bg-white/10` and `ring-white/25`, which is why it
+   could only ever be dark: a white-alpha fill on a white panel draws nothing.
+   Every one of those is a token below now, so light mode gets a light rail
+   with dark ink and the component does not know the difference.
+
+   Dark mode drops the rail onto the page ground. In the design this mode is
+   built to there is no visible seam down the side of the window: the sidebar,
+   the top bar and the page are one continuous near-black, and the only thing
+   marking the active nav row is a lighter pill. So the wash flattens to a
+   single colour, and the hairline on its edge does the separating.
+   ========================================================================== */
+:root {
+  --sidebar-bg: var(--surface-raised);
+  --sidebar-top: var(--surface-raised);
+  --sidebar-foot: var(--surface-raised);
+  --sidebar-wash: linear-gradient(180deg, var(--sidebar-bg), var(--sidebar-bg));
+  --sidebar-border: var(--border-default);
+  --sidebar-field: rgb(var(--gray-100));
+
+  /* Ink. `fg` is a nav row at rest, `strong` is a heading or the row you are
+     on, and the two below it are the label and timestamp tiers. */
+  --sidebar-fg: var(--text-secondary);
+  --sidebar-fg-strong: var(--text-primary);
+  --sidebar-fg-muted: var(--text-muted);
+  --sidebar-fg-faint: var(--text-faint);
+
+  /* State. The active row is the one place on the rail that carries the
+     accent, which is what makes it findable without a second cue. */
+  --sidebar-active: var(--brand-soft);
+  --sidebar-active-fg: var(--brand-text);
+  --sidebar-active-shadow: inset 0 0 0 1px var(--brand-border);
+  --sidebar-hover: var(--surface-hover);
+  /* A section left expanded but not the current route. Deliberately weaker
+     than `--sidebar-active`: with several sections open, one weight for both
+     made half the panel look selected. */
+  --sidebar-open: var(--surface-sunken);
+  --sidebar-ring: var(--border-default);
+  --sidebar-mark: var(--brand);
+
+  /* The logo tile and the account card were lit by a white-on-white gradient
+     inline in the component, which is a sheen on a dark panel and nothing at
+     all on a light one. Both are surfaces here instead. */
+  --sidebar-tile: var(--brand-soft);
+  --sidebar-tile-shadow: none;
+  --sidebar-card: rgb(var(--gray-50));
+  --sidebar-card-shadow: none;
+  --sidebar-field-shadow: none;
+
+  /* The grain broke up banding in the gradient the rail used to carry. There
+     is no gradient in either mode now. */
+  --sidebar-grain: none;
+}
+
+html.dark {
+  --sidebar-bg: rgb(var(--gray-900));
+  --sidebar-top: rgb(var(--gray-900));
+  --sidebar-foot: rgb(var(--gray-900));
+  --sidebar-border: rgb(255 255 255 / 0.07);
+  --sidebar-field: rgb(255 255 255 / 0.04);
+
+  --sidebar-fg: rgb(255 255 255 / 0.62);
+  --sidebar-fg-strong: rgb(255 255 255 / 0.95);
+  --sidebar-fg-muted: rgb(255 255 255 / 0.55);
+  --sidebar-fg-faint: rgb(255 255 255 / 0.4);
+
+  /* Neutral rather than brand-tinted. On a ground this dark a lifted pill
+     reads as selection on its own, and an orange fill behind a nav label
+     competes with the one orange thing on screen that matters. */
+  --sidebar-active: rgb(255 255 255 / 0.08);
+  --sidebar-active-fg: #ffffff;
+  --sidebar-active-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
+  --sidebar-hover: rgb(255 255 255 / 0.05);
+  --sidebar-open: rgb(255 255 255 / 0.035);
+  --sidebar-ring: rgb(255 255 255 / 0.12);
+  --sidebar-mark: rgb(var(--brand-500));
+
+  --sidebar-tile: linear-gradient(145deg, rgb(255 255 255 / 0.1), rgb(255 255 255 / 0.04));
+  --sidebar-tile-shadow: 0 6px 16px -6px rgb(0 0 0 / 0.55);
+  --sidebar-card: rgb(255 255 255 / 0.05);
+  --sidebar-card-shadow: 0 10px 24px -14px rgb(0 0 0 / 0.8);
+  --sidebar-field-shadow: inset 0 1px 2px rgb(0 0 0 / 0.25);
+}
+
+/* ==========================================================================
+   5. GLASS
+   --------------------------------------------------------------------------
+   The frosted material shared by cards, overlays and buttons. Four parts make
+   it read as glass: a translucent fill, a backdrop blur with a saturation
+   lift, a bright hairline standing in for the lit edge of a pane, and an
+   inset highlight standing in for the sheen. Drop any one and it reads as a
+   flat translucent box.
+
+   `--panel-fill` is deliberately near-opaque. An overlay cannot borrow
+   legibility from its blur: every dropdown in this app opens inside a bar
+   that already carries `backdrop-filter`, and a backdrop filter establishes a
+   backdrop root for its descendants - so the panel's own blur samples an
+   empty backdrop and diffuses nothing. What is left is the fill, and at glass
+   alpha the content underneath reads straight through the menu text.
+   ========================================================================== */
+:root {
+  --glass-fill:        rgb(255 255 255 / 0.92);
+  --glass-fill-strong: rgb(255 255 255 / 0.98);
+  --panel-fill:        rgb(255 255 255 / 0.96);
+  --glass-edge:        rgb(var(--gray-900) / 0.07);
+  --glass-sheen:       inset 0 1px 0 rgb(255 255 255 / 0.7);
+  --glass-drop:        var(--shadow-md);
+  --glass-drop-lifted: var(--shadow-lg);
+  --glass-blur:        blur(18px) saturate(150%);
+}
+
+html.dark {
+  /* A white overlay rather than a dark one: it lightens whatever sits behind,
+     which is what a pane of glass does, and it keeps working over content as
+     well as over the app ground.
+
+     The alpha is set against the ground, not picked in the abstract - it
+     opens the same gap over `--surface-base` that `--surface-raised` does, so
+     a glass card and a solid card land on the same rung. Move the ground and
+     this has to move with it. */
+  --glass-fill:        rgb(255 255 255 / 0.05);
+  --glass-fill-strong: rgb(255 255 255 / 0.085);
+  /* Not a white lift like the two above: at this opacity a white overlay
+     washes out to flat grey. This is the card raised one more rung, which is
+     the tone an overlay floating above a card should be. */
+  --panel-fill:        rgb(var(--gray-700) / 0.97);
+  --glass-edge:        rgb(255 255 255 / 0.08);
+  --glass-sheen:       inset 0 1px 0 rgb(255 255 255 / 0.05);
+}

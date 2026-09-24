@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 /**
  * Document Studio - import pipeline.
  *
@@ -14,26 +15,19 @@ export interface ImportResult {
 const stripName = (fileName: string) =>
   fileName.replace(/\.[^.]+$/, "").trim() || "Imported Template";
 
-/** Remove anything unsafe/unwanted before it reaches the editor. */
+/**
+ * Remove anything unsafe before it reaches the editor, the preview or storage.
+ * DOMPurify handles the cases a hand-written filter misses (obfuscated
+ * javascript: URLs, SVG/MathML vectors, mutation XSS). Links may only point to
+ * http(s)/mailto/tel, and images to http(s) or inline data images.
+ */
 export function sanitizeHtml(html: string): string {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  doc
-    .querySelectorAll("script, style, link, meta, iframe, object, embed")
-    .forEach((el) => el.remove());
-  // Drop event-handler attributes (onclick, onload, ...) and javascript: urls.
-  doc.querySelectorAll("*").forEach((el) => {
-    [...el.attributes].forEach((attr) => {
-      const n = attr.name.toLowerCase();
-      if (n.startsWith("on")) el.removeAttribute(attr.name);
-      if (
-        (n === "href" || n === "src") &&
-        attr.value.trim().toLowerCase().startsWith("javascript:")
-      ) {
-        el.removeAttribute(attr.name);
-      }
-    });
-  });
-  return doc.body.innerHTML.trim();
+  return DOMPurify.sanitize(html, {
+    USE_PROFILES: { html: true },
+    FORBID_TAGS: ["style", "form", "input", "button", "textarea", "select", "base", "link", "meta"],
+    FORBID_ATTR: ["srcset", "formaction", "action"],
+    ALLOWED_URI_REGEXP: /^(?:https?:|mailto:|tel:|data:image\/(?:png|jpe?g|gif|webp);|#|\/)/i,
+  }).trim();
 }
 
 /** Escape + paragraph-wrap plain text / markdown-ish content. */

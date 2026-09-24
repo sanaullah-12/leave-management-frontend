@@ -15,6 +15,7 @@ import DatePicker from "../../ui/DatePicker";
 import type { DayBar } from "../AttendanceOverview";
 import { EmptyNote, GroupLabel, PrimaryButton, SHEET, WELL } from "../../mobile/primitives";
 import useChartMotion from "../../../hooks/useChartMotion";
+import { statusColor } from "../../../lib/themeTokens";
 
 /**
  * The range, its headline figures and its two charts.
@@ -273,7 +274,7 @@ const MobileTrendsTab: React.FC<Props> = ({
                     {...chartMotion}
                     type="monotone"
                     dataKey="late"
-                    stroke="#b5650a"
+                    stroke={statusColor("warning")}
                     strokeWidth={2.2}
                     fill="none"
                   />
@@ -284,7 +285,7 @@ const MobileTrendsTab: React.FC<Props> = ({
             <div className="mt-3 flex gap-4">
               {[
                 { label: "On time", tone: accent },
-                { label: "Late", tone: "#b5650a" },
+                { label: "Late", tone: statusColor("warning") },
               ].map((entry) => (
                 <span
                   key={entry.label}

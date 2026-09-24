@@ -1,4 +1,5 @@
 import { io, Socket } from "socket.io-client";
+import { getFreshAccessToken } from "../services/api";
 
 /**
  * socket.ts
@@ -25,16 +26,18 @@ export function getSocket(): Socket | null {
  * Connect (or reuse) the singleton socket, authenticated with `token`.
  * Safe to call repeatedly - subsequent calls reuse the existing instance.
  */
-export function connectSocket(token: string): Socket {
+export function connectSocket(): Socket {
   if (socket) {
-    // Refresh auth in case the token changed, then ensure it's connected.
-    socket.auth = { token };
     if (!socket.connected) socket.connect();
     return socket;
   }
 
   socket = io(SOCKET_URL, {
-    auth: { token },
+    // Resolved on every (re)connect, so a reconnect after the short-lived
+    // access token expired presents a fresh one instead of the stale original.
+    auth: (cb) => {
+      getFreshAccessToken().then((token) => cb({ token }));
+    },
     // Poll first, then upgrade - Socket.IO's default order.
     //
     // Listing "websocket" first makes the client open a raw WebSocket before
@@ -44,7 +47,7 @@ export function connectSocket(token: string): Socket {
     // suppress. Handshaking over HTTP first avoids that line and still upgrades
     // to a WebSocket immediately afterwards, so nothing is lost but the noise.
     transports: ["polling", "websocket"],
-    withCredentials: true,
+    withCredentials: false,
     autoConnect: true,
     reconnection: true,
     reconnectionAttempts: Infinity,

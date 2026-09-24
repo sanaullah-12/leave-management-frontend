@@ -51,6 +51,15 @@ export function useRosterDay(
   const [data, setData] = useState<RosterDayResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  /**
+   * When the answer on screen was read from the server.
+   *
+   * A roster is a live figure - punches land on the device all morning - so a
+   * screen showing one has to say how old it is. Set on success only: a failed
+   * refresh leaves the previous read's time, because that is still when what
+   * is on screen came from.
+   */
+  const [fetchedAt, setFetchedAt] = useState<string | null>(null);
   /** Bumped by refresh(); the fetch effect watches it. */
   const [reloads, setReloads] = useState(0);
 
@@ -70,6 +79,7 @@ export function useRosterDay(
           throw new Error(response.data?.message || "Could not load attendance");
         }
         setData(response.data as RosterDayResponse);
+        setFetchedAt(new Date().toISOString());
       } catch (err: any) {
         if (cancelled) return;
         setError(
@@ -88,7 +98,7 @@ export function useRosterDay(
     };
   }, [from, to, detail, reloads]);
 
-  return { data, loading, error, refresh };
+  return { data, loading, error, refresh, fetchedAt };
 }
 
 export default useRosterDay;

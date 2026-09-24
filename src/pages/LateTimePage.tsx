@@ -383,8 +383,9 @@ const LateTimePage: React.FC = () => {
       {/* ---------------- Banner ----------------
           The same SectionHeader every other screen opens with, so Late
           arrivals is recognisably part of Attendance and not a separate
-          product. The console language below it stays: the dark cards are
-          what make a dense punch table readable. */}
+          product. The console language below it stays - the density and the
+          severity pills are what make a punch table readable - but it follows
+          the app's light/dark mode like every other screen. */}
       <SectionHeader
         variant="attendance"
         eyebrow={

@@ -5,6 +5,7 @@ import { AccentEdge } from "../ui/CardAccents";
 import { useThemeAccent } from "../../hooks/useThemeAccent";
 import { attendanceAPI } from "../../services/api";
 import useChartMotion from "../../hooks/useChartMotion";
+import { statusColor } from "../../lib/themeTokens";
 
 /**
  * This month's attendance so far, as a donut.
@@ -36,10 +37,10 @@ interface Props {
   employeeId?: string | number;
 }
 
-const LATE = "#b5650a";
-const ABSENT = "#b42318";
-const WFH = "#4c3fc7";
-const ON_LEAVE = "#0e7490";
+const LATE = statusColor("warning");
+const ABSENT = statusColor("danger");
+const WFH = statusColor("remote");
+const ON_LEAVE = statusColor("leave");
 
 /**
  * The first of the current month through today, as YYYY-MM-DD.

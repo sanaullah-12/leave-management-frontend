@@ -92,9 +92,9 @@ export const CATEGORY_META: Record<VoiceCategory, CategoryMeta> = {
     short: "Feedback",
     description: "Give general feedback about your experience",
     icon: ChatBubbleLeftRightIcon,
-    tile: "bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-300",
+    tile: "bg-gray-100 text-gray-600 dark:bg-gray-500/10 dark:text-gray-300",
     badge:
-      "bg-slate-100 text-slate-700 dark:bg-slate-500/10 dark:text-slate-300",
+      "bg-gray-100 text-gray-700 dark:bg-gray-500/10 dark:text-gray-300",
   },
 };
 
@@ -179,8 +179,8 @@ export const STATUS_META: Record<VoiceStatus, StatusMeta> = {
   closed: {
     key: "closed",
     label: "Closed",
-    badge: "bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-300",
-    dot: "bg-slate-400",
+    badge: "bg-gray-100 text-gray-600 dark:bg-gray-500/10 dark:text-gray-300",
+    dot: "bg-gray-400",
   },
 };
 

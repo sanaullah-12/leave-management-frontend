@@ -5,8 +5,7 @@ import EmployeePicker from "../components/reports/EmployeePicker";
 import { sectionIllustration } from "../components/ui/illustrations";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useTheme } from "../context/ThemeContext";
-import { accentFor } from "../lib/themeTokens";
+import { useThemeAccent } from "../hooks/useThemeAccent";
 import { useQuery } from "@tanstack/react-query";
 import { leavesAPI } from "../services/api";
 import LoadingSpinner from "../components/LoadingSpinner";
@@ -182,7 +181,7 @@ const ActivityTimeline: React.FC<{
       {events.length > 0 ? (
         <ol className="mt-5">
           {events.map((l, i) => {
-            const dot = STATUS_DOT[l.status] || "rgb(var(--blue-500))";
+            const dot = STATUS_DOT[l.status] || "rgb(var(--brand-500))";
             const last = i === events.length - 1;
             const ts = l.createdAt || l.updatedAt || l.startDate;
             return (
@@ -232,7 +231,7 @@ const ActivityTimeline: React.FC<{
         </ol>
       ) : (
         <div className="flex flex-col items-center justify-center py-10 text-center">
-          <div className="mb-3 rounded-full bg-slate-100 p-3 dark:bg-white/5">
+          <div className="mb-3 rounded-full bg-gray-100 p-3 dark:bg-white/5">
             <CalendarDaysIcon className="h-6 w-6 text-gray-400 dark:text-gray-500" />
           </div>
           <p className="text-sm font-medium text-gray-900 dark:text-gray-200">
@@ -255,8 +254,7 @@ const ReportsPage: React.FC = () => {
   /* Recharts animates by default, to its own timing. See useChartMotion. */
   const chartMotion = useChartMotion();
   const { user } = useAuth();
-  const { colorScheme } = useTheme();
-  const accent = accentFor(colorScheme);
+  const accent = useThemeAccent(600);
   const navigate = useNavigate();
   const [reportData, setReportData] = useState<EmployeeReportData | null>(null);
   // Which export is running (if any) and how far along it is.
@@ -545,7 +543,7 @@ const ReportsPage: React.FC = () => {
     <div className="space-y-6 stagger-children">
       {/* Export progress overlay - shared by both download paths */}
       {isExporting && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/40 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--overlay-scrim)] p-4 backdrop-blur-sm">
           <div className="animate-pop-in">
             <StepProgress
               title={

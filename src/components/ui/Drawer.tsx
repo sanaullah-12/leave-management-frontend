@@ -96,7 +96,7 @@ const Drawer: React.FC<DrawerProps> = ({
       {open && (
         <div className="fixed inset-0 z-[100] flex justify-end">
           <motion.div
-            className="absolute inset-0 bg-gray-900/40 backdrop-blur-md"
+            className="absolute inset-0 bg-[var(--overlay-scrim)] backdrop-blur-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -129,10 +129,10 @@ const Drawer: React.FC<DrawerProps> = ({
                matches the detail sheets; whether the body joins it is the
                `surface` prop's call. From `sm` up this is a panel over the
                page and keeps the panel tone throughout. */
-            className={`relative flex h-full w-full touch-pan-y flex-col border-l border-gray-200/80 shadow-2xl shadow-gray-900/20 dark:border-gray-700/60 sm:bg-white sm:dark:bg-gray-900 ${
+            className={`relative flex h-full w-full touch-pan-y flex-col border-l border-[var(--border-default)] shadow-2xl shadow-gray-950/25 sm:bg-[var(--surface-overlay)] ${
               surface === "page"
-                ? "bg-[var(--surface)]"
-                : "bg-white dark:bg-gray-900"
+                ? "bg-[var(--surface-base)]"
+                : "bg-[var(--surface-overlay)]"
             } ${WIDTHS[width]}`}
           >
             {/* Phone app bar. Back arrow, centred title, optional action -
@@ -235,7 +235,7 @@ const Drawer: React.FC<DrawerProps> = ({
             {/* Footer */}
             {footer && (
               <div
-                className={`flex-shrink-0 border-t border-black/5 px-4 pb-[calc(1rem+var(--safe-bottom)+var(--keyboard-inset))] pt-4 backdrop-blur-sm dark:border-white/[0.07] sm:bg-white/80 sm:px-5 sm:pb-4 sm:dark:bg-gray-900/80 ${
+                className={`flex-shrink-0 border-t border-[var(--border-subtle)] px-4 pb-[calc(1rem+var(--safe-bottom)+var(--keyboard-inset))] pt-4 backdrop-blur-sm sm:bg-[var(--surface-overlay)]/85 sm:px-5 sm:pb-4 ${
                   surface === "page"
                     ? "bg-[var(--surface)]/90"
                     : "bg-white/80 dark:bg-gray-900/80"

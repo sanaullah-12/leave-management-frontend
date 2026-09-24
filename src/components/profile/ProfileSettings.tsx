@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../../context/AuthContext";
-import { authAPI, usersAPI } from "../../services/api";
+import api, { authAPI, usersAPI } from "../../services/api";
 import Avatar from "../Avatar";
 import InlineLoader from "../InlineLoader";
 import Select from "../ui/Select";
@@ -141,16 +141,13 @@ const ProfileSettings: React.FC = () => {
     mutationFn: async (file: File) => {
       const fd = new FormData();
       fd.append("profilePicture", file);
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/users/profile-picture`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          body: fd,
-        }
-      );
-      if (!res.ok) throw new Error((await res.json()).message || "Upload failed");
-      return res.json();
+      // Through the shared client so it gets the session refresh handling.
+      try {
+        const res = await api.post("/users/profile-picture", fd);
+        return res.data;
+      } catch (e: any) {
+        throw new Error(e?.response?.data?.message || "Upload failed");
+      }
     },
     onSuccess: (res) => {
       updateUser(res.user ? res.user : { ...user!, profilePicture: res.profilePicture });
@@ -443,7 +440,7 @@ const ProfileSettings: React.FC = () => {
                 <label className={labelClass}>New Password</label>
                 <Input
                   type={showPw ? "text" : "password"}
-                  {...passwordForm.register("newPassword", { required: true, minLength: 6 })}
+                  {...passwordForm.register("newPassword", { required: true, minLength: 8, pattern: /^(?=.*[A-Za-z])(?=.*\d).+$/ })}
                 />
               </div>
               <div>

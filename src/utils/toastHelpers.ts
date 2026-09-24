@@ -8,46 +8,58 @@ import {
 
 export type { ToastIconName };
 
-// Helper function to detect if dark mode is active
-const isDarkMode = () => {
-  return (
-    document.documentElement.classList.contains("dark") ||
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-  );
+type ToastType = "success" | "error" | "warning" | "info" | "loading";
+
+/**
+ * One toast surface, shared by every helper below.
+ *
+ * Two things changed here.
+ *
+ * The colours are CSS variables rather than hexes. react-hot-toast takes
+ * inline styles, and a `var()` in an inline style resolves against the
+ * element's own computed context - so `var(--surface-overlay)` is the light
+ * panel on a light page and the dark panel on a dark one, with nothing in
+ * JavaScript deciding which.
+ *
+ * That let the `isDarkMode()` helper go, which was also wrong: it fell back to
+ * `prefers-color-scheme`, so someone who had picked Light while their OS was
+ * in dark mode got dark toasts over a light app. The app's mode lives on
+ * `<html class="dark">`, and letting CSS answer the question means the toast
+ * cannot disagree with the page it is sitting on.
+ *
+ * The per-type gradients are gone too. Every toast is now the same panel as
+ * every menu and modal, marked by a 4px rail in the status colour - one
+ * surface, one signal. The gradients were eight hand-written pairs (a "dark
+ * emerald gradient", a "light amber gradient", and so on) that between them
+ * put five different backgrounds behind what is, in every case, a line of
+ * text and an icon.
+ */
+const TOAST_BASE = {
+  background: "var(--surface-overlay)",
+  color: "var(--text-primary)",
+  border: "1px solid var(--border-default)",
+  borderRadius: "12px",
+  fontSize: "14px",
+  fontWeight: "500",
+  padding: "12px 16px",
+  boxShadow: "var(--shadow-lg)",
+} as const;
+
+/** The rail down the leading edge - the only thing that differs by type. */
+const RAIL: Record<ToastType, string> = {
+  success: "var(--success)",
+  error: "var(--danger)",
+  warning: "var(--warning)",
+  info: "var(--brand)",
+  loading: "var(--text-muted)",
 };
 
-// Get themed styles for different toast types
-const getThemedToastStyle = (
-  type: "success" | "error" | "warning" | "info" | "loading"
-) => {
-  const isDark = isDarkMode();
-
-  const baseStyle = {
-    background: isDark ? "#1f2937" : "#ffffff", // gray-800 : white
-    color: isDark ? "#f9fafb" : "#111827", // gray-50 : gray-900
-    border: `1px solid ${isDark ? "#374151" : "#e5e7eb"}`, // gray-700 : gray-200
-    borderRadius: "12px",
-    fontSize: "14px",
-    fontWeight: "500",
-    padding: "12px 16px",
-    boxShadow: isDark
-      ? "0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2)"
-      : "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-  };
-
-  const borderColors = {
-    success: "#10b981", // emerald-500
-    error: "#ef4444", // red-500
-    warning: "#f59e0b", // amber-500
-    info: "rgb(var(--blue-500))", // the theme accent
-    loading: "#6b7280", // gray-500
-  };
-
-  return {
-    ...baseStyle,
-    borderLeft: `4px solid ${borderColors[type]}`,
-  };
-};
+const getThemedToastStyle = (type: ToastType) => ({
+  ...TOAST_BASE,
+  // Logical, not `borderLeft`: this app ships an RTL locale, and the rail
+  // belongs on the side the text starts from.
+  borderInlineStart: `4px solid ${RAIL[type]}`,
+});
 
 // Custom toast helper functions with consistent theming
 export const showSuccessToast = (
@@ -103,8 +115,6 @@ export const showLoadingToast = (message: string) => {
 // Specialized toast functions for leave management with enhanced theming
 export const showLeaveSubmissionSuccess = (days: number, leaveType: string) => {
   const dayText = days === 1 ? "day" : "days";
-  const isDark = isDarkMode();
-
   return toast.success(
     `${leaveType} leave request submitted. ${days} ${dayText} pending approval.`,
     {
@@ -112,9 +122,6 @@ export const showLeaveSubmissionSuccess = (days: number, leaveType: string) => {
       duration: 6000,
       style: {
         ...getThemedToastStyle("success"),
-        background: isDark
-          ? "linear-gradient(135deg, #064e3b 0%, #065f46 100%)" // dark emerald gradient
-          : "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)", // light emerald gradient
       },
     }
   );
@@ -125,8 +132,6 @@ export const showLeaveApprovalSuccess = (
   days: number
 ) => {
   const dayText = days === 1 ? "day" : "days";
-  const isDark = isDarkMode();
-
   return toast.success(
     `${employeeName}'s ${days} ${dayText} leave request has been approved.`,
     {
@@ -134,32 +139,22 @@ export const showLeaveApprovalSuccess = (
       duration: 6000,
       style: {
         ...getThemedToastStyle("success"),
-        background: isDark
-          ? "linear-gradient(135deg, #064e3b 0%, #065f46 100%)"
-          : "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
       },
     }
   );
 };
 
 export const showLeaveRejectionSuccess = (employeeName: string) => {
-  const isDark = isDarkMode();
-
   return toast(`${employeeName}'s leave request has been rejected.`, {
     icon: TOAST_ICON.error,
     duration: 5000,
     style: {
       ...getThemedToastStyle("warning"),
-      background: isDark
-        ? "linear-gradient(135deg, #7c2d12 0%, #9a3412 100%)" // dark amber gradient
-        : "linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)", // light amber gradient
     },
   });
 };
 
 export const showInviteSuccess = (employeeName: string, email: string) => {
-  const isDark = isDarkMode();
-
   return toast.success(
     `Invitation sent to ${employeeName} (${email}) successfully!`,
     {
@@ -167,17 +162,12 @@ export const showInviteSuccess = (employeeName: string, email: string) => {
       duration: 7000,
       style: {
         ...getThemedToastStyle("success"),
-        background: isDark
-          ? "linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)" // dark blue gradient
-          : "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)", // light blue gradient
       },
     }
   );
 };
 
 export const showConnectionError = () => {
-  const isDark = isDarkMode();
-
   return toast.error(
     "Connection error. Please check your internet connection and try again.",
     {
@@ -185,9 +175,6 @@ export const showConnectionError = () => {
       duration: 8000,
       style: {
         ...getThemedToastStyle("error"),
-        background: isDark
-          ? "linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%)" // dark red gradient
-          : "linear-gradient(135deg, #fef2f2 0%, #fecaca 100%)", // light red gradient
       },
     }
   );
@@ -210,8 +197,6 @@ export const showActionToast = (
   }
 ) => {
   const type = options?.type || "info";
-  const isDark = isDarkMode();
-
   return toast(`${message} - ${actionLabel}`, {
     duration: options?.duration || 8000,
     icon:
@@ -219,13 +204,6 @@ export const showActionToast = (
       (type === "warning" ? TOAST_ICON.warning : TOAST_ICON.info),
     style: {
       ...getThemedToastStyle(type),
-      background: isDark
-        ? type === "warning"
-          ? "linear-gradient(135deg, #7c2d12 0%, #9a3412 100%)"
-          : "linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)"
-        : type === "warning"
-        ? "linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)"
-        : "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
     },
   });
 };
@@ -236,33 +214,23 @@ export const showSystemToast = (
   type: "maintenance" | "update" | "security" = "update",
   options?: { duration?: number }
 ) => {
-  const isDark = isDarkMode();
-
   return toast(message, {
     duration: options?.duration || 10000,
     icon: TOAST_ICON[type],
-    style: {
-      ...getThemedToastStyle("info"),
-      background: isDark
-        ? "linear-gradient(135deg, rgb(var(--blue-900)) 0%, rgb(var(--blue-800)) 100%)"
-        : "linear-gradient(135deg, rgb(var(--blue-50)) 0%, rgb(var(--blue-100)) 100%)",
-      borderLeft: "4px solid rgb(var(--blue-500))"
-    },
+    // The info style already carries the brand rail, so there is nothing to
+    // override - this used to restate it, and restate it as `borderLeft`,
+    // which put the rail on the wrong side in RTL.
+    style: getThemedToastStyle("info"),
   });
 };
 
 // Quick success feedback for form submissions
 export const showQuickSuccess = (message: string = "Success!") => {
-  const isDark = isDarkMode();
-
   return toast.success(message, {
     duration: 3000,
     icon: TOAST_ICON.celebrate,
     style: {
       ...getThemedToastStyle("success"),
-      background: isDark
-        ? "linear-gradient(135deg, #064e3b 0%, #065f46 100%)"
-        : "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
       fontSize: "13px",
       padding: "10px 14px",
     },

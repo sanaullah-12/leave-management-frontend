@@ -1,186 +1,147 @@
 /** @type {import('tailwindcss').Config} */
+
+/**
+ * A scale whose every step reads a CSS variable, so the utility recolours
+ * with the theme and with light/dark instead of being frozen at build time.
+ *
+ * `<alpha-value>` is what keeps `bg-gray-200/70` working: Tailwind substitutes
+ * the opacity into the slot, so the variable only ever holds the three
+ * channels.
+ */
+const varScale = (name) =>
+  Object.fromEntries(
+    [25, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950].map((step) => [
+      step,
+      `rgb(var(--${name}-${step}) / <alpha-value>)`,
+    ]),
+  );
+
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
-  darkMode: 'class',
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  darkMode: "class",
   theme: {
     extend: {
       fontFamily: {
         sans: [
-          'Geist',
-          'ui-sans-serif',
-          'system-ui',
-          '-apple-system',
-          'BlinkMacSystemFont',
-          'Segoe UI',
-          'Roboto',
-          'Helvetica',
-          'Arial',
-          'sans-serif',
+          "Geist",
+          "ui-sans-serif",
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica",
+          "Arial",
+          "sans-serif",
         ],
         mono: [
-          'Geist Mono',
-          'ui-monospace',
-          'SFMono-Regular',
-          'Menlo',
-          'Consolas',
-          'monospace',
+          "Geist Mono",
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "Consolas",
+          "monospace",
         ],
       },
-      // Modern SaaS type scale is defined as semantic classes in index.css
-      // (.text-display, .text-page-heading, .text-section-heading, .text-card-title,
-      //  .text-nav, .text-body, .text-secondary, .text-caption, .text-overline).
+      // The type scale is defined as semantic classes in index.css
+      // (.text-display, .text-page-heading, .text-section-heading,
+      //  .text-card-title, .text-nav, .text-body, .text-secondary,
+      //  .text-caption, .text-overline).
+
+      /* ====================================================================
+         Colours
+         --------------------------------------------------------------------
+         Every scale below is a pointer into styles/tokens.css. Nothing here
+         holds a literal colour, which is what makes the token file the only
+         place a palette is decided.
+
+         Scales deliberately left at their Tailwind defaults - sky, cyan,
+         fuchsia, indigo, lime, stone and the rest - are the chart, avatar and
+         illustration colours. Those are categorical: their job is to be
+         distinguishable from one another, not to follow the theme, so they
+         are not routed through a token.
+         ==================================================================== */
       colors: {
-        // Blue = the app's accent scale. Values are driven by CSS variables so
-        // the whole scale (and therefore every blue-* utility) recolors to the
-        // active theme. Defaults + per-theme overrides live in design-system.css.
-        blue: {
-          25: 'rgb(var(--blue-25) / <alpha-value>)',
-          50: 'rgb(var(--blue-50) / <alpha-value>)',
-          100: 'rgb(var(--blue-100) / <alpha-value>)',
-          200: 'rgb(var(--blue-200) / <alpha-value>)',
-          300: 'rgb(var(--blue-300) / <alpha-value>)',
-          400: 'rgb(var(--blue-400) / <alpha-value>)',
-          500: 'rgb(var(--blue-500) / <alpha-value>)',
-          600: 'rgb(var(--blue-600) / <alpha-value>)',
-          700: 'rgb(var(--blue-700) / <alpha-value>)',
-          800: 'rgb(var(--blue-800) / <alpha-value>)',
-          900: 'rgb(var(--blue-900) / <alpha-value>)',
-          950: 'rgb(var(--blue-950) / <alpha-value>)',
+        /* --- neutrals ----------------------------------------------------
+           One ladder for surfaces, borders and text, re-declared per mode in
+           tokens.css. This is why `dark:bg-gray-800` is a card in dark mode
+           and `border-gray-200` is a hairline in light mode with no override
+           rule anywhere. */
+        gray: varScale("gray"),
+
+        /* --- brand -------------------------------------------------------
+           `brand` and `blue` are the same scale under two names. `blue` is
+           what several hundred existing class names say; `brand` is what new
+           code should say. See the note in tokens.css. */
+        brand: varScale("brand"),
+        blue: varScale("blue"),
+
+        /* `violet` and `purple` are aliases of the brand scale rather than
+           fixed hues. They had become a second, unthemed brand colour - the
+           `from-violet-500 to-purple-500` pair appears a dozen times across
+           the product and printed the same two purples no matter which theme
+           was selected. Pointing both at the brand makes those elements
+           follow the theme, and collapses the gradient into a single-hue
+           wash, which is the quieter result anyway. */
+        violet: varScale("brand"),
+        purple: varScale("brand"),
+
+        /* --- status ------------------------------------------------------
+           Three hues, six names. `green`/`emerald`, `amber`/`yellow` and
+           `red`/`rose` had each drifted into two different colours for the
+           same meaning; aliasing them here unifies every status badge, pill
+           and icon in the app without touching the class names. */
+        success: varScale("success"),
+        emerald: varScale("success"),
+        green: varScale("success"),
+
+        warning: varScale("warning"),
+        amber: varScale("warning"),
+        yellow: varScale("warning"),
+
+        danger: varScale("danger"),
+        red: varScale("danger"),
+        rose: varScale("danger"),
+      },
+
+      /* Semantic aliases for the surface ladder, so new code can write
+         `bg-surface-raised` instead of remembering which grey step a card is. */
+      backgroundColor: {
+        surface: {
+          sunken: "var(--surface-sunken)",
+          base: "var(--surface-base)",
+          raised: "var(--surface-raised)",
+          overlay: "var(--surface-overlay)",
+          hover: "var(--surface-hover)",
+          active: "var(--surface-active)",
+          input: "var(--surface-input)",
         },
-        // Purple theme colors
-        purple: {
-          25: '#fefcff',
-          50: '#fdf8ff',
-          100: '#f9efff',
-          200: '#f2deff',
-          300: '#e7c4ff',
-          400: '#d49eff',
-          500: '#AE75DA', // Main purple theme color
-          600: '#9c5fd1',
-          700: '#8a4bc8',
-          800: '#7839bf',
-          900: '#6629b6',
-          950: '#4a1d8a',
+      },
+      textColor: {
+        content: {
+          primary: "var(--text-primary)",
+          secondary: "var(--text-secondary)",
+          muted: "var(--text-muted)",
+          faint: "var(--text-faint)",
+          disabled: "var(--text-disabled)",
         },
-        // Green theme colors
-        green: {
-          25: '#f7fef8',
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
-          950: '#052e16',
-        },
-        // Custom theme colors
-        custom: {
-          25: '#f8fcff',
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#3396d3',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
-          950: '#082f49',
-        },
-        // Indigo theme colors (matches the Sign in / Sign up button)
-        indigo: {
-          25: '#f5f7ff',
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5', // primary
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
-          950: '#1e1b4b',
-        },
-        // Status colors
-        success: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
-        },
-        warning: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          500: '#eab308',
-          600: '#d97706',
-          700: '#b45309',
-          800: '#92400e',
-          900: '#78350f',
-        },
-        danger: {
-          50: '#fef2f2',
-          100: '#fee2e2',
-          500: '#ef4444',
-          600: '#dc2626',
-          700: '#b91c1c',
-          800: '#991b1b',
-          900: '#7f1d1d',
-        },
-        // Red alias for danger
-        red: {
-          50: '#fef2f2',
-          100: '#fee2e2',
-          200: '#fecaca',
-          300: '#fca5a5',
-          400: '#f87171',
-          500: '#ef4444',
-          600: '#dc2626',
-          700: '#b91c1c',
-          800: '#991b1b',
-          900: '#7f1d1d',
-        },
-        // Yellow alias for warning
-        yellow: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#f59e0b',
-          600: '#d97706',
-          700: '#b45309',
-          800: '#92400e',
-          900: '#78350f',
-        },
-        // Gray scale
-        gray: {
-          25: '#fefcff',
-          50: '#f9fafb',
-          100: '#f3f4f6',
-          200: '#e5e7eb',
-          300: '#d1d5db',
-          400: '#9ca3af',
-          500: '#6b7280',
-          600: '#4b5563',
-          700: '#374151',
-          800: '#1f2937',
-          900: '#111827',
-          950: '#030712',
-        },
-      }
+      },
+      borderColor: {
+        subtle: "var(--border-subtle)",
+        DEFAULT: "var(--border-default)",
+        strong: "var(--border-strong)",
+      },
+      boxShadow: {
+        sm: "var(--shadow-sm)",
+        DEFAULT: "var(--shadow-sm)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
+        xl: "var(--shadow-lg)",
+      },
+      ringColor: {
+        focus: "var(--focus-ring)",
+      },
     },
   },
   plugins: [],
-}
+};

@@ -112,7 +112,7 @@ export const DetailShell: React.FC<ShellProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 flex justify-end bg-gray-900/60 backdrop-blur-[2px]"
+      className="fixed inset-0 flex justify-end bg-[var(--overlay-scrim)] backdrop-blur-[2px]"
       style={{ zIndex: z }}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();

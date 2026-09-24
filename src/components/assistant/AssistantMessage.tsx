@@ -43,7 +43,7 @@ const AssistantTurn: React.FC<Props> = ({
       <motion.div {...enter} className="flex justify-end">
         <div
           className="max-w-[85%] rounded-2xl rounded-ee-md px-3.5 py-2.5 text-sm font-medium text-white shadow-sm"
-          style={{ backgroundColor: "var(--accent)" }}
+          style={{ backgroundColor: "var(--brand-solid)" }}
         >
           {message.text}
         </div>
@@ -137,7 +137,7 @@ const AssistantTurn: React.FC<Props> = ({
                     else onAskEntry(action.entryId, action.action.label);
                   }}
                   className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-transform hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0"
-                  style={{ backgroundColor: "var(--accent)" }}
+                  style={{ backgroundColor: "var(--brand-solid)" }}
                   disabled={here}
                   title={here ? "You're already here" : undefined}
                 >

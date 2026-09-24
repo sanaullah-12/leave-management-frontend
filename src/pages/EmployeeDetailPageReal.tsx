@@ -4,12 +4,11 @@ import { CardHeading, Meta } from "../components/ui/CardPrimitives";
 import LeaveBalanceRow from "../components/leaves/LeaveBalanceRow";
 import { sectionIllustration } from "../components/ui/illustrations";
 import { CARD } from "../lib/surfaces";
-import { accentFor } from "../lib/themeTokens";
+import { useThemeAccent } from "../hooks/useThemeAccent";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersAPI, leavesAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
-import { useTheme } from "../context/ThemeContext";
 import LoadingSpinner from "../components/LoadingSpinner";
 import LogoLoader from "../components/LogoLoader";
 import Avatar from "../components/Avatar";
@@ -69,9 +68,8 @@ const EmployeeDetailPageReal: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { colorScheme } = useTheme();
   const isPhoneLayout = useMediaQuery("(max-width: 1023px)");
-  const accent = accentFor(colorScheme);
+  const accent = useThemeAccent(600);
   const queryClient = useQueryClient();
   const [isEditingAllocation, setIsEditingAllocation] = useState(false);
   const [editAllocation, setEditAllocation] = useState<LeaveAllocation>({
@@ -254,7 +252,7 @@ const EmployeeDetailPageReal: React.FC = () => {
           </p>
           <button
             onClick={() => navigate("/employees")}
-            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-2 sm:px-3.5 text-[13px] sm:text-sm font-semibold text-white shadow-sm shadow-blue-600/25"
+            className="btn-primary"
           >
             Back to Employees
           </button>
@@ -296,7 +294,7 @@ const EmployeeDetailPageReal: React.FC = () => {
       case "pending":
         return "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400";
       default:
-        return "bg-slate-100 text-gray-600 dark:bg-white/5 dark:text-gray-300";
+        return "bg-gray-100 text-gray-600 dark:bg-white/5 dark:text-gray-300";
     }
   };
 

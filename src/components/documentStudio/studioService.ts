@@ -64,7 +64,7 @@ export const DEFAULT_COMPANY: CompanyProfile = {
 };
 
 export const DEFAULT_BRAND: BrandSettings = {
-  accent: "#2563eb",
+  accent: "#ed5f0c",
   letterhead: "classic",
   footer: "line",
   headingFont: "'Geist', ui-sans-serif, system-ui, sans-serif",
@@ -365,7 +365,9 @@ function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 /** Which placeholder keys are still unresolved in a given html string. */

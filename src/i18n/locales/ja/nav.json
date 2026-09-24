@@ -7,10 +7,8 @@
   "search": {
     "placeholder": "検索",
     "title": "検索",
-    "noResults": "「{{query}}」の結果はありません"
-  },
-  "sections": {
-    "pages": "ページ"
+    "noResults": "「{{query}}」の結果はありません",
+    "clear": "検索をクリア"
   },
   "actions": {
     "collapse": "折りたたむ",
@@ -19,12 +17,19 @@
     "openMenu": "メニューを開く",
     "closeMenu": "メニューを閉じる",
     "manageAccount": "アカウント管理",
-    "more": "その他"
+    "more": "その他",
+    "switchToDark": "ダークモードに切り替え",
+    "switchToLight": "ライトモードに切り替え"
   },
   "header": {
     "welcome": "おかえりなさい、{{name}} さん",
     "administrator": "管理者",
     "employee": "従業員"
+  },
+  "bands": {
+    "workspace": "ワークスペース",
+    "people": "人事",
+    "operations": "業務"
   },
   "groups": {
     "home": "ホーム",

@@ -12,15 +12,17 @@ import "../../styles/section-header.css";
  *
  * The background is drawn as SVG rather than shipped as an image: it scales
  * to any width without a second asset, weighs nothing, and - because the
- * gradient stops read the app's `--blue-*` scale - it recolours with the
- * active theme instead of being pinned to one hue.
+ * gradient stops read the app's brand scale - it recolours with the active
+ * theme instead of being pinned to one hue.
  *
- * The ground sits a rung lighter than the accent itself (`--blue-600` into
- * `--blue-500`, with every variant tint moved up the same amount) so a banner
- * on every screen reads as a soft header rather than a block of saturated
- * colour. It stops there rather than going pastel because the copy on top is
- * white: `--blue-600` under the title holds normal-size text above 4.5:1, and
- * a lighter ground would not.
+ * The ground is `--banner-from` into `--banner-mid` (see styles/tokens.css),
+ * two rungs deeper than the accent itself, and the per-section tint arrives
+ * on top of it at `--banner-tint-opacity` rather than at full strength. A
+ * banner opens every screen in the product, so at full saturation it stops
+ * being a header and becomes the loudest thing in the app - which, stacked
+ * against a brand-coloured sidebar, was most of why the UI read as
+ * over-purple. It stops there rather than going pastel because the copy on
+ * top is white, and these steps hold normal-size text well above 4.5:1.
  *
  * Layout is two columns, not an overlay. The copy lives in its own column
  * with a max width and the illustration in another, so a long title can
@@ -61,18 +63,18 @@ export type SectionVariant =
  * SVG stop.
  */
 const VARIANT_TINT: Record<SectionVariant, string> = {
-  default: "rgb(var(--blue-400))",
+  default: "rgb(var(--brand-400))",
   // The dashboard is home, so it stays on the plain theme accent - no second
   // hue competing with the figures it frames.
-  dashboard: "rgb(var(--blue-400))",
+  dashboard: "rgb(var(--brand-400))",
   // Announcements carry news, so they lean warm against the accent.
   announcements: "rgb(249 168 212)",
 
   // People. All three sit on the accent's own scale rather than a second hue,
   // so moving between Team, Employees and Departments reads as one area.
-  team: "rgb(var(--blue-300))",
-  employees: "rgb(var(--blue-400))",
-  departments: "rgb(var(--blue-300))",
+  team: "rgb(var(--brand-300))",
+  employees: "rgb(var(--brand-400))",
+  departments: "rgb(var(--brand-300))",
 
   // Time and presence, on the sky end.
   attendance: "rgb(56 189 248)",
@@ -91,8 +93,8 @@ const VARIANT_TINT: Record<SectionVariant, string> = {
 
   // Personal settings stay closest to the plain accent: they are chrome, not
   // a section of the product with its own subject.
-  profile: "rgb(var(--blue-400))",
-  settings: "rgb(var(--blue-300))",
+  profile: "rgb(var(--brand-400))",
+  settings: "rgb(var(--brand-300))",
 
   tasks: "rgb(167 139 250)",
 };
@@ -120,15 +122,24 @@ const BannerBackdrop: React.FC<{ variant: SectionVariant; id: string }> = ({
       <linearGradient id={`${id}-ground`} x1="0" y1="0" x2="1" y2="1">
         {/* Stops are set through `style` rather than the `stop-color`
             attribute: a CSS variable only resolves in a style declaration. */}
-        <stop offset="0%" style={{ stopColor: "rgb(var(--blue-600))" }} />
-        <stop offset="55%" style={{ stopColor: "rgb(var(--blue-500))" }} />
-        <stop offset="100%" style={{ stopColor: VARIANT_TINT[variant] }} />
+        <stop offset="0%" style={{ stopColor: "var(--banner-from)" }} />
+        <stop offset="55%" style={{ stopColor: "var(--banner-mid)" }} />
+        {/* The section tint comes in at an opacity, so it shifts the
+            temperature of the ground rather than replacing it with a second
+            hue. The rect underneath is what it blends into. */}
+        <stop
+          offset="100%"
+          style={{
+            stopColor: VARIANT_TINT[variant],
+            stopOpacity: "var(--banner-tint-opacity)",
+          }}
+        />
       </linearGradient>
 
       {/* A soft light source in the upper right, which is what stops the
           gradient from reading as a flat swatch. */}
       <radialGradient id={`${id}-glow`} cx="0.78" cy="0.1" r="0.7">
-        <stop offset="0%" stopColor="#fff" stopOpacity="0.38" />
+        <stop offset="0%" stopColor="#fff" stopOpacity="0.26" />
         <stop offset="100%" stopColor="#fff" stopOpacity="0" />
       </radialGradient>
 
@@ -140,6 +151,8 @@ const BannerBackdrop: React.FC<{ variant: SectionVariant; id: string }> = ({
       </radialGradient>
     </defs>
 
+    {/* The solid ground the tinted gradient blends into. */}
+    <rect width="1200" height="200" fill="var(--banner-mid)" />
     <rect width="1200" height="200" fill={`url(#${id}-ground)`} />
     <rect width="1200" height="200" fill={`url(#${id}-glow)`} />
     <ellipse

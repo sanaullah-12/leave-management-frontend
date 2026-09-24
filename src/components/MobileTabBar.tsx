@@ -72,7 +72,7 @@ const MobileTabBar: React.FC<MobileTabBarProps> = ({ items, center }) => {
           <motion.span
             layoutId={reduce ? undefined : "tab-bar-active"}
             className="absolute inset-0 rounded-xl"
-            style={{ backgroundColor: "var(--accent)" }}
+            style={{ backgroundColor: "var(--brand-solid)" }}
             /* The general-purpose spring rather than the press one: the badge
                is travelling the width of a tab, not acknowledging a finger,
                and the press spring is tuned to be over before a finger lifts -

@@ -1,4 +1,5 @@
 import React from "react";
+import { statusColor } from "../../lib/themeTokens";
 
 /**
  * The pieces a phone screen in this app is built from.
@@ -26,10 +27,10 @@ import React from "react";
  * already use, so a colour cannot say one thing on a phone and another on a
  * laptop.
  */
-export const LATE_INK = "#b5650a";
-export const ABSENT_INK = "#b42318";
-export const LEAVE_INK = "#0e7490";
-export const WFH_INK = "#4c3fc7";
+export const LATE_INK = statusColor("warning");
+export const ABSENT_INK = statusColor("danger");
+export const LEAVE_INK = statusColor("leave");
+export const WFH_INK = statusColor("remote");
 
 /* ------------------------------------------------------------------ */
 /* Surfaces                                                            */
@@ -135,7 +136,7 @@ export const PrimaryButton: React.FC<{
     onClick={onClick}
     disabled={disabled}
     className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[13px] px-4 text-[13.5px] font-bold text-white transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
-    style={{ backgroundColor: "var(--accent)" }}
+    style={{ backgroundColor: "var(--brand-solid)" }}
   >
     {Icon && <Icon className={`h-4 w-4 ${busy ? "animate-spin" : ""}`} />}
     {children}

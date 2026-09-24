@@ -30,7 +30,7 @@ export const HEADING_FONT_FAMILIES = [
 
 /** Preset accents HR can pick without opening a colour wheel. */
 export const BRAND_ACCENTS = [
-  { label: "Nexora Blue", value: "#2563eb" },
+  { label: "Nexora Orange", value: "#ed5f0c" },
   { label: "Deep Navy", value: "#1e3a5f" },
   { label: "Emerald", value: "#047857" },
   { label: "Burgundy", value: "#9f1239" },

@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { showInfoToast } from "../utils/toastHelpers";
 import { connectSocket, disconnectSocket, getSocket } from "../socket/socket";
+import { getAccessToken } from "../services/tokenStore";
 import { SOCKET_EVENTS } from "../socket/events";
 import { useAppDispatch } from "../store/hooks";
 import { setConnected, setPresence, markEvent } from "../store/realtimeSlice";
@@ -53,10 +54,9 @@ export function useSocket() {
       return;
     }
 
-    const token = localStorage.getItem("token");
-    if (!token) return;
+    if (!getAccessToken()) return;
 
-    const socket = connectSocket(token);
+    const socket = connectSocket();
 
     // Guard against binding twice (React StrictMode double-invoke in dev).
     if (boundRef.current) return;

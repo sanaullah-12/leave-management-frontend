@@ -21,6 +21,7 @@ import EmployeeLeaveActivity from "../../EmployeeLeaveActivity";
 import type { LateEntry, LateSummary } from "../../../hooks/useLateHours";
 import useChartMotion from "../../../hooks/useChartMotion";
 import { spring } from "../../../lib/motion";
+import { statusColor } from "../../../lib/themeTokens";
 
 /**
  * One employee's record, as a phone screen.
@@ -94,9 +95,9 @@ export interface MobileEmployeeDetailProps {
 }
 
 /** The four states counted on this screen. Late and absent carry meaning. */
-const ON_TIME_INK = "#0f7a4c";
-const LATE_INK = "#b5650a";
-const INFO_INK = "#0e7490";
+const ON_TIME_INK = statusColor("success");
+const LATE_INK = statusColor("warning");
+const INFO_INK = statusColor("leave");
 
 const TABS = [
   { key: "profile", label: "Profile" },
@@ -480,7 +481,7 @@ const MobileEmployeeDetail: React.FC<MobileEmployeeDetailProps> = ({
                         disabled={savingAllocation}
                         aria-label="Save allocation"
                         className="grid h-9 w-9 place-items-center rounded-full text-white disabled:opacity-60"
-                        style={{ backgroundColor: "var(--accent)" }}
+                        style={{ backgroundColor: "var(--brand-solid)" }}
                       >
                         <CheckIcon className="h-4 w-4" />
                       </button>

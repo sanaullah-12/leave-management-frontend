@@ -210,7 +210,7 @@ export const DayRosterTable: React.FC<{
                 <td className={`${TD} whitespace-nowrap tabular-nums`}>
                   {row.checkIn || <span className="text-gray-400">-</span>}
                   {row.lateDisplay && (
-                    <span className="ml-2 text-xs text-[#b5650a]">
+                    <span className="ml-2 text-xs text-[var(--warning-text)]">
                       +{row.lateDisplay}
                     </span>
                   )}
@@ -322,11 +322,11 @@ export const ByDateTable: React.FC<{
                       </span>
                     </td>
                     <td className={NUM}>{day.onTime}</td>
-                    <td className={`${NUM} ${day.late ? "text-[#b5650a]" : ""}`}>
+                    <td className={`${NUM} ${day.late ? "text-[var(--warning-text)]" : ""}`}>
                       {day.late}
                     </td>
                     <td
-                      className={`${NUM} ${day.absent ? "text-[#b42318]" : ""}`}
+                      className={`${NUM} ${day.absent ? "text-[var(--danger-text)]" : ""}`}
                     >
                       {day.absent}
                     </td>
@@ -440,12 +440,12 @@ export const ByEmployeeTable: React.FC<{
                 </td>
                 <td className={NUM}>{person.onTime}</td>
                 <td
-                  className={`${NUM} ${person.late ? "text-[#b5650a]" : ""}`}
+                  className={`${NUM} ${person.late ? "text-[var(--warning-text)]" : ""}`}
                 >
                   {person.late}
                 </td>
                 <td
-                  className={`${NUM} ${person.absent ? "text-[#b42318]" : ""}`}
+                  className={`${NUM} ${person.absent ? "text-[var(--danger-text)]" : ""}`}
                 >
                   {person.absent}
                 </td>

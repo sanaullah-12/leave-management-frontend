@@ -197,8 +197,8 @@ const ResetPasswordPage: React.FC = () => {
                 {...register('password', {
                   required: 'Password is required',
                   minLength: {
-                    value: 6,
-                    message: 'Password must be at least 6 characters',
+                    value: 8,
+                    message: 'Password must be at least 8 characters',
                   },
                 })}
                 label="New Password"
@@ -233,7 +233,7 @@ const ResetPasswordPage: React.FC = () => {
                       <span className="block h-2 w-2 rounded-full border border-current" />
                     )}
                   </span>
-                  At least 6 characters long
+                  At least 8 characters, with a letter and a number
                 </li>
               </ul>
             </div>

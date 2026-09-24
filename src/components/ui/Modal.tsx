@@ -82,7 +82,7 @@ const Modal: React.FC<ModalProps> = ({
         <div className="fixed inset-0 z-[100] flex items-end justify-center px-safe sm:items-center sm:p-6">
           {/* Backdrop */}
           <motion.div
-            className="absolute inset-0 bg-gray-900/40 backdrop-blur-md"
+            className="absolute inset-0 bg-[var(--overlay-scrim)] backdrop-blur-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -136,7 +136,7 @@ const Modal: React.FC<ModalProps> = ({
                dvh, so the sheet has to give that height back itself or its
                footer ends up underneath the keys. */
             style={{ maxHeight: "calc(92dvh - var(--keyboard-inset))" }}
-            className={`relative flex min-h-[40vh] w-full touch-pan-y flex-col overflow-hidden border border-gray-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-900 shadow-2xl shadow-gray-900/20 rounded-t-3xl sm:!max-h-[94vh] sm:min-h-0 sm:rounded-3xl ${SIZES[size]} ${panelClassName}`}
+            className={`relative flex min-h-[40vh] w-full touch-pan-y flex-col overflow-hidden border border-[var(--border-default)] bg-[var(--surface-overlay)] shadow-2xl shadow-gray-950/25 rounded-t-3xl sm:!max-h-[94vh] sm:min-h-0 sm:rounded-3xl ${SIZES[size]} ${panelClassName}`}
           >
             {/* Grab handle - the standard affordance that marks a sheet as
                 dismissible. Sheet-only, so desktop dialogs are unchanged. */}
@@ -208,7 +208,7 @@ const Modal: React.FC<ModalProps> = ({
 
             {/* Sticky footer */}
             {footer && (
-              <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-100 bg-white/80 px-4 pb-[calc(1rem+var(--safe-bottom))] pt-4 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-900/80 sm:px-6 sm:pb-4">
+              <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-[var(--border-subtle)] bg-[var(--surface-overlay)]/85 px-4 pb-[calc(1rem+var(--safe-bottom))] pt-4 backdrop-blur-sm sm:px-6 sm:pb-4">
                 {footer}
               </div>
             )}

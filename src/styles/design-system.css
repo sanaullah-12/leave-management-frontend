@@ -1,8 +1,37 @@
-/* ============================= */
-/* Design System - Pure Tailwind CSS */
-/* ============================= */
+/* ==========================================================================
+   Design system - shared component recipes and motion
+   --------------------------------------------------------------------------
+   Colour is not decided here. Every value below resolves to a token from
+   styles/tokens.css, directly or through a Tailwind utility that the config
+   points at one.
 
-/* Base Styles */
+   WHAT USED TO BE IN THIS FILE
+
+   About 1,300 lines of per-theme utility overrides - roughly
+   `html.theme-purple .text-blue-600 { @apply text-purple-600 }`, repeated for
+   eleven schemes across some sixty utilities. They were written before the
+   brand scale was driven by CSS variables, and once it was, they became a
+   second mechanism doing the same job by a different route, with different
+   results wherever the two disagreed.
+
+   They are gone. Swapping the brand ramp in tokens.css recolours every
+   `blue-*`/`brand-*` utility in one step, which is what those blocks were
+   trying to achieve one selector at a time.
+
+   A large share of them could never have fired at all:
+
+     - `theme-green` and `theme-custom` are in `ThemeContext`'s LEGACY_CLASSES
+       and are stripped from <html> on load, so ~250 lines targeted a class
+       that is removed before paint.
+     - The `primary-*` scale they remapped (`bg-primary-50`, `text-primary-600`
+       and friends) is not defined in the Tailwind config, so those utilities
+       have never existed and ~200 further lines matched nothing.
+
+   Dead component recipes went with them: `.nav-item`, `.nav-icon`,
+   `.input-field`, `.table-row-hover`, `.profile-gradient`, `.card-hover-*`
+   and six unused keyframe sets, none of which had a single call site left.
+   ========================================================================== */
+
 body {
   font-family: "Geist", ui-sans-serif, system-ui, -apple-system,
     BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -11,206 +40,64 @@ body {
   line-height: 1.6;
 }
 
-/* ============================= */
-/* Animations */
-/* ============================= */
+/* ==========================================================================
+   Avatars
+   ========================================================================== */
 
-.fade-in {
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.hover-lift {
-  transition: transform 0.2s ease-in-out;
-}
-
-.hover-lift:hover {
-  transform: translateY(-2px);
-}
-
-/* ============================= */
-/* Card Hover Animations */
-/* ============================= */
-
-.card-hover-interactive {
-  @apply transform transition-all duration-300 ease-in-out cursor-pointer;
-  @apply hover:scale-105 hover:shadow-xl;
-  @apply relative overflow-hidden;
-}
-
-.card-hover-interactive::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.1),
-    transparent
-  );
-  transition: left 0.6s ease-in-out;
-}
-
-.card-hover-interactive:hover::before {
-  left: 100%;
-}
-
-.card-hover-excellent {
-  @apply hover:ring-2 hover:ring-green-300 hover:ring-opacity-50;
-  @apply hover:shadow-green-200/50;
-}
-
-.card-hover-good {
-  @apply hover:ring-2 hover:ring-yellow-300 hover:ring-opacity-50;
-  @apply hover:shadow-yellow-200/50;
-}
-
-.card-hover-poor {
-  @apply hover:ring-2 hover:ring-red-300 hover:ring-opacity-50;
-  @apply hover:shadow-red-200/50;
-}
-
-/* Tooltip Animations */
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.3s ease-out;
-}
-
-@keyframes bounce-in {
-  0% {
-    transform: scale(0.8) translateY(4px);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.05) translateY(-2px);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(1) translateY(0);
-    opacity: 1;
-  }
-}
-
-.animate-bounce-in {
-  animation: bounce-in 0.4s ease-out;
-}
-
-/* ============================= */
-/* Avatar Classes */
-/* ============================= */
-
+/* A tonal brand chip rather than a saturated fill: an avatar appears dozens
+   of times in a list, and at that count a solid brand circle per row turns
+   the page into confetti. */
 .user-initials-circle {
-  @apply bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-500 dark:to-blue-700 text-blue-700 dark:text-white;
+  background-color: var(--brand-soft);
+  color: var(--brand-text);
+  box-shadow: inset 0 0 0 1px var(--brand-border);
 }
 
-/* Employee Avatar Colors - Single Theme Color */
+/* The one place an avatar IS the brand - a single, deliberate accent. */
 .avatar-primary {
-  @apply bg-gradient-to-br from-blue-500 to-blue-600 text-white;
+  background-color: var(--brand-solid);
+  color: var(--brand-contrast);
 }
 
-/* ============================= */
-/* Custom Button Classes */
-/* ============================= */
+/* ==========================================================================
+   Buttons
+   --------------------------------------------------------------------------
+   Five variants, one size system. The typed API over these lives in
+   components/ui/Button.tsx; a plain `className="btn-primary"` gets the same
+   material.
 
-/* Primary Button */
-.btn-primary {
-  @apply inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-full border-none cursor-pointer transition-all duration-200 ease-in-out;
-}
+   Only the primary is a solid fill. Everything else is a surface or a tint,
+   so a toolbar of five controls has exactly one thing in it that reads as the
+   action. That is the difference between a product and a dashboard demo.
+   ========================================================================== */
 
-.btn-primary:hover {
-  @apply bg-blue-700 transform -translate-y-px shadow-lg;
-}
-
-/* Secondary Button */
-.btn-secondary {
-  @apply inline-flex items-center justify-center px-4 py-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold rounded-full border border-gray-200 dark:border-gray-700 cursor-pointer transition-all duration-200 ease-in-out;
-}
-
-.btn-secondary:hover {
-  @apply bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700;
-}
-
-/* Success Button - soft, professional tint (no harsh solid fill) */
-.btn-success {
-  @apply inline-flex items-center justify-center px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-semibold rounded-full border border-emerald-200 dark:border-emerald-500/30 cursor-pointer transition-all duration-200 ease-in-out;
-}
-
-.btn-success:hover {
-  @apply bg-emerald-100 dark:bg-emerald-500/20 border-emerald-300 dark:border-emerald-500/50;
-}
-
-/* Danger Button - soft, professional tint (no harsh solid fill) */
-.btn-danger {
-  @apply inline-flex items-center justify-center px-4 py-2 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 font-semibold rounded-full border border-red-200 dark:border-red-500/30 cursor-pointer transition-all duration-200 ease-in-out;
-}
-
-.btn-danger:hover {
-  @apply bg-red-100 dark:bg-red-500/20 border-red-300 dark:border-red-500/50;
-}
-
-/* Ghost Button */
-.btn-ghost {
-  @apply inline-flex items-center justify-center px-4 py-2 bg-transparent text-gray-600 dark:text-gray-300 font-semibold rounded-full border-none cursor-pointer transition-all duration-200 ease-in-out;
-}
-
-.btn-ghost:hover {
-  @apply bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300;
-}
-
-/* ---------------------------------------------------------------------
-   Shared button size
-   ---------------------------------------------------------------------
-   The .btn-* classes above set colour and shape but never set a type
-   size, so each one inherited whatever the surrounding block used - 16px
-   through most of the app. A 16px label inside px-4/py-2 is a ~42px
-   control: that is a form button, not a toolbar button, and it is why
-   buttons read as oversized next to inputs, chips and table rows.
-
-   One rule sizes all five, so the fix is a single decision rather than
-   one edit per call site.
-
-   Height is set rather than left to padding, so a button holding an icon,
-   a spinner, or a two-word label is always exactly as tall as the one
-   beside it. It steps up at `sm`: a phone is short on width and wants the
-   smaller footprint, a pointer wants the slightly larger target.
-   --------------------------------------------------------------------- */
 .btn-primary,
 .btn-secondary,
 .btn-success,
 .btn-danger,
 .btn-ghost {
-  height: 2rem; /* 32px */
-  /* A pill needs its horizontal padding at or above half its height, or the
-     label crowds the curve. That is why these grew while the height shrank. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-weight: 600;
+  cursor: pointer;
+  /* Height is set rather than left to padding, so a button holding an icon, a
+     spinner or a two-word label is always exactly as tall as the one beside
+     it. It steps up at `sm`: a phone is short on width and wants the smaller
+     footprint, a pointer wants the larger target. */
+  height: 2rem;
+  /* A pill needs horizontal padding at or above half its height, or the label
+     crowds the curve. */
   padding-left: 0.875rem;
   padding-right: 0.875rem;
   gap: 0.375rem;
-  font-size: 0.8125rem; /* 13px */
+  font-size: 0.8125rem;
   line-height: 1.25rem;
   white-space: nowrap;
+  border: 1px solid transparent;
+  transition: transform 0.15s var(--ease-out-quint), background-color 0.2s,
+    box-shadow 0.2s, border-color 0.2s, color 0.2s;
 }
 
 @media (min-width: 640px) {
@@ -219,20 +106,17 @@ body {
   .btn-success,
   .btn-danger,
   .btn-ghost {
-    height: 2.25rem; /* 36px */
+    height: 2.25rem;
     padding-left: 1rem;
     padding-right: 1rem;
-    font-size: 0.8125rem; /* 13px */
   }
 }
 
-/* Icons come in at whatever size each call site picked - usually h-5 w-5,
-   which is 20px against a 14px label. One size here keeps the ratio right
-   everywhere without touching every button in the app.
-
-   Horizontal margins are cleared because call sites are split between
-   `mr-2` on the icon and `gap-2` on the button; with a gap set above, the
-   ones using both were paying for the space twice. */
+/* Icons arrive at whatever size each call site picked - usually h-5 w-5, which
+   is 20px against a 13px label. One size here keeps the ratio right
+   everywhere without touching every button in the app. Horizontal margins are
+   cleared because call sites are split between `mr-2` on the icon and `gap-2`
+   on the button, and the ones using both paid for the space twice. */
 .btn-primary > svg,
 .btn-secondary > svg,
 .btn-success > svg,
@@ -245,1014 +129,252 @@ body {
   margin-right: 0;
 }
 
-/* ============================= */
-/* Custom Badge Classes */
-/* ============================= */
+/* The primary action. A flat brand fill with an inset top highlight - no
+   gradient and no coloured glow. The glow it used to carry
+   (`0 6px 18px brand/0.32`) is most of why the old UI read as over-saturated:
+   every button laid a puddle of brand colour on the surface under it. */
+.btn-primary {
+  background-color: var(--brand-solid);
+  color: var(--brand-contrast);
+  border-color: transparent;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.16), var(--shadow-sm);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--brand-solid-hover);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), var(--shadow-md);
+}
+
+.btn-primary:active:not(:disabled) {
+  background-color: var(--brand-solid-active);
+}
+
+/* The default non-action: a plain surface with a hairline. */
+.btn-secondary {
+  background-color: var(--surface-raised);
+  color: var(--text-secondary);
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--surface-hover);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.btn-secondary:active:not(:disabled) {
+  background-color: var(--surface-active);
+}
+
+/* Destructive and confirming actions are tinted, not filled. A solid red
+   button is a warning even when it is the safe, expected thing to press, and
+   this app puts one at the bottom of every confirm dialog. */
+.btn-danger {
+  background-color: var(--danger-soft);
+  color: var(--danger-text);
+  border-color: var(--danger-border);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: var(--danger-soft);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.btn-success {
+  background-color: var(--success-soft);
+  color: var(--success-text);
+  border-color: var(--success-border);
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: var(--success-soft);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+/* Ghost has no surface at rest; one materialises under the pointer. */
+.btn-ghost {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border-color: transparent;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-success:disabled,
+.btn-danger:disabled,
+.btn-ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* One focus ring for every button. `:focus-visible` rather than `:focus`, so
+   a mouse click does not leave a ring behind but a Tab does. */
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+.btn-success:focus-visible,
+.btn-danger:focus-visible,
+.btn-ghost:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Badges
+   --------------------------------------------------------------------------
+   A tinted pill, never a solid fill: badges appear several to a row in tables
+   and a row of saturated chips is unreadable at a glance, which is the one
+   thing a status badge exists to be.
+   ========================================================================== */
+.badge-primary,
+.badge-success,
+.badge-warning,
+.badge-error,
+.badge-gray {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  border: 1px solid;
+}
 
 .badge-primary {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700;
+  background-color: var(--brand-soft);
+  color: var(--brand-text);
+  border-color: var(--brand-border);
 }
 
 .badge-success {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-700;
+  background-color: var(--success-soft);
+  color: var(--success-text);
+  border-color: var(--success-border);
 }
 
 .badge-warning {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 border border-yellow-200 dark:border-yellow-700;
+  background-color: var(--warning-soft);
+  color: var(--warning-text);
+  border-color: var(--warning-border);
 }
 
 .badge-error {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-700;
+  background-color: var(--danger-soft);
+  color: var(--danger-text);
+  border-color: var(--danger-border);
 }
 
 .badge-gray {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-900/20 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700;
+  background-color: var(--surface-hover);
+  color: var(--text-secondary);
+  border-color: var(--border-default);
 }
 
-/* ============================= */
-/* Custom Card Classes */
-/* ============================= */
-
-.card {
-  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-sm transition-all duration-200 ease-in-out;
-}
-
-.card:hover {
-  @apply shadow-md;
-}
-
-.card-elevated {
-  @apply bg-white dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/50 rounded-2xl shadow-lg transition-all duration-200 ease-in-out backdrop-blur-sm;
-}
-
-.dashboard-card {
-  @apply relative bg-white dark:bg-gray-800/80 rounded-3xl p-0 shadow-lg transition-all duration-300 ease-out overflow-hidden backdrop-blur-sm border border-gray-100/50 dark:border-gray-700/50;
-}
-
-.dashboard-card:hover {
-  @apply -translate-y-1 shadow-xl;
-}
-
-/* ============================= */
-/* Navigation Classes */
-/* ============================= */
-
-/* Navigation - Geist Medium 15px */
-.nav-item {
-  @apply flex items-center px-4 py-2.5 my-0.5 rounded-full font-medium text-gray-600 dark:text-gray-300 no-underline transition-all duration-200 ease-in-out relative cursor-pointer;
-  font-size: 0.9375rem;
-  letter-spacing: -0.006em;
-}
-
-.nav-item.active {
-  @apply bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 border-l-2 border-blue-500 dark:border-blue-400/60 font-medium;
-}
-
-.nav-item:hover:not(.active) {
-  @apply bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300;
-}
-
-.nav-icon {
-  @apply w-5 h-5 mr-3 flex-shrink-0 text-gray-500 dark:text-gray-400 transition-colors duration-200 ease-in-out;
-}
-
-.nav-item:hover .nav-icon {
-  @apply text-blue-600 dark:text-blue-400;
-}
-
-.nav-item.active .nav-icon {
-  @apply text-blue-600 dark:text-blue-400;
-}
-
-/* ============================= */
-/* Input Field Classes */
-/* ============================= */
-
-.input-field {
-  @apply w-full px-4 py-3 bg-white dark:bg-gray-800/80 border border-gray-200/50 dark:border-gray-700/50 rounded-full text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-all duration-200 ease-in-out shadow-sm;
-}
-
-.input-field:focus {
-  @apply border-blue-500 dark:border-blue-400 ring-4 ring-blue-100 dark:ring-blue-900/30 bg-white dark:bg-gray-800/80 outline-none;
-}
-
-/* ============================= */
-/* Table Classes */
-/* ============================= */
-
-.table-row-hover {
-  @apply transition-all duration-300 ease-in-out cursor-pointer;
-}
-
-.table-row-hover:hover {
-  @apply bg-blue-25 dark:bg-blue-950/20 shadow-md rounded-full;
-}
-
-/* ============================= */
-/* Theme-specific Overrides */
-/* ============================= */
-
-/* Purple Theme Overrides */
-html.theme-purple .btn-primary {
-  @apply bg-purple-600;
-}
-
-html.theme-purple .btn-primary:hover {
-  @apply bg-purple-500; /* Using #AE75DA equivalent */
-}
-
-html.theme-purple .btn-secondary:hover {
-  @apply bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-700;
-}
-
-html.theme-purple .nav-item.active {
-  @apply bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500 dark:border-purple-400/60;
-}
-
-html.theme-purple .nav-item:hover:not(.active) {
-  @apply bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300;
-}
-
-html.theme-purple .nav-item:hover .nav-icon,
-html.theme-purple .nav-item.active .nav-icon {
-  @apply text-purple-600 dark:text-purple-400;
-}
-
-html.theme-purple .input-field:focus {
-  @apply border-purple-500 dark:border-purple-400 ring-purple-100 dark:ring-purple-900/30;
-}
-
-html.theme-purple .table-row-hover:hover {
-  @apply bg-purple-25 dark:bg-purple-950/20;
-}
-
-html.theme-purple .user-initials-circle {
-  @apply bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-500 dark:to-purple-700 text-purple-700 dark:text-white;
-}
-
-html.theme-purple .avatar-primary {
-  @apply bg-gradient-to-br from-purple-500 to-purple-600 text-white;
-}
-
-html.theme-purple .badge-primary {
-  @apply bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-700;
-}
-
-/* Employee page avatar overrides */
-html.theme-purple .from-blue-100 {
-  @apply from-purple-100;
-}
-html.theme-purple .to-blue-200 {
-  @apply to-purple-200;
-}
-html.theme-purple .from-blue-900 {
-  @apply from-purple-900;
-}
-html.theme-purple .to-blue-800 {
-  @apply to-purple-800;
-}
-html.theme-purple .text-blue-600 {
-  @apply text-purple-600;
-}
-html.theme-purple .text-blue-400 {
-  @apply text-purple-400;
-}
-
-/* Green Theme Overrides */
-html.theme-green .btn-primary {
-  @apply bg-green-600;
-}
-
-html.theme-green .btn-primary:hover {
-  @apply bg-green-700;
-}
-
-html.theme-green .btn-secondary:hover {
-  @apply bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700;
-}
-
-html.theme-green .nav-item.active {
-  @apply bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-300 border-green-500 dark:border-green-400/60;
-}
-
-html.theme-green .nav-item:hover:not(.active) {
-  @apply bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300;
-}
-
-html.theme-green .nav-item:hover .nav-icon,
-html.theme-green .nav-item.active .nav-icon {
-  @apply text-green-600 dark:text-green-400;
-}
-
-html.theme-green .input-field:focus {
-  @apply border-green-500 dark:border-green-400 ring-green-100 dark:ring-green-900/30;
-}
-
-html.theme-green .table-row-hover:hover {
-  @apply bg-green-25 dark:bg-green-950/20;
-}
-
-html.theme-green .user-initials-circle {
-  @apply bg-gradient-to-br from-green-100 to-green-200 dark:from-green-500 dark:to-green-700 text-green-700 dark:text-white;
-}
-
-html.theme-green .avatar-primary {
-  @apply bg-gradient-to-br from-green-500 to-green-600 text-white;
-}
-
-html.theme-green .badge-primary {
-  @apply bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-200 border-green-200 dark:border-green-700;
-}
-
-/* Employee page avatar overrides */
-html.theme-green .from-blue-100 {
-  @apply from-green-100;
-}
-html.theme-green .to-blue-200 {
-  @apply to-green-200;
-}
-html.theme-green .from-blue-900 {
-  @apply from-green-900;
-}
-html.theme-green .to-blue-800 {
-  @apply to-green-800;
-}
-html.theme-green .text-blue-600 {
-  @apply text-green-600;
-}
-html.theme-green .text-blue-400 {
-  @apply text-green-400;
-}
-
-/* Custom Theme Overrides */
-html.theme-custom .btn-primary {
-  @apply bg-custom-600;
-}
-
-html.theme-custom .btn-primary:hover {
-  @apply bg-custom-700;
-}
-
-html.theme-custom .btn-secondary:hover {
-  @apply bg-custom-50 dark:bg-custom-900/20 text-custom-700 dark:text-custom-300 border-custom-300 dark:border-custom-700;
-}
-
-html.theme-custom .nav-item.active {
-  @apply bg-custom-50 dark:bg-custom-500/10 text-custom-700 dark:text-custom-300 border-custom-500 dark:border-custom-400/60;
-}
-
-html.theme-custom .nav-item:hover:not(.active) {
-  @apply bg-custom-50 dark:bg-custom-900/20 text-custom-700 dark:text-custom-300;
-}
-
-html.theme-custom .nav-item:hover .nav-icon,
-html.theme-custom .nav-item.active .nav-icon {
-  @apply text-custom-600 dark:text-custom-400;
-}
-
-html.theme-custom .input-field:focus {
-  @apply border-custom-500 dark:border-custom-400 ring-custom-100 dark:ring-custom-900/30;
-}
-
-html.theme-custom .table-row-hover:hover {
-  @apply bg-custom-25 dark:bg-custom-950/20;
-}
-
-/* ============================= */
-/* Admin Privileges Container Theme Overrides */
-/* ============================= */
-
-/* Purple theme admin privileges */
-html.theme-purple .bg-blue-50 {
-  @apply bg-purple-50;
-}
-html.theme-purple .dark\:bg-blue-900\/20 {
-  @apply dark:bg-purple-900/20;
-}
-html.theme-purple .border-blue-200 {
-  @apply border-purple-200;
-}
-html.theme-purple .dark\:border-blue-800 {
-  @apply dark:border-purple-800;
-}
-html.theme-purple .text-blue-600 {
-  @apply text-purple-600;
-}
-html.theme-purple .dark\:text-blue-400 {
-  @apply dark:text-purple-400;
-}
-html.theme-purple .text-blue-800 {
-  @apply text-purple-800;
-}
-html.theme-purple .dark\:text-blue-200 {
-  @apply dark:text-purple-200;
-}
-html.theme-purple .text-blue-700 {
-  @apply text-purple-700;
-}
-html.theme-purple .dark\:text-blue-300 {
-  @apply dark:text-purple-300;
-}
-
-/* Green theme admin privileges */
-html.theme-green .bg-blue-50 {
-  @apply bg-green-50;
-}
-html.theme-green .dark\:bg-blue-900\/20 {
-  @apply dark:bg-green-900/20;
-}
-html.theme-green .border-blue-200 {
-  @apply border-green-200;
-}
-html.theme-green .dark\:border-blue-800 {
-  @apply dark:border-green-800;
-}
-html.theme-green .text-blue-600 {
-  @apply text-green-600;
-}
-html.theme-green .dark\:text-blue-400 {
-  @apply dark:text-green-400;
-}
-html.theme-green .text-blue-800 {
-  @apply text-green-800;
-}
-html.theme-green .dark\:text-blue-200 {
-  @apply dark:text-green-200;
-}
-html.theme-green .text-blue-700 {
-  @apply text-green-700;
-}
-html.theme-green .dark\:text-blue-300 {
-  @apply dark:text-green-300;
-}
-
-/* Custom theme admin privileges */
-html.theme-custom .bg-blue-50 {
-  @apply bg-custom-50;
-}
-html.theme-custom .dark\:bg-blue-900\/20 {
-  @apply dark:bg-custom-900/20;
-}
-html.theme-custom .border-blue-200 {
-  @apply border-custom-200;
-}
-html.theme-custom .dark\:border-blue-800 {
-  @apply dark:border-custom-800;
-}
-html.theme-custom .text-blue-600 {
-  @apply text-custom-600;
-}
-html.theme-custom .dark\:text-blue-400 {
-  @apply dark:text-custom-400;
-}
-html.theme-custom .text-blue-800 {
-  @apply text-custom-800;
-}
-html.theme-custom .dark\:text-blue-200 {
-  @apply dark:text-custom-200;
-}
-html.theme-custom .text-blue-700 {
-  @apply text-custom-700;
-}
-html.theme-custom .dark\:text-blue-300 {
-  @apply dark:text-custom-300;
-}
-
-html.theme-custom .user-initials-circle {
-  @apply bg-gradient-to-br from-custom-100 to-custom-200 dark:from-custom-500 dark:to-custom-700 text-custom-700 dark:text-white;
-}
-
-html.theme-custom .avatar-primary {
-  @apply bg-gradient-to-br from-custom-500 to-custom-600 text-white;
-}
-
-html.theme-custom .badge-primary {
-  @apply bg-custom-100 dark:bg-custom-900/20 text-custom-800 dark:text-custom-200 border-custom-200 dark:border-custom-700;
-}
-
-/* Employee page avatar overrides */
-html.theme-custom .from-blue-100 {
-  @apply from-custom-100;
-}
-html.theme-custom .to-blue-200 {
-  @apply to-custom-200;
-}
-html.theme-custom .from-blue-900 {
-  @apply from-custom-900;
-}
-html.theme-custom .to-blue-800 {
-  @apply to-custom-800;
-}
-html.theme-custom .text-blue-600 {
-  @apply text-custom-600;
-}
-html.theme-custom .text-blue-400 {
-  @apply text-custom-400;
-}
-
-/* ============================= */
-/* Profile Container Gradients */
-/* ============================= */
-
-.profile-gradient {
-  @apply bg-gradient-to-r from-blue-100 to-blue-400 dark:from-blue-700 dark:to-blue-900;
-}
-
-html.theme-purple .profile-gradient {
-  @apply from-purple-100 to-purple-400 dark:from-purple-700 dark:to-purple-900;
-}
-
-html.theme-green .profile-gradient {
-  @apply from-green-100 to-green-400 dark:from-green-700 dark:to-green-900;
-}
-
-html.theme-custom .profile-gradient {
-  @apply from-custom-100 to-custom-400 dark:from-custom-700 dark:to-custom-900;
-}
-
-/* ============================= */
-/* Form Label Styling */
-/* ============================= */
-
+/* ==========================================================================
+   Forms
+   ========================================================================== */
 .form-label {
-  @apply block text-sm font-medium mb-3 text-gray-900 dark:text-white;
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.003em;
+  margin-bottom: 0.375rem;
+  color: var(--text-secondary);
 }
 
-/* ============================= */
-/* Tab Border Theme Overrides */
-/* ============================= */
+/* ==========================================================================
+   Surfaces
+   --------------------------------------------------------------------------
+   Four parts make the material read as glass: a translucent fill, a backdrop
+   blur with a saturation lift, a bright hairline standing in for the lit edge
+   of a pane, and an inset highlight standing in for the sheen. Drop any one
+   and it reads as a flat translucent box.
 
-html.theme-purple .border-primary-500 {
-  @apply border-purple-500;
+   `.glass-card` is the card - it sits on the app ground, so the lighter fill
+   is enough to separate it. `.glass-panel` is the floating overlay: menus,
+   popovers, toasts, the mobile tab bar. It sits on top of CONTENT, so it gets
+   an opaque fill and a harder shadow, because at any glass alpha the text
+   underneath shows through and the panel stops being readable.
+
+   `.card`, `.card-elevated` and `.dashboard-card` are earlier names for the
+   same surface, kept pointing at it so the handful of remaining call sites
+   cannot drift back into being a different card.
+   ========================================================================== */
+.glass,
+.glass-card,
+.glass-panel,
+.surface-card,
+.card,
+.card-elevated,
+.dashboard-card {
+  background-color: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge);
+  border-radius: 1rem;
+  box-shadow: var(--glass-sheen), var(--glass-drop);
 }
 
-html.theme-green .border-primary-500 {
-  @apply border-green-500;
+.glass-strong {
+  background-color: var(--glass-fill-strong);
 }
 
-html.theme-custom .border-primary-500 {
-  @apply border-custom-500;
+.glass-panel {
+  background-color: var(--panel-fill);
+  box-shadow: var(--glass-sheen), var(--glass-drop-lifted);
 }
 
-html.theme-purple .border-primary-200 {
-  @apply border-purple-200;
-}
-
-html.theme-green .border-primary-200 {
-  @apply border-green-200;
-}
-
-html.theme-custom .border-primary-200 {
-  @apply border-custom-200;
-}
-
-html.theme-purple .dark\\:border-primary-800 {
-  @apply dark:border-purple-800;
-}
-
-html.theme-green .dark\\:border-primary-800 {
-  @apply dark:border-green-800;
-}
-
-html.theme-custom .dark\\:border-primary-800 {
-  @apply dark:border-custom-800;
-}
-
-/* ============================= */
-/* Coming Soon Animations */
-/* ============================= */
-
-/* Animation delays */
-.animation-delay-200 {
-  animation-delay: 200ms;
-}
-
-.animation-delay-400 {
-  animation-delay: 400ms;
-}
-
-.animation-delay-500 {
-  animation-delay: 500ms;
-}
-
-.animation-delay-1000 {
-  animation-delay: 1000ms;
-}
-
-.animation-delay-1500 {
-  animation-delay: 1500ms;
-}
-
-.animation-delay-2000 {
-  animation-delay: 2000ms;
-}
-
-/* Fade in up animation */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+/* Blur is the one part that cannot be faked. Without support the fill has to
+   go opaque, or the surface turns into an unreadable wash over whatever is
+   behind it. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass,
+  .glass-strong,
+  .glass-card,
+  .glass-panel,
+  .surface-card,
+  .card,
+  .card-elevated,
+  .dashboard-card {
+    background-color: var(--surface-raised);
   }
 }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.8s ease-out forwards;
+/* Opt-in hover lift for clickable cards. The fill steps up with the lift, so
+   the pane reads as coming toward the viewer rather than just moving. */
+.surface-card-interactive {
+  cursor: pointer;
+  transition: transform 0.3s var(--ease-out-quint),
+    box-shadow 0.3s var(--ease-out-quint), background-color 0.3s ease;
+  will-change: transform;
 }
 
-/* Progress bar animation */
-@keyframes progressBar {
-  from {
-    width: 0%;
-  }
-  to {
-    width: 75%;
-  }
+.surface-card-interactive:hover {
+  transform: translateY(-3px);
+  background-color: var(--glass-fill-strong);
+  box-shadow: var(--glass-sheen), var(--glass-drop-lifted);
 }
 
-.animate-progress-bar {
-  animation: progressBar 2s ease-out;
-}
+/* ==========================================================================
+   Motion - tasteful, professional micro-interactions
+   --------------------------------------------------------------------------
+   Everything here is disabled under prefers-reduced-motion at the end of the
+   section.
+   ========================================================================== */
 
-/* Floating animation */
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-/* Glow animation */
-@keyframes glow {
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(59, 130, 246, 0.8);
-  }
-}
-
-.animate-glow {
-  animation: glow 2s ease-in-out infinite;
-}
-
-/* Pulse text animation */
-@keyframes pulseText {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
-
-.animate-pulse-text {
-  animation: pulseText 2s ease-in-out infinite;
-}
-
-/* Shimmer effect */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.animate-shimmer {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  background-size: 200% 100%;
-  animation: shimmer 2s ease-in-out infinite;
-}
-
-/* ============================= */
-/* Complete Primary Color Theme Overrides */
-/* ============================= */
-
-/* Purple theme primary color overrides */
-html.theme-purple .bg-primary-50 {
-  @apply bg-purple-50;
-}
-html.theme-purple .dark\:bg-primary-900\/20 {
-  @apply dark:bg-purple-900/20;
-}
-html.theme-purple .border-primary-300 {
-  @apply border-purple-300;
-}
-html.theme-purple .dark\:border-primary-600 {
-  @apply dark:border-purple-600;
-}
-html.theme-purple .text-primary-600 {
-  @apply text-purple-600;
-}
-html.theme-purple .text-primary-800 {
-  @apply text-purple-800;
-}
-html.theme-purple .text-primary-900 {
-  @apply text-purple-900;
-}
-html.theme-purple .dark\:text-primary-100 {
-  @apply dark:text-purple-100;
-}
-html.theme-purple .dark\:text-primary-200 {
-  @apply dark:text-purple-200;
-}
-html.theme-purple .dark\:text-primary-400 {
-  @apply dark:text-purple-400;
-}
-html.theme-purple .focus\:ring-primary-500:focus {
-  @apply ring-purple-500;
-}
-html.theme-purple .focus\:border-primary-500:focus {
-  @apply border-purple-500;
-}
-
-/* Green theme primary color overrides */
-html.theme-green .bg-primary-50 {
-  @apply bg-green-50;
-}
-html.theme-green .dark\:bg-primary-900\/20 {
-  @apply dark:bg-green-900/20;
-}
-html.theme-green .border-primary-300 {
-  @apply border-green-300;
-}
-html.theme-green .dark\:border-primary-600 {
-  @apply dark:border-green-600;
-}
-html.theme-green .text-primary-600 {
-  @apply text-green-600;
-}
-html.theme-green .text-primary-800 {
-  @apply text-green-800;
-}
-html.theme-green .text-primary-900 {
-  @apply text-green-900;
-}
-html.theme-green .dark\:text-primary-100 {
-  @apply dark:text-green-100;
-}
-html.theme-green .dark\:text-primary-200 {
-  @apply dark:text-green-200;
-}
-html.theme-green .dark\:text-primary-400 {
-  @apply dark:text-green-400;
-}
-html.theme-green .focus\:ring-primary-500:focus {
-  @apply ring-green-500;
-}
-html.theme-green .focus\:border-primary-500:focus {
-  @apply border-green-500;
-}
-
-/* Custom theme primary color overrides */
-html.theme-custom .bg-primary-50 {
-  @apply bg-custom-50;
-}
-html.theme-custom .dark\:bg-primary-900\/20 {
-  @apply dark:bg-custom-900/20;
-}
-html.theme-custom .border-primary-300 {
-  @apply border-custom-300;
-}
-html.theme-custom .dark\:border-primary-600 {
-  @apply dark:border-custom-600;
-}
-html.theme-custom .text-primary-600 {
-  @apply text-custom-600;
-}
-html.theme-custom .text-primary-800 {
-  @apply text-custom-800;
-}
-html.theme-custom .text-primary-900 {
-  @apply text-custom-900;
-}
-html.theme-custom .dark\:text-primary-100 {
-  @apply dark:text-custom-100;
-}
-html.theme-custom .dark\:text-primary-200 {
-  @apply dark:text-custom-200;
-}
-html.theme-custom .dark\:text-primary-400 {
-  @apply dark:text-custom-400;
-}
-html.theme-custom .focus\:ring-primary-500:focus {
-  @apply ring-custom-500;
-}
-html.theme-custom .focus\:border-primary-500:focus {
-  @apply border-custom-500;
-}
-
-/* ============================= */
-/* Gradient Theme Overrides */
-/* ============================= */
-
-/* Purple theme gradient overrides */
-html.theme-purple .from-primary-400 {
-  @apply from-purple-400;
-}
-html.theme-purple .to-primary-600 {
-  @apply to-purple-600;
-}
-html.theme-purple .from-primary-500 {
-  @apply from-purple-500;
-}
-
-/* Green theme gradient overrides */
-html.theme-green .from-primary-400 {
-  @apply from-green-400;
-}
-html.theme-green .to-primary-600 {
-  @apply to-green-600;
-}
-html.theme-green .from-primary-500 {
-  @apply from-green-500;
-}
-
-/* Custom theme gradient overrides */
-html.theme-custom .from-primary-400 {
-  @apply from-custom-400;
-}
-html.theme-custom .to-primary-600 {
-  @apply to-custom-600;
-}
-html.theme-custom .from-primary-500 {
-  @apply from-custom-500;
-}
-
-/* ============================= */
-/* Background Primary Color Overrides */
-/* ============================= */
-
-/* Purple theme bg-primary overrides */
-html.theme-purple .bg-primary-500 {
-  @apply bg-purple-500;
-}
-html.theme-purple .from-primary-50 {
-  @apply from-purple-50;
-}
-html.theme-purple .to-primary-50 {
-  @apply to-purple-50;
-}
-html.theme-purple .dark\:from-primary-900\/20 {
-  @apply dark:from-purple-900/20;
-}
-html.theme-purple .dark\:to-primary-900\/20 {
-  @apply dark:to-purple-900/20;
-}
-html.theme-purple .border-primary-200 {
-  @apply border-purple-200;
-}
-html.theme-purple .dark\:border-primary-700 {
-  @apply dark:border-purple-700;
-}
-
-/* Green theme bg-primary overrides */
-html.theme-green .bg-primary-500 {
-  @apply bg-green-500;
-}
-html.theme-green .from-primary-50 {
-  @apply from-green-50;
-}
-html.theme-green .to-primary-50 {
-  @apply to-green-50;
-}
-html.theme-green .dark\:from-primary-900\/20 {
-  @apply dark:from-green-900/20;
-}
-html.theme-green .dark\:to-primary-900\/20 {
-  @apply dark:to-green-900/20;
-}
-html.theme-green .border-primary-200 {
-  @apply border-green-200;
-}
-html.theme-green .dark\:border-primary-700 {
-  @apply dark:border-green-700;
-}
-
-/* Custom theme bg-primary overrides */
-html.theme-custom .bg-primary-500 {
-  @apply bg-custom-500;
-}
-html.theme-custom .from-primary-50 {
-  @apply from-custom-50;
-}
-html.theme-custom .to-primary-50 {
-  @apply to-custom-50;
-}
-html.theme-custom .dark\:from-primary-900\/20 {
-  @apply dark:from-custom-900/20;
-}
-html.theme-custom .dark\:to-primary-900\/20 {
-  @apply dark:to-custom-900/20;
-}
-html.theme-custom .border-primary-200 {
-  @apply border-custom-200;
-}
-html.theme-custom .dark\:border-primary-700 {
-  @apply dark:border-custom-700;
-}
-
-/* ============================= */
-/* Total Late Minutes Card Theme Overrides */
-/* ============================= */
-
-/* Purple theme - use purple instead of orange for consistency */
-html.theme-purple .bg-orange-50 {
-  @apply bg-purple-50;
-}
-html.theme-purple .dark\:bg-orange-900\/20 {
-  @apply dark:bg-purple-900/20;
-}
-html.theme-purple .border-orange-200 {
-  @apply border-purple-200;
-}
-html.theme-purple .dark\:border-orange-700 {
-  @apply dark:border-purple-700;
-}
-html.theme-purple .text-orange-800 {
-  @apply text-purple-800;
-}
-html.theme-purple .dark\:text-orange-300 {
-  @apply dark:text-purple-300;
-}
-html.theme-purple .text-orange-900 {
-  @apply text-purple-900;
-}
-html.theme-purple .dark\:text-orange-100 {
-  @apply dark:text-purple-100;
-}
-html.theme-purple .text-orange-500 {
-  @apply text-purple-500;
-}
-
-/* Green theme - use green instead of orange for consistency */
-html.theme-green .bg-orange-50 {
-  @apply bg-green-50;
-}
-html.theme-green .dark\:bg-orange-900\/20 {
-  @apply dark:bg-green-900/20;
-}
-html.theme-green .border-orange-200 {
-  @apply border-green-200;
-}
-html.theme-green .dark\:border-orange-700 {
-  @apply dark:border-green-700;
-}
-html.theme-green .text-orange-800 {
-  @apply text-green-800;
-}
-html.theme-green .dark\:text-orange-300 {
-  @apply dark:text-green-300;
-}
-html.theme-green .text-orange-900 {
-  @apply text-green-900;
-}
-html.theme-green .dark\:text-orange-100 {
-  @apply dark:text-green-100;
-}
-html.theme-green .text-orange-500 {
-  @apply text-green-500;
-}
-
-/* Custom theme - use custom colors instead of orange */
-html.theme-custom .bg-orange-50 {
-  @apply bg-custom-50;
-}
-html.theme-custom .dark\:bg-orange-900\/20 {
-  @apply dark:bg-custom-900/20;
-}
-html.theme-custom .border-orange-200 {
-  @apply border-custom-200;
-}
-html.theme-custom .dark\:border-orange-700 {
-  @apply dark:border-custom-700;
-}
-html.theme-custom .text-orange-800 {
-  @apply text-custom-800;
-}
-html.theme-custom .dark\:text-orange-300 {
-  @apply dark:text-custom-300;
-}
-html.theme-custom .text-orange-900 {
-  @apply text-custom-900;
-}
-html.theme-custom .dark\:text-orange-100 {
-  @apply dark:text-custom-100;
-}
-html.theme-custom .text-orange-500 {
-  @apply text-custom-500;
-}
-
-/* ============================================= */
-/* Complete accent remaps for redesigned UI */
-/* Ensures every blue accent (buttons, rings,     */
-/* chart-adjacent chips, fills) follows the       */
-/* selected color theme in light AND dark mode.   */
-/* ============================================= */
-
-/* --- PURPLE --- */
-html.theme-purple .bg-blue-500 { @apply bg-purple-500; }
-html.theme-purple .bg-blue-600 { @apply bg-purple-600; }
-html.theme-purple .hover\:bg-blue-700:hover { @apply hover:bg-purple-700; }
-html.theme-purple .bg-blue-100 { @apply bg-purple-100; }
-html.theme-purple .bg-blue-500\/10 { @apply bg-purple-500/10; }
-html.theme-purple .dark\:bg-blue-500\/10 { @apply dark:bg-purple-500/10; }
-html.theme-purple .bg-blue-500\/20 { @apply bg-purple-500/20; }
-html.theme-purple .dark\:bg-blue-500\/20 { @apply dark:bg-purple-500/20; }
-html.theme-purple .text-blue-300 { @apply text-purple-300; }
-html.theme-purple .dark\:text-blue-300 { @apply dark:text-purple-300; }
-html.theme-purple .dark\:text-blue-200 { @apply dark:text-purple-200; }
-html.theme-purple .border-blue-400 { @apply border-purple-400; }
-html.theme-purple .ring-blue-500 { @apply ring-purple-500; }
-html.theme-purple .ring-blue-400 { @apply ring-purple-400; }
-html.theme-purple .ring-blue-200\/60 { @apply ring-purple-200/60; }
-html.theme-purple .ring-blue-200\/70 { @apply ring-purple-200/70; }
-html.theme-purple .dark\:ring-blue-500\/20 { @apply dark:ring-purple-500/20; }
-html.theme-purple .dark\:ring-blue-500\/30 { @apply dark:ring-purple-500/30; }
-html.theme-purple .focus-visible\:ring-blue-500:focus-visible { @apply focus-visible:ring-purple-500; }
-html.theme-purple .hover\:text-blue-600:hover { @apply hover:text-purple-600; }
-html.theme-purple .dark\:hover\:text-blue-400:hover { @apply dark:hover:text-purple-400; }
-html.theme-purple .shadow-blue-600\/20 { --tw-shadow-color: rgb(156 95 209 / 0.2); }
-
-/* --- GREEN --- */
-html.theme-green .bg-blue-500 { @apply bg-green-500; }
-html.theme-green .bg-blue-600 { @apply bg-green-600; }
-html.theme-green .hover\:bg-blue-700:hover { @apply hover:bg-green-700; }
-html.theme-green .bg-blue-100 { @apply bg-green-100; }
-html.theme-green .bg-blue-500\/10 { @apply bg-green-500/10; }
-html.theme-green .dark\:bg-blue-500\/10 { @apply dark:bg-green-500/10; }
-html.theme-green .bg-blue-500\/20 { @apply bg-green-500/20; }
-html.theme-green .dark\:bg-blue-500\/20 { @apply dark:bg-green-500/20; }
-html.theme-green .text-blue-300 { @apply text-green-300; }
-html.theme-green .dark\:text-blue-300 { @apply dark:text-green-300; }
-html.theme-green .dark\:text-blue-200 { @apply dark:text-green-200; }
-html.theme-green .border-blue-400 { @apply border-green-400; }
-html.theme-green .ring-blue-500 { @apply ring-green-500; }
-html.theme-green .ring-blue-400 { @apply ring-green-400; }
-html.theme-green .ring-blue-200\/60 { @apply ring-green-200/60; }
-html.theme-green .ring-blue-200\/70 { @apply ring-green-200/70; }
-html.theme-green .dark\:ring-blue-500\/20 { @apply dark:ring-green-500/20; }
-html.theme-green .dark\:ring-blue-500\/30 { @apply dark:ring-green-500/30; }
-html.theme-green .focus-visible\:ring-blue-500:focus-visible { @apply focus-visible:ring-green-500; }
-html.theme-green .hover\:text-blue-600:hover { @apply hover:text-green-600; }
-html.theme-green .dark\:hover\:text-blue-400:hover { @apply dark:hover:text-green-400; }
-html.theme-green .shadow-blue-600\/20 { --tw-shadow-color: rgb(22 163 74 / 0.2); }
-
-/* --- CUSTOM --- */
-html.theme-custom .bg-blue-500 { @apply bg-custom-500; }
-html.theme-custom .bg-blue-600 { @apply bg-custom-600; }
-html.theme-custom .hover\:bg-blue-700:hover { @apply hover:bg-custom-700; }
-html.theme-custom .bg-blue-100 { @apply bg-custom-100; }
-html.theme-custom .bg-blue-500\/10 { @apply bg-custom-500/10; }
-html.theme-custom .dark\:bg-blue-500\/10 { @apply dark:bg-custom-500/10; }
-html.theme-custom .bg-blue-500\/20 { @apply bg-custom-500/20; }
-html.theme-custom .dark\:bg-blue-500\/20 { @apply dark:bg-custom-500/20; }
-html.theme-custom .text-blue-300 { @apply text-custom-300; }
-html.theme-custom .dark\:text-blue-300 { @apply dark:text-custom-300; }
-html.theme-custom .dark\:text-blue-200 { @apply dark:text-custom-200; }
-html.theme-custom .border-blue-400 { @apply border-custom-400; }
-html.theme-custom .ring-blue-500 { @apply ring-custom-500; }
-html.theme-custom .ring-blue-400 { @apply ring-custom-400; }
-html.theme-custom .ring-blue-200\/60 { @apply ring-custom-200/60; }
-html.theme-custom .ring-blue-200\/70 { @apply ring-custom-200/70; }
-html.theme-custom .dark\:ring-blue-500\/20 { @apply dark:ring-custom-500/20; }
-html.theme-custom .dark\:ring-blue-500\/30 { @apply dark:ring-custom-500/30; }
-html.theme-custom .focus-visible\:ring-blue-500:focus-visible { @apply focus-visible:ring-custom-500; }
-html.theme-custom .hover\:text-blue-600:hover { @apply hover:text-custom-600; }
-html.theme-custom .dark\:hover\:text-blue-400:hover { @apply dark:hover:text-custom-400; }
-html.theme-custom .shadow-blue-600\/20 { --tw-shadow-color: rgb(3 150 211 / 0.2); }
-
-/* ============================================================ */
-/* Motion System - tasteful, professional micro-interactions */
-/*    (Linear / Vercel / Stripe flavour). Everything below is    */
-/*    disabled under prefers-reduced-motion at the end.          */
-/* ============================================================ */
-
-/* Smooth in-page scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Refined easing token used across entrances */
 :root {
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -1269,16 +391,12 @@ html {
   }
 }
 
-.animate-enter {
-  animation: enter 0.5s var(--ease-out-quint) both;
-}
-
-/* Make the existing page wrapper use the nicer easing */
+.animate-enter,
 .fade-in {
   animation: enter 0.5s var(--ease-out-quint) both;
 }
 
-/* --- Staggered children: cards/rows cascade in --- */
+/* --- Staggered children: cards and rows cascade in --- */
 .stagger-children > * {
   animation: enter 0.5s var(--ease-out-quint) both;
 }
@@ -1295,73 +413,39 @@ html {
 .stagger-children > *:nth-child(11) { animation-delay: 0.54s; }
 .stagger-children > *:nth-child(12) { animation-delay: 0.59s; }
 
-/* --- Interactive lift utility for clickable cards --- */
-.hover-lift-card {
-  transition: transform 0.22s var(--ease-out-quint),
-    box-shadow 0.22s var(--ease-out-quint);
-  will-change: transform;
-}
-.hover-lift-card:hover {
-  transform: translateY(-3px);
-}
-
-/* --- Button press + lift feedback (applies to all shared buttons) --- */
-.btn-primary,
-.btn-secondary,
-.btn-danger,
-.btn-success,
-.btn-ghost {
-  transition: transform 0.15s var(--ease-out-quint), background-color 0.2s,
-    box-shadow 0.2s, border-color 0.2s, color 0.2s;
-}
+/* --- Button press feedback --- */
 .btn-primary:active,
 .btn-secondary:active,
 .btn-danger:active,
 .btn-success:active,
 .btn-ghost:active {
-  transform: translateY(0) scale(0.97);
+  transform: scale(0.97);
 }
 
-/* --- Sidebar nav micro-interactions --- */
-.nav-item {
-  will-change: transform;
+/* --- Halo behind the assistant launcher while its greeting is up ---
+   A CSS animation rather than a JS-driven one on purpose: only transform and
+   opacity move, so the browser runs this on the compositor and the main
+   thread is left alone for the fifteen seconds the greeting is on screen. */
+@keyframes launcher-halo {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.6); opacity: 0; }
 }
-.nav-item:active {
-  transform: scale(0.98);
+.launcher-halo {
+  animation: launcher-halo 1.8s var(--ease-out-quint) infinite;
 }
-.nav-icon {
-  transition: transform 0.2s var(--ease-out-quint), color 0.2s ease-in-out;
-}
-.nav-item:hover .nav-icon {
-  transform: scale(1.12);
-}
-.nav-item.active .nav-icon {
-  transform: scale(1.05);
-}
-
-/* --- Soft pulse for "live"/attention dots --- */
-@keyframes soft-ping {
-  0% { transform: scale(1); opacity: 0.7; }
-  75%, 100% { transform: scale(2.2); opacity: 0; }
-}
-.soft-ping::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 9999px;
-  background: currentColor;
-  animation: soft-ping 1.8s var(--ease-out-quint) infinite;
+@media (prefers-reduced-motion: reduce) {
+  .launcher-halo { animation: none; opacity: 0; }
 }
 
 /* --- Attention pulse for the dashboard announcements card --- */
 @keyframes announce-attn {
   0%, 100% {
-    border-color: var(--accent-soft);
+    border-color: var(--brand-border);
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
   }
   50% {
-    border-color: var(--accent);
-    box-shadow: 0 0 22px 2px var(--accent-soft);
+    border-color: var(--brand);
+    box-shadow: 0 0 22px 2px var(--brand-soft);
   }
 }
 .announce-attn {
@@ -1372,157 +456,24 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .announce-attn {
     animation: none;
-    border-color: var(--accent);
+    border-color: var(--brand-border);
   }
 }
 
-/* --- Skeleton shimmer sweep --- */
+/* --- Skeleton shimmer sweep (driven by .skeleton in index.css) --- */
 @keyframes skeleton-shimmer {
   100% {
     transform: translateX(100%);
   }
 }
 
-/* ============================================================ */
-/* Branded Nexora loader animations */
-/* ============================================================ */
-
-/* Breathing scale for the logo mark */
-@keyframes breathe {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.06);
-  }
-}
-.animate-breathe {
-  animation: breathe 3s ease-in-out infinite;
-}
-
-/* Soft glow pulse (blue → emerald) */
-@keyframes brand-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 26px rgba(59, 130, 246, 0.35),
-      0 0 52px rgba(16, 185, 129, 0.14);
-  }
-  50% {
-    box-shadow: 0 0 44px rgba(59, 130, 246, 0.55),
-      0 0 88px rgba(16, 185, 129, 0.3);
-  }
-}
-.animate-brand-glow {
-  animation: brand-glow 3s ease-in-out infinite;
-}
-
-/* -- App logo (nexora-logo.png) --- */
-/* Gentle floating bob */
-@keyframes logo-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
-}
-
-/* Soft pulsing glow halo behind the mark */
-@keyframes logo-halo {
-  0%,
-  100% {
-    opacity: 0.35;
-    transform: scale(0.92);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.08);
-  }
-}
-
-/* Periodic light sweep across the mark */
-@keyframes logo-shine {
-  0% {
-    transform: translateX(-130%) skewX(-18deg);
-  }
-  60%,
-  100% {
-    transform: translateX(230%) skewX(-18deg);
-  }
-}
-
-.app-logo {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.app-logo__img {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  animation: logo-float 4s ease-in-out infinite;
-}
-.app-logo__halo {
-  position: absolute;
-  inset: -18%;
-  z-index: 0;
-  border-radius: 9999px;
-  background: radial-gradient(
-    circle,
-    rgba(59, 130, 246, 0.45) 0%,
-    rgba(16, 185, 129, 0.28) 45%,
-    transparent 70%
-  );
-  filter: blur(6px);
-  animation: logo-halo 3.5s ease-in-out infinite;
-}
-.app-logo__shine {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  overflow: hidden;
-  border-radius: inherit;
-  pointer-events: none;
-}
-.app-logo__shine::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 45%;
-  height: 100%;
-  background: linear-gradient(
-    100deg,
-    transparent,
-    rgba(255, 255, 255, 0.55),
-    transparent
-  );
-  animation: logo-shine 4.5s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .app-logo__img,
-  .app-logo__halo,
-  .app-logo__shine::before {
-    animation: none;
-  }
-}
-
-/* -- Employee Voice - soft glow for the live slide-in toast --- */
+/* --- Employee Voice: soft glow for the live slide-in toast --- */
 @keyframes voice-toast-glow {
-  0%,
-  100% {
-    box-shadow: 0 8px 30px -8px rgba(37, 99, 235, 0.35),
-      0 0 0 1px rgba(37, 99, 235, 0.05);
+  0%, 100% {
+    box-shadow: var(--shadow-md);
   }
   50% {
-    box-shadow: 0 12px 40px -8px rgba(37, 99, 235, 0.55),
-      0 0 22px -2px rgba(16, 185, 129, 0.25);
+    box-shadow: var(--shadow-lg), 0 0 18px -4px var(--brand-soft);
   }
 }
 .voice-toast {
@@ -1534,50 +485,19 @@ html {
   }
 }
 
-/* Flowing wave accent */
-@keyframes wave-flow {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-.animate-wave-flow {
-  animation: wave-flow 4s linear infinite;
-}
-
-/* Minimal floating particles */
+/* --- Minimal floating particles (BrandedLoader) --- */
 @keyframes float-particle {
-  0% {
-    transform: translateY(0) scale(1);
-    opacity: 0;
-  }
-  15% {
-    opacity: 0.7;
-  }
-  85% {
-    opacity: 0.4;
-  }
-  100% {
-    transform: translateY(-140px) scale(0.6);
-    opacity: 0;
-  }
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  15% { opacity: 0.7; }
+  85% { opacity: 0.4; }
+  100% { transform: translateY(-140px) scale(0.6); opacity: 0; }
 }
 
-/* Indeterminate progress sweep */
+/* --- Indeterminate progress sweep --- */
 @keyframes indeterminate-bar {
-  0% {
-    left: -45%;
-    width: 45%;
-  }
-  50% {
-    width: 55%;
-  }
-  100% {
-    left: 100%;
-    width: 45%;
-  }
+  0% { left: -45%; width: 45%; }
+  50% { width: 55%; }
+  100% { left: 100%; width: 45%; }
 }
 .animate-indeterminate {
   position: absolute;
@@ -1587,40 +507,31 @@ html {
   animation: indeterminate-bar 1.5s var(--ease-out-quint) infinite;
 }
 
-/* Spring pop-in for success states */
+/* --- Spring pop-in for success states --- */
 @keyframes pop-in {
-  0% {
-    transform: scale(0.4);
-    opacity: 0;
-  }
-  60% {
-    transform: scale(1.15);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
 }
 .animate-pop-in {
   animation: pop-in 0.4s var(--ease-out-quint) both;
 }
 
-/* Bouncing dots for inline loaders */
+/* --- Bouncing dots for inline loaders --- */
 @keyframes dot-bounce {
-  0%,
-  80%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.5;
-  }
-  40% {
-    transform: translateY(-4px);
-    opacity: 1;
-  }
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+  40% { transform: translateY(-4px); opacity: 1; }
 }
 
-/* --- Respect user's reduced-motion preference --- */
+/* --- Pulsing text --- */
+@keyframes pulseText {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+.animate-pulse-text {
+  animation: pulseText 2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1632,681 +543,27 @@ html {
   }
 }
 
-/* ============================================================ */
-/* INDIGO theme (matches the Sign in / Sign up button) */
-/* ============================================================ */
-html.theme-indigo .btn-primary {
-  @apply bg-indigo-600;
-}
-html.theme-indigo .btn-primary:hover {
-  @apply bg-indigo-500; /* Using #AE75DA equivalent */
-}
-html.theme-indigo .btn-secondary:hover {
-  @apply bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-700;
-}
-html.theme-indigo .nav-item.active {
-  @apply bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500 dark:border-indigo-400/60;
-}
-html.theme-indigo .nav-item:hover:not(.active) {
-  @apply bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300;
-}
-html.theme-indigo .nav-item:hover .nav-icon,
-html.theme-indigo .nav-item.active .nav-icon {
-  @apply text-indigo-600 dark:text-indigo-400;
-}
-html.theme-indigo .input-field:focus {
-  @apply border-indigo-500 dark:border-indigo-400 ring-indigo-100 dark:ring-indigo-900/30;
-}
-html.theme-indigo .table-row-hover:hover {
-  @apply bg-indigo-25 dark:bg-indigo-950/20;
-}
-html.theme-indigo .user-initials-circle {
-  @apply bg-gradient-to-br from-indigo-100 to-indigo-200 dark:from-indigo-500 dark:to-indigo-700 text-indigo-700 dark:text-white;
-}
-html.theme-indigo .avatar-primary {
-  @apply bg-gradient-to-br from-indigo-500 to-indigo-600 text-white;
-}
-html.theme-indigo .badge-primary {
-  @apply bg-indigo-100 dark:bg-indigo-900/20 text-indigo-800 dark:text-indigo-200 border-indigo-200 dark:border-indigo-700;
-}
-html.theme-indigo .from-blue-100 {
-  @apply from-indigo-100;
-}
-html.theme-indigo .to-blue-200 {
-  @apply to-indigo-200;
-}
-html.theme-indigo .from-blue-900 {
-  @apply from-indigo-900;
-}
-html.theme-indigo .to-blue-800 {
-  @apply to-indigo-800;
-}
-html.theme-indigo .text-blue-600 {
-  @apply text-indigo-600;
-}
-html.theme-indigo .text-blue-400 {
-  @apply text-indigo-400;
-}
-html.theme-indigo .bg-blue-50 {
-  @apply bg-indigo-50;
-}
-html.theme-indigo .dark\:bg-blue-900\/20 {
-  @apply dark:bg-indigo-900/20;
-}
-html.theme-indigo .border-blue-200 {
-  @apply border-indigo-200;
-}
-html.theme-indigo .dark\:border-blue-800 {
-  @apply dark:border-indigo-800;
-}
-html.theme-indigo .text-blue-600 {
-  @apply text-indigo-600;
-}
-html.theme-indigo .dark\:text-blue-400 {
-  @apply dark:text-indigo-400;
-}
-html.theme-indigo .text-blue-800 {
-  @apply text-indigo-800;
-}
-html.theme-indigo .dark\:text-blue-200 {
-  @apply dark:text-indigo-200;
-}
-html.theme-indigo .text-blue-700 {
-  @apply text-indigo-700;
-}
-html.theme-indigo .dark\:text-blue-300 {
-  @apply dark:text-indigo-300;
-}
-html.theme-indigo .profile-gradient {
-  @apply from-indigo-100 to-indigo-400 dark:from-indigo-700 dark:to-indigo-900;
-}
-html.theme-indigo .border-primary-500 {
-  @apply border-indigo-500;
-}
-html.theme-indigo .border-primary-200 {
-  @apply border-indigo-200;
-}
-html.theme-indigo .dark\\:border-primary-800 {
-  @apply dark:border-indigo-800;
-}
-html.theme-indigo .bg-primary-50 {
-  @apply bg-indigo-50;
-}
-html.theme-indigo .dark\:bg-primary-900\/20 {
-  @apply dark:bg-indigo-900/20;
-}
-html.theme-indigo .border-primary-300 {
-  @apply border-indigo-300;
-}
-html.theme-indigo .dark\:border-primary-600 {
-  @apply dark:border-indigo-600;
-}
-html.theme-indigo .text-primary-600 {
-  @apply text-indigo-600;
-}
-html.theme-indigo .text-primary-800 {
-  @apply text-indigo-800;
-}
-html.theme-indigo .text-primary-900 {
-  @apply text-indigo-900;
-}
-html.theme-indigo .dark\:text-primary-100 {
-  @apply dark:text-indigo-100;
-}
-html.theme-indigo .dark\:text-primary-200 {
-  @apply dark:text-indigo-200;
-}
-html.theme-indigo .dark\:text-primary-400 {
-  @apply dark:text-indigo-400;
-}
-html.theme-indigo .focus\:ring-primary-500:focus {
-  @apply ring-indigo-500;
-}
-html.theme-indigo .focus\:border-primary-500:focus {
-  @apply border-indigo-500;
-}
-html.theme-indigo .from-primary-400 {
-  @apply from-indigo-400;
-}
-html.theme-indigo .to-primary-600 {
-  @apply to-indigo-600;
-}
-html.theme-indigo .from-primary-500 {
-  @apply from-indigo-500;
-}
-html.theme-indigo .bg-primary-500 {
-  @apply bg-indigo-500;
-}
-html.theme-indigo .from-primary-50 {
-  @apply from-indigo-50;
-}
-html.theme-indigo .to-primary-50 {
-  @apply to-indigo-50;
-}
-html.theme-indigo .dark\:from-primary-900\/20 {
-  @apply dark:from-indigo-900/20;
-}
-html.theme-indigo .dark\:to-primary-900\/20 {
-  @apply dark:to-indigo-900/20;
-}
-html.theme-indigo .border-primary-200 {
-  @apply border-indigo-200;
-}
-html.theme-indigo .dark\:border-primary-700 {
-  @apply dark:border-indigo-700;
-}
-html.theme-indigo .bg-orange-50 {
-  @apply bg-indigo-50;
-}
-html.theme-indigo .dark\:bg-orange-900\/20 {
-  @apply dark:bg-indigo-900/20;
-}
-html.theme-indigo .border-orange-200 {
-  @apply border-indigo-200;
-}
-html.theme-indigo .dark\:border-orange-700 {
-  @apply dark:border-indigo-700;
-}
-html.theme-indigo .text-orange-800 {
-  @apply text-indigo-800;
-}
-html.theme-indigo .dark\:text-orange-300 {
-  @apply dark:text-indigo-300;
-}
-html.theme-indigo .text-orange-900 {
-  @apply text-indigo-900;
-}
-html.theme-indigo .dark\:text-orange-100 {
-  @apply dark:text-indigo-100;
-}
-html.theme-indigo .text-orange-500 {
-  @apply text-indigo-500;
-}
-html.theme-indigo .bg-blue-500 { @apply bg-indigo-500; }
-html.theme-indigo .bg-blue-600 { @apply bg-indigo-600; }
-html.theme-indigo .hover\:bg-blue-700:hover { @apply hover:bg-indigo-700; }
-html.theme-indigo .bg-blue-100 { @apply bg-indigo-100; }
-html.theme-indigo .bg-blue-500\/10 { @apply bg-indigo-500/10; }
-html.theme-indigo .dark\:bg-blue-500\/10 { @apply dark:bg-indigo-500/10; }
-html.theme-indigo .bg-blue-500\/20 { @apply bg-indigo-500/20; }
-html.theme-indigo .dark\:bg-blue-500\/20 { @apply dark:bg-indigo-500/20; }
-html.theme-indigo .text-blue-300 { @apply text-indigo-300; }
-html.theme-indigo .dark\:text-blue-300 { @apply dark:text-indigo-300; }
-html.theme-indigo .dark\:text-blue-200 { @apply dark:text-indigo-200; }
-html.theme-indigo .border-blue-400 { @apply border-indigo-400; }
-html.theme-indigo .ring-blue-500 { @apply ring-indigo-500; }
-html.theme-indigo .ring-blue-400 { @apply ring-indigo-400; }
-html.theme-indigo .ring-blue-200\/60 { @apply ring-indigo-200/60; }
-html.theme-indigo .ring-blue-200\/70 { @apply ring-indigo-200/70; }
-html.theme-indigo .dark\:ring-blue-500\/20 { @apply dark:ring-indigo-500/20; }
-html.theme-indigo .dark\:ring-blue-500\/30 { @apply dark:ring-indigo-500/30; }
-html.theme-indigo .focus-visible\:ring-blue-500:focus-visible { @apply focus-visible:ring-indigo-500; }
-html.theme-indigo .hover\:text-blue-600:hover { @apply hover:text-indigo-600; }
-html.theme-indigo .dark\:hover\:text-blue-400:hover { @apply dark:hover:text-indigo-400; }
-html.theme-indigo .shadow-blue-600\/20 { --tw-shadow-color: rgb(79 70 229 / 0.2); }
-
-/* ============================================================ */
-/* Auth-page accent remaps - focus rings & link hovers so the */
-/*    login / signup / onboarding pages follow the active theme. */
-/* ============================================================ */
-html.theme-purple .focus\:border-blue-500:focus { @apply focus:border-purple-500; }
-html.theme-purple .focus\:ring-blue-500\/10:focus { @apply focus:ring-purple-500/10; }
-html.theme-purple .focus\:ring-blue-500:focus { @apply focus:ring-purple-500; }
-html.theme-purple .hover\:text-blue-500:hover { @apply hover:text-purple-500; }
-html.theme-purple .text-blue-500 { @apply text-purple-500; }
-
-html.theme-green .focus\:border-blue-500:focus { @apply focus:border-green-500; }
-html.theme-green .focus\:ring-blue-500\/10:focus { @apply focus:ring-green-500/10; }
-html.theme-green .focus\:ring-blue-500:focus { @apply focus:ring-green-500; }
-html.theme-green .hover\:text-blue-500:hover { @apply hover:text-green-500; }
-html.theme-green .text-blue-500 { @apply text-green-500; }
-
-html.theme-custom .focus\:border-blue-500:focus { @apply focus:border-custom-500; }
-html.theme-custom .focus\:ring-blue-500\/10:focus { @apply focus:ring-custom-500/10; }
-html.theme-custom .focus\:ring-blue-500:focus { @apply focus:ring-custom-500; }
-html.theme-custom .hover\:text-blue-500:hover { @apply hover:text-custom-500; }
-html.theme-custom .text-blue-500 { @apply text-custom-500; }
-
-html.theme-indigo .focus\:border-blue-500:focus { @apply focus:border-indigo-500; }
-html.theme-indigo .focus\:ring-blue-500\/10:focus { @apply focus:ring-indigo-500/10; }
-html.theme-indigo .focus\:ring-blue-500:focus { @apply focus:ring-indigo-500; }
-html.theme-indigo .hover\:text-blue-500:hover { @apply hover:text-indigo-500; }
-html.theme-indigo .text-blue-500 { @apply text-indigo-500; }
-
-/* ===== Added color themes (Employee Voice redesign) ===== */
-
-/* Black Theme Overrides (auto-generated) */
-html.theme-black .btn-primary { @apply bg-gray-600; }
-html.theme-black .btn-primary:hover { @apply bg-gray-500; }
-html.theme-black .btn-secondary:hover { @apply bg-gray-50 dark:bg-gray-900/20 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700; }
-html.theme-black .nav-item.active { @apply bg-gray-50 dark:bg-gray-500/10 text-gray-700 dark:text-gray-300 border-gray-500 dark:border-gray-400/60; }
-html.theme-black .nav-item:hover:not(.active) { @apply bg-gray-50 dark:bg-gray-900/20 text-gray-700 dark:text-gray-300; }
-html.theme-black .nav-item:hover .nav-icon,
-html.theme-black .nav-item.active .nav-icon { @apply text-gray-600 dark:text-gray-400; }
-html.theme-black .input-field:focus { @apply border-gray-500 dark:border-gray-400 ring-gray-100 dark:ring-gray-900/30; }
-html.theme-black .table-row-hover:hover { @apply bg-gray-50 dark:bg-gray-900/20; }
-html.theme-black .user-initials-circle { @apply bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-500 dark:to-gray-700 text-gray-700 dark:text-white; }
-html.theme-black .avatar-primary { @apply bg-gradient-to-br from-gray-500 to-gray-600 text-white; }
-html.theme-black .badge-primary { @apply bg-gray-100 dark:bg-gray-900/20 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700; }
-html.theme-black .from-blue-100 { @apply from-gray-100; }
-html.theme-black .to-blue-200 { @apply to-gray-200; }
-html.theme-black .from-blue-900 { @apply from-gray-900; }
-html.theme-black .to-blue-800 { @apply to-gray-800; }
-html.theme-black .text-blue-600 { @apply text-gray-600; }
-html.theme-black .text-blue-400 { @apply text-gray-400; }
-
-
-/* Pink Theme Overrides (auto-generated) */
-html.theme-pink .btn-primary { @apply bg-pink-600; }
-html.theme-pink .btn-primary:hover { @apply bg-pink-500; }
-html.theme-pink .btn-secondary:hover { @apply bg-pink-50 dark:bg-pink-900/20 text-pink-700 dark:text-pink-300 border-pink-300 dark:border-pink-700; }
-html.theme-pink .nav-item.active { @apply bg-pink-50 dark:bg-pink-500/10 text-pink-700 dark:text-pink-300 border-pink-500 dark:border-pink-400/60; }
-html.theme-pink .nav-item:hover:not(.active) { @apply bg-pink-50 dark:bg-pink-900/20 text-pink-700 dark:text-pink-300; }
-html.theme-pink .nav-item:hover .nav-icon,
-html.theme-pink .nav-item.active .nav-icon { @apply text-pink-600 dark:text-pink-400; }
-html.theme-pink .input-field:focus { @apply border-pink-500 dark:border-pink-400 ring-pink-100 dark:ring-pink-900/30; }
-html.theme-pink .table-row-hover:hover { @apply bg-pink-50 dark:bg-pink-900/20; }
-html.theme-pink .user-initials-circle { @apply bg-gradient-to-br from-pink-100 to-pink-200 dark:from-pink-500 dark:to-pink-700 text-pink-700 dark:text-white; }
-html.theme-pink .avatar-primary { @apply bg-gradient-to-br from-pink-500 to-pink-600 text-white; }
-html.theme-pink .badge-primary { @apply bg-pink-100 dark:bg-pink-900/20 text-pink-800 dark:text-pink-200 border-pink-200 dark:border-pink-700; }
-html.theme-pink .from-blue-100 { @apply from-pink-100; }
-html.theme-pink .to-blue-200 { @apply to-pink-200; }
-html.theme-pink .from-blue-900 { @apply from-pink-900; }
-html.theme-pink .to-blue-800 { @apply to-pink-800; }
-html.theme-pink .text-blue-600 { @apply text-pink-600; }
-html.theme-pink .text-blue-400 { @apply text-pink-400; }
-
-
-/* Violet Theme Overrides (auto-generated) */
-html.theme-violet .btn-primary { @apply bg-violet-600; }
-html.theme-violet .btn-primary:hover { @apply bg-violet-500; }
-html.theme-violet .btn-secondary:hover { @apply bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 border-violet-300 dark:border-violet-700; }
-html.theme-violet .nav-item.active { @apply bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500 dark:border-violet-400/60; }
-html.theme-violet .nav-item:hover:not(.active) { @apply bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300; }
-html.theme-violet .nav-item:hover .nav-icon,
-html.theme-violet .nav-item.active .nav-icon { @apply text-violet-600 dark:text-violet-400; }
-html.theme-violet .input-field:focus { @apply border-violet-500 dark:border-violet-400 ring-violet-100 dark:ring-violet-900/30; }
-html.theme-violet .table-row-hover:hover { @apply bg-violet-50 dark:bg-violet-900/20; }
-html.theme-violet .user-initials-circle { @apply bg-gradient-to-br from-violet-100 to-violet-200 dark:from-violet-500 dark:to-violet-700 text-violet-700 dark:text-white; }
-html.theme-violet .avatar-primary { @apply bg-gradient-to-br from-violet-500 to-violet-600 text-white; }
-html.theme-violet .badge-primary { @apply bg-violet-100 dark:bg-violet-900/20 text-violet-800 dark:text-violet-200 border-violet-200 dark:border-violet-700; }
-html.theme-violet .from-blue-100 { @apply from-violet-100; }
-html.theme-violet .to-blue-200 { @apply to-violet-200; }
-html.theme-violet .from-blue-900 { @apply from-violet-900; }
-html.theme-violet .to-blue-800 { @apply to-violet-800; }
-html.theme-violet .text-blue-600 { @apply text-violet-600; }
-html.theme-violet .text-blue-400 { @apply text-violet-400; }
-
-
-/* Orange Theme Overrides (auto-generated) */
-html.theme-orange .btn-primary { @apply bg-orange-600; }
-html.theme-orange .btn-primary:hover { @apply bg-orange-500; }
-html.theme-orange .btn-secondary:hover { @apply bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border-orange-300 dark:border-orange-700; }
-html.theme-orange .nav-item.active { @apply bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500 dark:border-orange-400/60; }
-html.theme-orange .nav-item:hover:not(.active) { @apply bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300; }
-html.theme-orange .nav-item:hover .nav-icon,
-html.theme-orange .nav-item.active .nav-icon { @apply text-orange-600 dark:text-orange-400; }
-html.theme-orange .input-field:focus { @apply border-orange-500 dark:border-orange-400 ring-orange-100 dark:ring-orange-900/30; }
-html.theme-orange .table-row-hover:hover { @apply bg-orange-50 dark:bg-orange-900/20; }
-html.theme-orange .user-initials-circle { @apply bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-500 dark:to-orange-700 text-orange-700 dark:text-white; }
-html.theme-orange .avatar-primary { @apply bg-gradient-to-br from-orange-500 to-orange-600 text-white; }
-html.theme-orange .badge-primary { @apply bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-200 border-orange-200 dark:border-orange-700; }
-html.theme-orange .from-blue-100 { @apply from-orange-100; }
-html.theme-orange .to-blue-200 { @apply to-orange-200; }
-html.theme-orange .from-blue-900 { @apply from-orange-900; }
-html.theme-orange .to-blue-800 { @apply to-orange-800; }
-html.theme-orange .text-blue-600 { @apply text-orange-600; }
-html.theme-orange .text-blue-400 { @apply text-orange-400; }
-
-
-/* Teal Theme Overrides (auto-generated) */
-html.theme-teal .btn-primary { @apply bg-teal-600; }
-html.theme-teal .btn-primary:hover { @apply bg-teal-500; }
-html.theme-teal .btn-secondary:hover { @apply bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 border-teal-300 dark:border-teal-700; }
-html.theme-teal .nav-item.active { @apply bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500 dark:border-teal-400/60; }
-html.theme-teal .nav-item:hover:not(.active) { @apply bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300; }
-html.theme-teal .nav-item:hover .nav-icon,
-html.theme-teal .nav-item.active .nav-icon { @apply text-teal-600 dark:text-teal-400; }
-html.theme-teal .input-field:focus { @apply border-teal-500 dark:border-teal-400 ring-teal-100 dark:ring-teal-900/30; }
-html.theme-teal .table-row-hover:hover { @apply bg-teal-50 dark:bg-teal-900/20; }
-html.theme-teal .user-initials-circle { @apply bg-gradient-to-br from-teal-100 to-teal-200 dark:from-teal-500 dark:to-teal-700 text-teal-700 dark:text-white; }
-html.theme-teal .avatar-primary { @apply bg-gradient-to-br from-teal-500 to-teal-600 text-white; }
-html.theme-teal .badge-primary { @apply bg-teal-100 dark:bg-teal-900/20 text-teal-800 dark:text-teal-200 border-teal-200 dark:border-teal-700; }
-html.theme-teal .from-blue-100 { @apply from-teal-100; }
-html.theme-teal .to-blue-200 { @apply to-teal-200; }
-html.theme-teal .from-blue-900 { @apply from-teal-900; }
-html.theme-teal .to-blue-800 { @apply to-teal-800; }
-html.theme-teal .text-blue-600 { @apply text-teal-600; }
-html.theme-teal .text-blue-400 { @apply text-teal-400; }
-
-
-/* Bronze Theme Overrides (auto-generated) */
-html.theme-bronze .btn-primary { @apply bg-amber-600; }
-html.theme-bronze .btn-primary:hover { @apply bg-amber-500; }
-html.theme-bronze .btn-secondary:hover { @apply bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-700; }
-html.theme-bronze .nav-item.active { @apply bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500 dark:border-amber-400/60; }
-html.theme-bronze .nav-item:hover:not(.active) { @apply bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300; }
-html.theme-bronze .nav-item:hover .nav-icon,
-html.theme-bronze .nav-item.active .nav-icon { @apply text-amber-600 dark:text-amber-400; }
-html.theme-bronze .input-field:focus { @apply border-amber-500 dark:border-amber-400 ring-amber-100 dark:ring-amber-900/30; }
-html.theme-bronze .table-row-hover:hover { @apply bg-amber-50 dark:bg-amber-900/20; }
-html.theme-bronze .user-initials-circle { @apply bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-500 dark:to-amber-700 text-amber-700 dark:text-white; }
-html.theme-bronze .avatar-primary { @apply bg-gradient-to-br from-amber-500 to-amber-600 text-white; }
-html.theme-bronze .badge-primary { @apply bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 border-amber-200 dark:border-amber-700; }
-html.theme-bronze .from-blue-100 { @apply from-amber-100; }
-html.theme-bronze .to-blue-200 { @apply to-amber-200; }
-html.theme-bronze .from-blue-900 { @apply from-amber-900; }
-html.theme-bronze .to-blue-800 { @apply to-amber-800; }
-html.theme-bronze .text-blue-600 { @apply text-amber-600; }
-html.theme-bronze .text-blue-400 { @apply text-amber-400; }
-
-
-/* Mint Theme Overrides (auto-generated) */
-html.theme-mint .btn-primary { @apply bg-emerald-600; }
-html.theme-mint .btn-primary:hover { @apply bg-emerald-500; }
-html.theme-mint .btn-secondary:hover { @apply bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700; }
-html.theme-mint .nav-item.active { @apply bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500 dark:border-emerald-400/60; }
-html.theme-mint .nav-item:hover:not(.active) { @apply bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300; }
-html.theme-mint .nav-item:hover .nav-icon,
-html.theme-mint .nav-item.active .nav-icon { @apply text-emerald-600 dark:text-emerald-400; }
-html.theme-mint .input-field:focus { @apply border-emerald-500 dark:border-emerald-400 ring-emerald-100 dark:ring-emerald-900/30; }
-html.theme-mint .table-row-hover:hover { @apply bg-emerald-50 dark:bg-emerald-900/20; }
-html.theme-mint .user-initials-circle { @apply bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-500 dark:to-emerald-700 text-emerald-700 dark:text-white; }
-html.theme-mint .avatar-primary { @apply bg-gradient-to-br from-emerald-500 to-emerald-600 text-white; }
-html.theme-mint .badge-primary { @apply bg-emerald-100 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-200 border-emerald-200 dark:border-emerald-700; }
-html.theme-mint .from-blue-100 { @apply from-emerald-100; }
-html.theme-mint .to-blue-200 { @apply to-emerald-200; }
-html.theme-mint .from-blue-900 { @apply from-emerald-900; }
-html.theme-mint .to-blue-800 { @apply to-emerald-800; }
-html.theme-mint .text-blue-600 { @apply text-emerald-600; }
-html.theme-mint .text-blue-400 { @apply text-emerald-400; }
-
-/* ===== Theme accent variables (used by the sidebar rail & flyouts) ===== */
-:root { --accent: #2563eb; --accent-soft: rgba(37, 99, 235, 0.12); }
-html.theme-black  { --accent: #374151; --accent-soft: rgba(55, 65, 81, 0.14); }
-html.theme-purple { --accent: #9c5fd1; --accent-soft: rgba(156, 95, 209, 0.14); }
-html.theme-blue   { --accent: #2563eb; --accent-soft: rgba(37, 99, 235, 0.12); }
-html.theme-pink   { --accent: #db2777; --accent-soft: rgba(219, 39, 119, 0.12); }
-html.theme-violet { --accent: #7c3aed; --accent-soft: rgba(124, 58, 237, 0.12); }
-html.theme-indigo { --accent: #4f46e5; --accent-soft: rgba(79, 70, 229, 0.12); }
-html.theme-orange { --accent: #ea580c; --accent-soft: rgba(234, 88, 12, 0.12); }
-html.theme-teal   { --accent: #0d9488; --accent-soft: rgba(13, 148, 136, 0.12); }
-html.theme-bronze { --accent: #b45309; --accent-soft: rgba(180, 83, 9, 0.12); }
-html.theme-mint   { --accent: #10b981; --accent-soft: rgba(16, 185, 129, 0.12); }
-
-/* ===== Sidebar accent wash (low-opacity tint of the theme color) ===== */
-:root { --accent-wash: rgba(37, 99, 235, 0.10); }
-html.theme-black  { --accent-wash: rgba(55, 65, 81, 0.12); }
-html.theme-purple { --accent-wash: rgba(156, 95, 209, 0.12); }
-html.theme-blue   { --accent-wash: rgba(37, 99, 235, 0.10); }
-html.theme-pink   { --accent-wash: rgba(219, 39, 119, 0.10); }
-html.theme-violet { --accent-wash: rgba(124, 58, 237, 0.11); }
-html.theme-indigo { --accent-wash: rgba(79, 70, 229, 0.11); }
-html.theme-orange { --accent-wash: rgba(234, 88, 12, 0.10); }
-html.theme-teal   { --accent-wash: rgba(13, 148, 136, 0.11); }
-html.theme-bronze { --accent-wash: rgba(180, 83, 9, 0.11); }
-html.theme-mint   { --accent-wash: rgba(16, 185, 129, 0.11); }
-
-/* ===== Theme palette - remaps the `blue` scale to the active theme so EVERY blue-* utility recolors ===== */
-:root { --blue-25: 248 250 255; --blue-50: 239 246 255; --blue-100: 219 234 254; --blue-200: 191 219 254; --blue-300: 147 197 253; --blue-400: 96 165 250; --blue-500: 59 130 246; --blue-600: 37 99 235; --blue-700: 29 78 216; --blue-800: 30 64 175; --blue-900: 30 58 138; --blue-950: 23 37 84; }
-html.theme-blue { --blue-25: 248 250 255; --blue-50: 239 246 255; --blue-100: 219 234 254; --blue-200: 191 219 254; --blue-300: 147 197 253; --blue-400: 96 165 250; --blue-500: 59 130 246; --blue-600: 37 99 235; --blue-700: 29 78 216; --blue-800: 30 64 175; --blue-900: 30 58 138; --blue-950: 23 37 84; }
-html.theme-black { --blue-25: 248 250 252; --blue-50: 248 250 252; --blue-100: 241 245 249; --blue-200: 226 232 240; --blue-300: 203 213 225; --blue-400: 148 163 184; --blue-500: 100 116 139; --blue-600: 71 85 105; --blue-700: 51 65 85; --blue-800: 30 41 59; --blue-900: 15 23 42; --blue-950: 2 6 23; }
-html.theme-purple { --blue-25: 254 252 255; --blue-50: 253 248 255; --blue-100: 249 239 255; --blue-200: 242 222 255; --blue-300: 231 196 255; --blue-400: 212 158 255; --blue-500: 174 117 218; --blue-600: 156 95 209; --blue-700: 138 75 200; --blue-800: 120 57 191; --blue-900: 102 41 182; --blue-950: 74 29 138; }
-html.theme-pink { --blue-25: 253 242 248; --blue-50: 253 242 248; --blue-100: 252 231 243; --blue-200: 251 207 232; --blue-300: 249 168 212; --blue-400: 244 114 182; --blue-500: 236 72 153; --blue-600: 219 39 119; --blue-700: 190 24 93; --blue-800: 157 23 77; --blue-900: 131 24 67; --blue-950: 80 7 36; }
-html.theme-violet { --blue-25: 245 243 255; --blue-50: 245 243 255; --blue-100: 237 233 254; --blue-200: 221 214 254; --blue-300: 196 181 253; --blue-400: 167 139 250; --blue-500: 139 92 246; --blue-600: 124 58 237; --blue-700: 109 40 217; --blue-800: 91 33 182; --blue-900: 76 29 149; --blue-950: 46 16 101; }
-html.theme-indigo { --blue-25: 245 247 255; --blue-50: 238 242 255; --blue-100: 224 231 255; --blue-200: 199 210 254; --blue-300: 165 180 252; --blue-400: 129 140 248; --blue-500: 99 102 241; --blue-600: 79 70 229; --blue-700: 67 56 202; --blue-800: 55 48 163; --blue-900: 49 46 129; --blue-950: 30 27 75; }
-html.theme-orange { --blue-25: 255 247 237; --blue-50: 255 247 237; --blue-100: 255 237 213; --blue-200: 254 215 170; --blue-300: 253 186 116; --blue-400: 251 146 60; --blue-500: 249 115 22; --blue-600: 234 88 12; --blue-700: 194 65 12; --blue-800: 154 52 18; --blue-900: 124 45 18; --blue-950: 67 20 7; }
-html.theme-teal { --blue-25: 240 253 250; --blue-50: 240 253 250; --blue-100: 204 251 241; --blue-200: 153 246 228; --blue-300: 94 234 212; --blue-400: 45 212 191; --blue-500: 20 184 166; --blue-600: 13 148 136; --blue-700: 15 118 110; --blue-800: 17 94 89; --blue-900: 19 78 74; --blue-950: 4 47 46; }
-html.theme-bronze { --blue-25: 255 251 235; --blue-50: 255 251 235; --blue-100: 254 243 199; --blue-200: 253 230 138; --blue-300: 252 211 77; --blue-400: 251 191 36; --blue-500: 245 158 11; --blue-600: 217 119 6; --blue-700: 180 83 9; --blue-800: 146 64 14; --blue-900: 120 53 15; --blue-950: 69 26 3; }
-html.theme-mint { --blue-25: 236 253 245; --blue-50: 236 253 245; --blue-100: 209 250 229; --blue-200: 167 243 208; --blue-300: 110 231 183; --blue-400: 52 211 153; --blue-500: 16 185 129; --blue-600: 5 150 105; --blue-700: 4 120 87; --blue-800: 6 95 70; --blue-900: 6 78 59; --blue-950: 2 44 34; }
-
-/* ============================================================
-   Glassmorphism design system
-   ------------------------------------------------------------
-   One frosted-glass recipe shared by every card and button in
-   the app. Four parts make the material read as glass:
-
-     1. a translucent fill, so what is behind shows through
-     2. a backdrop blur with a saturation lift, so what shows
-        through is diffused and keeps its colour
-     3. a bright hairline, standing in for the lit edge of a pane
-     4. an inset top highlight, standing in for the sheen
-
-   Drop any one and it reads as a flat translucent box instead.
-
-   The accent tokens go through --blue-*, which is remapped per
-   theme, so a glass button recolours with the active theme
-   rather than needing a rule per theme.
-   ============================================================ */
-:root {
-  --glass-fill: rgb(255 255 255 / 0.55);
-  --glass-fill-strong: rgb(255 255 255 / 0.72);
-  /* The overlay fill. It is opaque enough to read on its own because an
-     overlay cannot borrow legibility from its blur: every dropdown in the app
-     opens inside a bar that already carries backdrop-blur, and a backdrop
-     filter establishes a backdrop root for its descendants - so the panel's
-     own blur samples an empty backdrop and diffuses nothing. What is left is
-     the fill, and at glass alpha the content underneath reads straight
-     through the menu text. */
-  --panel-fill: rgb(255 255 255 / 0.94);
-  --glass-edge: rgb(255 255 255 / 0.65);
-  --glass-sheen: inset 0 1px 0 rgb(255 255 255 / 0.75);
-  --glass-drop:
-    0 2px 4px rgba(16, 24, 40, 0.09),
-    0 8px 18px -3px rgba(16, 24, 40, 0.13),
-    0 30px 56px -12px rgba(16, 24, 40, 0.26);
-  --glass-drop-lifted:
-    0 3px 7px rgba(16, 24, 40, 0.12),
-    0 16px 32px -4px rgba(16, 24, 40, 0.2),
-    0 44px 80px -14px rgba(16, 24, 40, 0.38);
-  --glass-blur: blur(18px) saturate(180%);
-}
-
-html.dark {
-  /* A white overlay rather than a dark one: it lightens whatever sits
-     behind, which is what a pane of glass does, and it keeps working over
-     content as well as over the app ground.
-
-     The alpha is set against the app ground, not chosen in the abstract: it
-     opens a ~13-level gap over --app-bg, which is the card step the design
-     asks for. Move the ground and these have to move with it. */
-  --glass-fill: rgb(255 255 255 / 0.055);
-  --glass-fill-strong: rgb(255 255 255 / 0.09);
-  /* Not a white lift like the two above: at this opacity a white overlay
-     would wash out to near-grey. This is --card-surface raised one elevation
-     step, which is the tone an overlay floating above a card should be. */
-  --panel-fill: rgb(38 42 54 / 0.94);
-  --glass-edge: rgb(255 255 255 / 0.09);
-  --glass-sheen: inset 0 1px 0 rgb(255 255 255 / 0.06);
-  --glass-drop:
-    0 2px 4px rgba(0, 0, 0, 0.62),
-    0 10px 24px -2px rgba(0, 0, 0, 0.6),
-    0 34px 64px -10px rgba(0, 0, 0, 0.8);
-  --glass-drop-lifted:
-    0 3px 8px rgba(0, 0, 0, 0.7),
-    0 20px 40px -4px rgba(0, 0, 0, 0.72),
-    0 50px 90px -12px rgba(0, 0, 0, 0.9);
-}
-
-/* The material on its own, for surfaces that are not a .card or a .btn-*. */
-.glass {
-  background-color: var(--glass-fill);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-edge);
-  box-shadow: var(--glass-sheen), var(--glass-drop);
-}
-
-.glass-strong {
-  background-color: var(--glass-fill-strong);
-}
-
-/* The two surfaces the app actually builds with.
-
-   .glass-card is the card: it sits on the app ground, so the lighter fill is
-   enough to separate it.
-
-   .glass-panel is the floating overlay - menus, popovers, toasts, the mobile
-   tab bar. It sits on top of CONTENT, not on the ground, so it needs an opaque
-   fill and a harder shadow: at any glass alpha the text underneath shows
-   through and the panel becomes unreadable. The blur stays for the hairline
-   of translucency at the edges and for overlays that are not nested inside a
-   blurred bar, but nothing about the panel's legibility depends on it. */
-.glass-card,
-.glass-panel {
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-edge);
-  box-shadow: var(--glass-sheen), var(--glass-drop);
-}
-
-.glass-card {
-  background-color: var(--glass-fill);
-}
-
-.glass-panel {
-  background-color: var(--panel-fill);
-  box-shadow: var(--glass-sheen), var(--glass-drop-lifted);
-}
-
-/* An overlay is unreadable if its blur is dropped, so it falls back to the
-   solid card tone rather than staying translucent. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .glass-card,
-  .glass-panel {
-    background-color: var(--card-surface);
-  }
-}
-
-/* Blur is the one part that cannot be faked. Without support the fill has to
-   go opaque, or the surface turns into an unreadable wash over the content
-   behind it. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .glass,
-  .glass-strong,
-  .surface-card,
-  .card,
-  .card-elevated,
-  .dashboard-card {
-    background-color: var(--card-surface);
-  }
-}
-
-/* ------------------------------------------------------------
-   Glass buttons
-   ------------------------------------------------------------
-   Split light/dark rather than written once, because each needs
-   two class-level selectors to outweigh the per-theme
-   `html.theme-x .btn-primary` fills defined above - and being
-   last in the file settles the tie. The accent itself still
-   comes from --blue-*, so this stays one rule for all themes.
-   ------------------------------------------------------------ */
-html:not(.dark) .btn-primary,
-html.dark .btn-primary {
-  background-color: transparent;
-  background-image: linear-gradient(
-    180deg,
-    rgb(var(--blue-500) / 0.92),
-    rgb(var(--blue-600) / 0.96)
-  );
-  -webkit-backdrop-filter: blur(12px) saturate(170%);
-  backdrop-filter: blur(12px) saturate(170%);
-  border: 1px solid rgb(255 255 255 / 0.22);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3),
-    0 6px 18px rgb(var(--blue-600) / 0.32);
-  color: #fff;
-}
-
-html:not(.dark) .btn-primary:hover,
-html.dark .btn-primary:hover {
-  background-image: linear-gradient(
-    180deg,
-    rgb(var(--blue-400) / 0.95),
-    rgb(var(--blue-600) / 1)
-  );
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.38),
-    0 10px 26px rgb(var(--blue-600) / 0.42);
-}
-
-html:not(.dark) .btn-secondary,
-html.dark .btn-secondary {
-  background-color: var(--glass-fill-strong);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-edge);
-  box-shadow: var(--glass-sheen), 0 4px 14px rgba(15, 23, 42, 0.08);
-}
-
-html:not(.dark) .btn-secondary:hover,
-html.dark .btn-secondary:hover {
-  background-color: rgb(var(--blue-500) / 0.14);
-  border-color: rgb(var(--blue-500) / 0.4);
-  box-shadow: var(--glass-sheen), 0 8px 22px rgb(var(--blue-600) / 0.2);
-}
-
-/* Danger and success keep their own hue - a tinted pane, not a solid fill. */
-html:not(.dark) .btn-danger,
-html.dark .btn-danger {
-  background-color: rgb(239 68 68 / 0.14);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid rgb(239 68 68 / 0.34);
-  box-shadow: var(--glass-sheen), 0 4px 14px rgb(239 68 68 / 0.18);
-}
-
-html:not(.dark) .btn-danger:hover,
-html.dark .btn-danger:hover {
-  background-color: rgb(239 68 68 / 0.24);
-  border-color: rgb(239 68 68 / 0.55);
-  box-shadow: var(--glass-sheen), 0 8px 22px rgb(239 68 68 / 0.28);
-}
-
-html:not(.dark) .btn-success,
-html.dark .btn-success {
-  background-color: rgb(16 185 129 / 0.14);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid rgb(16 185 129 / 0.34);
-  box-shadow: var(--glass-sheen), 0 4px 14px rgb(16 185 129 / 0.18);
-}
-
-html:not(.dark) .btn-success:hover,
-html.dark .btn-success:hover {
-  background-color: rgb(16 185 129 / 0.24);
-  border-color: rgb(16 185 129 / 0.55);
-  box-shadow: var(--glass-sheen), 0 8px 22px rgb(16 185 129 / 0.28);
-}
-
-/* Ghost stays invisible at rest; the pane only materialises on hover. */
-html:not(.dark) .btn-ghost:hover,
-html.dark .btn-ghost:hover {
-  background-color: var(--glass-fill);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
-}
-
-/* ==============================================================
+/* ==========================================================================
    KPI rows of exactly four
+   --------------------------------------------------------------------------
+   Four tiles across where four fit, two where they do not - and never three
+   with one orphaned underneath, which is what auto-fit gave on every width
+   between roughly 46rem and 52rem. That band is not an edge case: it is a
+   1024-1280px laptop with the sidebar open, which is most of them.
 
-   Four tiles across where four fit, two where they do not - and
-   never three with one orphaned underneath, which is what
-   auto-fit gave on every width between roughly 46rem and 52rem.
-   That band is not an edge case: it is a 1024-1280px laptop with
-   the sidebar open, which is most of them.
+   Measured against the row's own width rather than the viewport's. The
+   sidebar is 19rem expanded and 4rem collapsed, so one viewport width gives
+   two row widths 15rem apart and no media query can tell them apart.
+   `container-type: inline-size` on the wrapper is what lets the row ask how
+   much room it actually has.
 
-   Measured against the row's own width rather than the viewport's.
-   The sidebar is 19rem expanded and 4rem collapsed, so one viewport
-   width gives two row widths 15rem apart and no media query can
-   tell them apart. `container-type: inline-size` on the wrapper is
-   what lets the row ask how much room it actually has.
-
-   55rem is measured, not guessed: it is the narrowest row at which
-   all four tiles print their label and figure without either
-   truncating, with the longest label in the product in the row
-   ("Generated Documents"). Below it the row halves rather than
-   shrinking the tiles past legibility - a truncated "PKR 4.2M" is
-   a wrong number on screen, which is worse than a second line.
-   ============================================================== */
+   55rem is measured, not guessed: it is the narrowest row at which all four
+   tiles print their label and figure without either truncating, with the
+   longest label in the product in the row ("Generated Documents"). Below it
+   the row halves rather than shrinking the tiles past legibility - a
+   truncated "PKR 4.2M" is a wrong number on screen, which is worse than a
+   second line.
+   ========================================================================== */
 .kpi-measure {
   container-type: inline-size;
 }
@@ -2319,19 +576,34 @@ html.dark .btn-ghost:hover {
   .kpi-four-up {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
-
-  /* A tile that spans the row - the odd metric that is a name rather
-     than a count, and belongs under the four counts rather than in
-     the first of four empty cells. */
-  .kpi-four-up > .kpi-span {
-    grid-column: 1 / -1;
-  }
 }
 
-/* Two across, so a spanning tile takes the whole of its row here too. */
+/* A tile that spans the row - the odd metric that is a name rather than a
+   count, and belongs under the four counts rather than in the first of four
+   empty cells. Stated outside the container query too, so it still spans in
+   the two-across layout and in engines without container queries. */
 .kpi-four-up > .kpi-span {
   grid-column: 1 / -1;
 }
 
-/* Browsers without container queries keep the two-column row. Two wide
-   tiles read correctly; four cramped ones do not. */
+/* ==========================================================================
+   Native date and time pickers in dark mode
+   --------------------------------------------------------------------------
+   The clock and calendar glyphs on these fields are drawn by the browser in
+   near-black, and no colour property reaches them. On a dark field that is an
+   invisible control, so the glyph is inverted to read light. The field's own
+   text and background stay as the Input component styles them.
+   ========================================================================== */
+html.dark input[type="time"]::-webkit-calendar-picker-indicator,
+html.dark input[type="date"]::-webkit-calendar-picker-indicator,
+html.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+html.dark input[type="month"]::-webkit-calendar-picker-indicator,
+html.dark input[type="week"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.75;
+}
+
+html.dark input[type="time"]::-webkit-calendar-picker-indicator:hover,
+html.dark input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}

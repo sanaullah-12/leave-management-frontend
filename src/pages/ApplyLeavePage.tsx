@@ -443,7 +443,7 @@ const ApplyLeavePage: React.FC = () => {
 
               {/* Balance impact */}
               {selectedBalance && (
-                <div className="mt-4 rounded-xl bg-slate-50 p-3.5 dark:bg-white/5">
+                <div className="mt-4 rounded-xl bg-gray-50 p-3.5 dark:bg-white/5">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-gray-500 dark:text-gray-400">
                       {LEAVE_META[selectedType]?.label} balance
@@ -497,7 +497,7 @@ const ApplyLeavePage: React.FC = () => {
 
               {/* Leave bank - total credit / used / remaining */}
               {hasBank && (
-                <div className="mt-5 rounded-xl border border-gray-100 bg-slate-50/60 p-4 dark:border-white/10 dark:bg-white/[0.03]">
+                <div className="mt-5 rounded-xl border border-gray-100 bg-gray-50/60 p-4 dark:border-white/10 dark:bg-white/[0.03]">
                   <div className="flex items-center justify-between">
                     <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                       Leave bank

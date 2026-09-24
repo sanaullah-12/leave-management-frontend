@@ -30,7 +30,8 @@ const LoadingSpinner: React.FC<{ size?: "sm" | "md" | "lg" }> = ({
       role="status"
       aria-label="Loading"
     >
-      <AppLogo size={PX[size]} />
+      {/* A spinner is progress, so the mark orbits here - see AppLogo. */}
+      <AppLogo size={PX[size]} animated />
     </div>
   );
 };

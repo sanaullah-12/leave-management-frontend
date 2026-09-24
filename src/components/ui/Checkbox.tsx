@@ -77,9 +77,9 @@ export const Checkbox: React.FC<CheckboxProps> = ({
           aria-hidden="true"
           whileTap={reduce || disabled ? undefined : { scale: 0.88 }}
           transition={pressSpring}
-          className={`pointer-events-none absolute inset-0 rounded-[5px] border-[1.5px] transition-colors duration-150 peer-focus-visible:ring-2 peer-focus-visible:ring-[rgb(var(--blue-500))]/40 peer-focus-visible:ring-offset-1 ${
+          className={`pointer-events-none absolute inset-0 rounded-[5px] border-[1.5px] transition-colors duration-150 peer-focus-visible:ring-2 peer-focus-visible:ring-[rgb(var(--brand-500))]/40 peer-focus-visible:ring-offset-1 ${
             on
-              ? "border-[rgb(var(--blue-500))] bg-[rgb(var(--blue-500))]"
+              ? "border-[rgb(var(--brand-500))] bg-[rgb(var(--brand-500))]"
               : "border-gray-300 bg-transparent dark:border-gray-600"
           }`}
         />

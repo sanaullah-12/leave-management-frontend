@@ -191,7 +191,8 @@ const RegisterPage: React.FC = () => {
           <PasswordInput
             {...register("password", {
               required: "Password is required",
-              minLength: { value: 6, message: "At least 6 characters" },
+              minLength: { value: 8, message: "At least 8 characters" },
+              pattern: { value: /^(?=.*[A-Za-z])(?=.*\d).+$/, message: "Use at least one letter and one number" },
             })}
             label="Password"
             placeholder="Create a password"

@@ -14,6 +14,8 @@ import Drawer from "../ui/Drawer";
 import WfhSessionSummary from "./WfhSessionSummary";
 import WfhTaskReport from "./WfhTaskReport";
 import { formatClock, formatHm } from "./sessionFormat";
+import { statusColor } from "../../lib/themeTokens";
+import { useThemeAccent } from "../../hooks/useThemeAccent";
 import {
   useWfhSessionDetail,
   type WfhSessionEvent,
@@ -42,36 +44,47 @@ interface Props {
   onClose: () => void;
 }
 
-const EVENT_META: Record<
+/**
+ * Label, glyph and colour per event type.
+ *
+ * Built per render rather than once at module scope. Both `statusColor` and
+ * the accent resolve a CSS variable off <html>, so a table built at import
+ * time holds whichever theme happened to be active when the module first
+ * loaded - which was invisible while the accent was fixed and the drawer was
+ * rarely open across a mode switch, and wrong the moment either can change.
+ */
+const eventMeta = (
+  accent: string,
+): Record<
   WfhSessionEvent["type"],
   { label: string; Icon: typeof ClockIcon; tone: string }
-> = {
-  started: { label: "Started work", Icon: PlayCircleIcon, tone: "#0f7a4c" },
-  resumed: { label: "Resumed work", Icon: PlayCircleIcon, tone: "#0f7a4c" },
-  paused: { label: "Paused", Icon: PauseCircleIcon, tone: "#b5650a" },
+> => ({
+  started: { label: "Started work", Icon: PlayCircleIcon, tone: statusColor("success") },
+  resumed: { label: "Resumed work", Icon: PlayCircleIcon, tone: statusColor("success") },
+  paused: { label: "Paused", Icon: PauseCircleIcon, tone: statusColor("warning") },
   auto_paused: {
     label: "Paused automatically",
     Icon: PauseCircleIcon,
-    tone: "#b5650a",
+    tone: statusColor("warning"),
   },
-  finished: { label: "Finished work", Icon: CheckCircleIcon, tone: "#1a5fb4" },
+  finished: { label: "Finished work", Icon: CheckCircleIcon, tone: accent },
   auto_finished: {
     label: "Closed automatically",
     Icon: CpuChipIcon,
-    tone: "#5c6470",
+    tone: statusColor("neutral"),
   },
-  task_added: { label: "Task added", Icon: PlusCircleIcon, tone: "#5c6470" },
+  task_added: { label: "Task added", Icon: PlusCircleIcon, tone: statusColor("neutral") },
   task_started: {
     label: "Started a task",
     Icon: ListBulletIcon,
-    tone: "#1a5fb4",
+    tone: accent,
   },
   task_completed: {
     label: "Completed a task",
     Icon: CheckCircleIcon,
-    tone: "#0f7a4c",
+    tone: statusColor("success"),
   },
-};
+});
 
 /** Why a stretch ended, in the words a reader would use. */
 const ENDED_BY_LABEL: Record<string, string> = {
@@ -87,6 +100,8 @@ const WfhSessionDrawer: React.FC<Props> = ({
 }) => {
   const { data: session, isLoading } = useWfhSessionDetail(sessionId);
   const listRow = useListRowMotion(true);
+  const accent = useThemeAccent(600);
+  const META = eventMeta(accent);
 
   return (
     <Drawer
@@ -171,7 +186,7 @@ const WfhSessionDrawer: React.FC<Props> = ({
             </p>
             <ol className="space-y-2">
               {session.events.map((event, index) => {
-                const meta = EVENT_META[event.type] || EVENT_META.started;
+                const meta = META[event.type] || META.started;
                 const { Icon } = meta;
                 return (
                   <li

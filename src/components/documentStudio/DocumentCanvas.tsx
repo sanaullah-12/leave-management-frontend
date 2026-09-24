@@ -39,6 +39,7 @@ import type {
   PageSettings,
   TemplateVariant,
 } from "./types";
+import { sanitizeHtml } from "./importers";
 
 export interface CanvasHandle {
   /** Insert a {{Token}} at the current caret. */
@@ -98,7 +99,8 @@ const DocumentCanvas = forwardRef<CanvasHandle, Props>(
 
     // (Re)hydrate the DOM only when the loaded document changes - never on keystroke.
     useEffect(() => {
-      if (bodyRef.current) bodyRef.current.innerHTML = initialHtml;
+      // Stored documents predate (or bypass) the import sanitizer, so clean again here.
+      if (bodyRef.current) bodyRef.current.innerHTML = sanitizeHtml(initialHtml);
       setSelectedImg(null);
       setImgBox(null);
     }, [docKey]); // eslint-disable-line react-hooks/exhaustive-deps

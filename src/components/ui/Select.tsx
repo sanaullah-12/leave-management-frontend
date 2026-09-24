@@ -108,7 +108,7 @@ const Select: React.FC<SelectProps> = ({
                 <span
                   className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
                     opt.badgeClass ??
-                    "bg-slate-100 text-gray-500 dark:bg-white/10 dark:text-gray-400"
+                    "bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-gray-400"
                   }`}
                 >
                   {opt.badge}

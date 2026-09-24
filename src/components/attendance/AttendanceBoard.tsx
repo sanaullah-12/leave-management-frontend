@@ -13,11 +13,14 @@ import {
 import {
   ByDateTable,
   ByEmployeeTable,
-  DayRosterTable,
   type RosterDayRow,
 } from "./RosterTables";
 import { EMPTY_ROSTER_TOTALS, useRosterDay } from "../../hooks/useRosterDay";
 import MobileAttendanceToday from "./MobileAttendanceToday";
+import TodayRoster from "./TodayRoster";
+import TodaySummary from "./TodaySummary";
+import { statusColor } from "../../lib/themeTokens";
+import useTimeAgo from "../../hooks/useTimeAgo";
 
 /**
  * Attendance for a chosen period, as one section.
@@ -60,19 +63,27 @@ const AttendanceBoard: React.FC<Props> = ({
   const [period, setPeriod] = useState<PeriodKey>(defaultPeriod);
   const range = useMemo(() => periodRange(period), [period]);
 
-  const { data, loading, error, refresh } = useRosterDay(
+  const { data, loading, error, refresh, fetchedAt } = useRosterDay(
     range.from,
     range.to,
     range.detail
   );
 
+  const updatedAgo = useTimeAgo(fetchedAt);
+
   // "By date" or "By employee", once the period covers more than one day.
   const [grouping, setGrouping] = useState<"date" | "employee">("date");
+
+  // Which state the day is narrowed to, set by the summary tiles. Cleared on
+  // a period change: "absent" is a filter on a day, not on a quarter, and
+  // carrying it across would hide rows the new period never filtered.
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   const changePeriod = useCallback(
     (next: string) => {
       const key = next as PeriodKey;
       setPeriod(key);
+      setStatusFilter(null);
       onRangeChange?.(periodRange(key));
     },
     [onRangeChange]
@@ -96,10 +107,10 @@ const AttendanceBoard: React.FC<Props> = ({
       value: totals.onTime,
       color: accent,
     },
-    { label: "Late", value: totals.late, color: "#b5650a" },
-    { label: "Absent", value: totals.absent, color: "#b42318" },
-    { label: "Leave", value: totals.onLeave, color: "#0e7490" },
-    { label: "Work from home", value: totals.workFromHome, color: "#4c3fc7" },
+    { label: "Late", value: totals.late, color: statusColor("warning") },
+    { label: "Absent", value: totals.absent, color: statusColor("danger") },
+    { label: "Leave", value: totals.onLeave, color: statusColor("leave") },
+    { label: "Work from home", value: totals.workFromHome, color: statusColor("remote") },
   ];
 
   const hasRecords =
@@ -126,7 +137,9 @@ const AttendanceBoard: React.FC<Props> = ({
       {/* Heading, period filter */}
       <div className="flex flex-wrap items-start justify-between gap-3 p-4 pb-3 sm:p-5 sm:pb-4">
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+          {/* The section title carries the whole card, so it is set at the
+              size a card title is set at elsewhere rather than at row size. */}
+          <h3 className="text-lg font-semibold tracking-tight text-gray-900 dark:text-gray-100">
             {title ||
               (isSelfView
                 ? "My attendance"
@@ -134,11 +147,20 @@ const AttendanceBoard: React.FC<Props> = ({
                 ? "Today's attendance"
                 : "Attendance")}
           </h3>
-          <p className="mt-0.5 truncate text-xs text-gray-400 dark:text-gray-500">
+          <p className="mt-0.5 truncate text-[13px] text-gray-500 dark:text-gray-400">
             {caption()}
-            {data?.cutoffTime && hasRecords && !loading
-              ? ` - measured against ${data.cutoffTime}`
-              : ""}
+            {data?.cutoffTime && hasRecords && !loading && (
+              <>
+                {" - measured against "}
+                {/* The arrival rule every verdict below was decided under.
+                    Set apart from the date because it is the one part of the
+                    caption an admin changes, and the one that explains why a
+                    row says "Late". */}
+                <span className="font-semibold text-gray-700 dark:text-gray-200">
+                  {data.cutoffTime}
+                </span>
+              </>
+            )}
           </p>
         </div>
 
@@ -166,31 +188,44 @@ const AttendanceBoard: React.FC<Props> = ({
       </div>
 
       {/* Counts for the period on screen.
-          Desktop only for a single day: below `lg` the mobile list carries
-          these as a rail of chips that also filter it, and two rows of the
-          same five numbers is one row too many on a phone. A multi-day
-          period still shows them here, since the tables below it have no
-          mobile list of their own. */}
-      <div
-        className={`flex-wrap items-center gap-x-5 gap-y-2 border-b border-gray-200/70 px-5 pb-4 dark:border-gray-700 ${
-          singleDay ? "hidden lg:flex" : "flex"
-        }`}
-      >
-        {chips.map((chip) => (
-          <span key={chip.label} className="flex items-center gap-1.5 text-sm">
-            <span
-              className="h-2 w-2 rounded-full"
-              style={{ background: chip.color }}
-            />
-            <span className="text-gray-500 dark:text-gray-400">
-              {chip.label}
+          A single day gets the rate and the five tiles, which is the reading
+          the screen is opened for. A multi-day period keeps the chip strip:
+          there is no "rate" for a quarter that is not already the report the
+          tables below draw, and a 4xl percentage over three months would be
+          the loudest thing on the page for the least useful fact on it.
+
+          The tiles are desktop-only: below `lg` the mobile list carries its
+          own chip rail, which also filters it, and two rows of the same five
+          numbers is one row too many on a phone. The chip strip has no such
+          list under it, so it shows at every width. */}
+      {singleDay ? (
+        <div className="hidden lg:block">
+          <TodaySummary
+            totals={totals}
+            loading={loading}
+            isSelfView={isSelfView}
+            activeStatus={statusFilter}
+            onStatusChange={setStatusFilter}
+          />
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-gray-200/70 px-5 pb-4 dark:border-gray-700">
+          {chips.map((chip) => (
+            <span key={chip.label} className="flex items-center gap-1.5 text-sm">
+              <span
+                className="h-2 w-2 rounded-full"
+                style={{ background: chip.color }}
+              />
+              <span className="text-gray-500 dark:text-gray-400">
+                {chip.label}
+              </span>
+              <span className="font-semibold tabular-nums text-gray-900 dark:text-gray-100">
+                {loading ? "-" : chip.value}
+              </span>
             </span>
-            <span className="font-semibold tabular-nums text-gray-900 dark:text-gray-100">
-              {loading ? "-" : chip.value}
-            </span>
-          </span>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* How a multi-day period is grouped */}
       {!singleDay && hasRecords && !error && (
@@ -225,7 +260,7 @@ const AttendanceBoard: React.FC<Props> = ({
 
       {error ? (
         <div className="px-5 py-12 text-center">
-          <p className="text-sm text-[#b42318]">{error}</p>
+          <p className="text-sm text-[var(--danger-text)]">{error}</p>
           <button
             type="button"
             onClick={refresh}
@@ -265,11 +300,12 @@ const AttendanceBoard: React.FC<Props> = ({
             maxRows={variant === "dashboard" ? 8 : undefined}
           />
           <div className="hidden lg:block">
-            <DayRosterTable
+            <TodayRoster
               rows={data?.rows || []}
               loading={loading}
               maxRows={variant === "dashboard" ? 8 : undefined}
               emptyMessage="Nothing recorded yet today."
+              statusFilter={statusFilter}
             />
           </div>
         </>
@@ -294,9 +330,18 @@ const AttendanceBoard: React.FC<Props> = ({
         </p>
       )}
 
-      {footer && (
-        <div className="border-t border-gray-200/70 px-5 py-3 dark:border-gray-700">
+      {(footer || fetchedAt) && (
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200/70 px-5 py-3 dark:border-gray-700">
           {footer}
+          {/* How old the figures are. A roster reads as live whether or not
+              it is, so a section that fetched once on mount has to say when
+              - otherwise a stale morning count looks like the current one.
+              Pushed right on its own when there is no footer beside it. */}
+          {fetchedAt && (
+            <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">
+              Updated {updatedAgo}
+            </span>
+          )}
         </div>
       )}
     </section>

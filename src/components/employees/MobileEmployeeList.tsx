@@ -130,7 +130,7 @@ const MobileEmployeeList: React.FC<Props> = ({
                   setSelected(null);
                 }}
                 className="flex-1 rounded-[13px] py-2.5 text-[13px] font-bold text-white active:opacity-85"
-                style={{ backgroundColor: "var(--accent)" }}
+                style={{ backgroundColor: "var(--brand-solid)" }}
               >
                 View profile
               </button>

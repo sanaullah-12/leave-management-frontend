@@ -379,16 +379,12 @@ html.keyboard-open .hide-on-keyboard {
 /* --------------------------------------------------------------
    Scrollbars
 
-   The dark theme was inheriting the light scrollbar track, which drew
-   a pale channel down the side of every dark pane.
+   The per-mode overrides that used to sit here hardcoded the old dark
+   surfaces (rgb(16 18 25) and rgb(55 60 73)) as a third copy of values
+   the tokens already held. The scrollbar in index.css is now drawn from
+   the neutral ramp, which is declared per mode, so a transparent track
+   and a translucent thumb are correct in both without a dark override.
    -------------------------------------------------------------- */
-html.dark ::-webkit-scrollbar-track {
-  background-color: rgb(16 18 25);
-}
-html.dark ::-webkit-scrollbar-thumb {
-  background-color: rgb(55 60 73);
-}
-
 @media (pointer: coarse) {
   /* A touch device has no pointer to grab a scrollbar with, and the
      8px channel is 8px of a 375px screen. */

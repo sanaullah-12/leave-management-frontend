@@ -373,7 +373,7 @@ const EmployeesPage: React.FC = () => {
                 }
                 handleGenerateReport(emp);
               }}
-              className="mt-auto inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-3 text-sm font-semibold text-white shadow-sm shadow-blue-600/25 transition-all hover:-translate-y-0.5 hover:shadow-md"
+              className="btn-primary mt-auto w-full"
             >
               <DocumentChartBarIcon className="h-4 w-4 flex-shrink-0" />
               Generate Report
@@ -414,7 +414,7 @@ const EmployeesPage: React.FC = () => {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm.show && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-[var(--overlay-scrim)] flex items-center justify-center z-50">
           <div className="card-elevated rounded-lg p-6 w-full max-w-md mx-4">
             <div className="flex items-center mb-4">
               <ExclamationTriangleIcon className="h-8 w-8 text-red-500 mr-3" />
