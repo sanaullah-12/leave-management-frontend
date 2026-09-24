@@ -25,6 +25,10 @@ import DayTable from "../components/attendance/DayTable";
 import type { DayRow } from "../components/attendance/DayTable";
 import DayDrawer from "../components/attendance/DayDrawer";
 import FullAttendanceDrawer from "../components/attendance/FullAttendanceDrawer";
+import TimeChangeRequestModal, {
+  type TimeChangeDay,
+} from "../components/attendance/TimeChangeRequestModal";
+import { useMyTimeChanges } from "../hooks/useTimeChanges";
 import {
   CheckCircleIcon,
   ArrowPathIcon,
@@ -1096,6 +1100,11 @@ const AttendancePage: React.FC = () => {
   /** The day an employee is looking at in the side panel, or null. */
   const [selectedDay, setSelectedDay] = useState<DayRow | null>(null);
 
+  /** The late day a time change is being requested for, or null. */
+  const [timeChangeDay, setTimeChangeDay] = useState<TimeChangeDay | null>(
+    null
+  );
+
   /**
    * Whether the whole record is open in the side panel.
    *
@@ -1169,6 +1178,48 @@ const AttendancePage: React.FC = () => {
   const selfData = isAdmin
     ? null
     : rosterAttendance[String(currentUser?.employeeId)] || null;
+
+  /**
+   * The employee's own time change requests. Their verdicts live in the
+   * attendance response, so when one is submitted, withdrawn or decided -
+   * here or by an admin elsewhere - the loaded record is read again rather
+   * than patched, and the late count can never disagree with the server.
+   */
+  const { data: myTimeChanges } = useMyTimeChanges(!isAdmin);
+  const timeChangeSignature = useMemo(
+    () =>
+      (myTimeChanges || [])
+        .map((request) => `${request.id}:${request.status}`)
+        .join("|"),
+    [myTimeChanges]
+  );
+  const seenTimeChangeSignature = useRef<string | null>(null);
+  const reloadSelfRef = useRef(loadRosterAttendance);
+  reloadSelfRef.current = loadRosterAttendance;
+
+  useEffect(() => {
+    if (isAdmin || myTimeChanges === undefined) return;
+    const previous = seenTimeChangeSignature.current;
+    seenTimeChangeSignature.current = timeChangeSignature;
+    if (previous === null || previous === timeChangeSignature) return;
+    if (rosterFetchedFor) reloadSelfRef.current();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeChangeSignature, isAdmin, myTimeChanges]);
+
+  const openTimeChange = (row: DayRow) => {
+    const record = row.record;
+    if (!record) return;
+    setTimeChangeDay({
+      date: row.date,
+      dateDisplay: row.dateDisplay,
+      machineTime: record.time,
+      machineTimeDisplay: record.timeDisplay || record.time,
+      // A request is judged against the saved office rule, never a preview.
+      cutoffTime:
+        selfData?.lateTimePolicy?.officialCutoffTime ||
+        selfData?.lateTimePolicy?.cutoffTime,
+    });
+  };
 
   /**
    * Every day of the range as its own row, newest first.
@@ -1295,12 +1346,20 @@ const AttendancePage: React.FC = () => {
       {/* One day, in full */}
       {selectedDay && (
         <DayDrawer
-          row={selectedDay}
+          // Read from the current rows so a reload after a time change is
+          // reflected in a sheet that is already open.
+          row={dayRows.find((r) => r.date === selectedDay.date) || selectedDay}
           policy={selfData?.lateTimePolicy}
           source={selfData?.source}
           onClose={() => setSelectedDay(null)}
+          onRequestTimeChange={isAdmin ? undefined : openTimeChange}
         />
       )}
+
+      <TimeChangeRequestModal
+        day={timeChangeDay}
+        onClose={() => setTimeChangeDay(null)}
+      />
 
       {/* Employee detail panel */}
       {modalEmployee && (
@@ -1866,6 +1925,7 @@ const AttendancePage: React.FC = () => {
             onViewFull={
               dayRows.length ? () => setShowFullAttendance(true) : undefined
             }
+            onRequestTimeChange={openTimeChange}
           />
         )}
       </div>

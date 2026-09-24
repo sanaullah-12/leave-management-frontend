@@ -35,11 +35,14 @@ import type { QueryClient, QueryKey } from "@tanstack/react-query";
 export const EMPLOYEE_ATTENDANCE_ROOT = "employee-attendance";
 export const ROSTER_ATTENDANCE_ROOT = "roster-attendance";
 export const MACHINE_EMPLOYEES_ROOT = "machine-employees";
+/** The server-judged roster for a period - see hooks/useRosterDay. */
+export const ROSTER_DAY_ROOT = "roster-day";
 
 const PERSISTED_ROOTS = [
   EMPLOYEE_ATTENDANCE_ROOT,
   ROSTER_ATTENDANCE_ROOT,
   MACHINE_EMPLOYEES_ROOT,
+  ROSTER_DAY_ROOT,
 ];
 
 /** "official" rather than undefined, so the admin's saved rule keys stably. */
@@ -193,6 +196,10 @@ const isPersistedRoot = (key: unknown): boolean =>
  * exactly the same getQueryData lookup it uses for a fetch made a moment ago -
  * there is no second code path for "restored from disk", and therefore no
  * second way for it to be wrong.
+ *
+ * Each entry keeps the time it was actually fetched. Stamped with the moment
+ * of restoring instead, a morning roster reloaded at noon would look a second
+ * old and nothing observing it would think to re-read it.
  */
 export function hydrateAttendanceCache(client: QueryClient): void {
   try {
@@ -208,7 +215,9 @@ export function hydrateAttendanceCache(client: QueryClient): void {
     for (const entry of entries) {
       if (!entry || !isPersistedRoot(entry.key)) continue;
       if (!entry.savedAt || entry.savedAt < cutoff) continue;
-      client.setQueryData<unknown>(entry.key as QueryKey, entry.data);
+      client.setQueryData<unknown>(entry.key as QueryKey, entry.data, {
+        updatedAt: entry.savedAt,
+      });
       restored += 1;
     }
 

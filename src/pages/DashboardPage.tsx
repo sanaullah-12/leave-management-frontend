@@ -12,11 +12,23 @@ import { useTheme } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
 import { useFormatters } from "../i18n/useFormatters";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { attendanceAPI, leavesAPI, usersAPI } from "../services/api";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { leavesAPI, usersAPI } from "../services/api";
+import useRosterDay from "../hooks/useRosterDay";
 import { isoDay } from "../lib/attendancePeriod";
 import useMediaQuery from "../hooks/useMediaQuery";
 import MobileDashboard from "../components/dashboard/mobile/MobileDashboard";
+import { MorphTabs, MorphTabPanels } from "../components/ui/MorphTabs";
+
+/**
+ * The three screens the dashboard is split into, on every screen size.
+ *
+ * The phone and desktop layouts share one selection, held in `?tab=`, so a
+ * refresh or a shared link opens on the same screen and resizing across the
+ * breakpoint does not drop back to Overview.
+ */
+const DASHBOARD_TABS = ["overview", "charts", "activity"] as const;
+type DashboardTab = (typeof DASHBOARD_TABS)[number];
 
 /**
  * How a reported day reads in the Team Availability panel.
@@ -108,6 +120,8 @@ import {
   ArrowUpRightIcon,
   ChartBarIcon,
   SunIcon,
+  Squares2X2Icon,
+  ListBulletIcon,
 } from "@heroicons/react/24/outline";
 import {
   AreaChart,
@@ -403,21 +417,34 @@ const DashboardPage: React.FC = () => {
 
   /**
    * Today's attendance, so the availability panel can read who is actually in
-   * rather than assume it. Same endpoint and day the attendance board further
-   * up the page already loads, so the two never disagree.
+   * rather than assume it. The same cache entry the attendance board on the
+   * Overview tab fills, so the two share one request and never disagree.
    */
   const todayIso = React.useMemo(() => isoDay(new Date()), []);
 
-  const { data: rosterToday } = useQuery({
-    queryKey: ["roster-day", todayIso],
-    queryFn: () => attendanceAPI.getRosterDay(todayIso, todayIso, "day"),
+  const { data: rosterToday } = useRosterDay(todayIso, todayIso, "day", {
     enabled: user?.role === "admin",
-    refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000,
   });
 
   /** Expands the availability panel past its first few rows. */
   const [showAllTeam, setShowAllTeam] = React.useState(false);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get("tab");
+  const tab: DashboardTab = DASHBOARD_TABS.includes(requestedTab as DashboardTab)
+    ? (requestedTab as DashboardTab)
+    : "overview";
+  // `replace`, so flipping tabs does not fill the back button with them.
+  const setTab = (next: DashboardTab) =>
+    setSearchParams(
+      (params) => {
+        const updated = new URLSearchParams(params);
+        if (next === "overview") updated.delete("tab");
+        else updated.set("tab", next);
+        return updated;
+      },
+      { replace: true }
+    );
 
   if (statsLoading && user?.role === "admin") {
     return <LogoLoader label={t("loading")} />;
@@ -602,7 +629,7 @@ const DashboardPage: React.FC = () => {
    * not the account id the rest of this page joins on.
    */
   const attendanceToday = new Map<string, string>(
-    (((rosterToday as any)?.data?.rows || []) as any[])
+    ((rosterToday?.rows || []) as any[])
       .filter((row) => row?.employeeId && row?.date === todayIso)
       .map((row) => [String(row.employeeId), String(row.status)])
   );
@@ -623,7 +650,7 @@ const DashboardPage: React.FC = () => {
    * about the invite, not about the day.
    */
   const attendanceCovers = new Set<string>(
-    (((rosterToday as any)?.data?.byEmployee || []) as any[])
+    ((rosterToday?.byEmployee || []) as any[])
       .filter((entry) => entry?.employeeId)
       .map((entry) => String(entry.employeeId))
   );
@@ -797,10 +824,11 @@ const DashboardPage: React.FC = () => {
         onOpenCalendar={() => navigate("/leave-calendar")}
         onOpenAttendance={() => navigate("/attendance")}
         onOpenEmployee={(id) => navigate(`/employees/${id}`)}
+        tab={tab}
+        onTabChange={setTab}
         tabLabels={{
           overview: t("tabs.overview"),
           charts: t("tabs.charts"),
-          review: t("tabs.review"),
           activity: t("tabs.activity"),
         }}
         listLabels={{
@@ -873,6 +901,32 @@ const DashboardPage: React.FC = () => {
         />
       </motion.div>
 
+      {/* ---------------- Tabs ---------------- */}
+      {/* Sticky under the 64px header, so the control naming the screen does
+          not scroll away from the screen it names. The same three screens the
+          phone layout uses - see MobileDashboard for why they are split so. */}
+      <motion.div
+        variants={staggerItem}
+        className="sticky top-16 z-20 -my-2 py-2 backdrop-blur-xl"
+      >
+        <MorphTabs
+          value={tab}
+          onChange={setTab}
+          ariaLabel="Dashboard screens"
+          className="max-w-2xl"
+          options={[
+            { value: "overview", label: t("tabs.overview"), icon: <Squares2X2Icon className="h-4 w-4" /> },
+            { value: "charts", label: t("tabs.charts"), icon: <ChartBarIcon className="h-4 w-4" /> },
+            { value: "activity", label: t("tabs.activity"), icon: <ListBulletIcon className="h-4 w-4" /> },
+          ]}
+        />
+      </motion.div>
+
+      <motion.div variants={staggerItem}>
+      <MorphTabPanels value={tab} order={DASHBOARD_TABS}>
+      {/* ================ Overview ================ */}
+      {tab === "overview" && (
+      <div className="space-y-5">
       {/* ---------------- Top KPI row (4-up) ---------------- */}
       {/* The figures cross over their own placeholders. The skeleton is
           already the right shape, so nothing moves - only the shimmer gives
@@ -881,14 +935,11 @@ const DashboardPage: React.FC = () => {
         loading={showCardsLoading}
         skeleton={<StatCardsSkeleton count={4} />}
       >
-        <motion.div
-          variants={staggerItem}
-          className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4"
-        >
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
           {kpis.map((c, i) => (
             <KpiCard key={i} {...c} accent={i % 2 === 0 ? "indigo" : "teal"} />
           ))}
-        </motion.div>
+        </div>
       </LoadSwap>
 
       {/* ---------------- Announcements highlight (fresh 24h + pinned) ---------------- */}
@@ -897,7 +948,7 @@ const DashboardPage: React.FC = () => {
       {/* ---------------- Today's attendance ---------------- */}
       {/* Opens on today, which is the question this section exists to answer.
           The period filter widens it without leaving the dashboard. */}
-      <motion.div variants={staggerItem}>
+      <div>
         <AttendanceBoard
           variant="dashboard"
           role={user?.role}
@@ -912,37 +963,15 @@ const DashboardPage: React.FC = () => {
             </button>
           }
         />
-      </motion.div>
+      </div>
+      </div>
+      )}
 
-      {/* ---------------- Attendance + gauges ---------------- */}
-      <motion.div
-        variants={staggerItem}
-        className="grid grid-cols-1 lg:grid-cols-2 gap-5"
-      >
-        {/* Attendance donut, then the remaining gauge. */}
-        <AttendancePieCard role={user?.role} employeeId={user?.employeeId} />
-
-        {gauges.map((g, i) => (
-          <SemiGauge
-            key={i}
-            {...g}
-            accent={accent}
-            accentSoft={accentSoft}
-            gradientId={`gaugeArc${i}`}
-          />
-        ))}
-      </motion.div>
-
-      {/* ---------------- Employee Voice widget ---------------- */}
-      <motion.div variants={staggerItem}>
-        <EmployeeVoiceWidget />
-      </motion.div>
-
+      {/* ================ Charts ================ */}
+      {tab === "charts" && (
+      <div className="space-y-5">
       {/* ---------------- Chart + breakdown ---------------- */}
-      <motion.div
-        variants={staggerItem}
-        className="grid grid-cols-1 lg:grid-cols-3 gap-5"
-      >
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Leave Trends area chart (spans 2) */}
         <div className={`${CARD} ${CARD_HOVER} lg:col-span-2 p-5`}>
           <div className="flex items-start justify-between mb-2">
@@ -1067,17 +1096,36 @@ const DashboardPage: React.FC = () => {
             ))}
           </div>
         </div>
-      </motion.div>
+      </div>
 
+      {/* ---------------- Attendance + gauges ---------------- */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Attendance donut, then the remaining gauge. */}
+        <AttendancePieCard role={user?.role} employeeId={user?.employeeId} />
+
+        {gauges.map((g, i) => (
+          <SemiGauge
+            key={i}
+            {...g}
+            accent={accent}
+            accentSoft={accentSoft}
+            gradientId={`gaugeArc${i}`}
+          />
+        ))}
+      </div>
+
+      </div>
+      )}
+
+      {/* ================ Activity ================ */}
+      {tab === "activity" && (
+      <div className="space-y-5">
       {/* ---------------- Activity + timeline ---------------- */}
       {/* `items-start` so each column keeps its own height. Stretched, the
           activity card grew to match the holidays + availability stack beside
           it, which left most of it empty whenever there were only a few
           recent requests - and there are at most five. */}
-      <motion.div
-        variants={staggerItem}
-        className="grid grid-cols-1 items-start lg:grid-cols-3 gap-5"
-      >
+      <div className="grid grid-cols-1 items-start lg:grid-cols-3 gap-5">
         {/* Recent Activity (spans 2) */}
         <PanelCard
           accent={accent}
@@ -1278,6 +1326,13 @@ const DashboardPage: React.FC = () => {
             )}
           </PanelCard>
         </div>
+      </div>
+
+      {/* ---------------- Employee Voice widget ---------------- */}
+      <EmployeeVoiceWidget />
+      </div>
+      )}
+      </MorphTabPanels>
       </motion.div>
     </motion.div>
   );

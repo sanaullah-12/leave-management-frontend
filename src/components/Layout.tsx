@@ -55,6 +55,7 @@ import {
   DocumentTextIcon,
   ArchiveBoxIcon,
   ExclamationTriangleIcon,
+  PencilSquareIcon,
   LanguageIcon,
   ChevronDownIcon,
   EllipsisVerticalIcon,
@@ -93,6 +94,7 @@ const SEARCH_KEYWORDS: Record<string, string> = {
   "/my-leave-activity": "my requests history balance",
   "/attendance": "punch clock in out hours present",
   "/attendance/late-time": "late arrivals tardy punctuality",
+  "/attendance/time-changes": "time change correction check-in late request approve",
   "/work-from-home": "wfh remote home office",
   "/employees": "staff people team members roster invite manage",
   // "my team" stays searchable: these two screens were called that until
@@ -232,6 +234,7 @@ const Layout: React.FC = () => {
           items: [
             { name: t("items.attendance"), href: "/attendance", icon: ClockIcon, exact: true },
             { name: t("items.lateTime"), href: "/attendance/late-time", icon: ExclamationTriangleIcon },
+            { name: t("items.timeChanges"), href: "/attendance/time-changes", icon: PencilSquareIcon },
           ],
         },
         {
@@ -311,6 +314,7 @@ const Layout: React.FC = () => {
         items: [
           { name: t("items.attendance"), href: "/attendance", icon: ClockIcon, exact: true },
           { name: t("items.lateTime"), href: "/attendance/late-time", icon: ExclamationTriangleIcon },
+          { name: t("items.timeChanges"), href: "/attendance/time-changes", icon: PencilSquareIcon },
         ],
       },
       {

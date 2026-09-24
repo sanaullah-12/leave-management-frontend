@@ -847,6 +847,30 @@ export const workFromHomeAPI = {
 };
 
 /**
+ * Time change requests: an employee asks for a late day's arrival to be read
+ * at an agreed time, and an admin decides. The machine check-in is never sent
+ * from here - the server reads it off the device record.
+ */
+export const timeChangeAPI = {
+  submit: (data: { date: string; requestedTime: string; reason: string }) =>
+    api.post("/attendance-corrections", data),
+
+  /** The signed-in person's own requests. */
+  mine: (status = "all") =>
+    api.get(`/attendance-corrections/mine?status=${status}`),
+
+  /** The company's requests, for an admin, with a count per status. */
+  list: (status = "all") => api.get(`/attendance-corrections?status=${status}`),
+
+  review: (
+    id: string,
+    data: { status: "approved" | "rejected"; reviewComments?: string }
+  ) => api.put(`/attendance-corrections/${id}/review`, data),
+
+  cancel: (id: string) => api.put(`/attendance-corrections/${id}/cancel`),
+};
+
+/**
  * The work timer on an approved work-from-home day.
  *
  * Every call here is a request for the server to act and report; none of them

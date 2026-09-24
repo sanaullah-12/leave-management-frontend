@@ -10,9 +10,9 @@ import { statusColor } from "../../lib/themeTokens";
  * Today's attendance, for a phone.
  *
  * The desktop answer to "who is in today" is a table, and a table is the wrong
- * shape here: five columns on a 390px screen leaves no room for the two things
- * the roster is actually scanned for - who arrived late, and how long people
- * have been working. This is the same data as a list.
+ * shape here: five columns on a 390px screen leaves no room for the thing the
+ * roster is actually scanned for - who arrived late, and by how much. This is
+ * the same data as a list.
  *
  * Three decisions carry it:
  *
@@ -24,7 +24,7 @@ import { statusColor } from "../../lib/themeTokens";
  *      row that the status is a judgement *of*, so tinting it means the status
  *      can be read without reading the pill - which matters when the pill is
  *      the narrowest thing on the row.
- *   3. Hours worked sit on the right, aligned, in a column of their own. They
+ *   3. Minutes late sit on the right, aligned, in a column of their own. They
  *      are the only numbers on the screen worth comparing down the list.
  *
  * An employee sees the same row without the roster chrome around it - see
@@ -195,6 +195,7 @@ const PersonRow: React.FC<{ row: RosterDayRow }> = ({ row }) => {
   /* Whether the device saw this person. It decides the shape of the row, not
      just one line of it - see the two branches below. */
   const hasArrival = Boolean(row.checkIn);
+  const lateMinutes = Math.max(0, Math.round(row.lateMinutes || 0));
 
   return (
     <li className="flex items-center gap-2.5 py-3 sm:gap-3">
@@ -217,11 +218,10 @@ const PersonRow: React.FC<{ row: RosterDayRow }> = ({ row }) => {
           </p>
         )}
 
-        {/* Arrival, the delta that made it late, and the pill - one line,
-            below the department.
+        {/* Arrival and the pill - one line, below the department.
 
             Only for a row that has an arrival. A day with no punch has no
-            time and no hours, so this line would hold nothing but the pill
+            time and no lateness, so this line would hold nothing but the pill
             and the column to the right of it would be empty: a third of the
             row's height and half its width spent on one word. Those rows put
             the pill in the free column instead - see below. */}
@@ -230,29 +230,22 @@ const PersonRow: React.FC<{ row: RosterDayRow }> = ({ row }) => {
             <span className={`text-[13px] font-semibold tabular-nums ${tone}`}>
               {row.checkIn}
             </span>
-            {row.lateDisplay && (
-              <span
-                className={`text-[12px] font-semibold tabular-nums ${LATE_INK}`}
-              >
-                +{row.lateDisplay}
-              </span>
-            )}
             <StatusBadge status={row.status} compact />
           </div>
         )}
       </div>
 
-      {/* The trailing column. Hours for a day that was worked, and otherwise
-          the status - which is the whole of what this row has to report. */}
+      {/* The trailing column. Minutes late for an arrival, and otherwise the
+          status - which is the whole of what this row has to report. */}
       {hasArrival ? (
         <div className="w-[60px] shrink-0 text-right">
-          {row.workedDisplay && (
+          {lateMinutes > 0 && (
             <>
-              <p className="text-[14px] font-bold tabular-nums leading-tight text-gray-900 dark:text-white">
-                {row.workedDisplay}
+              <p className={`text-[14px] font-bold tabular-nums leading-tight ${LATE_INK}`}>
+                {lateMinutes} min
               </p>
               <p className="mt-0.5 text-[11px] text-gray-400 dark:text-gray-500">
-                logged
+                late
               </p>
             </>
           )}

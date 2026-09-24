@@ -18,26 +18,18 @@ import Input from "../ui/Input";
  *
  * The same rows the table used to draw, as a list of cards. A four-column
  * table puts the whole day on one baseline, which is the problem: the name,
- * the arrival, the verdict and the hours are four different kinds of fact,
+ * the arrival, the verdict and the lateness are four different kinds of fact,
  * and reading down a column of them tells you nothing that reading across a
  * row does not. The card gives each row a shape instead - a coloured rail on
- * the leading edge that states the verdict before any of it is read, and an
- * hours bar that is a length rather than a number to compare by eye.
+ * the leading edge that states the verdict before any of it is read.
  *
- * Nothing is judged here. Status, arrival time, lateness and worked minutes
- * all arrive already decided by the server under the office arrival rule.
- */
-
-/**
- * The working day the hours bar is drawn against.
+ * Lateness has a column of its own rather than riding on the arrival time:
+ * how late somebody was is what the morning roster is scanned for, and a
+ * figure tucked beside another figure is one nobody compares down the list.
  *
- * The office day length is not configured anywhere yet - the attendance
- * settings hold the arrival rule and nothing about how long a day runs - so
- * this is a display reference, not a policy. It is the one number in this
- * file that is not the server's, which is why it is named and alone: when a
- * day length becomes a setting, this is what it replaces.
+ * Nothing is judged here. Status, arrival time and lateness all arrive already
+ * decided by the server under the office arrival rule.
  */
-const FULL_DAY_MINUTES = 8 * 60;
 
 /**
  * Identity colours for the initials tile.
@@ -74,10 +66,10 @@ const initialsOf = (name?: string) =>
     .map((part) => part[0]?.toUpperCase())
     .join("") || "?";
 
-/** Minutes as "7h 45m", zero included, so the column stays one shape. */
-const hoursLabel = (minutes: number | null) => {
-  const safe = Math.max(0, minutes || 0);
-  return `${Math.floor(safe / 60)}h ${String(safe % 60).padStart(2, "0")}m`;
+/** Late minutes as "12 min"; nothing for an arrival that was on time. */
+const lateLabel = (minutes: number | null | undefined) => {
+  const safe = Math.max(0, Math.round(minutes || 0));
+  return safe > 0 ? `${safe} min` : null;
 };
 
 /**
@@ -98,18 +90,23 @@ const arrivalNote = (status: string) => {
 /* One row                                                             */
 /* ------------------------------------------------------------------ */
 
+/**
+ * A row's edge is its shadow, not a rule: the same glass drop the dashboard's
+ * KPI tiles use, so a roster card and a leave card read as one material.
+ */
+const ROW_SURFACE = "shadow-[shadow:var(--glass-sheen),var(--glass-drop)]";
+
 const COLS =
   "grid grid-cols-[minmax(0,1fr)_9.5rem_8.5rem_9.5rem_2.25rem] items-center gap-3";
 
 const RosterRow: React.FC<{ row: RosterDayRow }> = ({ row }) => {
   const [open, setOpen] = useState(false);
   const tone = toneOf(row.status);
-  const worked = Math.max(0, row.workedMinutes || 0);
-  const progress = Math.min(100, (worked / FULL_DAY_MINUTES) * 100);
+  const late = lateLabel(row.lateMinutes);
 
   return (
     <div
-      className="relative overflow-hidden rounded-xl border border-[var(--border-default)] transition-colors hover:bg-[var(--surface-hover)]"
+      className={`relative overflow-hidden rounded-xl ${ROW_SURFACE} transition-[background-color,box-shadow] hover:bg-[var(--surface-hover)] hover:shadow-[shadow:var(--glass-sheen),var(--glass-drop-lifted)]`}
       style={{ background: "var(--surface-raised)" }}
     >
       {/* The verdict, before anything on the row is read. */}
@@ -155,11 +152,6 @@ const RosterRow: React.FC<{ row: RosterDayRow }> = ({ row }) => {
           {row.checkIn ? (
             <span className="tabular-nums text-gray-700 dark:text-gray-200">
               {row.checkIn}
-              {row.lateDisplay && (
-                <span className="ml-1.5 text-xs text-[var(--warning-text)]">
-                  +{row.lateDisplay}
-                </span>
-              )}
             </span>
           ) : (
             <span className="text-gray-400 dark:text-gray-500">
@@ -173,31 +165,21 @@ const RosterRow: React.FC<{ row: RosterDayRow }> = ({ row }) => {
           <StatusBadge status={row.status} dot />
         </div>
 
-        {/* ---- Hours ---- */}
-        <div className="min-w-0">
-          <p className="text-sm">
-            <span className="font-semibold tabular-nums text-gray-900 dark:text-gray-100">
-              {hoursLabel(row.workedMinutes)}
+        {/* ---- Late ---- */}
+        <div className="min-w-0 text-sm">
+          {late ? (
+            <span className="font-semibold tabular-nums text-[var(--warning-text)]">
+              {late}
             </span>
-            <span className="ml-1 text-xs text-gray-400">
-              / {FULL_DAY_MINUTES / 60}h
-            </span>
-          </p>
-          <span
-            className="mt-1.5 block h-1 w-full overflow-hidden rounded-full"
-            style={{ background: "var(--surface-hover)" }}
-          >
-            <span
-              className="block h-full rounded-full"
-              style={{ width: `${progress}%`, background: tone.ink }}
-            />
-          </span>
+          ) : (
+            <span className="text-gray-400 dark:text-gray-500">-</span>
+          )}
         </div>
 
         {/* ---- The rest of the row ---- */}
-        {/* Check-out, lateness and the device code have nowhere to live in
-            four columns, and widening to seven would make the row a table
-            again. They open underneath instead. */}
+        {/* Check-out and the device code have nowhere to live in four
+            columns, and widening to six would make the row a table again.
+            They open underneath instead. */}
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -222,7 +204,6 @@ const RosterRow: React.FC<{ row: RosterDayRow }> = ({ row }) => {
               {[
                 { label: "Employee ID", value: row.employeeId },
                 { label: "Checked out", value: row.checkOut || "Not recorded" },
-                { label: "Late by", value: row.lateDisplay || "Not late" },
                 { label: "Department", value: row.department || "Unassigned" },
               ].map((item) => (
                 <div key={item.label}>
@@ -311,7 +292,7 @@ const TodayRoster: React.FC<Props> = ({
 
       {/* ---- Column labels ---- */}
       {/* Kept even though the rows are cards: four facts per row still need
-          naming once, and "9:12 AM" beside "0h 00m" is ambiguous without it. */}
+          naming once, and "9:12 AM" beside "12 min" is ambiguous without it. */}
       {/* Padded exactly as a row is, or the 1fr column resolves to a
           different width here than in the rows under it and every label sits
           a few pixels off the column it names. */}
@@ -322,7 +303,7 @@ const TodayRoster: React.FC<Props> = ({
         <span>Employee</span>
         <span>Check-in</span>
         <span>Status</span>
-        <span>Hours</span>
+        <span>Late</span>
         <span />
       </div>
 
@@ -331,7 +312,7 @@ const TodayRoster: React.FC<Props> = ({
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="h-[66px] animate-pulse rounded-xl border border-[var(--border-default)]"
+              className={`h-[66px] animate-pulse rounded-xl ${ROW_SURFACE}`}
               style={{ background: "var(--surface-hover)" }}
             />
           ))}

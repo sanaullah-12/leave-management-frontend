@@ -8,6 +8,7 @@ import {
   CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
 import StatusBadge from "./StatusBadge";
+import TimeChangeAction, { timeChangeState } from "./TimeChangeAction";
 import { CARD } from "../../lib/surfaces";
 
 /**
@@ -60,6 +61,8 @@ interface Props {
    * the full record needs a way in that is not paging to it.
    */
   onViewFull?: () => void;
+  /** Offered on a late day. Omit where the viewer cannot raise a request. */
+  onRequestTimeChange?: (row: DayRow) => void;
 }
 
 const PAGE_SIZE = 10;
@@ -72,6 +75,7 @@ const DayTable: React.FC<Props> = ({
   statusFilter = null,
   onClearFilter,
   onViewFull,
+  onRequestTimeChange,
 }) => {
   const phoneRow = useListRowMotion();
   const tableRow = useListRowMotion(true);
@@ -189,6 +193,11 @@ const DayTable: React.FC<Props> = ({
                     <span className="mt-0.5 block truncate text-[12px] text-gray-500 dark:text-gray-400">
                       {row.arrival ? `In ${row.arrival}` : "No punch"}
                       {row.lateDisplay ? ` - ${row.lateDisplay} late` : ""}
+                      {timeChangeState(row) === "corrected"
+                        ? " - time corrected"
+                        : timeChangeState(row) === "pending"
+                        ? " - change pending"
+                        : ""}
                     </span>
                   </span>
 
@@ -265,6 +274,11 @@ const DayTable: React.FC<Props> = ({
                     className={`${cell} font-mono text-sm text-gray-700 dark:text-gray-200`}
                   >
                     {row.arrival || "-"}
+                    {row.record?.timeCorrected && (
+                      <p className="font-sans text-[11px] text-gray-400 dark:text-gray-500">
+                        Machine {row.record.machineCheckInDisplay}
+                      </p>
+                    )}
                   </td>
                   <td
                     className={`${cell} text-sm text-gray-600 dark:text-gray-300`}
@@ -275,17 +289,23 @@ const DayTable: React.FC<Props> = ({
                     <StatusBadge status={row.status} />
                   </td>
                   <td className={`${cell} text-right`}>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelect(row);
-                      }}
-                      aria-label={`View ${row.dateDisplay}`}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-                    >
-                      <EyeIcon className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <TimeChangeAction
+                        row={row}
+                        onRequest={onRequestTimeChange}
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelect(row);
+                        }}
+                        aria-label={`View ${row.dateDisplay}`}
+                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                      >
+                        <EyeIcon className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </motion.tr>
               ))

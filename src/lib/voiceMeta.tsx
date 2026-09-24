@@ -20,6 +20,7 @@ import {
   MegaphoneIcon,
   ClockIcon,
   SparklesIcon,
+  PencilSquareIcon,
 } from "@heroicons/react/24/outline";
 import type { ComponentType, SVGProps } from "react";
 
@@ -267,6 +268,18 @@ export const NOTIFICATION_META: Record<
   attendance_late: {
     icon: ClockIcon,
     tile: "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400",
+  },
+  time_change_request: {
+    icon: PencilSquareIcon,
+    tile: "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400",
+  },
+  time_change_approved: {
+    icon: CheckCircleIcon,
+    tile: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400",
+  },
+  time_change_rejected: {
+    icon: FaceFrownIcon,
+    tile: "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400",
   },
   app_update: {
     icon: SparklesIcon,

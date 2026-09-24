@@ -6,6 +6,8 @@ import {
   ServerIcon,
 } from "@heroicons/react/24/outline";
 import StatusBadge from "./StatusBadge";
+import TimeChangeAction, { timeChangeState } from "./TimeChangeAction";
+import { formatTimeLabel } from "../ui/TimePicker";
 import type { DayRow } from "./DayTable";
 import {
   CardHead,
@@ -33,6 +35,8 @@ interface Props {
   /** Where the punch came from, for the provenance line. */
   source?: string;
   onClose: () => void;
+  /** Offered on a late day. Omit where the viewer cannot raise a request. */
+  onRequestTimeChange?: (row: DayRow) => void;
 }
 
 /** "HH:MM" or "HH:MM:SS" to minutes past midnight. */
@@ -42,8 +46,17 @@ const toMinutes = (value?: string) => {
   return Number.isNaN(h) || Number.isNaN(m) ? null : h * 60 + m;
 };
 
-const DayDrawer: React.FC<Props> = ({ row, policy, source, onClose }) => {
+const DayDrawer: React.FC<Props> = ({
+  row,
+  policy,
+  source,
+  onClose,
+  onRequestTimeChange,
+}) => {
   const record = row.record;
+  const changeState = timeChangeState(row);
+  const rejected =
+    record?.timeChange?.status === "rejected" ? record.timeChange : null;
 
   /**
    * Where the arrival sits either side of the cutoff. Purely for the bar - the
@@ -156,6 +169,64 @@ const DayDrawer: React.FC<Props> = ({ row, policy, source, onClose }) => {
             </p>
           )}
         </DetailCard>
+
+        {/* Time change: a correction already applied, one waiting, or the way
+            to ask for one on a late day. */}
+        {changeState && (
+          <DetailCard>
+            <CardHead
+              title="Time change"
+              className="mb-2"
+              action={<TimeChangeAction row={row} />}
+            />
+            {changeState === "corrected" && (
+              <dl>
+                <FieldRow
+                  label="Machine check-in"
+                  value={record.machineCheckInDisplay || "-"}
+                />
+                <FieldRow label="Approved check-in" value={row.arrival || "-"} />
+              </dl>
+            )}
+            {changeState === "pending" && (
+              <dl>
+                <FieldRow
+                  label="Machine check-in"
+                  value={record.timeDisplay || record.time || "-"}
+                />
+                <FieldRow
+                  label="Requested check-in"
+                  value={
+                    formatTimeLabel(record.timeChange?.requestedTime) || "-"
+                  }
+                />
+              </dl>
+            )}
+            {changeState === "requestable" && (
+              <>
+                <p className="text-[13px] leading-relaxed text-gray-500 dark:text-gray-400">
+                  Arrived late with prior approval? Ask for this day to be
+                  recorded from the agreed time.
+                </p>
+                {rejected && (
+                  <p className="mt-2 text-[12px] leading-relaxed text-red-600 dark:text-red-400">
+                    Your last request for this day was rejected
+                    {rejected.reviewComments ? `: ${rejected.reviewComments}` : "."}
+                  </p>
+                )}
+                {onRequestTimeChange && (
+                  <div className="mt-3">
+                    <TimeChangeAction
+                      row={row}
+                      onRequest={onRequestTimeChange}
+                      size="md"
+                    />
+                  </div>
+                )}
+              </>
+            )}
+          </DetailCard>
+        )}
 
         {/* Record detail */}
         {record && (
