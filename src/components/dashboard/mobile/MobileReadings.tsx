@@ -6,9 +6,10 @@ import type { DashboardGauge } from "./types";
 /**
  * The month as two readings: how it was attended, and what is still waiting.
  *
- * Both are one figure with its share drawn around it, which is why they share
- * a tab. The donut is the shared AttendancePieCard - the same month-to-date
- * read the desktop page shows, not a phone-sized approximation of it.
+ * Both are one figure with its share drawn around it, and they sit under the
+ * two charts on the Charts tab. The donut is the shared AttendancePieCard - the
+ * same month-to-date read the desktop page shows, not a phone-sized
+ * approximation of it.
  */
 
 interface Props {
@@ -83,7 +84,7 @@ const SemiGauge: React.FC<{
   );
 };
 
-const MobileReviewTab: React.FC<Props> = ({
+const MobileReadings: React.FC<Props> = ({
   role,
   employeeId,
   gauges,
@@ -106,4 +107,4 @@ const MobileReviewTab: React.FC<Props> = ({
   </div>
 );
 
-export default MobileReviewTab;
+export default MobileReadings;

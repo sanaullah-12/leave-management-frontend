@@ -109,6 +109,9 @@ export type NotificationType =
   | "voice_status"
   | "announcement"
   | "attendance_late"
+  | "time_change_request"
+  | "time_change_approved"
+  | "time_change_rejected"
   | "app_update";
 
 export interface AppNotification {

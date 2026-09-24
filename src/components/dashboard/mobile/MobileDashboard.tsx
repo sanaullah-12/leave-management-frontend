@@ -5,7 +5,7 @@ import { MorphTabs, MorphTabPanels } from "../../ui/MorphTabs";
 import PushNotificationToggle from "../../notifications/PushNotificationToggle";
 import MobileOverviewTab from "./MobileOverviewTab";
 import MobileChartsTab from "./MobileChartsTab";
-import MobileReviewTab from "./MobileReviewTab";
+import MobileReadings from "./MobileReadings";
 import MobileActivityTab from "./MobileActivityTab";
 import type {
   DashboardGauge,
@@ -27,20 +27,19 @@ import type {
  * opened to check - how much leave is moving, and who is in - are separated
  * from the rest of the page by seven of them.
  *
- * So the same page is four screens under one segmented control:
+ * So the same page is three screens under one segmented control:
  *
  *   Overview - the headline figures, and who is in today
- *   Charts   - the shape of the year, and the split by type
- *   Review   - the month as one figure: attendance, and what is still pending
+ *   Charts   - every chart: the year, the split by type, attendance, pending
  *   Activity - what happened, what is coming, who is around
  *
  * Nothing is computed here. Every figure is one DashboardPage already derived
  * and every list is one it already fetched; this file only decides which
  * screen each belongs on. The banner stays above the control because it is
- * the only part of the page that is true on all four.
+ * the only part of the page that is true on all three.
  */
 
-type TabKey = "overview" | "charts" | "review" | "activity";
+type TabKey = "overview" | "charts" | "activity";
 
 interface Props {
   isAdmin: boolean;
@@ -77,6 +76,11 @@ interface Props {
   onOpenAttendance: () => void;
   onOpenEmployee: (id: string) => void;
 
+  /* ---- which screen ---- */
+  /* Owned by DashboardPage, so the desktop layout and this one agree on it. */
+  tab: TabKey;
+  onTabChange: (tab: TabKey) => void;
+
   /* ---- wording ---- */
   tabLabels: Record<TabKey, string>;
   listLabels: React.ComponentProps<typeof MobileActivityTab>["labels"];
@@ -112,15 +116,15 @@ const MobileDashboard: React.FC<Props> = ({
   onOpenCalendar,
   onOpenAttendance,
   onOpenEmployee,
+  tab,
+  onTabChange,
   tabLabels,
   listLabels,
   accent,
   accentSoft,
   isDark,
 }) => {
-  const [tab, setTab] = React.useState<TabKey>("overview");
-
-  const tabs: TabKey[] = ["overview", "charts", "review", "activity"];
+  const tabs: TabKey[] = ["overview", "charts", "activity"];
 
   return (
     <div>
@@ -159,13 +163,13 @@ const MobileDashboard: React.FC<Props> = ({
           negative margin lets the blurred ground run to both edges while the
           buttons keep the page's gutter. */}
       <div className="sticky top-[calc(var(--app-bar-h)+var(--safe-top))] z-20 -mx-[max(0.75rem,var(--safe-left))] mb-3 mt-3 bg-white/80 px-[max(0.75rem,var(--safe-left))] py-2 backdrop-blur-xl dark:bg-gray-900/70">
-        {/* One well holding four tabs, not four buttons in a row: the four are
-            one choice, and a border around each says they are four. The
+        {/* One well holding three tabs, not three buttons in a row: the three
+            are one choice, and a border around each says they are three. The
             selected pill is a single element that travels between them, so the
             eye follows the selection rather than re-finding it. */}
         <MorphTabs
           value={tab}
-          onChange={setTab}
+          onChange={onTabChange}
           ariaLabel="Dashboard screens"
           options={tabs.map((key) => ({ value: key, label: tabLabels[key] }))}
         />
@@ -183,6 +187,7 @@ const MobileDashboard: React.FC<Props> = ({
       )}
 
       {tab === "charts" && (
+        <div className="space-y-3">
         <MobileChartsTab
           trend={trend}
           types={types}
@@ -194,16 +199,14 @@ const MobileDashboard: React.FC<Props> = ({
           accentSoft={accentSoft}
           isDark={isDark}
         />
-      )}
-
-      {tab === "review" && (
-        <MobileReviewTab
+        <MobileReadings
           role={role}
           employeeId={employeeId}
           gauges={gauges}
           accent={accent}
           accentSoft={accentSoft}
         />
+        </div>
       )}
 
       {tab === "activity" && (

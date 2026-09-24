@@ -63,7 +63,7 @@ const AttendanceBoard: React.FC<Props> = ({
   const [period, setPeriod] = useState<PeriodKey>(defaultPeriod);
   const range = useMemo(() => periodRange(period), [period]);
 
-  const { data, loading, error, refresh, fetchedAt } = useRosterDay(
+  const { data, loading, refreshing, error, refresh, fetchedAt } = useRosterDay(
     range.from,
     range.to,
     range.detail
@@ -168,13 +168,13 @@ const AttendanceBoard: React.FC<Props> = ({
           <button
             type="button"
             onClick={refresh}
-            disabled={loading}
+            disabled={refreshing}
             aria-label="Refresh attendance"
             title="Refresh"
             className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
           >
             <ArrowPathIcon
-              className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
+              className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
             />
           </button>
 

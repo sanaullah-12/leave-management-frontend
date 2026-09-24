@@ -23,6 +23,7 @@ export const notificationTarget = (n: AppNotification): string => {
   if (n.type && n.type.startsWith("wfh_")) return "/work-from-home";
   if (n.type === "announcement") return "/announcements";
   if (n.type === "attendance_late") return "/attendance/late-time";
+  if (n.type && n.type.startsWith("time_change_")) return "/attendance/time-changes";
   // A release is about the app as a whole, so it opens the app.
   if (n.type === "app_update") return "/";
   return "/leaves";

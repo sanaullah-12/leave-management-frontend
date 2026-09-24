@@ -67,7 +67,9 @@ export function MorphTabs<T extends string>({
       aria-label={ariaLabel}
       className={`flex ${
         well
-          ? "gap-1 rounded-[14px] border border-[var(--border-default)] bg-[var(--surface-sunken)] p-1"
+          ? // Raised off the page, not sunk into it: the strip is what the
+            // screen below answers to, so it reads as a card of its own.
+            "gap-1 rounded-[14px] border border-[var(--border-default)] bg-[var(--surface-raised)] p-1 shadow-[var(--shadow-md)]"
           : "inline-flex gap-0.5 rounded-lg bg-[var(--surface-sunken)] p-0.5"
       } ${className}`}
     >
@@ -109,6 +111,10 @@ export function MorphTabs<T extends string>({
                     ? {
                         backgroundImage:
                           "linear-gradient(135deg, color-mix(in srgb, var(--accent) 78%, white), var(--accent))",
+                        // Tinted with the accent so the selected tab stands off
+                        // the strip rather than sitting flush in it.
+                        boxShadow:
+                          "0 4px 12px -2px color-mix(in srgb, var(--accent) 45%, transparent)",
                       }
                     : undefined
                 }

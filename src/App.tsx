@@ -62,6 +62,7 @@ const ApplyLeavePage = React.lazy(() => import("./pages/ApplyLeavePage"));
 const LeaveCalendarPage = React.lazy(() => import("./pages/LeaveCalendarPage"));
 const AttendancePage = React.lazy(() => import("./pages/AttendancePage"));
 const LateTimePage = React.lazy(() => import("./pages/LateTimePage"));
+const TimeChangesPage = React.lazy(() => import("./pages/TimeChangesPage"));
 const EmployeesPage = React.lazy(() => import("./pages/EmployeesPage"));
 const EmployeeDetailPageReal = React.lazy(
   () => import("./pages/EmployeeDetailPageReal")
@@ -230,6 +231,10 @@ const App: React.FC = () => {
                   <Route
                     path="attendance/late-time"
                     element={<LateTimePage />}
+                  />
+                  <Route
+                    path="attendance/time-changes"
+                    element={<TimeChangesPage />}
                   />
                   <Route path="employees" element={<EmployeesPage />} />
                   <Route

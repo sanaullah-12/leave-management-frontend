@@ -178,6 +178,7 @@ const MobileAttendance: React.FC<Props> = (props) => {
   const {
     data: todayData,
     loading: todayLoading,
+    refreshing: todayRefreshing,
     error: todayError,
     refresh: refreshToday,
   } = useRosterDay(today.from, today.to, today.detail);
@@ -254,7 +255,7 @@ const MobileAttendance: React.FC<Props> = (props) => {
         return {
           label: "Refresh today",
           onClick: refreshToday,
-          busy: todayLoading,
+          busy: todayRefreshing,
           disabled: false,
         };
     }

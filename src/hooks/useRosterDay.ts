@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { attendanceAPI } from "../services/api";
+import { ROSTER_DAY_ROOT } from "../lib/attendanceCache";
 import type {
   RosterDateTotals,
   RosterDayRow,
@@ -43,62 +45,95 @@ export const EMPTY_ROSTER_TOTALS: RosterTotals = {
   onLeave: 0,
 };
 
-export function useRosterDay(
+/**
+ * How long a roster answer is trusted before it is re-read.
+ *
+ * Short, because punches land all morning; but long enough that moving between
+ * the dashboard and the attendance page inside a minute reuses the answer
+ * rather than asking the server the same question again. Past this the cached
+ * answer is still shown at once, and the refetch happens behind it.
+ */
+const ROSTER_STALE_MS = 60 * 1000;
+
+/**
+ * The cache key for one period.
+ *
+ * Exported so the dashboard's availability panel reads today through the same
+ * entry the attendance section fills - one request for both, and no chance of
+ * the two showing different mornings.
+ */
+export const rosterDayKey = (
   from: string,
   to: string,
   detail: "day" | "summary"
+) => [ROSTER_DAY_ROOT, from, to, detail];
+
+async function fetchRosterDay(
+  from: string,
+  to: string,
+  detail: "day" | "summary"
+): Promise<RosterDayResponse> {
+  const response = await attendanceAPI.getRosterDay(from, to, detail);
+  if (!response.data?.success) {
+    throw new Error(response.data?.message || "Could not load attendance");
+  }
+  return response.data as RosterDayResponse;
+}
+
+/**
+ * The roster for one period, kept in the app-wide query cache.
+ *
+ * It used to live in component state, so leaving the page threw it away and
+ * coming back started from a spinner and a fresh request. Cached, a return
+ * visit draws the last answer immediately and only re-reads it once it is
+ * older than ROSTER_STALE_MS.
+ *
+ * `loading` is true only when there is nothing to show yet; `refreshing` is
+ * true whenever a request is in flight, which is what the refresh button spins
+ * on. A failed background refresh keeps the answer on screen rather than
+ * replacing a good roster with an error - `fetchedAt` still says how old it is.
+ */
+export function useRosterDay(
+  from: string,
+  to: string,
+  detail: "day" | "summary",
+  options: { enabled?: boolean } = {}
 ) {
-  const [data, setData] = useState<RosterDayResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  /**
-   * When the answer on screen was read from the server.
-   *
-   * A roster is a live figure - punches land on the device all morning - so a
-   * screen showing one has to say how old it is. Set on success only: a failed
-   * refresh leaves the previous read's time, because that is still when what
-   * is on screen came from.
-   */
-  const [fetchedAt, setFetchedAt] = useState<string | null>(null);
-  /** Bumped by refresh(); the fetch effect watches it. */
-  const [reloads, setReloads] = useState(0);
+  const query = useQuery({
+    queryKey: rosterDayKey(from, to, detail),
+    queryFn: () => fetchRosterDay(from, to, detail),
+    staleTime: ROSTER_STALE_MS,
+    enabled: options.enabled ?? true,
+  });
 
-  const refresh = useCallback(() => setReloads((n) => n + 1), []);
+  const { refetch } = query;
+  const refresh = useCallback(() => {
+    void refetch();
+  }, [refetch]);
 
-  useEffect(() => {
-    let cancelled = false;
+  const data = query.data ?? null;
+  const failure = query.error as any;
+  const error =
+    data || !failure
+      ? ""
+      : failure?.response?.data?.message ||
+        failure?.message ||
+        "Could not load attendance";
 
-    (async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const response = await attendanceAPI.getRosterDay(from, to, detail);
-        if (cancelled) return;
-
-        if (!response.data?.success) {
-          throw new Error(response.data?.message || "Could not load attendance");
-        }
-        setData(response.data as RosterDayResponse);
-        setFetchedAt(new Date().toISOString());
-      } catch (err: any) {
-        if (cancelled) return;
-        setError(
-          err?.response?.data?.message ||
-            err?.message ||
-            "Could not load attendance"
-        );
-        setData(null);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [from, to, detail, reloads]);
-
-  return { data, loading, error, refresh, fetchedAt };
+  return {
+    data,
+    loading: query.isLoading,
+    refreshing: query.isFetching,
+    error,
+    refresh,
+    /**
+     * When the answer on screen was read from the server. A roster is a live
+     * figure, so a screen showing one has to say how old it is.
+     */
+    fetchedAt: query.dataUpdatedAt
+      ? new Date(query.dataUpdatedAt).toISOString()
+      : null,
+  };
 }
 
 export default useRosterDay;

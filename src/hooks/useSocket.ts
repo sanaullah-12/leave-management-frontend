@@ -10,6 +10,7 @@ import { setConnected, setPresence, markEvent } from "../store/realtimeSlice";
 import { NOTIF_KEY } from "./useNotifications";
 import { VOICES_KEY, VOICE_STATS_KEY } from "./useEmployeeVoice";
 import { WFH_KEY, WFH_STATS_KEY } from "./useWorkFromHome";
+import { refreshAfterTimeChange } from "./useTimeChanges";
 import {
   WFH_SESSION_KEY,
   WFH_SESSION_LIVE_KEY,
@@ -177,6 +178,12 @@ export function useSocket() {
       invalidate([["attendance"], ["dashboard-stats"]])
     );
     socket.on(SOCKET_EVENTS.STATS_UPDATE, (p: { scope?: string }) => {
+      // A time change request moved. An approval re-judges a day, so every
+      // attendance answer that could hold the old verdict goes with it.
+      if (p?.scope === "time-change" || p?.scope === "time-change-approved") {
+        refreshAfterTimeChange(qc, p.scope === "time-change-approved");
+        return;
+      }
       const keys: unknown[][] = [
         ["dashboard-stats"],
         ["recent-leaves"],
