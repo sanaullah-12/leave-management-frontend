@@ -38,7 +38,7 @@ export const ContactModal: React.FC<{ open: boolean; onClose: () => void }> = ({
           <motion.div
             aria-hidden
             onClick={onClose}
-            className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-[var(--overlay-scrim)] backdrop-blur-sm"
           />
 
           <motion.div

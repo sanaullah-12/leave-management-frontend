@@ -166,7 +166,7 @@ const MobileDeviceTab: React.FC<Props> = ({
               onClick={onConnect}
               disabled={connecting || !ip}
               className="flex-none rounded-[10px] px-3 py-2 text-[11.5px] font-bold text-white transition-transform active:scale-95 disabled:opacity-50"
-              style={{ backgroundColor: "var(--accent)" }}
+              style={{ backgroundColor: "var(--brand-solid)" }}
             >
               {connecting ? "Connecting" : "Connect"}
             </button>
@@ -305,7 +305,7 @@ const MobileDeviceTab: React.FC<Props> = ({
                   {on && (
                     <span
                       className="h-[9px] w-[9px] rounded-full"
-                      style={{ backgroundColor: "var(--accent)" }}
+                      style={{ backgroundColor: "var(--brand-solid)" }}
                     />
                   )}
                 </span>

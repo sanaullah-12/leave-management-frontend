@@ -4,6 +4,7 @@ import { markKnownUser } from '../utils/knownUser';
 import { detachOnLogout } from '../services/pushNotifications';
 import { useQueryClient } from '@tanstack/react-query';
 import { clearAttendanceCache } from '../lib/attendanceCache';
+import { getAccessToken, setTokens, clearTokens } from '../services/tokenStore';
 
 // Inline type definitions
 interface User {
@@ -105,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // token, then kicks the user out on their first API call. Verifying up-front means we
   // either start fully authenticated (with fresh user data) or land cleanly on /login.
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = getAccessToken();
 
     if (!token) {
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -128,18 +129,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const freshUser: User = response.data?.user || cachedUser;
         if (freshUser) {
           localStorage.setItem('user', JSON.stringify(freshUser));
-          dispatch({ type: 'LOGIN_SUCCESS', payload: { user: freshUser, token } });
+          dispatch({
+            type: 'LOGIN_SUCCESS',
+            payload: { user: freshUser, token: getAccessToken() || token },
+          });
         } else {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+          clearTokens();
           dispatch({ type: 'LOGOUT' });
         }
       })
       .catch((error) => {
         if (error?.response?.status === 401) {
-          // Token is genuinely invalid/expired → clean logout to the login screen.
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+          // The session could not be refreshed → clean logout to the login screen.
+          clearTokens();
           dispatch({ type: 'LOGOUT' });
         } else if (cachedUser) {
           // Backend unreachable (network/CORS/5xx) but we have a cached session -
@@ -156,9 +158,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     try {
       const response = await authAPI.login(credentials);
-      const { token, user } = response.data;
+      const { token, refreshToken, user } = response.data;
 
-      localStorage.setItem('token', token);
+      setTokens(token, refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
       markKnownUser();
 
@@ -177,9 +179,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     try {
       const response = await authAPI.registerCompany(data);
-      const { token, user } = response.data;
+      const { token, refreshToken, user } = response.data;
 
-      localStorage.setItem('token', token);
+      setTokens(token, refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
       markKnownUser();
 
@@ -210,8 +212,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // its first failed delivery even if this does not complete.
     void detachOnLogout();
 
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    // Revoke the session server-side so the tokens stop working everywhere,
+    // not just in this tab. Not awaited: signing out must never hang.
+    void authAPI.logout().catch(() => undefined).finally(() => clearTokens());
+
+    clearTokens();
+    // Cached queries belong to the previous user; the next person to sign in
+    // on this browser must not see them.
+    queryClient.clear();
     dispatch({ type: 'LOGOUT' });
   };
 

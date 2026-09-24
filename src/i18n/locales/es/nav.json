@@ -7,10 +7,8 @@
   "search": {
     "placeholder": "Buscar",
     "title": "Búsqueda",
-    "noResults": "Sin resultados para «{{query}}»"
-  },
-  "sections": {
-    "pages": "Páginas"
+    "noResults": "Sin resultados para «{{query}}»",
+    "clear": "Borrar búsqueda"
   },
   "actions": {
     "collapse": "Contraer",
@@ -19,12 +17,19 @@
     "openMenu": "Abrir menú",
     "closeMenu": "Cerrar menú",
     "manageAccount": "Gestionar cuenta",
-    "more": "Más"
+    "more": "Más",
+    "switchToDark": "Cambiar a modo oscuro",
+    "switchToLight": "Cambiar a modo claro"
   },
   "header": {
     "welcome": "Bienvenido de nuevo, {{name}}",
     "administrator": "Administrador",
     "employee": "Empleado"
+  },
+  "bands": {
+    "workspace": "Espacio de trabajo",
+    "people": "Personas",
+    "operations": "Operaciones"
   },
   "groups": {
     "home": "Inicio",

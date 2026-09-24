@@ -77,7 +77,7 @@ interface Props {
   emptyMessage?: string;
 }
 
-const ON_TIME = "rgb(var(--blue-600))";
+const ON_TIME = "rgb(var(--brand-600))";
 const LATE = "#b45309";
 
 const TooltipCard = ({ active, payload }: any) => {
@@ -240,7 +240,7 @@ const AttendanceOverview: React.FC<Props> = ({
                 allowDecimals={false}
               />
               <Tooltip
-                cursor={{ fill: "rgb(var(--blue-600) / 0.06)" }}
+                cursor={{ fill: "rgb(var(--brand-600) / 0.06)" }}
                 content={<TooltipCard />}
               />
               <Bar

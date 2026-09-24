@@ -8,24 +8,26 @@ import {
   NoSymbolIcon,
   ExclamationTriangleIcon,
   ChevronRightIcon,
+  ChatBubbleBottomCenterTextIcon,
 } from "@heroicons/react/24/outline";
 import WfhStatusBadge from "./WfhStatusBadge";
+import Avatar from "../Avatar";
 import { CARD } from "../../lib/surfaces";
+import { formatRequestRange, previewReason } from "../../lib/requestList";
 import { formatPlannedWindow } from "./sessionFormat";
 import type { WfhRequest } from "../../hooks/useWorkFromHome";
 
 /**
  * The request list.
  *
- * One table for both roles - an admin sees who asked and gets the decision
- * buttons, an employee sees their own history and can withdraw something still
- * pending. Splitting it in two would have meant maintaining the same columns
- * twice.
+ * One table for both roles - an admin sees who asked, an employee sees their
+ * own history and can withdraw something still pending. Splitting it in two
+ * would have meant maintaining the same columns twice.
  *
- * A row opens the request's report. The buttons in the last column stop the
- * click from reaching the row, so approving something never also opens it - a
- * drawer sliding out over a decision that has just been made reads as an
- * error, not as a confirmation.
+ * A row carries two words of a reason and opens the request's report; the
+ * decision is taken in that report rather than from the row, because a row is
+ * not enough to decide on. The buttons in the last column stop the click from
+ * reaching the row, so withdrawing something never also opens it.
  *
  * Below `lg` the table is not rendered at all. Six columns need 760px, and on
  * a 390px screen that is a sideways scroll through a grid where no single
@@ -50,42 +52,12 @@ interface Props {
   emptyMessage?: string;
 }
 
-const formatDate = (value: string) =>
-  new Date(value).toLocaleDateString(undefined, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-
-const formatRange = (request: WfhRequest) => {
-  const from = formatDate(request.startDate);
-  const to = formatDate(request.endDate);
-  return from === to ? from : `${from} - ${to}`;
-};
-
-/**
- * The way in to a request's report, for rows with no decision left to make.
- *
- * The row has been the control all along; this is what says so. Absent when the
- * table has nowhere to open, which is how it renders wherever no drawer is
- * mounted.
- */
-const ViewReport: React.FC<{
-  request: WfhRequest;
-  onOpen?: (request: WfhRequest) => void;
-}> = ({ request, onOpen }) =>
-  onOpen ? (
-    <button
-      type="button"
-      onClick={() => onOpen(request)}
-      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-500/10"
-    >
-      View report
-      <ChevronRightIcon className="h-3.5 w-3.5" />
-    </button>
-  ) : (
-    <span className="text-xs text-gray-400">-</span>
-  );
+/* The same column heading and row tint the leave request list uses, so the
+   two queues an admin works through in the same sitting read as one. */
+const TH =
+  "px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400";
+const ROW =
+  "bg-blue-50/40 transition-colors hover:bg-blue-50/80 dark:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.09]";
 
 const employeeOf = (request: WfhRequest) =>
   typeof request.employee === "object" && request.employee
@@ -192,7 +164,7 @@ const MobileRequestCard: React.FC<{
                   : "text-[15px] font-bold leading-tight tracking-[-0.01em] text-gray-900 dark:text-white"
               }`}
             >
-              {formatRange(request)}
+              {formatRequestRange(request.startDate, request.endDate)}
             </p>
             <p className="mt-0.5 truncate text-[12px] text-gray-400 dark:text-gray-500">
               {request.totalDays} {request.totalDays === 1 ? "day" : "days"}
@@ -259,9 +231,6 @@ const WfhRequestTable: React.FC<Props> = ({
   emptyMessage,
 }) => {
   const listRow = useListRowMotion(true);
-  const head =
-    "whitespace-nowrap border-b border-gray-100 bg-gray-50/70 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:border-gray-700 dark:bg-gray-700/40 dark:text-gray-300";
-  const cell = "border-b border-gray-100 px-4 py-3 dark:border-gray-700";
   const columns = showEmployee ? 6 : 5;
 
   return (
@@ -303,184 +272,158 @@ const WfhRequestTable: React.FC<Props> = ({
 
       {/* ---------------- Desktop ---------------- */}
       <div className={`hidden overflow-hidden lg:block ${CARD}`}>
-      <div className="table-scroll">
-        <table className="w-full min-w-[760px] border-collapse">
-          <thead>
-            <tr>
-              {showEmployee && <th className={head}>Employee</th>}
-              <th className={head}>Dates</th>
-              <th className={head}>Days</th>
-              <th className={head}>Reason</th>
-              <th className={head}>Status</th>
-              <th className={`${head} text-right`}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              Array.from({ length: 4 }).map((_, i) => (
-                <tr key={i}>
-                  {Array.from({ length: columns }).map((__, j) => (
-                    <td key={j} className={cell}>
-                      <div className="h-4 animate-pulse rounded bg-gray-100 dark:bg-gray-700" />
-                    </td>
-                  ))}
-                </tr>
-              ))
-            ) : requests.length === 0 ? (
-              <tr>
-                <td colSpan={columns} className="px-4 py-16 text-center">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    Nothing here yet.
-                  </p>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    {emptyMessage ||
-                      "Work from home requests will appear in this list."}
-                  </p>
-                </td>
+        <div className="table-scroll">
+          <table className="w-full min-w-[820px] border-collapse">
+            <thead>
+              <tr className="border-b border-gray-100 dark:border-gray-700/60">
+                {showEmployee && <th className={TH}>Employee</th>}
+                <th className={TH}>Dates</th>
+                <th className={TH}>Days</th>
+                <th className={TH}>Reason</th>
+                <th className={TH}>Status</th>
+                <th className={`${TH} text-right`}>Action</th>
               </tr>
-            ) : (
-              requests.map((request, i) => {
-                const employee = employeeOf(request);
-                const busy = busyId === request._id;
-
-                return (
-                  <motion.tr
-                    key={request._id}
-                    {...listRow(i)}
-                    onClick={onOpen ? () => onOpen(request) : undefined}
-                    className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/40 ${
-                      onOpen ? "cursor-pointer" : ""
-                    }`}
-                  >
-                    {showEmployee && (
-                      <td className={cell}>
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          {employee?.name || "Unknown"}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {employee?.employeeId || "-"}
-                          {employee?.department ? ` - ${employee.department}` : ""}
-                        </p>
+            </thead>
+            <tbody className="divide-y divide-white dark:divide-gray-800/60">
+              {loading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <tr key={i} className={ROW}>
+                    {Array.from({ length: columns }).map((__, j) => (
+                      <td key={j} className="px-6 py-4">
+                        <div className="h-4 animate-pulse rounded bg-gray-100 dark:bg-gray-700" />
                       </td>
-                    )}
-                    <td className={cell}>
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                        {formatRange(request)}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Requested {formatDate(request.createdAt)}
-                      </p>
-                      {request.plannedStartTime && request.plannedEndTime && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          Planned{" "}
-                          {formatPlannedWindow(
-                            request.plannedStartTime,
-                            request.plannedEndTime
+                    ))}
+                  </tr>
+                ))
+              ) : requests.length === 0 ? (
+                <tr>
+                  <td colSpan={columns} className="px-4 py-16 text-center">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      Nothing here yet.
+                    </p>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      {emptyMessage ||
+                        "Work from home requests will appear in this list."}
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                requests.map((request, i) => {
+                  const employee = employeeOf(request);
+                  const busy = busyId === request._id;
+
+                  return (
+                    <motion.tr
+                      key={request._id}
+                      {...listRow(i)}
+                      onClick={onOpen ? () => onOpen(request) : undefined}
+                      className={`${ROW} ${onOpen ? "cursor-pointer" : ""}`}
+                    >
+                      {showEmployee && (
+                        <td className="whitespace-nowrap px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <Avatar
+                              name={employee?.name || "Unknown"}
+                              size="md"
+                              className="flex-shrink-0"
+                            />
+                            <div className="flex min-w-0 flex-col">
+                              <span className="truncate text-[15px] font-semibold text-gray-900 dark:text-gray-100">
+                                {employee?.name || "Unknown"}
+                              </span>
+                              <span className="truncate text-xs text-gray-500 dark:text-gray-400">
+                                {employee?.employeeId || "-"}
+                                {employee?.department
+                                  ? ` · ${employee.department}`
+                                  : ""}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                      )}
+
+                      {/* The span on one line. Everything the middle columns
+                          used to stack - when it was requested, the planned
+                          window, the note, the task list - is in the report
+                          the row opens, where it is read rather than skimmed. */}
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <span className="text-sm font-medium tabular-nums text-gray-900 dark:text-gray-100">
+                          {formatRequestRange(
+                            request.startDate,
+                            request.endDate
                           )}
-                        </p>
-                      )}
-                      {request.isBackdated && (
-                        <span
-                          className="mt-1 inline-flex items-center gap-1 rounded border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300"
-                          title="Raised after the days had passed - approving corrects the attendance record"
-                        >
-                          <ExclamationTriangleIcon className="h-3 w-3" />
-                          Backdated
                         </span>
-                      )}
-                    </td>
-                    <td
-                      className={`${cell} text-sm text-gray-700 dark:text-gray-200`}
-                    >
-                      {request.totalDays}
-                    </td>
-                    <td className={cell}>
-                      <p className="max-w-[280px] text-sm text-gray-700 dark:text-gray-200">
-                        {request.reason}
-                      </p>
-                      {request.note && (
-                        <p className="mt-0.5 max-w-[280px] text-xs text-gray-500 dark:text-gray-400">
-                          {request.note}
-                        </p>
-                      )}
-                      {/* What they said they would work on. Shown to the
-                          reviewer because a day of named work is a different
-                          request from a day of unnamed work, and this is the
-                          screen where that judgement is made. */}
-                      {request.plannedTasks &&
-                        request.plannedTasks.length > 0 && (
-                          <ul className="mt-1.5 max-w-[280px] space-y-0.5">
-                            {request.plannedTasks.map((task, index) => (
-                              <li
-                                key={`${task}-${index}`}
-                                className="flex items-start gap-1.5 text-xs text-gray-500 dark:text-gray-400"
-                              >
-                                <span
-                                  className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-gray-300 dark:bg-gray-600"
-                                  aria-hidden="true"
-                                />
-                                <span className="min-w-0 flex-1">{task}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                    </td>
-                    <td className={cell}>
-                      <WfhStatusBadge status={request.status} />
-                      {request.status !== "pending" &&
-                        request.reviewComments && (
-                          <p className="mt-1 max-w-[220px] text-xs text-gray-500 dark:text-gray-400">
-                            {request.reviewComments}
-                          </p>
-                        )}
-                    </td>
-                    <td
-                      className={`${cell} text-right`}
-                      onClick={(event) => event.stopPropagation()}
-                    >
-                      {busy ? (
-                        <ArrowPathIcon className="ml-auto h-4 w-4 animate-spin text-gray-400" />
-                      ) : request.status !== "pending" ? (
-                        <ViewReport request={request} onOpen={onOpen} />
-                      ) : onReview ? (
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => onReview(request, "approved")}
-                            className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-400"
+                        {request.isBackdated && (
+                          <span
+                            className="mt-1 flex w-fit items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 ring-1 ring-inset ring-amber-200/70 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/25"
+                            title="Raised after the days had passed - approving corrects the attendance record"
                           >
-                            <CheckIcon className="h-3.5 w-3.5" />
-                            Approve
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onReview(request, "rejected")}
-                            className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-700 transition-colors hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400"
-                          >
-                            <XMarkIcon className="h-3.5 w-3.5" />
-                            Reject
-                          </button>
-                        </div>
-                      ) : onCancel ? (
-                        <button
-                          type="button"
-                          onClick={() => onCancel(request)}
-                          className="inline-flex items-center gap-1 rounded-full border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                            <ExclamationTriangleIcon className="h-3 w-3" />
+                            Backdated
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <span className="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">
+                          {request.totalDays}{" "}
+                          {request.totalDays === 1 ? "day" : "days"}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <span
+                          title={request.reason}
+                          className="inline-flex max-w-[13rem] items-center gap-2 rounded-full bg-blue-50/80 px-3 py-1.5 ring-1 ring-inset ring-blue-100 dark:bg-blue-500/10 dark:ring-blue-500/15"
                         >
-                          <NoSymbolIcon className="h-3.5 w-3.5" />
-                          Withdraw
-                        </button>
-                      ) : (
-                        <ViewReport request={request} onOpen={onOpen} />
-                      )}
-                    </td>
-                  </motion.tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+                          <ChatBubbleBottomCenterTextIcon className="h-4 w-4 flex-none text-blue-600 dark:text-blue-400" />
+                          <span className="min-w-0 truncate text-sm text-blue-900 dark:text-blue-100">
+                            {previewReason(request.reason)}
+                          </span>
+                        </span>
+                      </td>
+
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <WfhStatusBadge status={request.status} dot />
+                      </td>
+
+                      <td
+                        className="whitespace-nowrap px-6 py-4 text-right"
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        {busy ? (
+                          <ArrowPathIcon className="ml-auto h-4 w-4 animate-spin text-gray-400" />
+                        ) : (
+                          <div className="flex items-center justify-end gap-2">
+                            {request.status === "pending" && onCancel && (
+                              <button
+                                type="button"
+                                onClick={() => onCancel(request)}
+                                className="inline-flex items-center gap-1 rounded-full px-3 py-2 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-200 transition-colors hover:bg-gray-50 dark:text-gray-300 dark:ring-gray-600 dark:hover:bg-gray-700"
+                              >
+                                <NoSymbolIcon className="h-3.5 w-3.5" />
+                                Withdraw
+                              </button>
+                            )}
+                            {onOpen && (
+                              <button
+                                type="button"
+                                onClick={() => onOpen(request)}
+                                className="inline-flex items-center rounded-full bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
+                              >
+                                Review
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                    </motion.tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </>
   );

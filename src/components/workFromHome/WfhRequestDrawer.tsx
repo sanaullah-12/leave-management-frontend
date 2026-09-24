@@ -31,6 +31,15 @@ import type { WfhRequest } from "../../hooks/useWorkFromHome";
 interface Props {
   request: WfhRequest | null;
   onClose: () => void;
+  /**
+   * The decision, for a reviewer.
+   *
+   * It lives here rather than in the row because the row shows two words of a
+   * reason: approving from the list is a decision taken without the report the
+   * list exists to lead to. Absent for an employee's own history.
+   */
+  onReview?: (request: WfhRequest, status: "approved" | "rejected") => void;
+  busy?: boolean;
 }
 
 const dayLabel = (value: string) =>
@@ -60,7 +69,12 @@ const Row: React.FC<{ label: string; children: React.ReactNode }> = ({
   </div>
 );
 
-const WfhRequestDrawer: React.FC<Props> = ({ request, onClose }) => {
+const WfhRequestDrawer: React.FC<Props> = ({
+  request,
+  onClose,
+  onReview,
+  busy = false,
+}) => {
   const employee = request ? employeeOf(request) : null;
 
   // Only an approved request can have produced work, so nothing else is asked
@@ -111,6 +125,37 @@ const WfhRequestDrawer: React.FC<Props> = ({ request, onClose }) => {
           : undefined
       }
       icon={<HomeIcon className="h-5 w-5" />}
+      footer={
+        <div className="flex items-center justify-end gap-3">
+          {request && request.status === "pending" && onReview && (
+            <>
+              <button
+                type="button"
+                onClick={() => onReview(request, "rejected")}
+                disabled={busy}
+                className="rounded-full px-3.5 py-2 text-sm font-semibold text-red-600 ring-1 ring-inset ring-red-200/70 transition-colors hover:bg-red-50 disabled:opacity-60 dark:text-red-400 dark:ring-red-500/30 dark:hover:bg-red-500/10"
+              >
+                Reject
+              </button>
+              <button
+                type="button"
+                onClick={() => onReview(request, "approved")}
+                disabled={busy}
+                className="rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-600/25 transition-all hover:bg-emerald-700 disabled:opacity-70"
+              >
+                {busy ? "Saving..." : "Approve"}
+              </button>
+            </>
+          )}
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full px-3.5 py-2 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+          >
+            Close
+          </button>
+        </div>
+      }
     >
       {!request ? null : (
         /* The drawer body ships without padding, so the panel owns its gutters. */

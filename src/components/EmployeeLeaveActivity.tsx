@@ -119,7 +119,7 @@ const EmployeeLeaveActivity: React.FC<EmployeeLeaveActivityProps> = ({
       case 'pending':
         return 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400';
       default:
-        return 'bg-slate-100 text-gray-600 dark:bg-white/5 dark:text-gray-300';
+        return 'bg-gray-100 text-gray-600 dark:bg-white/5 dark:text-gray-300';
     }
   };
 

@@ -214,7 +214,7 @@ const MobileLeaveCalendar: React.FC<Props> = ({
             className={`flex-1 rounded-[10px] py-2 text-[13px] font-bold capitalize transition-colors ${
               view === v ? "text-white" : "text-gray-500 dark:text-gray-400"
             }`}
-            style={view === v ? { backgroundColor: "var(--accent)" } : undefined}
+            style={view === v ? { backgroundColor: "var(--brand-solid)" } : undefined}
           >
             {v}
           </button>
@@ -278,7 +278,7 @@ const MobileLeaveCalendar: React.FC<Props> = ({
                             : "font-medium text-gray-300 dark:text-gray-600"
                       }`}
                       style={
-                        isToday ? { backgroundColor: "var(--accent)" } : undefined
+                        isToday ? { backgroundColor: "var(--brand-solid)" } : undefined
                       }
                     >
                       {format(day, "d")}

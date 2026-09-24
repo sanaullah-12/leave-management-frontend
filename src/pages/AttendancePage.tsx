@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
+import { motion } from "framer-motion";
 import SectionHeader from "../components/ui/SectionHeader";
 import { sectionIllustration } from "../components/ui/illustrations";
 import { useQueryClient } from "@tanstack/react-query";
@@ -12,6 +13,7 @@ import {
 import DatePicker from "../components/ui/DatePicker";
 import { useThemeAccent } from "../hooks/useThemeAccent";
 import { CARD } from "../lib/surfaces";
+import { spring } from "../lib/motion";
 import { AccentEdge } from "../components/ui/CardAccents";
 import AttendanceBoard from "../components/attendance/AttendanceBoard";
 import AttendanceSummary from "../components/attendance/AttendanceSummary";
@@ -26,9 +28,7 @@ import FullAttendanceDrawer from "../components/attendance/FullAttendanceDrawer"
 import {
   CheckCircleIcon,
   ArrowPathIcon,
-  ServerIcon,
   XCircleIcon,
-  Cog6ToothIcon,
   ArrowDownTrayIcon,
   UserGroupIcon,
   ClockIcon,
@@ -41,6 +41,7 @@ import AttendanceModal from "../components/AttendanceModal";
 import MobileAttendance from "../components/attendance/mobile/MobileAttendance";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import "../styles/design-system.css";
+import { statusColor } from "../lib/themeTokens";
 
 interface MachineConnection {
   ip: string;
@@ -98,6 +99,14 @@ const RANGE_PRESETS = [
   { label: "3M", days: 90 },
   { label: "1Y", days: 365 },
 ];
+
+/**
+ * The four questions the page answers, one per tab.
+ *
+ * "directory" and "days" are the same slot read two ways: an admin looks up
+ * one of many people, an employee has only their own days to look at.
+ */
+type AttendanceTab = "today" | "trends" | "directory" | "days" | "device";
 
 const AttendancePage: React.FC = () => {
   // Attendance is cached on the QueryClient rather than in this component, so
@@ -163,8 +172,17 @@ const AttendancePage: React.FC = () => {
    * synchronously on first render, so there is no flash of the wrong layout.
    */
   const isPhoneLayout = useMediaQuery("(max-width: 1023px)");
-  const [showSettings, setShowSettings] = useState(false);
-  const [showDevicePanel, setShowDevicePanel] = useState(false);
+  const [tab, setTab] = useState<AttendanceTab>("today");
+  /**
+   * Which tabs have been opened at least once.
+   *
+   * A panel is mounted the first time it is asked for and kept mounted after
+   * that, hidden rather than torn down. Mounting late keeps a chart from
+   * measuring itself inside a hidden box; keeping it mounted means a period,
+   * a filter, a page number and a fetched range all survive a trip to another
+   * tab and back.
+   */
+  const [seenTabs, setSeenTabs] = useState<AttendanceTab[]>(["today"]);
   // Organisation-wide totals for the dashboard, so it has figures before any
   // individual is chosen.
 
@@ -602,7 +620,6 @@ const AttendancePage: React.FC = () => {
               : newSettings.flexibleCutoff || "09:15"
           )}.`
         );
-        setShowSettings(false);
 
         // Existing rows were labelled with the old rule, so re-read them.
         const target = modalEmployee || _selectedEmployee;
@@ -1098,13 +1115,53 @@ const AttendancePage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
+  /** The list slot: many people for an admin, own days for everyone else. */
+  const listTab: AttendanceTab = isAdmin ? "directory" : "days";
+
+  const tabs: { key: AttendanceTab; label: string }[] = isAdmin
+    ? [
+        { key: "today", label: "Today" },
+        { key: "trends", label: "Reports" },
+        { key: "directory", label: "Employees" },
+        { key: "device", label: "Device" },
+      ]
+    : [
+        { key: "today", label: "Today" },
+        { key: "trends", label: "Reports" },
+        { key: "days", label: "My days" },
+      ];
+
+  const openTab = (next: AttendanceTab) => {
+    setTab(next);
+    setSeenTabs((seen) => (seen.includes(next) ? seen : [...seen, next]));
+  };
+
+  /** A tab's panel: mounted on first open, hidden rather than unmounted after. */
+  const panel = (key: AttendanceTab, content: React.ReactNode) =>
+    seenTabs.includes(key) ? (
+      <div
+        role="tabpanel"
+        id={`attendance-panel-${key}`}
+        aria-labelledby={`attendance-tab-${key}`}
+        /* The stagger replays every time a panel is shown again: an
+           animation does not run while its element is display:none, so
+           revealing one starts it over. */
+        className={tab === key ? "space-y-6 stagger-children" : "hidden"}
+      >
+        {content}
+      </div>
+    ) : null;
+
   const handleBreakdownSelect = (label: string) => {
     const next = statusFilter === label ? null : label;
     setStatusFilter(next);
-    // The list can be below the fold; a filter nobody sees applied reads as a
-    // dead click.
+    // A filter nobody sees applied reads as a dead click, and the list it
+    // filters is on the next tab along - so the click goes there.
     if (next) {
-      listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      openTab(listTab);
+      requestAnimationFrame(() =>
+        listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+      );
     }
   };
 
@@ -1358,29 +1415,25 @@ const AttendancePage: React.FC = () => {
     );
   }
 
-  return (
-    <div className="attendance-dashboard space-y-6 stagger-children">
-      {/* Page header. The section's identity only - the date range that
-          drives every figure below is a control, so it stays in the toolbar
-          under the banner where it sits next to what it filters. */}
-      <SectionHeader
-        variant="attendance"
-        eyebrow="Presence"
-        title="Attendance"
-        description="Punch records, hours worked and lateness across the range you pick below."
-        badge={
-          <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white ring-1 ring-inset ring-white/25">
-            {new Date(endDate + "T00:00:00").toLocaleDateString(undefined, {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </span>
-        }
-        illustration={sectionIllustration("attendance")}
-      />
+  /* ---------------------------------------------------------------
+     The desktop page, as four questions rather than one long column.
 
+     Scrolled end to end it was a hero banner, today's roster, a range
+     toolbar, five tiles, two charts, a row of device actions, a settings
+     panel and a paged table - so the answer to "who is late today" sat
+     nine sections away from the control that decides what late means.
+
+     The grouping is the one the phone layout already uses, so the two
+     tell the same story: Today is who is in now, Trends is how a range
+     went, Directory (an employee's own days instead) is one person, and
+     Device is the unit and the rule the rest of it is judged by.
+
+     Nothing below is recomputed or re-fetched. Every block is the one
+     the page already rendered, on the tab it belongs to.
+     --------------------------------------------------------------- */
+
+  const todayBoard = (
+    <>
       {/* Attendance for the chosen period, today by default. One request for
           the whole roster, so this is the part of the page that can answer
           "who is in" without being asked to fetch first.
@@ -1395,7 +1448,11 @@ const AttendancePage: React.FC = () => {
           setActiveRangeDays(null);
         }}
       />
+    </>
+  );
 
+  const rangeToolbar = (
+    <>
       {/* Range toolbar.
           One column on a phone. Laid out as a wrapping row it produced a
           150px date field, the word "to", another 150px field and a Fetch
@@ -1532,7 +1589,11 @@ const AttendancePage: React.FC = () => {
           )}
         </div>
       </div>
+    </>
+  );
 
+  const doorFeedback = (
+    <>
       {/* Door feedback. The button that triggers it is in the toolbar below. */}
       {(!currentUser || currentUser.role === "admin") &&
         (isUnlockingDoor || doorMessage) && (
@@ -1566,7 +1627,11 @@ const AttendancePage: React.FC = () => {
             )}
           </div>
         )}
+    </>
+  );
 
+  const summaryTiles = (
+    <>
       {/* Summary. Two different questions: an admin asks who is in today,
           an employee asks how their own range went. */}
       <AttendanceSummary
@@ -1599,7 +1664,7 @@ const AttendancePage: React.FC = () => {
                   label: "Late",
                   icon: <ClockIcon className="h-7 w-7" />,
                   value: rosterFetchedFor ? statusCounts.late : null,
-                  accent: "#b5650a",
+                  accent: statusColor("warning"),
                   caption: !rosterFetchedFor
                     ? "Not fetched yet"
                     : rosterTargets.length
@@ -1612,7 +1677,7 @@ const AttendancePage: React.FC = () => {
                   label: "Absent",
                   icon: <XCircleIcon className="h-7 w-7" />,
                   value: rosterFetchedFor ? statusCounts.absent : null,
-                  accent: "#b42318",
+                  accent: statusColor("danger"),
                   caption: !rosterFetchedFor
                     ? "Not fetched yet"
                     : rosterTargets.length
@@ -1625,7 +1690,7 @@ const AttendancePage: React.FC = () => {
                   label: "Work from home",
                   icon: <HomeIcon className="h-7 w-7" />,
                   value: rosterFetchedFor ? rosterWfhDays : null,
-                  accent: "#4c3fc7",
+                  accent: statusColor("remote"),
                   caption: !rosterFetchedFor
                     ? "Not fetched yet"
                     : "Approved days in this range",
@@ -1657,7 +1722,7 @@ const AttendancePage: React.FC = () => {
                   label: "Late",
                   icon: <ClockIcon className="h-7 w-7" />,
                   value: selfSummary ? selfSummary.lateDays : null,
-                  accent: "#b5650a",
+                  accent: statusColor("warning"),
                   caption: selfSummary
                     ? `Arrived after ${formatCutoff(
                         lateTimeSettings.effectiveCutoffTime ||
@@ -1669,7 +1734,7 @@ const AttendancePage: React.FC = () => {
                   label: "Absent",
                   icon: <XCircleIcon className="h-7 w-7" />,
                   value: selfSummary ? selfSummary.absentDays : null,
-                  accent: "#b42318",
+                  accent: statusColor("danger"),
                   caption: selfSummary
                     ? "Working days with no punch"
                     : "Not fetched yet",
@@ -1678,7 +1743,7 @@ const AttendancePage: React.FC = () => {
                   label: "Work from home",
                   icon: <HomeIcon className="h-7 w-7" />,
                   value: selfSummary ? selfSummary.wfhDays : null,
-                  accent: "#4c3fc7",
+                  accent: statusColor("remote"),
                   caption: selfSummary
                     ? "Approved days worked remotely"
                     : "Not fetched yet",
@@ -1686,7 +1751,11 @@ const AttendancePage: React.FC = () => {
               ]
         }
       />
+    </>
+  );
 
+  const trendOverview = (
+    <>
       {/* Overview: trend beside the current split */}
       <AttendanceOverview
         selected={statusFilter}
@@ -1738,11 +1807,11 @@ const AttendancePage: React.FC = () => {
                   count: statusCounts.onTime,
                   tone: themeAccent,
                 },
-                { label: "Late", count: statusCounts.late, tone: "#b5650a" },
+                { label: "Late", count: statusCounts.late, tone: statusColor("warning") },
                 {
                   label: "Absent",
                   count: statusCounts.absent,
-                  tone: "#b42318",
+                  tone: statusColor("danger"),
                 },
               ]
             : [
@@ -1754,117 +1823,26 @@ const AttendancePage: React.FC = () => {
                 {
                   label: "Late",
                   count: selfSummary?.lateDays ?? 0,
-                  tone: "#b5650a",
+                  tone: statusColor("warning"),
                 },
                 {
                   label: "Work from home",
                   count: selfSummary?.wfhDays ?? 0,
-                  tone: "#4c3fc7",
+                  tone: statusColor("remote"),
                 },
                 {
                   label: "Absent",
                   count: selfSummary?.absentDays ?? 0,
-                  tone: "#b42318",
+                  tone: statusColor("danger"),
                 },
               ]
         }
       />
+    </>
+  );
 
-      {/* Toolbar */}
-      {/* Two across on a phone rather than a wrapping row of pills that each
-          take a different fraction of the line. */}
-      <section
-        aria-label="Actions"
-        className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center"
-      >
-        {isAdmin && (
-        <button
-          type="button"
-          onClick={() => setShowDevicePanel((v) => !v)}
-          className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 sm:min-h-0 sm:justify-start"
-        >
-          <ServerIcon className="h-4 w-4" />
-          {machineStatus?.status === "connected"
-            ? `Connected to ${machineStatus.ip}`
-            : "Device not connected"}
-        </button>
-        )}
-
-        <div className="flex-1" />
-
-        {isAdmin && (
-          <>
-            <button
-              type="button"
-              onClick={handleUnlockDoor}
-              disabled={isUnlockingDoor}
-              className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 sm:min-h-0 sm:justify-start"
-            >
-              <LockOpenIcon className="h-4 w-4" />
-              Unlock door
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowDevicePanel(true);
-                setShowSettings(true);
-              }}
-              className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 sm:min-h-0 sm:justify-start"
-            >
-              <Cog6ToothIcon className="h-4 w-4" />
-              Late time
-            </button>
-          </>
-        )}
-        {isAdmin && (
-        <button
-          type="button"
-          onClick={() =>
-            fetchEmployees(selectedIP === "custom" ? customIP : selectedIP)
-          }
-          disabled={isFetchingEmployees}
-          className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 sm:min-h-0 sm:justify-start"
-        >
-          <ArrowPathIcon
-            className={`h-4 w-4 ${isFetchingEmployees ? "animate-spin" : ""}`}
-          />
-          Refresh
-        </button>
-        )}
-        <button
-          type="button"
-          onClick={exportRoster}
-          disabled={!rosterRows.length}
-          className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 sm:min-h-0 sm:justify-start"
-        >
-          <ArrowDownTrayIcon className="h-4 w-4" />
-          Export
-        </button>
-      </section>
-
-      <DeviceSettingsPanel
-        open={isAdmin && (showDevicePanel || showSettings)}
-        onClose={() => {
-          setShowDevicePanel(false);
-          setShowSettings(false);
-        }}
-        ip={selectedIP === "custom" ? customIP : selectedIP}
-        onIpChange={(next) => {
-          setSelectedIP("custom");
-          setCustomIP(next);
-        }}
-        connected={machineStatus?.status === "connected"}
-        connecting={isConnecting}
-        onConnect={handleConnect}
-        onDisconnect={handleDisconnect}
-        statusText={error || success || undefined}
-        settings={lateTimeSettings}
-        onSettingsChange={setLateTimeSettings}
-        onSaveSettings={() => updateLateTimeSettings(lateTimeSettings)}
-        canEditSettings={!currentUser || currentUser.role === "admin"}
-        formatCutoff={formatCutoff}
-      />
-
+  const rosterList = (
+    <>
       {/* The roster for an admin; an employee's own days for everyone else.
           Both are what the breakdown panel filters. */}
       <div ref={listRef} className="scroll-mt-4">
@@ -1891,6 +1869,178 @@ const AttendancePage: React.FC = () => {
           />
         )}
       </div>
+    </>
+  );
+
+  /** Re-reads the roster from the unit. Offered wherever that roster is. */
+  const refreshRosterButton = (
+    <button
+      type="button"
+      onClick={() =>
+        fetchEmployees(selectedIP === "custom" ? customIP : selectedIP)
+      }
+      disabled={isFetchingEmployees}
+      className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 sm:min-h-0 sm:justify-start"
+    >
+      <ArrowPathIcon
+        className={`h-4 w-4 ${isFetchingEmployees ? "animate-spin" : ""}`}
+      />
+      Refresh
+    </button>
+  );
+
+  /** What the list in front of you can be done with. */
+  const listActions = (
+    <section
+      aria-label="List actions"
+      className="flex flex-wrap items-center justify-end gap-2"
+    >
+      {isAdmin && refreshRosterButton}
+      <button
+        type="button"
+        onClick={exportRoster}
+        disabled={!rosterRows.length}
+        className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 sm:min-h-0 sm:justify-start"
+      >
+        <ArrowDownTrayIcon className="h-4 w-4" />
+        Export
+      </button>
+    </section>
+  );
+
+  /** What the unit itself can be told to do, shown inside its own card. */
+  const deviceActions = (
+    <>
+      <button
+        type="button"
+        onClick={handleUnlockDoor}
+        disabled={isUnlockingDoor}
+        className="flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 sm:min-h-0 sm:justify-start"
+      >
+        <LockOpenIcon className="h-4 w-4" />
+        Unlock door
+      </button>
+      {refreshRosterButton}
+    </>
+  );
+
+  const deviceSettings = (
+    <>
+      <DeviceSettingsPanel
+        open={isAdmin}
+        actions={deviceActions}
+        ip={selectedIP === "custom" ? customIP : selectedIP}
+        onIpChange={(next) => {
+          setSelectedIP("custom");
+          setCustomIP(next);
+        }}
+        connected={machineStatus?.status === "connected"}
+        connecting={isConnecting}
+        onConnect={handleConnect}
+        onDisconnect={handleDisconnect}
+        statusText={error || success || undefined}
+        settings={lateTimeSettings}
+        onSettingsChange={setLateTimeSettings}
+        onSaveSettings={() => updateLateTimeSettings(lateTimeSettings)}
+        canEditSettings={!currentUser || currentUser.role === "admin"}
+        formatCutoff={formatCutoff}
+      />
+    </>
+  );
+
+  return (
+    <div className="attendance-dashboard space-y-6 stagger-children">
+      {/* Page header. The section's identity only - the date range that
+          drives every figure below is a control, so it stays in the toolbar
+          under the banner where it sits next to what it filters. */}
+      <SectionHeader
+        variant="attendance"
+        eyebrow="Presence"
+        title="Attendance"
+        description="Punch records, hours worked and lateness across the range you pick below."
+        badge={
+          <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white ring-1 ring-inset ring-white/25">
+            {new Date(endDate + "T00:00:00").toLocaleDateString(undefined, {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+            })}
+          </span>
+        }
+        illustration={sectionIllustration("attendance")}
+      />
+      {/* One strip, the same segmented control the leave queue and the phone
+          layout use, so picking a view is the same gesture everywhere. */}
+      <div
+        role="tablist"
+        aria-label="Attendance views"
+        className="inline-flex flex-wrap gap-1 rounded-full border border-gray-200/60 bg-gray-100 p-1 dark:border-gray-700/60 dark:bg-gray-800/80"
+      >
+        {tabs.map((item) => {
+          const on = tab === item.key;
+          return (
+            <button
+              key={item.key}
+              type="button"
+              role="tab"
+              id={`attendance-tab-${item.key}`}
+              aria-selected={on}
+              aria-controls={`attendance-panel-${item.key}`}
+              onClick={() => openTab(item.key)}
+              className={`relative rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                on
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+              }`}
+            >
+              {on && (
+                <motion.span
+                  layoutId="attendance-view-pill"
+                  transition={spring}
+                  aria-hidden="true"
+                  className="absolute inset-0 rounded-full bg-white shadow-sm dark:bg-gray-700"
+                />
+              )}
+              <span className="relative z-10">{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Who is in, right now. */}
+      {panel("today", todayBoard)}
+
+      {/* How the range went: the figures, then the shape of them. */}
+      {panel(
+        "trends",
+        <>
+          {rangeToolbar}
+          {summaryTiles}
+          {trendOverview}
+        </>
+      )}
+
+      {/* One person - the roster for an admin, their own days for everyone
+          else. Both are what the breakdown on Trends filters. */}
+      {panel(
+        listTab,
+        <>
+          {rangeToolbar}
+          {listActions}
+          {rosterList}
+        </>
+      )}
+
+      {/* The unit, and the arrival rule the rest of the page is judged by. */}
+      {isAdmin &&
+        panel(
+          "device",
+          <>
+            {doorFeedback}
+            {deviceSettings}
+          </>
+        )}
 
       {/* Late hours live on their own page now (/attendance/late-time), which
           is where every late total, daily late record and roster ranking is

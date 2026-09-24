@@ -23,7 +23,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useTheme } from "../../context/ThemeContext";
-import { accentFor, accentSoftFor } from "../../lib/themeTokens";
+import { useThemeAccent } from "../../hooks/useThemeAccent";
 import { staggerContainer, staggerItem } from "../../lib/motion";
 import { relativeTime } from "../../lib/surfaces";
 import Avatar from "../../components/Avatar";
@@ -85,9 +85,9 @@ const PayrollDashboardPage: React.FC = () => {
   const chartMotion = useChartMotion();
   const { t } = useTranslation("payroll");
   const navigate = useNavigate();
-  const { colorScheme, isDark } = useTheme();
-  const accent = accentFor(colorScheme);
-  const accentSoft = accentSoftFor(colorScheme);
+  const { isDark } = useTheme();
+  const accent = useThemeAccent(600);
+  const accentSoft = useThemeAccent(400);
 
   const { state, rows, payableRows, totals, period, employees, employeesLoading } =
     usePayroll();

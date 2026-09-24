@@ -24,6 +24,7 @@ import { usersAPI } from "../services/api";
 import { showSuccessToast, showErrorToast } from "../utils/toastHelpers";
 import { panelSpring, staggerContainer, staggerItem } from "../lib/motion";
 import Modal from "../components/ui/Modal";
+import Select from "../components/ui/Select";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
 import { useStudioStore } from "../components/documentStudio/useStudioStore";
 import StudioOverviewCards from "../components/documentStudio/StudioOverviewCards";
@@ -208,6 +209,19 @@ const DocumentStudioPage: React.FC = () => {
 
   const previewEmployee =
     employees.find((e) => e._id === previewEmployeeId) ?? null;
+
+  /* An empty value is the placeholder run, so it is an option in the list
+     rather than a separate control to clear the picker with. */
+  const previewSubjects = useMemo(
+    () => [
+      { value: "", label: "Sample placeholders" },
+      ...employees.map((e) => ({
+        value: e._id,
+        label: `${e.name}${e.employeeId ? ` (${e.employeeId})` : ""}`,
+      })),
+    ],
+    [employees]
+  );
 
   const previewBody = useMemo(() => {
     if (!session) return "";
@@ -554,19 +568,13 @@ const DocumentStudioPage: React.FC = () => {
             <span className="font-medium text-gray-500 dark:text-gray-400">
               Preview with
             </span>
-            <select
+            <Select
               value={previewEmployeeId}
-              onChange={(e) => setPreviewEmployeeId(e.target.value)}
-              className="min-w-0 flex-1 rounded-full border border-gray-200 bg-white px-2 py-1 text-xs text-gray-800 outline-none sm:flex-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-            >
-              <option value="">Sample placeholders</option>
-              {employees.map((e) => (
-                <option key={e._id} value={e._id}>
-                  {e.name}
-                  {e.employeeId ? ` (${e.employeeId})` : ""}
-                </option>
-              ))}
-            </select>
+              onChange={setPreviewEmployeeId}
+              options={previewSubjects}
+              placeholder="Sample placeholders"
+              className="min-w-0 flex-1 sm:w-[240px] sm:flex-none"
+            />
             {employeesLoading && (
               <span className="text-gray-400">Loading employees...</span>
             )}

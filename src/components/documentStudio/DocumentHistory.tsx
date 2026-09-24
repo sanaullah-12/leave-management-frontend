@@ -107,7 +107,7 @@ const DocumentHistory: React.FC<Props> = ({
               options={[
                 { value: "all", label: "All statuses" },
                 { value: "draft", label: "Draft", dotColor: "#9ca3af" },
-                { value: "generated", label: "Generated", dotColor: "rgb(var(--blue-500))" },
+                { value: "generated", label: "Generated", dotColor: "rgb(var(--brand-500))" },
                 { value: "downloaded", label: "Downloaded", dotColor: "#10b981" },
                 { value: "printed", label: "Printed", dotColor: "#8b5cf6" },
               ]}

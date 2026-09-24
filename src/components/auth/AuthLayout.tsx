@@ -82,7 +82,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ activeTab, children }) => {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(38rem 30rem at 100% -5%, rgb(var(--blue-600) / 0.07), transparent 62%)",
+              "radial-gradient(38rem 30rem at 100% -5%, rgb(var(--brand-600) / 0.07), transparent 62%)",
           }}
         />
 

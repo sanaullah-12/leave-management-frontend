@@ -6,6 +6,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import PasswordInput from '../components/PasswordInput';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { authAPI } from '../services/api';
+import { setTokens } from '../services/tokenStore';
 
 import Button from "../components/ui/Button";
 interface VerifyInvitationForm {
@@ -112,7 +113,7 @@ const VerifyInvitationPage: React.FC = () => {
       });
 
       // Store token and user data
-      localStorage.setItem('token', response.data.token);
+      setTokens(response.data.token, response.data.refreshToken);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       
       setSuccess(true);
@@ -184,8 +185,8 @@ const VerifyInvitationPage: React.FC = () => {
                 {...register('password', {
                   required: 'Password is required',
                   minLength: {
-                    value: 6,
-                    message: 'Password must be at least 6 characters',
+                    value: 8,
+                    message: 'Password must be at least 8 characters',
                   },
                 })}
                 label="Create Password"

@@ -185,7 +185,7 @@ const MobileChartsTab: React.FC<Props> = ({
                 <div
                   className="h-full rounded-full transition-[width] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
                   style={{
-                    backgroundColor: "var(--accent)",
+                    backgroundColor: "var(--brand-solid)",
                     width:
                       stat.value <= 0
                         ? "6%"

@@ -1,6 +1,6 @@
 import React from "react";
 import { CARD, CARD_HOVER } from "../lib/surfaces";
-import { accentFor, accentSoftFor } from "../lib/themeTokens";
+import { useThemeAccent } from "../hooks/useThemeAccent";
 import { AccentEdge } from "../components/ui/CardAccents";
 import { StatCard, type StatAccent } from "../components/ui/StatCard";
 import SectionHeader from "../components/ui/SectionHeader";
@@ -128,7 +128,7 @@ import { LoadSwap } from "../components/ui/motion";
  *
  * Colour rules for this screen - only two families:
  *   1. The theme accent. `blue-*` utilities recolour per theme via
- *      design-system.css; `accentFor()` gives the matching hex for SVG.
+ *      design-system.css; `useThemeAccent()` gives the matching hex for SVG.
  *      Carries all data viz, icon chips, gauges and links.
  *   2. emerald / amber / red, only where the colour means something
  *      (approved / pending / rejected) and only on pills and dots.
@@ -315,15 +315,15 @@ const DashboardPage: React.FC = () => {
   const chartMotion = useChartMotion();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { colorScheme, isDark } = useTheme();
+  const { isDark } = useTheme();
   /* The same breakpoint the attendance page switches on, so the two never
      disagree about what counts as a phone. */
   const isPhoneLayout = useMediaQuery("(max-width: 1023px)");
   const { t } = useTranslation("dashboard");
   // Dates follow the chosen language, not the browser locale.
   const fmt = useFormatters();
-  const accent = accentFor(colorScheme);
-  const accentSoft = accentSoftFor(colorScheme);
+  const accent = useThemeAccent(600);
+  const accentSoft = useThemeAccent(400);
 
   // Recharts styles tooltips inline, so they can't pick up the dark-mode
   // classes. Build the palette here and hand it to every chart on the page.

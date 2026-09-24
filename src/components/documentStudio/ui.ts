@@ -33,9 +33,9 @@ export const TINT: Record<
     icon: "bg-red-500",
   },
   slate: {
-    chip: "bg-slate-100 text-slate-700 dark:bg-slate-500/10 dark:text-slate-300",
-    ring: "ring-slate-200/60 dark:ring-slate-500/20",
-    icon: "bg-slate-500",
+    chip: "bg-gray-100 text-gray-700 dark:bg-gray-500/10 dark:text-gray-300",
+    ring: "ring-gray-200/60 dark:ring-gray-500/20",
+    icon: "bg-gray-500",
   },
   violet: {
     chip: "bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300",

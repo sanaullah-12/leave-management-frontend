@@ -210,7 +210,7 @@ const MyLeaveActivityPage: React.FC = () => {
       <div className="space-y-4">
         <SectionHeading
           action={
-            <span className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-200/70 dark:bg-white/5 dark:text-gray-300 dark:ring-white/10">
+            <span className="rounded-lg bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600 ring-1 ring-inset ring-gray-200/70 dark:bg-white/5 dark:text-gray-300 dark:ring-white/10">
               {totalRemaining} of {totalAllocated} days left
             </span>
           }

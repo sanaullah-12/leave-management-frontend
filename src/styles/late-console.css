@@ -1,9 +1,21 @@
 /* ==========================================================================
    Attendance console
    --------------------------------------------------------------------------
-   A dark, self-contained surface for the late-arrivals report. It is the one
-   screen in Nexora that is a monitoring console rather than a form, and the
-   dark ground is what lets the delay pills carry severity at a glance.
+   A self-contained surface for the late-arrivals report. It is the one screen
+   in Nexora that is a monitoring console rather than a form, so it keeps its
+   own density and its own severity language - but not its own mode.
+
+   It used to be dark unconditionally: the page carried `force-dark`, which put
+   the app's dark token set on this subtree even while the rest of the app was
+   light, and about a dozen rules underneath painted white text and white-alpha
+   fills to match. That made Late arrivals the single screen that ignored the
+   user's choice - a light-mode user walked from a white attendance page into a
+   black one.
+
+   The mode is the app's now. Every value below is a token, so the console
+   inverts with everything else, and the severity pills keep their meaning on
+   either ground because they come off the status hues, which are already
+   declared per mode.
 
    Everything is scoped under `.lateconsole`, and the page background is only
    overridden while the page is mounted (see LateTimePage), so no other screen
@@ -11,38 +23,32 @@
    ========================================================================== */
 
 .lateconsole {
-  /* Ground and surfaces.
-
-     These mirror the app's DARK tokens by value rather than referencing
-     --app-bg / --glass-* directly, because the console stays dark in light
-     mode too: it is a monitoring screen, and its near-white text would be
-     unreadable if the ground followed the light theme. Keep them in step with
-     the html.dark block in index.css and the --glass-* block in
-     design-system.css. */
-  --lc-bg: #101219;
-  --lc-card: rgba(255, 255, 255, 0.055);
-  --lc-card-solid: #1b1e27;
-  --lc-line: rgba(255, 255, 255, 0.09);
-  --lc-line-soft: rgba(255, 255, 255, 0.05);
-  --lc-raised: rgba(255, 255, 255, 0.09);
-  --lc-sheen: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  --lc-drop:
-    0 2px 4px rgba(0, 0, 0, 0.62),
-    0 10px 24px -2px rgba(0, 0, 0, 0.6),
-    0 34px 64px -10px rgba(0, 0, 0, 0.8);
+  --lc-bg: var(--surface-base);
+  --lc-card: var(--glass-fill);
+  --lc-card-solid: var(--surface-raised);
+  --lc-line: var(--glass-edge);
+  --lc-line-soft: var(--border-subtle);
+  --lc-raised: var(--surface-hover);
+  --lc-sheen: var(--glass-sheen);
+  --lc-drop: var(--shadow-lg);
+  /* Table head, row hover and the empty trend column. These were white at 2.5
+     to 6 percent, which is nothing at all on a light card. */
+  --lc-wash: var(--surface-sunken);
+  --lc-wash-soft: var(--surface-hover);
 
   /* Text */
-  --lc-text: #e9eef7;
-  --lc-muted: #8e9bb3;
-  --lc-dim: #6b7996;
+  --lc-text: var(--text-primary);
+  --lc-muted: var(--text-muted);
+  --lc-dim: var(--text-faint);
 
   /* The console's accent is the app accent, so it repaints with the theme
      instead of printing a fixed teal on a purple app. The other three are
-     severity, are read as meaning rather than decoration, and so stay put. */
-  --lc-accent: rgb(var(--blue-400));
-  --lc-good: #34d399;
-  --lc-warn: #fbbf24;
-  --lc-bad: #fb7185;
+     severity - they are read as meaning rather than decoration, so they stay
+     on the status hues rather than following the theme. */
+  --lc-accent: var(--brand);
+  --lc-good: var(--success-text);
+  --lc-warn: var(--warning-text);
+  --lc-bad: var(--danger-text);
 
   color: var(--lc-text);
   font-variant-numeric: tabular-nums;
@@ -52,10 +58,10 @@
    a theme-tinted gradient on body::before; this replaces it, and the class is
    removed on unmount so the app's own background returns untouched. */
 html.late-console-page body::before {
-  background-color: #101219 !important;
+  background-color: var(--surface-base) !important;
   background-image:
-    radial-gradient(48rem 34rem at 88% -6%, rgb(var(--blue-500) / 0.16), transparent 60%),
-    radial-gradient(42rem 32rem at -6% 104%, rgb(var(--blue-600) / 0.14), transparent 62%) !important;
+    radial-gradient(48rem 34rem at 88% -6%, rgb(var(--brand-500) / 0.06), transparent 60%),
+    radial-gradient(42rem 32rem at -6% 104%, rgb(var(--brand-600) / 0.045), transparent 62%) !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -99,7 +105,7 @@ html.late-console-page body::before {
   line-height: 1.75rem;
   letter-spacing: -0.017em;
   font-weight: 600;
-  color: #fff;
+  color: var(--lc-text);
 }
 
 /* .text-card-title */
@@ -108,7 +114,7 @@ html.late-console-page body::before {
   line-height: 1.5rem;
   letter-spacing: -0.011em;
   font-weight: 600;
-  color: #fff;
+  color: var(--lc-text);
 }
 
 .lc-muted { color: var(--lc-muted); }
@@ -121,7 +127,7 @@ html.late-console-page body::before {
   line-height: 2rem;
   letter-spacing: -0.017em;
   font-weight: 600;
-  color: #fff;
+  color: var(--lc-text);
 }
 .lc-unit {
   font-size: 0.875rem;
@@ -140,7 +146,7 @@ html.late-console-page body::before {
   width: 2.75rem;
   flex: none;
   border-radius: 0.85rem;
-  background: rgba(45, 212, 191, 0.14);
+  background: var(--brand-soft);
   color: var(--lc-accent);
 }
 
@@ -162,7 +168,7 @@ html.late-console-page body::before {
   flex: none;
   border-radius: 50%;
   background: var(--lc-good);
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.16);
+  box-shadow: 0 0 0 3px var(--success-soft);
 }
 
 /* --------------------------------------------------------------------------
@@ -193,13 +199,13 @@ html.late-console-page body::before {
 .lc-segment button:hover { color: var(--lc-text); }
 .lc-segment button[aria-pressed="true"] {
   background: var(--lc-raised);
-  color: #fff;
+  color: var(--lc-text);
 }
 
 /* The shared DatePicker (components/ui/DatePicker) is used here as it is
-   everywhere else. Its trigger is painted for the app's light surfaces, so
-   only the trigger's colours are re-tinted for the dark ground - its layout,
-   calendar and behaviour are untouched. */
+   everywhere else. Only the trigger's fill and radius are restated, to sit on
+   the console's card rather than the app's - its layout, calendar and
+   behaviour are untouched. */
 .lateconsole .lc-datefield > button {
   background: var(--lc-card) !important;
   color: var(--lc-text) !important;
@@ -210,15 +216,15 @@ html.late-console-page body::before {
 .lateconsole .lc-datefield > button svg { color: var(--lc-dim) !important; }
 
 /* The shared StatCard (components/ui/StatCard) is used here as it is on every
-   other screen. It is painted for the app's light and dark themes; the console
-   is dark whatever the app theme is, so only its colours are re-tinted. Size,
-   ring and layout are untouched, so a KPI tile is the same tile everywhere. */
+   other screen. Only its fill is restated, so a tile reads as part of the
+   console's surface. Size, ring and layout are untouched, so a KPI tile is the
+   same tile everywhere. */
 .lateconsole .statcard {
   background: var(--lc-card) !important;
   box-shadow: none !important;
 }
 .lateconsole .statcard > span > span:first-child { color: var(--lc-muted) !important; }
-.lateconsole .statcard > span > span:nth-child(2) { color: #fff !important; }
+.lateconsole .statcard > span > span:nth-child(2) { color: var(--lc-text) !important; }
 
 /* --------------------------------------------------------------------------
    Severity pills - the delay column and the repeat counts
@@ -234,9 +240,9 @@ html.late-console-page body::before {
   font-size: 0.75rem;
   font-weight: 600;
 }
-.lc-pill-good { background: rgba(52, 211, 153, 0.14); color: var(--lc-good); }
-.lc-pill-warn { background: rgba(251, 191, 36, 0.14); color: var(--lc-warn); }
-.lc-pill-bad  { background: rgba(251, 113, 133, 0.14); color: var(--lc-bad); }
+.lc-pill-good { background: var(--success-soft); color: var(--lc-good); }
+.lc-pill-warn { background: var(--warning-soft); color: var(--lc-warn); }
+.lc-pill-bad  { background: var(--danger-soft); color: var(--lc-bad); }
 
 /* --------------------------------------------------------------------------
    Table
@@ -261,7 +267,7 @@ html.late-console-page body::before {
   padding: 0.7rem 1rem;
   text-align: left;
   white-space: nowrap;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--lc-wash);
   /* .text-overline */
   font-size: 0.6875rem;
   line-height: 1rem;
@@ -278,8 +284,8 @@ html.late-console-page body::before {
   white-space: nowrap;
 }
 .lc-table tbody tr { transition: background-color 0.15s ease; }
-.lc-table tbody tr:hover { background: rgba(255, 255, 255, 0.025); }
-.lc-name { color: #fff; font-weight: 500; }
+.lc-table tbody tr:hover { background: var(--lc-wash-soft); }
+.lc-name { color: var(--lc-text); font-weight: 500; }
 
 /* --------------------------------------------------------------------------
    Weekly trend - one column per weekday, height is that day's share
@@ -294,11 +300,11 @@ html.late-console-page body::before {
 }
 .lc-trend-bar {
   border-radius: 0.4rem 0.4rem 0.2rem 0.2rem;
-  background: linear-gradient(180deg, var(--lc-accent), rgb(var(--blue-500) / 0.25));
+  background: linear-gradient(180deg, var(--lc-accent), rgb(var(--brand-500) / 0.25));
   min-height: 0.25rem;
   transition: height 0.5s ease;
 }
-.lc-trend-bar-empty { background: rgba(255, 255, 255, 0.06); }
+.lc-trend-bar-empty { background: var(--lc-wash); }
 .lc-trend-labels {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -328,7 +334,7 @@ html.late-console-page body::before {
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
-.lc-row:hover { background: rgba(255, 255, 255, 0.04); }
+.lc-row:hover { background: var(--lc-wash-soft); }
 
 .lc-btn {
   display: inline-flex;

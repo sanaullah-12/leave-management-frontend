@@ -252,7 +252,7 @@ const LeaveDetailSheet: React.FC<Props> = ({
               <span
                 className="mt-1 h-[11px] w-[11px] shrink-0 rounded-full border-2"
                 style={{
-                  backgroundColor: "var(--accent)",
+                  backgroundColor: "var(--brand-solid)",
                   borderColor: "var(--accent)",
                 }}
               />
@@ -323,7 +323,7 @@ const LeaveDetailSheet: React.FC<Props> = ({
                 onClose();
               }}
               className="flex flex-1 items-center justify-center rounded-[13px] py-2.5 text-[13px] font-bold text-white active:opacity-85"
-              style={{ backgroundColor: "var(--accent)" }}
+              style={{ backgroundColor: "var(--brand-solid)" }}
             >
               Approve
             </button>

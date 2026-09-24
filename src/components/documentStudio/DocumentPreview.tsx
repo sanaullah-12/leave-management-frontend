@@ -142,6 +142,7 @@ const DocumentPreview: React.FC<Props> = ({
           style={{ width: PAGE_PX * scale, height: docHeight * scale }}
         >
           <iframe
+        sandbox="allow-same-origin"
             title="Document preview"
             srcDoc={html}
             scrolling="no"

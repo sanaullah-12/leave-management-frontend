@@ -25,25 +25,25 @@ const META: Record<
 > = {
   pending: {
     className:
-      "text-[#b5650a] bg-[#fdf0df] border-[#f5d9ae] dark:text-amber-300 dark:bg-amber-400/15 dark:border-amber-400/25",
+      "text-[var(--warning-text)] bg-[#fdf0df] border-[#f5d9ae] dark:text-amber-300 dark:bg-amber-400/15 dark:border-amber-400/25",
     Icon: ClockIcon,
     label: "Pending",
   },
   approved: {
     className:
-      "text-[#0f7a4c] bg-[#e4f5ec] border-[#bfe6d3] dark:text-emerald-300 dark:bg-emerald-400/15 dark:border-emerald-400/25",
+      "text-[var(--success-text)] bg-[#e4f5ec] border-[#bfe6d3] dark:text-emerald-300 dark:bg-emerald-400/15 dark:border-emerald-400/25",
     Icon: CheckCircleIcon,
     label: "Approved",
   },
   rejected: {
     className:
-      "text-[#b42318] bg-[#fbeaea] border-[#f3c6c3] dark:text-red-300 dark:bg-red-400/15 dark:border-red-400/25",
+      "text-[var(--danger-text)] bg-[#fbeaea] border-[#f3c6c3] dark:text-red-300 dark:bg-red-400/15 dark:border-red-400/25",
     Icon: XCircleIcon,
     label: "Rejected",
   },
   cancelled: {
     className:
-      "text-[#5c6470] bg-[#f1f3f6] border-[#dde1e7] dark:text-gray-300 dark:bg-white/10 dark:border-white/15",
+      "text-[var(--text-muted)] bg-[#f1f3f6] border-[#dde1e7] dark:text-gray-300 dark:bg-white/10 dark:border-white/15",
     Icon: MinusCircleIcon,
     label: "Cancelled",
   },
@@ -52,9 +52,31 @@ const META: Record<
 interface Props {
   status: string;
   compact?: boolean;
+  /**
+   * A dot in place of the icon, for the request list.
+   *
+   * At 12px a tick, a cross and a clock are three shapes competing with the
+   * word beside them, and a column of them reads as noise down a long table.
+   * The dot carries the colour and lets the label do the naming. Everywhere a
+   * badge stands alone - a card, a drawer header - the icon still earns its
+   * place, so it stays the default.
+   */
+  dot?: boolean;
 }
 
-const WfhStatusBadge: React.FC<Props> = ({ status, compact = false }) => {
+/** Dot fills, matched to each state's text colour. */
+const DOT: Record<string, string> = {
+  pending: "bg-amber-500",
+  approved: "bg-emerald-500",
+  rejected: "bg-red-500",
+  cancelled: "bg-gray-400",
+};
+
+const WfhStatusBadge: React.FC<Props> = ({
+  status,
+  compact = false,
+  dot = false,
+}) => {
   const meta = META[status] || META.pending;
   const { Icon } = meta;
 
@@ -64,7 +86,13 @@ const WfhStatusBadge: React.FC<Props> = ({ status, compact = false }) => {
         compact ? "px-1.5 py-0.5 text-[11px]" : "px-2.5 py-1 text-xs"
       } ${meta.className}`}
     >
-      <Icon className={compact ? "h-3 w-3" : "h-3.5 w-3.5"} />
+      {dot ? (
+        <span
+          className={`h-1.5 w-1.5 rounded-full ${DOT[status] || DOT.pending}`}
+        />
+      ) : (
+        <Icon className={compact ? "h-3 w-3" : "h-3.5 w-3.5"} />
+      )}
       {meta.label}
     </span>
   );

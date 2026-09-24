@@ -130,7 +130,7 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
              page, not a modal - the app stays visible and clickable. */
           <motion.div
             key="assistant-scrim"
-            className="fixed inset-0 z-[85] bg-gray-900/40 backdrop-blur-sm sm:hidden"
+            className="fixed inset-0 z-[85] bg-[var(--overlay-scrim)] backdrop-blur-sm sm:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -147,7 +147,7 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
             transition={panelSpring}
             style={{ transformOrigin: "bottom right" }}
             className={
-              "fixed z-[90] flex flex-col overflow-hidden border-gray-200/80 bg-gray-50/95 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-gray-900/95 " +
+              "fixed z-[90] flex flex-col overflow-hidden border-[var(--border-default)] bg-[var(--surface-overlay)]/95 shadow-2xl backdrop-blur-xl " +
               // Mobile: a sheet filling the screen - no border, because there
               // is no edge for one to sit on. Desktop: a card sitting just
               // above the launcher.
@@ -322,7 +322,7 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
                 disabled={!draft.trim()}
                 aria-label={STRINGS.send}
                 className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-full text-white shadow-sm transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
-                style={{ backgroundColor: "var(--accent)" }}
+                style={{ backgroundColor: "var(--brand-solid)" }}
               >
                 <PaperAirplaneIcon className="h-5 w-5 rtl:-scale-x-100" />
               </button>

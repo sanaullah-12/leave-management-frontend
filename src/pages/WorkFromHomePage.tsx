@@ -7,10 +7,13 @@ import {
   CheckCircleIcon,
   XCircleIcon,
 } from "@heroicons/react/24/outline";
+import { XCircleIcon as XCircleSolid } from "@heroicons/react/24/solid";
 import { StatCardRow } from "../components/ui/StatCard";
 import { useThemeAccent } from "../hooks/useThemeAccent";
 import { useAuth } from "../context/AuthContext";
 import Select from "../components/ui/Select";
+import Modal from "../components/ui/Modal";
+import InlineLoader from "../components/InlineLoader";
 import WfhRequestForm from "../components/workFromHome/WfhRequestForm";
 import WfhRequestTable from "../components/workFromHome/WfhRequestTable";
 import WfhTodayCard from "../components/workFromHome/WfhTodayCard";
@@ -26,6 +29,7 @@ import {
   type WfhRequest,
 } from "../hooks/useWorkFromHome";
 import { showSuccessToast, showErrorToast } from "../utils/toastHelpers";
+import { statusColor } from "../lib/themeTokens";
 
 /**
  * Work From Home
@@ -61,6 +65,9 @@ const WorkFromHomePage: React.FC = () => {
   // The request whose report is open. Held here rather than in the table so the
   // drawer is mounted once, outside the scrolling list it was opened from.
   const [openRequest, setOpenRequest] = useState<WfhRequest | null>(null);
+  /** The request being rejected, and the reason being typed for it. */
+  const [rejecting, setRejecting] = useState<WfhRequest | null>(null);
+  const [rejectionReason, setRejectionReason] = useState("");
 
   const filters = useMemo(
     () => (status === "all" ? {} : { status }),
@@ -95,23 +102,11 @@ const WorkFromHomePage: React.FC = () => {
     }
   };
 
-  const handleReview = async (
+  const applyReview = async (
     request: WfhRequest,
-    next: "approved" | "rejected"
+    next: "approved" | "rejected",
+    reviewComments = ""
   ) => {
-    // A rejection without a word back is the one that generates a follow-up
-    // question, so the reason is asked for here rather than left optional.
-    let reviewComments = "";
-    if (next === "rejected") {
-      const entered = window.prompt(
-        "Reason for rejecting this request (optional):",
-        ""
-      );
-      // Cancel on the prompt means cancel the rejection.
-      if (entered === null) return;
-      reviewComments = entered;
-    }
-
     setBusyId(request._id);
     try {
       await review.mutateAsync({ id: request._id, status: next, reviewComments });
@@ -120,12 +115,42 @@ const WorkFromHomePage: React.FC = () => {
           ? "Approved. Those days now read as work from home instead of absent."
           : `Request ${next}. The employee has been notified.`
       );
+      return true;
     } catch (error: any) {
       showErrorToast(
         error?.response?.data?.message || "Could not update the request"
       );
+      return false;
     } finally {
       setBusyId(null);
+    }
+  };
+
+  const handleReview = async (
+    request: WfhRequest,
+    next: "approved" | "rejected"
+  ) => {
+    // A rejection without a word back is the one that generates a follow-up
+    // question, so it is asked for in the app's own dialog - the same one the
+    // leave queue uses - rather than a browser prompt.
+    if (next === "rejected") {
+      setRejectionReason("");
+      setRejecting(request);
+      return;
+    }
+    await applyReview(request, "approved");
+  };
+
+  const handleRejectSubmit = async () => {
+    if (!rejecting) return;
+    if (!rejectionReason.trim()) {
+      showErrorToast("Please provide a reason for rejection");
+      return;
+    }
+    const done = await applyReview(rejecting, "rejected", rejectionReason.trim());
+    if (done) {
+      setRejecting(null);
+      setRejectionReason("");
     }
   };
 
@@ -148,7 +173,7 @@ const WorkFromHomePage: React.FC = () => {
       label: "Pending",
       value: stats?.pending ?? null,
       icon: <ClockIcon className="h-6 w-6" />,
-      tone: "#b5650a",
+      tone: statusColor("warning"),
       caption: isAdmin ? "Waiting for your decision" : "Waiting for approval",
     },
     {
@@ -162,7 +187,7 @@ const WorkFromHomePage: React.FC = () => {
       label: "Rejected",
       value: stats?.rejected ?? null,
       icon: <XCircleIcon className="h-6 w-6" />,
-      tone: "#b42318",
+      tone: statusColor("danger"),
       caption: "Not approved",
     },
   ];
@@ -264,7 +289,62 @@ const WorkFromHomePage: React.FC = () => {
       <WfhRequestDrawer
         request={openRequest}
         onClose={() => setOpenRequest(null)}
+        onReview={
+          isAdmin
+            ? async (request, next) => {
+                await handleReview(request, next);
+                setOpenRequest(null);
+              }
+            : undefined
+        }
+        busy={Boolean(openRequest) && busyId === openRequest?._id}
       />
+
+      {/* Rejection reason. Same dialog as the leave queue, so a reviewer
+          declining one request and then the other types into the same box. */}
+      <Modal
+        open={Boolean(rejecting)}
+        onClose={() => setRejecting(null)}
+        size="md"
+        icon={<XCircleSolid className="h-6 w-6" />}
+        iconClassName="bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400"
+        title="Reject this request"
+        description="Let the employee know why the day was declined."
+        footer={
+          <>
+            <button
+              onClick={() => setRejecting(null)}
+              disabled={review.isPending}
+              className="rounded-full border border-gray-200 px-3.5 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleRejectSubmit}
+              disabled={review.isPending}
+              className="rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-600/25 transition-all hover:bg-red-700 disabled:opacity-70"
+            >
+              {review.isPending ? (
+                <InlineLoader label="Rejecting..." />
+              ) : (
+                "Confirm reject"
+              )}
+            </button>
+          </>
+        }
+      >
+        <textarea
+          value={rejectionReason}
+          onChange={(event) => setRejectionReason(event.target.value)}
+          placeholder="Enter rejection reason..."
+          rows={4}
+          maxLength={500}
+          className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50/70 p-3.5 text-sm text-gray-900 outline-none transition-all focus:border-red-500 focus:bg-white focus:ring-4 focus:ring-red-500/10 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-100 dark:focus:bg-gray-900"
+        />
+        <div className="mt-1.5 text-right text-xs tabular-nums text-gray-400">
+          {rejectionReason.length}/500
+        </div>
+      </Modal>
     </div>
   );
 };

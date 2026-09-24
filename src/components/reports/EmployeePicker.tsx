@@ -99,7 +99,7 @@ const EmployeePicker: React.FC<Props> = ({ onSelect, note }) => {
         </ul>
       ) : isError ? (
         <div className="px-5 py-12 text-center">
-          <p className="text-sm text-[#b42318]">Could not load the roster.</p>
+          <p className="text-sm text-[var(--danger-text)]">Could not load the roster.</p>
           <button
             type="button"
             onClick={() => refetch()}

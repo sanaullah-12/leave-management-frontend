@@ -124,7 +124,7 @@ const MobileLeaveList: React.FC<Props> = ({
                   ? "border-transparent text-white"
                   : "border-gray-200 bg-[var(--card-surface)] text-gray-500 dark:border-white/10 dark:text-gray-400"
               }`}
-              style={active ? { backgroundColor: "var(--accent)" } : undefined}
+              style={active ? { backgroundColor: "var(--brand-solid)" } : undefined}
             >
               {f.label}
               <span

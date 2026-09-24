@@ -170,7 +170,7 @@ const Trace: React.FC = () => {
         </defs>
 
         {/* decorative branches + node dots */}
-        <g className="text-gray-400 dark:text-slate-600">
+        <g className="text-gray-400 dark:text-gray-600">
           {BRANCHES.map((b, i) => (
             <motion.path
               key={i}
@@ -205,7 +205,7 @@ const Trace: React.FC = () => {
           d={D}
           fill="none"
           stroke="currentColor"
-          className="text-gray-300 dark:text-slate-600"
+          className="text-gray-300 dark:text-gray-600"
           strokeWidth={3}
           strokeLinecap="round"
           strokeLinejoin="round"

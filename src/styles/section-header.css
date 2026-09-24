@@ -251,7 +251,7 @@
    printing a fixed blue on a repainted banner. */
 .sh-action-primary {
   background-color: #fff;
-  color: rgb(var(--blue-700));
+  color: rgb(var(--brand-700));
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.08);
 }
 

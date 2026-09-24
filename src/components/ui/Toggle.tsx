@@ -45,7 +45,7 @@ export const Toggle: React.FC<ToggleProps> = ({
       aria-labelledby={labelledBy}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full px-0.5 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgb(var(--blue-500))] disabled:cursor-not-allowed disabled:opacity-50 ${
+      className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full px-0.5 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgb(var(--brand-500))] disabled:cursor-not-allowed disabled:opacity-50 ${
         checked ? "bg-blue-600" : "bg-gray-300 dark:bg-gray-600"
       } ${className}`}
     >

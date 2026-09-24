@@ -20,40 +20,32 @@ import type { WfhRowStatus } from "../../hooks/useWfhSession";
  */
 
 /**
- * Each state is a class pair, not a fixed fill. The light half is the original
- * palette; the dark half is a low-alpha wash of the same hue with the label a
- * step lighter, because a #e4f5ec fill on a #1b1e27 card is not a pale tint of
- * green - it is a white chip.
+ * Each state takes its colour from the app's status tokens rather than from a
+ * hex chosen here. Those tokens are declared per mode, so one class string is
+ * correct on a white card and on a dark one - which is what the hand-written
+ * `dark:` half used to be doing, and why this component had accumulated its
+ * own #0f7a4c / #b5650a / #1a5fb4 set that did not match the greens, ambers
+ * and blues used by the leave badges it sits beside.
+ *
+ * `completed` is the odd one: it is not a success, a warning or a failure, it
+ * is "this is over". It takes the brand, which is the app's neutral-positive
+ * accent, so it follows the theme rather than pinning a blue.
  */
+const TONE = (name: "success" | "warning" | "danger" | "brand") => ({
+  className: `text-[var(--${name}-text)] bg-[var(--${name}-soft)] border-[var(--${name}-border)]`,
+  dot: `bg-[var(--${name}-text)] text-[var(--${name}-text)]`,
+});
 const META: Record<
   WfhRowStatus,
   { className: string; dot: string; Icon: typeof CheckCircleIcon; label: string }
 > = {
-  working: {
-    className:
-      "text-[#0f7a4c] bg-[#e4f5ec] border-[#bfe6d3] dark:text-emerald-300 dark:bg-emerald-400/15 dark:border-emerald-400/25",
-    dot: "bg-[#0f7a4c] text-[#0f7a4c] dark:bg-emerald-300 dark:text-emerald-300",
-    Icon: PlayCircleIcon,
-    label: "Working",
-  },
-  paused: {
-    className:
-      "text-[#b5650a] bg-[#fdf0df] border-[#f5d9ae] dark:text-amber-300 dark:bg-amber-400/15 dark:border-amber-400/25",
-    dot: "bg-[#b5650a] text-[#b5650a] dark:bg-amber-300 dark:text-amber-300",
-    Icon: PauseCircleIcon,
-    label: "Inactive",
-  },
-  completed: {
-    className:
-      "text-[#1a5fb4] bg-[#e8f0fb] border-[#c5d9f3] dark:text-blue-300 dark:bg-blue-400/15 dark:border-blue-400/25",
-    dot: "bg-[#1a5fb4] text-[#1a5fb4] dark:bg-blue-300 dark:text-blue-300",
-    Icon: CheckCircleIcon,
-    label: "Completed",
-  },
+  working: { ...TONE("success"), Icon: PlayCircleIcon, label: "Working" },
+  paused: { ...TONE("warning"), Icon: PauseCircleIcon, label: "Inactive" },
+  completed: { ...TONE("brand"), Icon: CheckCircleIcon, label: "Completed" },
   not_started: {
     className:
-      "text-[#5c6470] bg-[#f1f3f6] border-[#dde1e7] dark:text-gray-300 dark:bg-white/10 dark:border-white/15",
-    dot: "bg-[#5c6470] text-[#5c6470] dark:bg-gray-300 dark:text-gray-300",
+      "text-[var(--text-secondary)] bg-[var(--surface-hover)] border-[var(--border-default)]",
+    dot: "bg-[var(--text-muted)] text-[var(--text-muted)]",
     Icon: MinusCircleIcon,
     label: "Not Started",
   },

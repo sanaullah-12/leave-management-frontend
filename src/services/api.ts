@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getAccessToken, getRefreshToken, setTokens, clearTokens } from "./tokenStore";
 
 // Inline type definitions to avoid import issues
 interface LoginCredentials {
@@ -75,7 +76,7 @@ const attendanceApi = axios.create({
 
 // Request interceptor to add auth token (for both api instances)
 const requestInterceptor = (config: any) => {
-  const token = localStorage.getItem("token");
+  const token = getAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -86,27 +87,105 @@ const requestErrorInterceptor = (error: any) => {
   return Promise.reject(error);
 };
 
+/**
+ * Exchange the refresh token for a new pair. One refresh at a time per tab,
+ * and across tabs via the Web Locks API where available: the server rotates
+ * the refresh token on every use, so two tabs racing with the same token would
+ * otherwise be treated as a replay.
+ */
+let refreshInFlight: Promise<boolean> | null = null;
+
+const doRefresh = async (staleAccessToken: string | null): Promise<boolean> => {
+  // Another tab may already have refreshed while this one waited for the lock.
+  const current = getAccessToken();
+  if (current && current !== staleAccessToken) return true;
+
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return false;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const { data } = await axios.post(
+        `${API_BASE_URL}/auth/refresh`,
+        { refreshToken },
+        { timeout: 15000 }
+      );
+      setTokens(data.token, data.refreshToken);
+      return true;
+    } catch (err: any) {
+      // 409: a concurrent refresh won; pick up the tokens it stored.
+      if (err?.response?.status === 409) {
+        await new Promise((r) => setTimeout(r, 400));
+        const after = getAccessToken();
+        if (after && after !== staleAccessToken) return true;
+        continue;
+      }
+      return false;
+    }
+  }
+  return false;
+};
+
+const refreshSession = (staleAccessToken: string | null): Promise<boolean> => {
+  if (!refreshInFlight) {
+    const locks = (navigator as any).locks;
+    const run = () => doRefresh(staleAccessToken);
+    refreshInFlight = (locks?.request
+      ? locks.request("nexora-session-refresh", run)
+      : run()
+    ).finally(() => {
+      refreshInFlight = null;
+    });
+  }
+  return refreshInFlight as Promise<boolean>;
+};
+
+/** A fresh access token for callers outside axios (the socket handshake). */
+export const getFreshAccessToken = async (): Promise<string | null> => {
+  const token = getAccessToken();
+  if (!token) return null;
+  try {
+    const [, payload] = token.split(".");
+    const { exp } = JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/")));
+    if (typeof exp === "number" && exp * 1000 - Date.now() > 30_000) return token;
+  } catch {
+    // Unreadable token: try a refresh below.
+  }
+  return (await refreshSession(token)) ? getAccessToken() : null;
+};
+
+const endSession = () => {
+  clearTokens();
+  // Guard against redirect loops when we're already on the login screen.
+  if (!window.location.pathname.startsWith("/login")) {
+    window.location.href = "/login";
+  }
+};
+
 // Response interceptor to handle auth errors (for both api instances)
 const responseInterceptor = (response: any) => response;
-const responseErrorInterceptor = (error: any) => {
+const responseErrorInterceptor = async (error: any) => {
   const status = error.response?.status;
-  const url: string = error.config?.url || "";
+  const config = error.config || {};
+  const url: string = config.url || "";
 
   // Auth "probe" calls handle their own 401s:
   //  - /auth/login  → LoginPage shows "invalid credentials" (must NOT reload the page)
-  //  - /auth/profile → AuthContext validates the session on startup and logs out cleanly
-  const isAuthProbe =
-    url.includes("/auth/login") || url.includes("/auth/profile");
+  //  - /auth/refresh → handled inside refreshSession
+  const isAuthProbe = url.includes("/auth/login") || url.includes("/auth/refresh");
 
-  // A real 401 from a data endpoint means the session is dead → sign out.
+  // A 401 from a data endpoint means the access token expired or the session
+  // was revoked: refresh once and replay the request, or sign out.
   // 403 (authorization) is NOT a session problem and must never log the user out.
-  if (status === 401 && !isAuthProbe) {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    // Guard against redirect loops when we're already on the login screen.
-    if (!window.location.pathname.startsWith("/login")) {
-      window.location.href = "/login";
+  if (status === 401 && !isAuthProbe && !config._retried) {
+    const sent = String(config.headers?.Authorization || "").replace(/^Bearer /, "") || null;
+    if (await refreshSession(sent)) {
+      config._retried = true;
+      config.headers = { ...(config.headers || {}), Authorization: `Bearer ${getAccessToken()}` };
+      return axios.request(config);
     }
+    if (!url.includes("/auth/profile")) endSession();
+    else clearTokens();
   }
   return Promise.reject(error);
 };
@@ -139,6 +218,12 @@ export const authAPI = {
     api.post("/auth/register-company", data),
 
   getProfile: () => api.get("/auth/profile"),
+
+  /** Revoke this device's session on the server. */
+  logout: () => api.post("/auth/logout"),
+
+  /** Revoke every session this account has, on every device. */
+  logoutAll: () => api.post("/auth/logout-all"),
 
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     api.put("/auth/change-password", data),

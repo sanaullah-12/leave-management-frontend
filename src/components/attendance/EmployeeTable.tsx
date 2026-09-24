@@ -7,13 +7,14 @@ import {
   ChevronUpDownIcon,
   ArrowUpIcon,
   ArrowDownIcon,
-  EyeIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import StatusBadge from "./StatusBadge";
 import { CARD } from "../../lib/surfaces";
 
 import Input from "../ui/Input";
+import Select from "../ui/Select";
+import { statusColor } from "../../lib/themeTokens";
 /**
  * The employee roster with its filters, sorting and pagination.
  *
@@ -60,6 +61,22 @@ interface Props {
 }
 
 const PAGE_SIZE = 8;
+
+/* The same column heading and row tint the leave and work-from-home lists
+   use, so every queue in the app reads as one table. */
+const TH =
+  "px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400";
+const ROW =
+  "bg-blue-50/40 transition-colors hover:bg-blue-50/80 dark:bg-blue-500/[0.04] dark:hover:bg-blue-500/[0.09]";
+
+/* Dots repeat each status pill's colour, so the filter and the column it
+   filters name the same three states the same way. */
+const STATUS_OPTIONS = [
+  { value: "All", label: "All statuses" },
+  { value: "On time", label: "On time", dotColor: statusColor("success") },
+  { value: "Late", label: "Late", dotColor: statusColor("warning") },
+  { value: "Absent", label: "Absent", dotColor: statusColor("danger") },
+];
 
 const initialsOf = (name?: string) =>
   (name || "?")
@@ -110,6 +127,14 @@ const EmployeeTable: React.FC<Props> = ({
         )
       ).sort(),
     [allRows]
+  );
+
+  const departmentOptions = useMemo(
+    () => [
+      { value: "All", label: "All departments" },
+      ...departments.map((d) => ({ value: d, label: d })),
+    ],
+    [departments]
   );
 
   const rows = useMemo(() => {
@@ -182,7 +207,7 @@ const EmployeeTable: React.FC<Props> = ({
     const active = sort.key === sortKey;
     return (
       <th
-        className="whitespace-nowrap border-b border-gray-100 bg-gray-50/70 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:border-gray-700 dark:bg-gray-700/40 dark:text-gray-300"
+        className={TH}
         aria-sort={
           active ? (sort.dir === "asc" ? "ascending" : "descending") : "none"
         }
@@ -230,34 +255,26 @@ const EmployeeTable: React.FC<Props> = ({
           className="col-span-2 sm:min-w-[180px] sm:max-w-xs sm:flex-1"
         />
 
-        <select
-          value={department}
-          onChange={(e) => {
-            setDepartment(e.target.value);
-            setPage(1);
-          }}
-          aria-label="Filter by department"
-          className="min-h-[42px] w-full min-w-0 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 sm:min-h-0 sm:w-auto"
-        >
-          <option value="All">All departments</option>
-          {departments.map((d) => (
-            <option key={d} value={d}>
-              {d}
-            </option>
-          ))}
-        </select>
+        <div className="w-full min-w-0 sm:w-[190px]">
+          <Select
+            value={department}
+            onChange={(next) => {
+              setDepartment(next);
+              setPage(1);
+            }}
+            options={departmentOptions}
+            placeholder="All departments"
+          />
+        </div>
 
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          aria-label="Filter by status"
-          className="min-h-[42px] w-full min-w-0 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 sm:min-h-0 sm:w-auto"
-        >
-          <option value="All">All statuses</option>
-          <option value="On time">On time</option>
-          <option value="Late">Late</option>
-          <option value="Absent">Absent</option>
-        </select>
+        <div className="w-full min-w-0 sm:w-[170px]">
+          <Select
+            value={status}
+            onChange={setStatus}
+            options={STATUS_OPTIONS}
+            placeholder="All statuses"
+          />
+        </div>
 
         {filtersActive && (
           <button
@@ -348,31 +365,24 @@ const EmployeeTable: React.FC<Props> = ({
 
       {/* ---------------- Desktop ---------------- */}
       <div className="hidden table-scroll lg:block">
-        <table className="w-full min-w-[860px] border-collapse">
+        <table className="w-full min-w-[900px] border-collapse">
           <thead>
-            <tr>
+            <tr className="border-b border-gray-100 dark:border-gray-700/60">
               <SortHeader label="Employee" sortKey="name" />
               <SortHeader label="User ID" sortKey="employeeId" />
               <SortHeader label="Department" sortKey="department" />
               <SortHeader label="Check-in" sortKey="checkIn" />
-              <th className="whitespace-nowrap border-b border-gray-100 bg-gray-50/70 px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:border-gray-700 dark:bg-gray-700/40 dark:text-gray-300">
-                Days present
-              </th>
+              <th className={TH}>Days present</th>
               <SortHeader label="Status" sortKey="status" />
-              <th className="border-b border-gray-100 bg-gray-50/70 px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:border-gray-700 dark:bg-gray-700/40 dark:text-gray-300">
-                Actions
-              </th>
+              <th className={`${TH} text-right`}>Action</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-white dark:divide-gray-800/60">
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <tr key={i}>
+                <tr key={i} className={ROW}>
                   {Array.from({ length: 7 }).map((__, j) => (
-                    <td
-                      key={j}
-                      className="border-b border-gray-100 px-4 py-3 dark:border-gray-700"
-                    >
+                    <td key={j} className="px-6 py-4">
                       <div className="h-4 animate-pulse rounded bg-gray-100 dark:bg-gray-700" />
                     </td>
                   ))}
@@ -403,15 +413,15 @@ const EmployeeTable: React.FC<Props> = ({
                   onKeyDown={(e) => {
                     if (e.key === "Enter") onSelect(row.employee);
                   }}
-                  className="cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/40"
+                  className={`cursor-pointer ${ROW}`}
                 >
-                  <td className="border-b border-gray-100 px-4 py-3 dark:border-gray-700">
+                  <td className="whitespace-nowrap px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-xs font-semibold text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100/70 text-xs font-semibold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">
                         {initialsOf(row.employee.name)}
                       </span>
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+                        <p className="truncate text-[15px] font-semibold text-gray-900 dark:text-gray-100">
                           {row.employee.name || "Unnamed"}
                         </p>
                         <p className="truncate text-xs text-gray-500 dark:text-gray-400">
@@ -420,27 +430,47 @@ const EmployeeTable: React.FC<Props> = ({
                       </div>
                     </div>
                   </td>
-                  <td className="border-b border-gray-100 px-4 py-3 font-mono text-sm text-gray-700 dark:border-gray-700 dark:text-gray-200">
+
+                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium tabular-nums text-gray-900 dark:text-gray-100">
                     {row.employee.employeeId}
                   </td>
-                  <td className="border-b border-gray-100 px-4 py-3 text-sm text-gray-600 dark:border-gray-700 dark:text-gray-300">
-                    {row.employee.department || "-"}
+
+                  <td className="whitespace-nowrap px-6 py-4">
+                    {row.employee.department ? (
+                      <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-200/70 dark:bg-gray-700/50 dark:text-gray-200 dark:ring-gray-600/50">
+                        {row.employee.department}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-gray-400">-</span>
+                    )}
                   </td>
-                  <td className="border-b border-gray-100 px-4 py-3 font-mono text-sm text-gray-700 dark:border-gray-700 dark:text-gray-200">
-                    {row.checkIn || "-"}
+
+                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium tabular-nums text-gray-900 dark:text-gray-100">
+                    {row.checkIn || <span className="text-gray-400">-</span>}
                   </td>
-                  <td className="border-b border-gray-100 px-4 py-3 text-sm text-gray-600 dark:border-gray-700 dark:text-gray-300">
-                    {row.presentDays ?? "-"}
+
+                  <td className="whitespace-nowrap px-6 py-4">
+                    {row.presentDays === null ||
+                    row.presentDays === undefined ? (
+                      <span className="text-sm text-gray-400">-</span>
+                    ) : (
+                      <span className="text-sm font-semibold tabular-nums text-gray-900 dark:text-gray-100">
+                        {row.presentDays}{" "}
+                        {row.presentDays === 1 ? "day" : "days"}
+                      </span>
+                    )}
                   </td>
-                  <td className="border-b border-gray-100 px-4 py-3 dark:border-gray-700">
-                    <StatusBadge status={row.status} />
+
+                  <td className="whitespace-nowrap px-6 py-4">
+                    <StatusBadge status={row.status} dot />
                     {row.status === "Late" && row.lateDisplay && (
-                      <span className="ml-2 text-xs text-gray-400">
+                      <span className="ml-2 text-xs tabular-nums text-gray-400">
                         {row.lateDisplay}
                       </span>
                     )}
                   </td>
-                  <td className="border-b border-gray-100 px-4 py-3 text-right dark:border-gray-700">
+
+                  <td className="whitespace-nowrap px-6 py-4 text-right">
                     <button
                       type="button"
                       onClick={(e) => {
@@ -448,9 +478,9 @@ const EmployeeTable: React.FC<Props> = ({
                         onSelect(row.employee);
                       }}
                       aria-label={`View ${row.employee.name || "employee"}`}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                      className="inline-flex items-center rounded-full bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
                     >
-                      <EyeIcon className="h-4 w-4" />
+                      View
                     </button>
                   </td>
                 </motion.tr>

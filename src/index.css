@@ -1,5 +1,6 @@
+/* Tokens first: every file after this one resolves its colours from it. */
+@import "./styles/tokens.css";
 @import "./styles/design-system.css";
-@import "./styles/themes.css";
 @import "./styles/mobile-app.css";
 @tailwind base;
 @tailwind components;
@@ -18,7 +19,7 @@
   }
 
   body {
-    background-color: var(--surface);
+    background-color: var(--surface-base);
     color: var(--text-primary);
     min-height: 100vh;
     /* Body Text - Geist Regular 15px */
@@ -49,120 +50,52 @@
     }
   }
 
-  /* ============================================================ */
-  /* Theme-aware ambient app background */
-  /* A fixed layer behind all content. Soft radial "glows" use the */
-  /* active theme's accent scale (--blue-* is remapped per theme), */
-  /* so the background turns blue/green/purple/... with the theme.   */
-  /* Content surfaces above it are left transparent to reveal it.  */
-  /* ============================================================ */
-  /* Coordinated surface palette - background and cards share ONE blue-gray
-     tonal family. The card surface is exactly one gentle elevation step above
-     the app background, so cards read as extruded from the same sheet (soft-UI)
-     and sit harmoniously on the accent-tinted ambient background. */
-  :root {
-    --app-bg: #e9edf5;
-    --card-surface: #ffffff;
-    /* Legacy surface tokens now alias the coordinated palette so any element
-       using them recolors with the scheme. */
-    --surface: var(--app-bg);
-    --surface-elevated: var(--card-surface);
-  }
-  /* Dark ground and its one card step. Both sit in the same blue-grey family,
-     so the accent wash on the background reads as light on a surface rather
-     than as a colour cast fighting the cards. */
-  html.dark {
-    /* Read off the reference dashboard: a near-neutral dark ground with only a
-       trace of cool in it, and a card step about eight levels above it. The
-       purple in the reference is the theme's ambient wash on top of this, not
-       a tint baked into the tokens - which is why these stay near-neutral and
-       the ground still turns purple/green/teal with the theme. */
-    --app-bg: #101219;
-    --card-surface: #1b1e27;
-    --hairline: #2a2d38;
-  }
+  /* ============================================================
+     Ambient app background
+     ------------------------------------------------------------
+     A fixed layer behind all content: the page ground plus two soft
+     corner glows in the theme's brand hue, so the app is tinted by
+     the active scheme rather than sitting on flat grey. Content
+     surfaces above it are translucent, which is what lets the tint
+     show through a card instead of stopping at its edge.
 
+     The glows are deliberately faint. At the strength they used to
+     carry (0.16 and 0.11 in light, three stacked layers in dark)
+     they stopped reading as light on a surface and started reading
+     as brand colour painted behind every card - which is most of
+     what made the product feel over-saturated before you had looked
+     at a single component.
+
+     There is no longer a block of `html.dark .dark\:bg-gray-800 { ... }`
+     rules under this. Some forty of them existed to drag Tailwind's
+     default greys onto the app's real surface values, one utility and
+     one opacity step at a time - and they only covered the opacities
+     someone had happened to use. The neutral ramp is now declared per
+     mode in styles/tokens.css, so `dark:bg-gray-800` IS the card,
+     `dark:border-gray-700` IS the hairline, and every opacity variant
+     of them works without being enumerated.
+     ============================================================ */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background-color: var(--app-bg);
+    background-color: var(--surface-base);
     background-image:
-      radial-gradient(58rem 48rem at 92% -8%, rgb(var(--blue-400) / 0.16), transparent 62%),
-      radial-gradient(48rem 42rem at -8% 108%, rgb(var(--blue-500) / 0.11), transparent 58%);
+      radial-gradient(58rem 48rem at 92% -8%, rgb(var(--brand-400) / 0.07), transparent 62%),
+      radial-gradient(48rem 42rem at -8% 108%, rgb(var(--brand-500) / 0.05), transparent 58%);
     transition: background-color 0.4s ease;
   }
 
-  /* The accent-tinted corners the theme paints onto the ground. --blue-* is
-     remapped per theme, so this wash turns purple/green/teal with the theme
-     rather than printing a fixed blue behind every card. */
+  /* Both glows are pulled back hard for dark mode. They are set against the
+     ground, and the ground dropped from #191c24 to #0b0b0d - the same alpha
+     that read as a faint warmth on the old grey reads as orange paint behind
+     every card on this one. */
   html.dark body::before {
     background-image:
-      radial-gradient(58rem 50rem at 90% -8%, rgb(var(--blue-500) / 0.16), transparent 62%),
-      radial-gradient(50rem 44rem at -8% 108%, rgb(var(--blue-600) / 0.13), transparent 60%),
-      radial-gradient(72rem 72rem at 50% 124%, rgb(var(--blue-400) / 0.05), transparent 72%);
-  }
-
-  /* ============================================================ */
-  /* App-wide dark surface unification */
-  /* Remap every dark gray-800/900 surface utility to the shared  */
-  /* palette (card = 27 30 39, base = 16 18 25), so all pages,     */
-  /* panels and modals land on the same two steps as the shell.     */
-  /* Higher specificity (html.dark) beats Tailwind's (.dark)        */
-  /* rules; per-element opacity is preserved.                       */
-  /* Light mode already matches (white cards on the light base).   */
-  /* ============================================================ */
-  html.dark .dark\:bg-gray-800        { background-color: rgb(27 30 39 / var(--tw-bg-opacity, 1)); }
-  html.dark .dark\:bg-gray-800\/40    { background-color: rgb(27 30 39 / 0.4); }
-  html.dark .dark\:bg-gray-800\/50    { background-color: rgb(27 30 39 / 0.5); }
-  html.dark .dark\:bg-gray-800\/60    { background-color: rgb(27 30 39 / 0.6); }
-  html.dark .dark\:bg-gray-800\/70    { background-color: rgb(27 30 39 / 0.7); }
-  html.dark .dark\:bg-gray-800\/80    { background-color: rgb(27 30 39 / 0.8); }
-  html.dark .dark\:bg-gray-800\/90    { background-color: rgb(27 30 39 / 0.9); }
-
-  html.dark .dark\:bg-gray-900        { background-color: rgb(16 18 25 / var(--tw-bg-opacity, 1)); }
-  html.dark .dark\:bg-gray-900\/20    { background-color: rgb(16 18 25 / 0.2); }
-  html.dark .dark\:bg-gray-900\/30    { background-color: rgb(16 18 25 / 0.3); }
-  html.dark .dark\:bg-gray-900\/40    { background-color: rgb(16 18 25 / 0.4); }
-  html.dark .dark\:bg-gray-900\/50    { background-color: rgb(16 18 25 / 0.5); }
-  html.dark .dark\:bg-gray-900\/55    { background-color: rgb(16 18 25 / 0.55); }
-  html.dark .dark\:bg-gray-900\/60    { background-color: rgb(16 18 25 / 0.6); }
-  html.dark .dark\:bg-gray-900\/70    { background-color: rgb(16 18 25 / 0.7); }
-  html.dark .dark\:bg-gray-900\/80    { background-color: rgb(16 18 25 / 0.8); }
-  html.dark .dark\:bg-gray-900\/95    { background-color: rgb(16 18 25 / 0.95); }
-
-  /* Gradient card shells - remap the gray-800/900 colour stops to the same
-     palette (opacity + gradient positions preserved). */
-  html.dark .dark\:from-gray-800      { --tw-gradient-from: #1b1e27 var(--tw-gradient-from-position); }
-  html.dark .dark\:from-gray-800\/40  { --tw-gradient-from: rgb(27 30 39 / 0.4) var(--tw-gradient-from-position); }
-  html.dark .dark\:from-gray-800\/90  { --tw-gradient-from: rgb(27 30 39 / 0.9) var(--tw-gradient-from-position); }
-  html.dark .dark\:from-gray-900      { --tw-gradient-from: #101219 var(--tw-gradient-from-position); }
-  html.dark .dark\:from-gray-900\/20  { --tw-gradient-from: rgb(16 18 25 / 0.2) var(--tw-gradient-from-position); }
-  html.dark .dark\:to-gray-800        { --tw-gradient-to: #1b1e27 var(--tw-gradient-to-position); }
-  html.dark .dark\:to-gray-800\/50    { --tw-gradient-to: rgb(27 30 39 / 0.5) var(--tw-gradient-to-position); }
-  html.dark .dark\:to-gray-900\/20    { --tw-gradient-to: rgb(16 18 25 / 0.2) var(--tw-gradient-to-position); }
-
-  /* Shared component card classes (use @apply'd dark:bg-gray-800/900 which the
-     utility remap above can't reach) - hand them the glass fill explicitly, or
-     the opaque utility wins and the pane loses its transparency. */
-  html.dark .card,
-  html.dark .card-elevated,
-  html.dark .dashboard-card { background-color: var(--glass-fill); }
-
-  /* Hairlines. Tailwind's gray-700 (#374151) is a touch light against this
-     ground and reads as an outline rather than an edge, so borders come from
-     the same blue-grey family as the surfaces. Same for the divide-* pairs. */
-  html.dark .dark\:border-gray-600,
-  html.dark .dark\:border-gray-700,
-  html.dark .dark\:border-gray-800   { border-color: var(--hairline); }
-  html.dark .dark\:border-gray-700\/50,
-  html.dark .dark\:border-gray-700\/60,
-  html.dark .dark\:border-gray-700\/70 { border-color: rgb(42 45 56 / 0.7); }
-  html.dark .dark\:divide-gray-700 > :not([hidden]) ~ :not([hidden]),
-  html.dark .dark\:divide-gray-800 > :not([hidden]) ~ :not([hidden]) {
-    border-color: var(--hairline);
+      radial-gradient(58rem 50rem at 90% -8%, rgb(var(--brand-500) / 0.05), transparent 62%),
+      radial-gradient(50rem 44rem at -8% 108%, rgb(var(--brand-600) / 0.035), transparent 60%);
   }
 
   /* ============================= */
@@ -211,26 +144,45 @@
     font-variant-numeric: tabular-nums;
   }
 
-  * {
-    border-color: var(--border-color);
-  }
+  /* A `* { border-color: var(--border-color) }` rule used to sit here, and
+     `--border-color` was never defined anywhere in the project. An invalid
+     var() in an inherited property falls back to the inherited value, so every
+     border in the app that did not name a colour was drawn in `currentColor` -
+     the colour of the text beside it. That is why borders looked heavy on a
+     heading and invisible on muted copy, on the same card.
 
-  /* Scrollbar Styling */
+     Tailwind's `borderColor.DEFAULT` now points at `--border-default` (see
+     tailwind.config.js), so a bare `border` gets the hairline it was always
+     meant to get, and no catch-all selector is needed. */
+
+  /* Scrollbars. Sized and coloured from the surface ladder so they recede in
+     both modes instead of printing a light-grey track on a dark page. */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-gray-100;
+    background-color: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 rounded-full;
+    background-color: rgb(var(--gray-400) / 0.4);
+    border-radius: 9999px;
+    /* A transparent border with background-clip is the only way to inset a
+       webkit thumb; without it the bar touches both edges of the gutter. */
+    border: 2px solid transparent;
+    background-clip: content-box;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400;
+    background-color: rgb(var(--gray-400) / 0.65);
+  }
+
+  /* Firefox has no pseudo-elements for this, only the two properties. */
+  * {
+    scrollbar-color: rgb(var(--gray-400) / 0.4) transparent;
+    scrollbar-width: thin;
   }
 }
 
@@ -303,58 +255,17 @@
     text-transform: uppercase;
   }
 
-  /* Legacy button compatibility - Buttons: Geist SemiBold 15px */
-  .btn-primary {
-    @apply text-white font-semibold py-2.5 px-4 rounded-full shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:shadow-md;
-    font-size: 0.9375rem;
-    letter-spacing: -0.006em;
-    background-color: var(--color-primary-600);
-    border-color: var(--color-primary-600);
-  }
+  /* The `.btn-*` and `.input-field` recipes that used to sit here were a
+     second, conflicting definition of classes that design-system.css already
+     defines, and they set their colours from `--color-primary-600`,
+     `--color-primary-200` and friends - a token family that is not defined
+     anywhere in the project, so those declarations were dropped by the parser
+     and the buttons silently fell back to the other definition. Whichever one
+     won was decided by source order, not by intent.
 
-  .btn-primary:hover {
-    background-color: var(--color-primary-700);
-    border-color: var(--color-primary-700);
-  }
-
-  .btn-primary:focus {
-    box-shadow: 0 0 0 3px var(--color-primary-200);
-  }
-
-  .btn-secondary {
-    @apply font-semibold py-2.5 px-4 rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
-    font-size: 0.9375rem;
-    letter-spacing: -0.006em;
-    background-color: var(--surface-elevated);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-  }
-
-  .btn-secondary:hover {
-    background-color: var(--color-primary-50);
-    border-color: var(--color-primary-300);
-    color: var(--color-primary-700);
-  }
-
-  .btn-secondary:focus {
-    box-shadow: 0 0 0 3px var(--color-primary-200);
-  }
-
-  .btn-danger {
-    @apply bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-4 rounded-full shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 hover:shadow-md;
-    font-size: 0.9375rem;
-    letter-spacing: -0.006em;
-  }
-
-  /* Enhanced input field - Inputs: Geist Regular 15px */
-  .input-field {
-    @apply block w-full px-4 py-2.5 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:border-transparent shadow-sm;
-    font-size: 0.9375rem;
-    letter-spacing: -0.006em;
-    background-color: var(--surface-elevated);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-  }
+     There is now one definition of each, in design-system.css. `.input-field`
+     is gone entirely: it had no call sites left, because inputs go through
+     components/ui/Input.tsx. */
 
   /* ============================================================ */
   /* Touch sizing                                                  */
@@ -385,10 +296,6 @@
       font-size: 0.8125rem;
     }
 
-    .input-field {
-      min-height: 44px;
-    }
-
     /* Native controls: 16px is the threshold below which iOS Safari
        zooms the viewport on focus, which then leaves the page zoomed
        and horizontally scrollable. */
@@ -407,79 +314,43 @@
     }
   }
 
-  .input-field::placeholder {
-    color: var(--text-tertiary);
+  /* ============================================================
+     Tables
+     ------------------------------------------------------------
+     `.table-header`, `.table-header-cell`, `.table-row`,
+     `.form-group`, `.form-help` and `.loading-overlay` were removed:
+     none had a call site left, and `.loading-overlay` hardcoded a
+     white scrim that would have been a white flash over a dark page.
+     `.form-label` moved to design-system.css alongside the other
+     shared recipes, so a form control and its label are described in
+     one place.
+
+     The header sits on the sunken rung - a table head is a well the
+     rows sit above, which is the read whether the page is light or
+     dark, and it needs no border to say so.
+     ============================================================ */
+  .table {
+    @apply min-w-full divide-y;
   }
 
-  .input-field:focus {
-    border-color: var(--color-primary-500);
-    box-shadow: 0 0 0 3px var(--color-primary-200);
-  }
-
-  /* Enhanced card */
-  .card {
-    @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden;
-  }
-
-  /* Professional form styling */
-  .form-group {
-    @apply space-y-1;
-  }
-
-  .form-label {
-    @apply block font-medium mb-1.5;
+  .table-cell {
+    @apply px-6 py-4 whitespace-nowrap;
+    color: var(--text-primary);
     font-size: 0.875rem;
     letter-spacing: -0.003em;
-    color: var(--color-primary-700);
   }
 
   .form-error {
-    @apply text-red-600 mt-1.5;
+    @apply mt-1.5;
+    color: var(--danger-text);
     font-size: 0.8125rem;
     letter-spacing: -0.003em;
   }
 
-  .form-help {
-    @apply text-gray-500 mt-1.5;
-    font-size: 0.8125rem;
-    letter-spacing: -0.003em;
-  }
-
-  /* Professional table styling */
-  .table {
-    @apply min-w-full divide-y divide-gray-200 dark:divide-gray-700;
-  }
-
-  .table-header {
-    @apply bg-gray-50 dark:bg-gray-800;
-  }
-
-  /* Table Header - Geist SemiBold, 13px, subtle tracking (no shouty uppercase) */
-  .table-header-cell {
-    @apply px-6 py-3.5 text-left font-semibold text-gray-500 dark:text-gray-400;
-    font-size: 0.8125rem;
-    letter-spacing: -0.001em;
-  }
-
-  .table-row {
-    @apply bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors;
-  }
-
-  /* Table Cell - Geist Regular 14px */
-  .table-cell {
-    @apply px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100;
-    font-size: 0.875rem;
-    letter-spacing: -0.003em;
-  }
-
-  /* Loading states */
-  .loading-overlay {
-    @apply absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center;
-  }
-
-  /* Shimmer skeleton loader (Linear/Stripe style light sweep) */
+  /* Shimmer skeleton loader */
   .skeleton {
-    @apply relative overflow-hidden rounded-md bg-gray-200/80 dark:bg-gray-700/50;
+    @apply relative overflow-hidden rounded-md;
+    background-color: var(--surface-hover);
   }
   .skeleton::after {
     content: "";
@@ -509,40 +380,10 @@
     @apply skeleton w-10 h-10 rounded-full;
   }
 
-  /* ============================================================ */
-  /* Unified glass card system (app-wide) */
-  /* One frosted surface shared by the dashboard, reports, team,   */
-  /* and every legacy .card/.card-elevated/.dashboard-card. Use    */
-  /* .surface-card on any container to get the dashboard card look;*/
-  /* add .surface-card-interactive for the hover lift. The glass    */
-  /* recipe itself lives in design-system.css as --glass-*.         */
-  /* ============================================================ */
-  .surface-card,
-  .card,
-  .card-elevated,
-  .dashboard-card {
-    background-color: var(--glass-fill);
-    -webkit-backdrop-filter: var(--glass-blur);
-    backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-edge);
-    border-radius: 1rem; /* rounded-2xl */
-    box-shadow: var(--glass-sheen), var(--glass-drop);
-  }
-
-  /* Opt-in hover lift for clickable cards. The fill steps up with the lift so
-     the pane reads as coming toward the viewer, not just moving. */
-  .surface-card-interactive {
-    cursor: pointer;
-    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-      background-color 0.3s ease;
-    will-change: transform;
-  }
-  .surface-card-interactive:hover {
-    transform: translateY(-4px);
-    background-color: var(--glass-fill-strong);
-    box-shadow: var(--glass-sheen), var(--glass-drop-lifted);
-  }
+  /* The card surfaces - .surface-card, .glass-card, .glass-panel, .card,
+     .card-elevated, .dashboard-card - were defined here AND in
+     design-system.css, with different values. They now live only in
+     design-system.css, next to the buttons and badges they sit beside. */
 }
 
 /* ============================================================ */
@@ -701,35 +542,17 @@
 /* ---------------------------------------------------------------------------
    Attendance dashboard surface
    ---------------------------------------------------------------------------
-   The attendance page uses the softer card treatment from the dashboard design:
-   a larger corner radius, a hairline border carrying the edge instead of a
-   shadow, and a single quiet elevation step on hover.
+   This block used to re-style .card and .surface-card for one page, with its
+   own hardcoded border (rgb(243 244 246) light, rgb(55 65 81) dark) and its
+   own shadow and hover step. It is the reason the attendance screen did not
+   look like the rest of the product: same class names, different material,
+   and two more greys that answered to nothing.
 
-   Scoped to .attendance-dashboard on purpose. The same classes are used on every
-   other screen, so restyling .card globally would silently redesign pages this
-   change was never reviewed against.
+   The cards on this page now use the shared surface. The one thing worth
+   keeping was the heading weight - the tiles here are dense enough that the
+   page-level heading tracking reads as too loose above them.
 --------------------------------------------------------------------------- */
-.attendance-dashboard .card,
-.attendance-dashboard .surface-card {
-  border-radius: 1rem;
-  border: 1px solid rgb(243 244 246);
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
-  transition: box-shadow 150ms ease;
-}
-
-.attendance-dashboard .card:hover {
-  box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.06);
-}
-
-html.dark .attendance-dashboard .card,
-html.dark .attendance-dashboard .surface-card {
-  border-color: rgb(55 65 81);
-  box-shadow: none;
-}
-
-/* Section headings inside the dashboard sit closer in weight to the tiles than
-   the old page-level heading scale did. */
-.attendance-dashboard .card h3 {
+.attendance-dashboard .card h3,
+.attendance-dashboard .surface-card h3 {
   letter-spacing: -0.01em;
 }
-

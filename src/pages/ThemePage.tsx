@@ -24,15 +24,15 @@ const ThemePage: React.FC = () => {
       initial="initial"
       animate="animate"
     >
-      {/* Header. Its own banner is the live preview of what the controls
-          below do: the gradient and the animation both repaint the moment an
-          accent is picked. */}
+      {/* Header. Its own banner is a live preview of the controls below: it
+          is drawn from the same surface tokens, so it repaints the moment the
+          mode changes. */}
       <motion.div variants={staggerItem}>
         <SectionHeader
           variant="settings"
           eyebrow="Preferences"
           title="Customize"
-          description="Personalize the appearance and accent color of your workspace."
+          description="Choose how your workspace looks and which language it speaks."
           illustration={sectionIllustration("settings")}
         />
       </motion.div>
@@ -83,7 +83,7 @@ const ThemePage: React.FC = () => {
               Live preview
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Your logo and accents update instantly.
+              Your logo and surfaces update instantly.
             </p>
           </div>
         </div>

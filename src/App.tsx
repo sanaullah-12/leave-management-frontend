@@ -19,7 +19,6 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { LocaleProvider } from "./i18n/LocaleProvider";
 import RealtimeProvider from "./providers/RealtimeProvider";
 // import { NotificationProvider } from './components/NotificationSystem'; // Removed for Socket.IO implementation
-import "./styles/themes.css";
 import Layout from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
 import FirstLaunchGate from "./components/onboarding/FirstLaunchGate";
@@ -171,22 +170,25 @@ const App: React.FC = () => {
                   className: "max-w-[calc(100vw-1.5rem)]",
                   // Default styles will be overridden by individual toast functions
                   style: {},
+                  // The status tokens, so a toast icon is the same green as
+                  // every other success mark in the product and shifts with
+                  // light/dark like the rest of them.
                   success: {
                     iconTheme: {
-                      primary: "#10b981",
-                      secondary: "#ffffff",
+                      primary: "var(--success)",
+                      secondary: "var(--surface-overlay)",
                     },
                   },
                   error: {
                     iconTheme: {
-                      primary: "#ef4444",
-                      secondary: "#ffffff",
+                      primary: "var(--danger)",
+                      secondary: "var(--surface-overlay)",
                     },
                   },
                   loading: {
                     iconTheme: {
-                      primary: "#6b7280",
-                      secondary: "#ffffff",
+                      primary: "var(--text-muted)",
+                      secondary: "var(--surface-overlay)",
                     },
                   },
                 }}

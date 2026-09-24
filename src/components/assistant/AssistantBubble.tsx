@@ -121,22 +121,20 @@ const AssistantBubble: React.FC<Props> = ({
         whileHover={drag.dragging ? undefined : { scale: 1.06 }}
         whileTap={drag.dragging ? undefined : { scale: 0.94 }}
         className="pointer-events-auto relative grid h-14 w-14 place-items-center rounded-full text-white shadow-lg shadow-black/20 focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--accent-soft)]"
-        style={{ backgroundColor: "var(--accent)" }}
+        style={{ backgroundColor: "var(--brand-solid)" }}
       >
-        {/* A single slow pulse while the greeting is up, so the eye is drawn
-            to the launcher rather than left with a permanently animating dot. */}
-        <AnimatePresence>
-          {greetingVisible && !open && !reduce && (
-            <motion.span
-              className="absolute inset-0 rounded-full"
-              style={{ backgroundColor: "var(--accent)" }}
-              initial={{ opacity: 0.5, scale: 1 }}
-              animate={{ opacity: 0, scale: 1.6 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
-            />
-          )}
-        </AnimatePresence>
+        {/* A slow pulse while the greeting is up, so the eye is drawn to the
+            launcher rather than left with a permanently animating dot.
+            Driven by CSS (see .launcher-halo): the same loop written as a
+            framer transition wrote an inline style ~44 times a second on the
+            main thread, which is most of a frame's budget spent on a halo. */}
+        {greetingVisible && !open && !reduce && (
+          <span
+            aria-hidden="true"
+            className="launcher-halo absolute inset-0 rounded-full"
+            style={{ backgroundColor: "var(--brand-solid)" }}
+          />
+        )}
         <ChatBubbleLeftRightIcon className="relative h-6 w-6" />
       </motion.button>
       </div>

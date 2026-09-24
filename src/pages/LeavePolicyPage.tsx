@@ -188,7 +188,7 @@ const LeavePolicyPage: React.FC = () => {
       <div className={`${CARD} overflow-hidden`}>
         <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
           <div className="flex items-center gap-5">
-            <div className="flex h-20 w-20 flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-600/25">
+            <div className="flex h-20 w-20 flex-col items-center justify-center rounded-2xl bg-[var(--brand-solid)] text-[var(--brand-contrast)] shadow-md">
               <span className="text-3xl font-extrabold leading-none tabular-nums">
                 {coreTotal}
               </span>
@@ -214,7 +214,7 @@ const LeavePolicyPage: React.FC = () => {
             {CORE_TYPES.map((t) => (
               <div
                 key={t.key}
-                className="flex min-w-[68px] flex-col items-center rounded-xl bg-slate-100 px-4 py-3 dark:bg-white/5"
+                className="flex min-w-[68px] flex-col items-center rounded-xl bg-gray-100 px-4 py-3 dark:bg-white/5"
               >
                 <span className={`text-xl font-bold tabular-nums ${t.value}`}>
                   {shown[t.key] || 0}
@@ -324,7 +324,7 @@ const LeavePolicyPage: React.FC = () => {
             <h3 className="text-base font-bold text-gray-900 dark:text-white">
               Statutory & Special Leaves
             </h3>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:bg-white/5 dark:text-gray-500">
+            <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:bg-white/5 dark:text-gray-500">
               Separate from the {coreTotal}-day allocation
             </span>
           </div>
@@ -332,7 +332,7 @@ const LeavePolicyPage: React.FC = () => {
             {statutory.map((s) => (
               <div
                 key={s.name}
-                className="rounded-xl bg-slate-100 p-4 text-center dark:bg-white/5"
+                className="rounded-xl bg-gray-100 p-4 text-center dark:bg-white/5"
               >
                 <p className="text-2xl font-bold tabular-nums text-gray-900 dark:text-white">
                   {s.value}

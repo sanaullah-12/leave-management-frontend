@@ -1,11 +1,12 @@
 import React from "react";
+import type { LottieOptions, LottieRefCurrentProps } from "lottie-react";
 import { recolorLottie, stripBackdropLayers } from "../../../lib/lottieTheme";
 import { useThemeAccentRgb } from "../../../hooks/useThemeAccent";
 
 /**
  * A Lottie animation in a section banner.
  *
- * Four things it takes care of:
+ * Six things it takes care of:
  *
  *   - `lottie-react` is loaded lazily. The player is ~60kB and the animation
  *     JSON is usually larger; neither should be in the bundle for a screen
@@ -22,12 +23,33 @@ import { useThemeAccentRgb } from "../../../hooks/useThemeAccent";
  *     writes that class in an effect, so a render-time read returns the
  *     previous theme and the artwork lags a switch behind the banner it sits
  *     on.
+ *   - It draws to a canvas, not to SVG. Every banner in the app carries one of
+ *     these on a permanent loop, and the SVG renderer expresses each frame as
+ *     hundreds of attribute writes on live DOM nodes - measured at ~2,200
+ *     mutations a second on the dashboard alone, which is style recalc, layout
+ *     and paint for the whole document on every frame. The canvas renderer
+ *     draws the same frames into one bitmap that the rest of the page never
+ *     has to reason about. Subframes are off for the same reason: the
+ *     animation then ticks at the frame rate it was authored at rather than at
+ *     whatever rate the display offers.
+ *   - It runs only while it can actually be seen. Off-screen, on a breakpoint
+ *     that hides the banner artwork, or in a background tab, the player is
+ *     paused rather than drawing frames nobody is looking at.
  *
  * A reduced-motion preference stops the animation on its first frame rather
  * than hiding it, so the artwork is still there, just still.
  */
 
-const Lottie = React.lazy(() => import("lottie-react"));
+/**
+ * `lottie-react` types its default export for the SVG renderer only - the
+ * component's props are `LottieOptions<"svg">`, which rejects both
+ * `renderer="canvas"` and the canvas renderer's own settings. The runtime
+ * passes every option straight through to lottie-web, so the cast restates
+ * the generic the package hard-codes rather than papering over a mismatch.
+ */
+const Lottie = React.lazy(() => import("lottie-react")) as React.ComponentType<
+  LottieOptions<"canvas">
+>;
 
 export interface LottieIllustrationProps {
   /** A parsed Lottie animation. */
@@ -70,16 +92,73 @@ const LottieIllustration: React.FC<LottieIllustrationProps> = ({
 
   const still = prefersReducedMotion();
 
+  const hostRef = React.useRef<HTMLDivElement>(null);
+  const lottieRef = React.useRef<LottieRefCurrentProps | null>(null);
+  const onScreenRef = React.useRef(true);
+
+  /**
+   * Play only while the artwork is both on screen and in a foreground tab.
+   *
+   * An element hidden by a breakpoint (`hidden lg:block` on the banner's
+   * artwork slot) reports an empty rectangle, so a phone pauses on the same
+   * path as a scrolled-away banner with no separate media query.
+   */
+  const sync = React.useCallback(() => {
+    const player = lottieRef.current;
+    if (!player || still) return;
+    if (onScreenRef.current && document.visibilityState === "visible") {
+      player.play();
+    } else {
+      player.pause();
+    }
+  }, [still]);
+
+  React.useEffect(() => {
+    const host = hostRef.current;
+    if (!host || still) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        onScreenRef.current = entry.isIntersecting;
+        sync();
+      },
+      // Start a beat before the banner is reached, so scrolling up to it does
+      // not show a frozen frame catching up.
+      { rootMargin: "96px" }
+    );
+    observer.observe(host);
+    document.addEventListener("visibilitychange", sync);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", sync);
+    };
+  }, [still, sync]);
+
   return (
-    <React.Suspense fallback={<div className={className}>{fallback}</div>}>
-      <Lottie
-        animationData={animation as never}
-        loop={!still}
-        autoplay={!still}
-        className={className}
-        rendererSettings={{ preserveAspectRatio: "xMidYMid meet" }}
-      />
-    </React.Suspense>
+    <div ref={hostRef} className={className}>
+      <React.Suspense fallback={<>{fallback}</>}>
+        <Lottie
+          lottieRef={lottieRef}
+          animationData={animation as never}
+          loop={!still}
+          autoplay={!still}
+          renderer="canvas"
+          className="h-full w-full"
+          onDOMLoaded={() => {
+            // Whole frames only - see the note on subframes above.
+            lottieRef.current?.setSubframe(false);
+            sync();
+          }}
+          rendererSettings={{
+            preserveAspectRatio: "xMidYMid meet",
+            // Without this the canvas is laid out in CSS pixels and drawn at
+            // one device pixel each, which is visibly soft on any retina or
+            // scaled display.
+            dpr: typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1,
+          }}
+        />
+      </React.Suspense>
+    </div>
   );
 };
 

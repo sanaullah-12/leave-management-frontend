@@ -253,13 +253,13 @@ const GlobalSearch: React.FC<Props> = ({
                             layoutId={reduce ? undefined : "global-search-active"}
                             transition={spring}
                             aria-hidden="true"
-                            className="absolute inset-0 rounded-xl bg-[rgb(var(--blue-600))]/10"
+                            className="absolute inset-0 rounded-xl bg-[rgb(var(--brand-600))]/10"
                           />
                         )}
                         <span
                           className={`relative z-10 grid h-7 w-7 shrink-0 place-items-center rounded-lg transition-colors ${
                             isActive
-                              ? "bg-[rgb(var(--blue-600))] text-white"
+                              ? "bg-[rgb(var(--brand-600))] text-white"
                               : "bg-black/[0.04] text-gray-500 dark:bg-white/10 dark:text-gray-400"
                           }`}
                         >

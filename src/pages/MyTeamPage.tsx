@@ -64,7 +64,7 @@ const Chip: React.FC<{ icon: React.ReactNode; children: React.ReactNode }> = ({
   icon,
   children,
 }) => (
-  <span className="flex min-w-0 items-center gap-2 rounded-lg bg-slate-50 px-2 py-1.5 ring-1 ring-inset ring-gray-200/70 dark:bg-white/[0.04] dark:ring-white/10">
+  <span className="flex min-w-0 items-center gap-2 rounded-lg bg-gray-50 px-2 py-1.5 ring-1 ring-inset ring-gray-200/70 dark:bg-white/[0.04] dark:ring-white/10">
     <span className="flex-none text-blue-500 dark:text-blue-300">{icon}</span>
     <span className="h-4 w-px flex-none bg-gray-200 dark:bg-white/10" />
     <span className="truncate text-xs font-semibold text-gray-700 dark:text-gray-200">
@@ -323,7 +323,7 @@ const MyTeamPage: React.FC = () => {
                         className={`inline-flex flex-none items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset ${
                           active
                             ? "bg-emerald-50 text-emerald-600 ring-emerald-200/70 dark:bg-emerald-400/10 dark:text-emerald-300 dark:ring-emerald-400/25"
-                            : "bg-slate-100 text-gray-500 ring-gray-200/70 dark:bg-white/5 dark:text-gray-400 dark:ring-white/10"
+                            : "bg-gray-100 text-gray-500 ring-gray-200/70 dark:bg-white/5 dark:text-gray-400 dark:ring-white/10"
                         }`}
                       >
                         <span
@@ -365,7 +365,7 @@ const MyTeamPage: React.FC = () => {
                 </p>
 
                 {/* The allocation, as one panel so the three read as a set. */}
-                <div className="relative mt-2.5 grid grid-cols-3 divide-x divide-gray-200/70 rounded-2xl bg-gradient-to-br from-slate-50 to-blue-100/70 p-3 ring-1 ring-inset ring-gray-200/70 dark:divide-white/10 dark:from-white/[0.04] dark:to-blue-500/25 dark:ring-white/10">
+                <div className="relative mt-2.5 grid grid-cols-3 divide-x divide-gray-200/70 rounded-2xl bg-gradient-to-br from-gray-50 to-blue-100/70 p-3 ring-1 ring-inset ring-gray-200/70 dark:divide-white/10 dark:from-white/[0.04] dark:to-blue-500/25 dark:ring-white/10">
                   <Stat
                     icon={<SunIcon className="h-4 w-4" />}
                     label="Annual"

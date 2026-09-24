@@ -2,9 +2,8 @@
  * Re-colouring a Lottie animation to the app's theme.
  *
  * A downloaded animation arrives with whatever palette its author chose. On a
- * banner painted in the theme accent that palette is simply someone else's -
- * the stock announcement animation is orange and rust, which fights a blue
- * gradient and would fight every other scheme the theme picker offers.
+ * banner painted in the theme accent that palette is simply someone else's,
+ * and two palettes on one surface read as a mistake rather than as artwork.
  *
  * So the colours are remapped on load. The rule is hue-only:
  *

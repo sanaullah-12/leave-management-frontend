@@ -48,11 +48,11 @@ const StepProgress: React.FC<StepProgressProps> = ({
       <div className="relative mt-3 h-2 overflow-hidden rounded-full bg-gray-200/80 dark:bg-gray-700/60">
         {determinate ? (
           <div
-            className="h-full rounded-full bg-gradient-to-r from-blue-500 to-emerald-500 transition-[width] duration-500 ease-out"
+            className="h-full rounded-full bg-[var(--brand)] transition-[width] duration-500 ease-out"
             style={{ width: `${pct}%` }}
           />
         ) : (
-          <span className="animate-indeterminate bg-gradient-to-r from-blue-500 to-emerald-500" />
+          <span className="animate-indeterminate bg-[var(--brand)]" />
         )}
       </div>
       {determinate && (

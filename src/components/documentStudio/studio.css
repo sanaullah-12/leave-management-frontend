@@ -15,7 +15,7 @@
 
 /* Placeholder chip when a token lands in the document */
 .ds-editable span[data-token] {
-  background: var(--accent-soft, rgba(37, 99, 235, 0.12));
+  background: var(--brand-soft);
   border-radius: 3px;
   padding: 0 3px;
 }
@@ -23,5 +23,5 @@
 /* Empty-body helper text */
 .ds-editable:empty::before {
   content: "Start typing your document...";
-  color: #9ca3af;
+  color: var(--text-faint);
 }

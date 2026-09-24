@@ -409,7 +409,7 @@ const MorphScreen: React.FC<{
     <div className="fixed inset-0 z-[120]">
       <motion.div
         aria-hidden="true"
-        className="absolute inset-0 bg-black/50 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-[var(--overlay-scrim)] backdrop-blur-[2px]"
         style={{ opacity: scrimOpacity }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

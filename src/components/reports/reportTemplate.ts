@@ -25,8 +25,8 @@ const INK = "#111827";
 const MUTED = "#6b7280";
 const FAINT = "#9ca3af";
 const LINE = "#e5e7eb";
-const ACCENT = "#2563eb";
-const ACCENT_DARK = "#1d4ed8";
+const ACCENT = "#ed5f0c";
+const ACCENT_DARK = "#c24c0a";
 const WASH = "#f8fafc";
 
 /**
@@ -394,7 +394,7 @@ function monthlyChart(model: ReportModel): string {
             m.days || ""
           }</div>
   <div style="width:24px;height:${h}px;border-radius:6px 6px 2px 2px;
-    background:${m.days > 0 ? `linear-gradient(180deg, #60a5fa, ${ACCENT})` : "#e5e7eb"};"></div>
+    background:${m.days > 0 ? `linear-gradient(180deg, #ff9147, ${ACCENT})` : "#e5e7eb"};"></div>
 </div>`;
         })
         .join("")}

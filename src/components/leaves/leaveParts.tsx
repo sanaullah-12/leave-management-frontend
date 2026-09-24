@@ -1,4 +1,5 @@
 import React from "react";
+import { formatRequestDate } from "../../lib/requestList";
 import {
   ClockIcon,
   CheckCircleIcon,
@@ -199,3 +200,6 @@ export const MonthRail: React.FC<{ leave: LeaveRow }> = ({ leave }) => {
     </div>
   );
 };
+
+/** Kept as the dialog's single-date printer; the shape lives in lib. */
+export const formatLeaveDate = (value?: string) => formatRequestDate(value);

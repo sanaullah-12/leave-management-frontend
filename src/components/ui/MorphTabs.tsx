@@ -67,8 +67,8 @@ export function MorphTabs<T extends string>({
       aria-label={ariaLabel}
       className={`flex ${
         well
-          ? "gap-1 rounded-[14px] border border-gray-200 bg-black/[0.03] p-1 dark:border-white/10 dark:bg-white/[0.05]"
-          : "inline-flex gap-0.5 rounded-lg bg-gray-100 p-0.5 dark:bg-gray-700/50"
+          ? "gap-1 rounded-[14px] border border-[var(--border-default)] bg-[var(--surface-sunken)] p-1"
+          : "inline-flex gap-0.5 rounded-lg bg-[var(--surface-sunken)] p-0.5"
       } ${className}`}
     >
       {options.map((option) => {
@@ -102,7 +102,7 @@ export function MorphTabs<T extends string>({
                 } ${
                   well
                     ? ""
-                    : "bg-white shadow-sm dark:bg-gray-900"
+                    : "bg-[var(--surface-raised)] shadow-sm"
                 }`}
                 style={
                   well

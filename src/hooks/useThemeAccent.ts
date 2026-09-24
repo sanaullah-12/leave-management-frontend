@@ -3,22 +3,27 @@ import { useCallback, useEffect, useState } from "react";
 /**
  * Reading the app's accent at runtime.
  *
- * The app repaints its accent by swapping `--blue-*` on <html>, so components
- * can normally just use the themed `blue-*` utilities. These hooks exist for
- * the places that cannot:
+ * The accent lives as `--brand-*` (aliased `--blue-*`) on <html>, so components
+ * can normally just use the themed `blue-*`/`brand-*` utilities. These hooks
+ * exist for the places that cannot:
  *
  *   - helpers such as AccentEdge build gradient stops by concatenating an
  *     alpha suffix onto the colour (`${color}66`), which produces invalid CSS
- *     if the colour is `rgb(var(--blue-600))` rather than a hex - the gradient
+ *     if the colour is `rgb(var(--brand-600))` rather than a hex - the gradient
  *     silently fails and the accent disappears;
  *   - `recolorLottie` needs real channel values to rotate an animation's
  *     palette onto the accent hue.
  *
- * Both read through a MutationObserver rather than off a React value.
- * ThemeContext applies the theme class in an effect, and a parent's effect
- * runs *after* its children's, so anything that reads the variable during
- * render - or even in a child effect - sees the previous theme's accent and
- * stays one switch behind. Watching the attribute is what makes the value
+ * Both read the variable rather than holding a literal, which is what keeps
+ * the hex stated in exactly one place - styles/tokens.css - instead of being
+ * copied into a dozen components that then drift from it.
+ *
+ * The MutationObserver is what it is because the accent used to be one of ten
+ * selectable hues applied as a class in ThemeContext's effect, and a parent's
+ * effect runs *after* its children's - so anything reading the variable during
+ * render, or even in a child effect, saw the previous theme and stayed one
+ * switch behind. The accent is fixed now, but the class on <html> still moves
+ * for light/dark, and watching it is still what makes a value read this way
  * correct no matter when it changes.
  */
 
@@ -54,7 +59,7 @@ function useAccentSubscription(read: () => void) {
  *
  * @param step Which rung of the accent scale, e.g. 600.
  */
-export function useThemeAccent(step: number = 600, fallback = "#2563eb") {
+export function useThemeAccent(step: number = 600, fallback = "#ed5f0c") {
   const [hex, setHex] = useState(fallback);
 
   useAccentSubscription(
@@ -82,7 +87,7 @@ export function useThemeAccent(step: number = 600, fallback = "#2563eb") {
  */
 export function useThemeAccentRgb(
   step: number = 600,
-  fallback: [number, number, number] = [37 / 255, 99 / 255, 235 / 255]
+  fallback: [number, number, number] = [237 / 255, 95 / 255, 12 / 255]
 ): [number, number, number] {
   const [rgb, setRgb] = useState<[number, number, number]>(fallback);
 

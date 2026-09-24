@@ -17,10 +17,11 @@ import { DUR, EASE, pressSpring } from "../../lib/motion";
  * transparent while a hairline accent border and the accent-tinted icon take
  * over. A non-empty field grows a round clear button on the trailing edge.
  *
- * Every colour is an app token rather than a fixed hex: the shell is
- * --card-surface (the same sheet Select, DatePicker and the cards sit on), the
- * hairline is the app's gray-200/white-10 pair, and the focus accent is
- * --blue-*, so the field recolours with the theme like everything else.
+ * Every colour is a semantic token rather than a fixed hex or a raw palette
+ * step: the shell is --surface-input, the hairline is --border-default, the
+ * focus accent is --brand and the invalid state is --danger. All four are
+ * declared per mode in styles/tokens.css, so the field is correct in light and
+ * dark and recolours with the theme without a single `dark:` variant.
  *
  * Sizing is the caller's: `className` lands on the shell, so `w-64`, `h-9`,
  * `max-w-sm` and friends work there. `inputSize` only picks the default
@@ -239,13 +240,20 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           />
 
           {/* The shell. Filled at rest, transparent behind an accent hairline
-              on focus - the border is always there so focus costs no reflow. */}
+              on focus - the border is always there so focus costs no reflow.
+
+              The fill is --surface-input, not --card-surface. An input drawn
+              in exactly the card's own tone has no edge of its own and reads
+              as a line of text that happens to have a border round it; in
+              dark mode it disappeared into the card entirely. The input token
+              is a rung off the card in both modes, which is what makes a form
+              scannable as a set of fields. */}
           <span
             aria-hidden
-            className={`pointer-events-none absolute inset-0 -z-10 rounded-full border bg-[var(--card-surface)] shadow-[0_1px_4px_rgba(0,0,0,0.16)] transition-colors duration-200 peer-focus:bg-transparent ${
+            className={`pointer-events-none absolute inset-0 -z-10 rounded-full border bg-[var(--surface-input)] transition-colors duration-200 peer-focus:bg-[var(--surface-raised)] ${
               error
-                ? "border-red-500"
-                : "border-gray-200/70 peer-focus:border-[rgb(var(--blue-500))] dark:border-white/10"
+                ? "border-[var(--danger)]"
+                : "border-[var(--border-default)] peer-focus:border-[var(--brand)]"
             } ${disabled ? "opacity-60" : ""}`}
           />
 
@@ -256,12 +264,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               be doing so. */}
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 scale-[0.97] rounded-full opacity-0 ring-4 ring-[rgb(var(--blue-500))]/15 transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] peer-focus:scale-100 peer-focus:opacity-100"
+            className="pointer-events-none absolute inset-0 -z-10 scale-[0.97] rounded-full opacity-0 ring-4 ring-[var(--focus-ring)] transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] peer-focus:scale-100 peer-focus:opacity-100"
           />
 
           {Icon && (
             <Icon
-              className={`pointer-events-none absolute top-1/2 -translate-y-1/2 text-gray-400 transition-[color,transform] duration-200 peer-focus:scale-110 peer-focus:text-[rgb(var(--blue-500))] dark:text-gray-500 ${size.icon} ${size.left}`}
+              className={`pointer-events-none absolute top-1/2 -translate-y-1/2 text-gray-400 transition-[color,transform] duration-200 peer-focus:scale-110 peer-focus:text-[var(--brand)] dark:text-gray-500 ${size.icon} ${size.left}`}
             />
           )}
 
@@ -277,7 +285,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               animate={{ opacity: 1, scale: 1 }}
               whileTap={reduce ? undefined : { scale: 0.85 }}
               transition={pressSpring}
-              className={`tap-target absolute top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-[rgb(var(--blue-500))] text-white transition-opacity hover:opacity-90 ${size.right}`}
+              className={`tap-target absolute top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--brand-solid)] text-white transition-opacity hover:opacity-90 ${size.right}`}
             >
               <svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor">
                 <path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4z" />

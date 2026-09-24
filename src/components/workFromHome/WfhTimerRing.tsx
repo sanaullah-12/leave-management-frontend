@@ -1,4 +1,5 @@
 import React, { useId } from "react";
+import { statusColor } from "../../lib/themeTokens";
 
 /**
  * The work timer, drawn as a ring.
@@ -41,8 +42,7 @@ const RADIUS = (SIZE - STROKE) / 2 - 4;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 /** Amber for a stopped clock, matching WfhSessionStatusBadge's "Inactive". */
-const PAUSED = { from: "#f59e0b", to: "#b5650a" };
-const DONE = { from: "#3b82f6", to: "#1a5fb4" };
+const PAUSED = { from: "#f59e0b", to: statusColor("warning") };
 
 const WfhTimerRing: React.FC<Props> = ({
   progress,
@@ -62,7 +62,10 @@ const WfhTimerRing: React.FC<Props> = ({
     tone === "paused"
       ? PAUSED
       : tone === "done"
-      ? DONE
+      ? // A finished clock is the accent too, read the other way round: the
+        // arc runs from the solid end to the soft one, so "done" is the same
+        // colour as "running" without being the same sweep.
+        { from: accent, to: accentSoft }
       : { from: accentSoft, to: accent };
 
   // A day with no planned hours has nothing to be a fraction of. A token arc
