@@ -9,6 +9,18 @@ updates:
       security:
         applies-to: security-updates
         patterns: ["*"]
+    ignore:
+      # The ESLint toolchain only works as a set (eslint 8 <-> react-hooks 4 <->
+      # react-refresh 0.4). Single-package bumps fail `npm install` with ERESOLVE,
+      # so these are upgraded together by hand. Security fixes still come through.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@eslint/js"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint-plugin-react-hooks"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint-plugin-react-refresh"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
