@@ -200,6 +200,8 @@ export function useDraggableWidget(storageKey: string, options: Options = {}) {
       },
     },
     dragging,
+    /** Current translation from the CSS anchor, for widgets that track it. */
+    offset,
     /** True if the gesture that just ended was a drag, not a click. */
     didDrag: () => moved.current,
     resetPosition,

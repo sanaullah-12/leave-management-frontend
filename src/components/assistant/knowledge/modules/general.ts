@@ -13,7 +13,7 @@ const general: KnowledgeModule = {
   primaryRoute: "/",
   routes: ["/"],
   summary:
-    "The Dashboard is your daily overview - leave balances, pending requests, upcoming time off, team activity and the latest announcements, all on one screen.",
+    "The Dashboard is your daily overview. It has Overview, Charts and Activity tabs covering leave balances, pending requests, who is present, late, absent, on leave or working remotely today, public holidays, and the latest announcements.",
   quickActions: [
     { label: "Open Dashboard", to: "/", icon: "navigate" },
     { label: "Announcements", to: "/announcements", icon: "megaphone" },
@@ -26,9 +26,9 @@ const general: KnowledgeModule = {
       aliases: ["what does this app do", "what is this system"],
       keywords: ["nexora", "hrms", "about", "overview", "system"],
       answer:
-        "Nexora is your company's HRMS - one place for leave, attendance, people, payroll, documents and employee feedback.",
+        "Nexora is your company's HRMS. It is one place for leave, attendance, lateness, time changes, work from home, people, payroll, documents and employee feedback.",
       steps: [
-        "Use the icon rail on the left to move between areas: Home, Leave, Team, Attendance, Payroll, Documents and Voice.",
+        "Use the icon rail on the left to move between areas: Home, Leave, Team, Attendance, WFH, Payroll, Documents and Voice. Which areas you see depends on your role.",
         "Each rail icon opens a panel listing the pages inside that area.",
         "The Dashboard is your daily summary; everything else lives one click away.",
       ],
@@ -46,9 +46,9 @@ const general: KnowledgeModule = {
       answer:
         "Navigation is a two-part sidebar: an icon rail for areas, and a panel listing the pages inside the selected area.",
       steps: [
-        "Click an icon in the left rail to switch area - Home, Leave, Team, Attendance, Payroll, Documents, Voice or Settings.",
-        "Pick a page from the panel that opens beside the rail.",
-        "On mobile, tap the menu button in the top-left to slide the same navigation in.",
+        "Click an icon in the left rail to switch area: Home, Leave, Team, Attendance, WFH, Payroll, Documents, Voice or Settings.",
+        "Pick a page from the panel that opens beside the rail. Attendance, for example, holds Attendance, Late Time and Time Changes.",
+        "On mobile, use the bottom tab bar. The centre button is Apply Leave, and \"More\" opens everything else.",
       ],
       tips: [
         "The double-arrow button at the bottom of the rail collapses the panel when you want more room.",
@@ -63,11 +63,14 @@ const general: KnowledgeModule = {
       aliases: ["is there a search", "keyboard shortcut for search"],
       keywords: ["search", "find", "shortcut", "ctrl k", "cmd k", "quick"],
       answer:
-        "There is a search box at the top of the navigation panel that filters every page you have access to.",
+        "The search box in the header finds any page you have access to. It searches pages and settings, not employees or records.",
       steps: [
-        "Press Ctrl + K (Cmd + K on Mac) from anywhere in the app.",
-        "Type part of a page name - for example \"payslip\" or \"policy\".",
+        "Press Ctrl + K (Cmd + K on Mac) from anywhere in the app, or click the header search.",
+        "Type part of a page name or a common word. For example, \"wfh\" finds Work From Home, \"tardy\" finds Late Time and \"correction\" finds Time Changes.",
         "Click a result to jump straight there.",
+      ],
+      tips: [
+        "On smaller screens the same search sits at the top of the navigation panel.",
       ],
       featured: true,
     },
@@ -80,10 +83,14 @@ const general: KnowledgeModule = {
       answer:
         "The Dashboard is a live summary of everything that needs your attention today.",
       steps: [
-        "Leave balances and how much of your allowance is left.",
-        "Pending requests - yours to track, or your team's to approve.",
-        "Upcoming approved leave and who else is out.",
-        "The most recent company announcements.",
+        "Overview: leave balances, pending requests, today's attendance and the latest announcements.",
+        "Team Availability: who is Present, Late, Absent, On Leave or Working Remotely today.",
+        "Charts: Leave by Type and Leave Trends.",
+        "Activity: recent activity across the team, plus upcoming public holidays.",
+      ],
+      tips: [
+        "Employees also get a Quick Apply card to request leave straight from the dashboard.",
+        "Use \"Enable notifications\" on the dashboard to get browser alerts.",
       ],
       actions: [{ label: "Open Dashboard", to: "/", icon: "navigate" }],
       related: ["announcements.read", "leave.apply"],
@@ -104,6 +111,23 @@ const general: KnowledgeModule = {
       actions: [
         { label: "Open Notifications", to: "/notifications", icon: "navigate" },
       ],
+    },
+    {
+      id: "general.install",
+      module: "general",
+      question: "Can I install Nexora as an app?",
+      aliases: ["download the app", "install on my phone", "get app", "desktop app"],
+      keywords: ["install", "app", "download", "phone", "mobile", "desktop", "pwa"],
+      answer:
+        "Yes. Nexora can be installed on your computer or phone and opens in its own window like a normal app.",
+      steps: [
+        "Press \"Get app\" in the header.",
+        "Choose \"Install now\" and confirm in your browser's prompt.",
+      ],
+      tips: [
+        "Turn on browser notifications from the dashboard so alerts reach you even when the app is closed.",
+      ],
+      related: ["general.notifications"],
     },
   ],
 };

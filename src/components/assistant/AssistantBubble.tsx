@@ -6,7 +6,7 @@
  * of the assistant that speaks first, so it is also the only part with a
  * dismissal - the rules for when it may appear live in `assistantService`.
  */
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useDraggableWidget } from "../../hooks/useDraggableWidget";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChatBubbleLeftRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
@@ -19,6 +19,8 @@ interface Props {
   greeting: string;
   onOpen: () => void;
   onDismissGreeting: () => void;
+  /** Receives the launcher's viewport rect whenever it settles somewhere new. */
+  onAnchorChange?: (rect: DOMRect) => void;
 }
 
 const AssistantBubble: React.FC<Props> = ({
@@ -27,6 +29,7 @@ const AssistantBubble: React.FC<Props> = ({
   greeting,
   onOpen,
   onDismissGreeting,
+  onAnchorChange,
 }) => {
   const reduce = useReducedMotion();
 
@@ -58,6 +61,29 @@ const AssistantBubble: React.FC<Props> = ({
   }, []);
 
   const drag = useDraggableWidget("assistantLauncherPosition", { keepClear });
+
+  /* Report where the launcher is so the panel can open beside it. Mid-drag the
+     transform is applied with no transition, so the rect is already final;
+     otherwise wait out the 160ms settle transition before measuring. */
+  const launcherRef = useRef<HTMLButtonElement>(null);
+  const { x, y } = drag.offset;
+  useEffect(() => {
+    if (!onAnchorChange) return;
+    const measure = () => {
+      const el = launcherRef.current;
+      if (el) onAnchorChange(el.getBoundingClientRect());
+    };
+    if (drag.dragging) {
+      measure();
+      return;
+    }
+    const id = window.setTimeout(measure, 180);
+    window.addEventListener("resize", measure);
+    return () => {
+      window.clearTimeout(id);
+      window.removeEventListener("resize", measure);
+    };
+  }, [x, y, drag.dragging, open, onAnchorChange]);
 
   return (
     // On phones the bubble must clear the bottom tab bar (52px + safe area)
@@ -104,8 +130,22 @@ const AssistantBubble: React.FC<Props> = ({
       </AnimatePresence>
 
       {/* ---------------- Launcher ---------------- */}
-      <div className="pointer-events-auto" {...drag.handleProps}>
+      <div className="pointer-events-auto relative" {...drag.handleProps}>
+      {/* The aura sits beside the button, not inside it: framer's scale gives
+          the button its own stacking context, so a child could not be painted
+          behind the button face. */}
+      <motion.span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        initial={reduce ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.5 }}
+      >
+        <span className="assistant-aura" data-active={open} />
+        <span className="assistant-ring" />
+      </motion.span>
       <motion.button
+        ref={launcherRef}
         type="button"
         onClick={() => {
           // Releasing after a drag must not also open the panel.

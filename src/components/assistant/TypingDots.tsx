@@ -28,7 +28,7 @@ const TypingDots: React.FC = () => {
           [0, 1, 2].map((i) => (
             <motion.span
               key={i}
-              className="h-1.5 w-1.5 rounded-full"
+              className="assistant-dot-glow h-1.5 w-1.5 rounded-full"
               style={{ backgroundColor: "var(--brand-solid)" }}
               animate={{ opacity: [0.3, 1, 0.3], y: [0, -3, 0] }}
               transition={{

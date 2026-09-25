@@ -27,6 +27,9 @@ export interface LateEntry {
   isLate: boolean;
   lateMinutes: number;
   lateDisplay: string | null;
+  /** An approved time change set this day's arrival; punchIn is that time. */
+  timeCorrected?: boolean;
+  machineCheckInDisplay?: string;
 }
 
 export interface LateSummary {

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import StatusBadge from "./StatusBadge";
+import { LateDayTimeChange } from "./TimeChangeAction";
 import type { RosterDayRow, RosterTotals } from "./RosterTables";
 import { byArrival, groupByStatus } from "./rosterGrouping";
 import { spring } from "../../lib/motion";
@@ -231,6 +232,24 @@ const PersonRow: React.FC<{ row: RosterDayRow }> = ({ row }) => {
               {row.checkIn}
             </span>
             <StatusBadge status={row.status} compact />
+          </div>
+        )}
+
+        {/* The viewer's own late day offers the change right under it. */}
+        {hasArrival && (
+          <div className="mt-2 empty:hidden">
+            <LateDayTimeChange
+              day={{
+                employeeCode: row.employeeId,
+                date: row.date,
+                dateDisplay: row.dateDisplay,
+                isLate: row.status === "Late",
+                arrival: row.checkIn,
+                lateMinutes: row.lateMinutes,
+                corrected: row.timeCorrected,
+                machineCheckInDisplay: row.machineCheckInDisplay,
+              }}
+            />
           </div>
         )}
       </div>

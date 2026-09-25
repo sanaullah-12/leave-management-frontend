@@ -16,6 +16,7 @@ import Avatar from "../components/Avatar";
 import DatePicker from "../components/ui/DatePicker";
 import { StatCardRow } from "../components/ui/StatCard";
 import useListRowMotion from "../hooks/useListRowMotion";
+import { LateDayTimeChange } from "../components/attendance/TimeChangeAction";
 import "../styles/late-console.css";
 
 /**
@@ -95,6 +96,18 @@ const Empty: React.FC<{ message: string }> = ({ message }) => (
   </div>
 );
 
+/** One of the viewer's own late days, in the shape the time change reads. */
+const ownLateDay = (row: LateEntry) => ({
+  date: row.date,
+  dateDisplay: row.dateDisplay,
+  isLate: row.isLate,
+  arrival: row.punchIn,
+  lateMinutes: row.lateMinutes,
+  cutoffTime: row.officeCutoff,
+  corrected: row.timeCorrected,
+  machineCheckInDisplay: row.machineCheckInDisplay,
+});
+
 /**
  * Late arrivals as a table.
  *
@@ -113,7 +126,9 @@ const LateTable: React.FC<{
   withEmployee: boolean;
   onSelect?: (employeeId: string) => void;
   emptyMessage: string;
-}> = ({ rows, withEmployee, onSelect, emptyMessage }) => {
+  /** The viewer's own record: each late day offers a time change. */
+  withTimeChange?: boolean;
+}> = ({ rows, withEmployee, onSelect, emptyMessage, withTimeChange = false }) => {
   // Declared above the empty-list return: hooks cannot sit after it.
   const phoneRow = useListRowMotion();
   const tableRow = useListRowMotion(true);
@@ -154,6 +169,11 @@ const LateTable: React.FC<{
                 </span>
                 <DelayPill minutes={row.lateMinutes} label={row.lateDisplay} />
               </button>
+              {withTimeChange && (
+                <div className="flex justify-end px-4 pb-3 empty:hidden">
+                  <LateDayTimeChange day={ownLateDay(row)} />
+                </div>
+              )}
             </motion.li>
           );
         })}
@@ -172,6 +192,7 @@ const LateTable: React.FC<{
               {/* The record has no free-text reason. The time the day was
                   judged against is the fact that explains the delay. */}
               <th>Expected</th>
+              {withTimeChange && <th>Time change</th>}
             </tr>
           </thead>
           <tbody>
@@ -209,6 +230,11 @@ const LateTable: React.FC<{
                   <DelayPill minutes={row.lateMinutes} label={row.lateDisplay} />
                 </td>
                 <td>{row.expected}</td>
+                {withTimeChange && (
+                  <td>
+                    <LateDayTimeChange day={ownLateDay(row)} />
+                  </td>
+                )}
               </motion.tr>
             ))}
           </tbody>
@@ -548,6 +574,7 @@ const LateTimePage: React.FC = () => {
                   onSelect={
                     isAdmin && !viewingEmployee ? setOpenEmployeeId : undefined
                   }
+                  withTimeChange={!isAdmin}
                   emptyMessage="No late arrivals in this range. Every punch was inside the arrival time."
                 />
               )}

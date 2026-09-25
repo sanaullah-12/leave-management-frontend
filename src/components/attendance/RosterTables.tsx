@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import useListRowMotion from "../../hooks/useListRowMotion";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import StatusBadge from "./StatusBadge";
+import { LateDayTimeChange } from "./TimeChangeAction";
 import { formatIsoDate } from "../../lib/attendancePeriod";
 import { collapseVariants } from "../../lib/motion";
 
@@ -33,6 +34,9 @@ export interface RosterDayRow {
   workedDisplay: string | null;
   lateMinutes: number;
   lateDisplay: string | null;
+  /** An approved time change set this day's arrival. */
+  timeCorrected?: boolean;
+  machineCheckInDisplay?: string;
 }
 
 export interface RosterEmployeeTotals {
@@ -216,7 +220,23 @@ export const DayRosterTable: React.FC<{
                   )}
                 </td>
                 <td className={TD}>
-                  <StatusBadge status={row.status} compact />
+                  {/* The viewer's own late day offers the change beside
+                      its verdict; anyone else's row shows the verdict alone. */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusBadge status={row.status} compact />
+                    <LateDayTimeChange
+                      day={{
+                        employeeCode: row.employeeId,
+                        date: row.date,
+                        dateDisplay: row.dateDisplay,
+                        isLate: row.status === "Late",
+                        arrival: row.checkIn,
+                        lateMinutes: row.lateMinutes,
+                        corrected: row.timeCorrected,
+                        machineCheckInDisplay: row.machineCheckInDisplay,
+                      }}
+                    />
+                  </div>
                 </td>
                 <td className={`${NUM} hidden sm:table-cell`}>
                   {row.workedDisplay || <span className="text-gray-400">-</span>}

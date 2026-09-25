@@ -16,6 +16,7 @@ import GlobalSearch, { type SearchEntry } from "./header/GlobalSearch";
 import ThemeModal from "./ThemeModal";
 import VoiceNotificationToaster from "./voice/VoiceNotificationToaster";
 import NexoraAssistant from "./assistant/NexoraAssistant";
+import { TimeChangeProvider } from "../providers/TimeChangeProvider";
 import { useNotifications } from "../hooks/useNotifications";
 import { companyNameOf } from "../lib/company";
 import { useLocale } from "../i18n/LocaleProvider";
@@ -211,7 +212,6 @@ const Layout: React.FC = () => {
           items: [
             { name: t("items.leaveRequests"), href: "/leaves", icon: ClipboardDocumentListIcon },
             { name: t("items.leaveCalendar"), href: "/leave-calendar", icon: CalendarDaysIcon },
-            { name: t("items.wfhRequests"), href: "/work-from-home", icon: HomeModernIcon },
           ],
         },
         {
@@ -235,6 +235,17 @@ const Layout: React.FC = () => {
             { name: t("items.attendance"), href: "/attendance", icon: ClockIcon, exact: true },
             { name: t("items.lateTime"), href: "/attendance/late-time", icon: ExclamationTriangleIcon },
             { name: t("items.timeChanges"), href: "/attendance/time-changes", icon: PencilSquareIcon },
+          ],
+        },
+        {
+          // Its own area rather than a page under Leave: remote days are
+          // reviewed and tracked daily, and a leave type they are not.
+          key: "wfh",
+          short: t("short.workFromHome"),
+          label: t("groups.workFromHome"),
+          icon: HomeModernIcon,
+          items: [
+            { name: t("items.wfhRequests"), href: "/work-from-home", icon: HomeModernIcon },
           ],
         },
         {
@@ -303,7 +314,6 @@ const Layout: React.FC = () => {
           { name: t("items.applyLeave"), href: "/apply-leave", icon: PlusCircleIcon },
           { name: t("items.leaveCalendar"), href: "/leave-calendar", icon: CalendarDaysIcon },
           { name: t("items.myLeaveActivity"), href: "/my-leave-activity", icon: ClipboardDocumentCheckIcon },
-          { name: t("items.workFromHome"), href: "/work-from-home", icon: HomeModernIcon },
         ],
       },
       {
@@ -315,6 +325,15 @@ const Layout: React.FC = () => {
           { name: t("items.attendance"), href: "/attendance", icon: ClockIcon, exact: true },
           { name: t("items.lateTime"), href: "/attendance/late-time", icon: ExclamationTriangleIcon },
           { name: t("items.timeChanges"), href: "/attendance/time-changes", icon: PencilSquareIcon },
+        ],
+      },
+      {
+        key: "wfh",
+        short: t("short.workFromHome"),
+        label: t("groups.workFromHome"),
+        icon: HomeModernIcon,
+        items: [
+          { name: t("items.workFromHome"), href: "/work-from-home", icon: HomeModernIcon },
         ],
       },
       {
@@ -476,9 +495,15 @@ const Layout: React.FC = () => {
   // be read top to bottom every time. These three bands are what turn it into
   // a map: somebody looking for Payroll looks in Operations, not at item six.
   // Bands with nothing in them (an employee has no Payroll) do not render.
+  // A group listed in no band is not drawn in the sidebar at all, so every
+  // new group key needs a place here.
   const navBands = [
     { key: "workspace", label: t("bands.workspace"), keys: ["home"] },
-    { key: "people", label: t("bands.people"), keys: ["leave", "team", "attendance"] },
+    {
+      key: "people",
+      label: t("bands.people"),
+      keys: ["leave", "team", "attendance", "wfh"],
+    },
     {
       key: "operations",
       label: t("bands.operations"),
@@ -967,6 +992,7 @@ const Layout: React.FC = () => {
   );
 
   return (
+    <TimeChangeProvider>
     <div className="min-h-screen">
       <VoiceNotificationToaster />
       {/* In-app guide. Mounted here so it exists on every authenticated
@@ -1179,6 +1205,7 @@ const Layout: React.FC = () => {
         </div>
       </main>
     </div>
+    </TimeChangeProvider>
   );
 };
 

@@ -8,6 +8,7 @@ import {
   CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
 import StatusBadge from "./StatusBadge";
+import TimeChangeAction, { timeChangeState } from "./TimeChangeAction";
 import type { DayRow } from "./DayTable";
 import {
   CardAction,
@@ -63,6 +64,8 @@ interface Props {
   loading?: boolean;
   /** Open one day in full. The day sheet stacks above this one. */
   onSelectDay?: (row: DayRow) => void;
+  /** Offered on a late day. Omit where the viewer cannot raise a request. */
+  onRequestTimeChange?: (row: DayRow) => void;
   /**
    * True while the single-day sheet is open on top. Escape then belongs to
    * that sheet, and closing both layers on one press would lose this list.
@@ -107,6 +110,7 @@ const FullAttendanceDrawer: React.FC<Props> = ({
   rangeLabel,
   loading = false,
   onSelectDay,
+  onRequestTimeChange,
   detailOpen = false,
   onClose,
 }) => {
@@ -349,17 +353,33 @@ const FullAttendanceDrawer: React.FC<Props> = ({
 
               {historyRows.length ? (
                 <div className={showAll ? "max-h-72 overflow-y-auto" : undefined}>
-                  {historyRows.map((row) => (
-                    <HistoryRow
-                      key={row.date}
-                      date={row.dateDisplay}
-                      detail={row.arrival || "-"}
-                      badge={<StatusBadge status={row.status} compact />}
-                      onClick={
-                        onSelectDay ? () => onSelectDay(row) : undefined
-                      }
-                    />
-                  ))}
+                  {historyRows.map((row) => {
+                    const change = timeChangeState(row);
+                    return (
+                      <HistoryRow
+                        key={row.date}
+                        date={row.dateDisplay}
+                        detail={
+                          row.lateDisplay
+                            ? `${row.arrival || "-"} - ${row.lateDisplay} late`
+                            : row.arrival || "-"
+                        }
+                        badge={<StatusBadge status={row.status} compact />}
+                        onClick={
+                          onSelectDay ? () => onSelectDay(row) : undefined
+                        }
+                        footer={
+                          change &&
+                          (change !== "requestable" || onRequestTimeChange) ? (
+                            <TimeChangeAction
+                              row={row}
+                              onRequest={onRequestTimeChange}
+                            />
+                          ) : undefined
+                        }
+                      />
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="py-2 text-[13px] text-gray-500 dark:text-gray-400">

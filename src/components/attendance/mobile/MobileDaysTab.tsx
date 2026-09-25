@@ -8,6 +8,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Select from "../../ui/Select";
 import StatusBadge from "../StatusBadge";
+import TimeChangeAction, { timeChangeState } from "../TimeChangeAction";
 import type { DayRow } from "../DayTable";
 import { CardSkeleton, EmptyNote, SHEET, WELL } from "../../mobile/primitives";
 
@@ -43,6 +44,8 @@ interface Props {
   onStatusFilterChange: (next: string) => void;
   /** Opens the whole record, unpaged. */
   onViewFull?: () => void;
+  /** Offered on a late day. Omit where the viewer cannot raise a request. */
+  onRequestTimeChange?: (row: DayRow) => void;
 }
 
 const MobileDaysTab: React.FC<Props> = ({
@@ -52,6 +55,7 @@ const MobileDaysTab: React.FC<Props> = ({
   statusFilter,
   onStatusFilterChange,
   onViewFull,
+  onRequestTimeChange,
 }) => {
   const listRow = useListRowMotion();
   const [page, setPage] = useState(1);
@@ -114,37 +118,53 @@ const MobileDaysTab: React.FC<Props> = ({
         <>
           {/* A card per day, the same shape the roster lists use. */}
           <ul className="flex flex-col gap-2.5">
-            {shown.map((row, i) => (
-              <motion.li key={row.date} {...listRow(i)}>
-                <button
-                  type="button"
-                  onClick={() => onSelect(row)}
-                  className={`${SHEET} flex w-full items-center gap-3 px-3.5 py-3 text-left transition-colors active:bg-black/[0.02] dark:active:bg-white/[0.03]`}
+            {shown.map((row, i) => {
+              // The time change sits under the late time it is about, on its
+              // own line: inside the row it would be a button in a button.
+              const change = timeChangeState(row);
+              const showChange =
+                change && (change !== "requestable" || onRequestTimeChange);
+              return (
+                <motion.li
+                  key={row.date}
+                  {...listRow(i)}
+                  className={`${SHEET} overflow-hidden`}
                 >
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13.5px] font-semibold leading-tight text-gray-900 dark:text-white">
-                      {row.dateDisplay}
-                    </p>
-                    <p className="mt-[3px] flex flex-wrap items-center gap-x-2 truncate text-[11.5px] text-gray-400 dark:text-gray-500">
-                      <span>{row.weekday}</span>
-                      {row.arrival && (
-                        <span className="font-semibold tabular-nums text-gray-500 dark:text-gray-400">
-                          {row.arrival}
-                        </span>
-                      )}
-                      {row.lateDisplay && (
-                        <span className="font-bold tabular-nums text-amber-700 dark:text-amber-400">
-                          +{row.lateDisplay}
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  <span className="flex-none">
-                    <StatusBadge status={row.status} compact />
-                  </span>
-                </button>
-              </motion.li>
-            ))}
+                  <button
+                    type="button"
+                    onClick={() => onSelect(row)}
+                    className="flex w-full items-center gap-3 px-3.5 py-3 text-left transition-colors active:bg-black/[0.02] dark:active:bg-white/[0.03]"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[13.5px] font-semibold leading-tight text-gray-900 dark:text-white">
+                        {row.dateDisplay}
+                      </p>
+                      <p className="mt-[3px] flex flex-wrap items-center gap-x-2 truncate text-[11.5px] text-gray-400 dark:text-gray-500">
+                        <span>{row.weekday}</span>
+                        {row.arrival && (
+                          <span className="font-semibold tabular-nums text-gray-500 dark:text-gray-400">
+                            {row.arrival}
+                          </span>
+                        )}
+                        {row.lateDisplay && (
+                          <span className="font-bold tabular-nums text-amber-700 dark:text-amber-400">
+                            +{row.lateDisplay}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    <span className="flex-none">
+                      <StatusBadge status={row.status} compact />
+                    </span>
+                  </button>
+                  {showChange && (
+                    <div className="flex items-center justify-end border-t border-black/5 px-3.5 py-2 dark:border-white/[0.07]">
+                      <TimeChangeAction row={row} onRequest={onRequestTimeChange} />
+                    </div>
+                  )}
+                </motion.li>
+              );
+            })}
           </ul>
 
           <div className="flex items-center justify-between px-1 pt-0.5">
