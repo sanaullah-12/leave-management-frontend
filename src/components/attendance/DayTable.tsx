@@ -92,6 +92,12 @@ const DayTable: React.FC<Props> = ({
     [allRows, statusFilter]
   );
 
+  /** A corrected or pending day always says so; a late one when it can be asked. */
+  const showTimeChange = (row: DayRow) => {
+    const state = timeChangeState(row);
+    return Boolean(state && (state !== "requestable" || onRequestTimeChange));
+  };
+
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
   const pageRows = rows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
@@ -193,16 +199,19 @@ const DayTable: React.FC<Props> = ({
                     <span className="mt-0.5 block truncate text-[12px] text-gray-500 dark:text-gray-400">
                       {row.arrival ? `In ${row.arrival}` : "No punch"}
                       {row.lateDisplay ? ` - ${row.lateDisplay} late` : ""}
-                      {timeChangeState(row) === "corrected"
-                        ? " - time corrected"
-                        : timeChangeState(row) === "pending"
-                        ? " - change pending"
-                        : ""}
                     </span>
                   </span>
 
                   <StatusBadge status={row.status} />
                 </button>
+                {/* Under the late time it is about, lined up with the text
+                    rather than the date tile. Inside the row it would be a
+                    button in a button. */}
+                {showTimeChange(row) && (
+                  <div className="-mt-1 pb-3 pe-4 ps-[4.5rem]">
+                    <TimeChangeAction row={row} onRequest={onRequestTimeChange} />
+                  </div>
+                )}
               </motion.li>
             ))}
           </ul>

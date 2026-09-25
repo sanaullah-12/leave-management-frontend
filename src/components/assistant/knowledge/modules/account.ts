@@ -44,10 +44,10 @@ const account: KnowledgeModule = {
         "Open Settings → Profile Settings.",
         "Scroll to the Change Password section.",
         "Enter your current password, then your new one twice.",
-        "Save. You stay signed in; the new password applies from your next sign-in.",
+        "Save. You stay signed in on this device, and every other device is signed out.",
       ],
       tips: [
-        "Locked out instead? Use \"Forgot password\" on the sign-in screen to get a reset link by email.",
+        "Locked out instead? Use \"Forgot password\" on the sign-in screen to get a reset link by email. A reset signs you out everywhere.",
       ],
       actions: [
         { label: "Open Profile Settings", to: "/profile", icon: "settings" },
@@ -138,6 +138,29 @@ const account: KnowledgeModule = {
         "Click your avatar in the top-right and choose Log out.",
         "Or use the sign-out icon at the bottom of the left rail.",
       ],
+    },
+    {
+      id: "account.security",
+      module: "account",
+      question: "Why was I signed out or locked out?",
+      aliases: [
+        "too many failed sign-in attempts",
+        "account locked",
+        "session expired",
+        "sign out of other devices",
+      ],
+      keywords: ["locked", "lockout", "signed out", "session", "expired", "attempts", "security", "devices"],
+      answer:
+        "Sessions end after 7 days without use, or 30 days at most. After 5 wrong passwords, sign-in is blocked for 15 minutes.",
+      steps: [
+        "Locked out: wait 15 minutes, or use \"Forgot password\" to set a new one.",
+        "Changing your password signs out all your other devices, which is also how to end a session you do not recognise.",
+      ],
+      tips: [
+        "If an admin deactivates your account, all its sessions end immediately.",
+      ],
+      actions: [{ label: "Open Profile Settings", to: "/profile", icon: "settings" }],
+      related: ["account.change-password"],
     },
   ],
 };

@@ -25,10 +25,8 @@ import DayTable from "../components/attendance/DayTable";
 import type { DayRow } from "../components/attendance/DayTable";
 import DayDrawer from "../components/attendance/DayDrawer";
 import FullAttendanceDrawer from "../components/attendance/FullAttendanceDrawer";
-import TimeChangeRequestModal, {
-  type TimeChangeDay,
-} from "../components/attendance/TimeChangeRequestModal";
 import { useMyTimeChanges } from "../hooks/useTimeChanges";
+import { useTimeChangeRequest } from "../providers/TimeChangeProvider";
 import {
   CheckCircleIcon,
   ArrowPathIcon,
@@ -1100,10 +1098,8 @@ const AttendancePage: React.FC = () => {
   /** The day an employee is looking at in the side panel, or null. */
   const [selectedDay, setSelectedDay] = useState<DayRow | null>(null);
 
-  /** The late day a time change is being requested for, or null. */
-  const [timeChangeDay, setTimeChangeDay] = useState<TimeChangeDay | null>(
-    null
-  );
+  /** Opens the app-wide Request Time Change form for one late day. */
+  const { requestTimeChange } = useTimeChangeRequest();
 
   /**
    * Whether the whole record is open in the side panel.
@@ -1209,7 +1205,7 @@ const AttendancePage: React.FC = () => {
   const openTimeChange = (row: DayRow) => {
     const record = row.record;
     if (!record) return;
-    setTimeChangeDay({
+    requestTimeChange({
       date: row.date,
       dateDisplay: row.dateDisplay,
       machineTime: record.time,
@@ -1338,6 +1334,7 @@ const AttendancePage: React.FC = () => {
           policy={selfData?.lateTimePolicy}
           loading={rosterLoading}
           onSelectDay={setSelectedDay}
+          onRequestTimeChange={isAdmin ? undefined : openTimeChange}
           detailOpen={!!selectedDay}
           onClose={() => setShowFullAttendance(false)}
         />
@@ -1355,11 +1352,6 @@ const AttendancePage: React.FC = () => {
           onRequestTimeChange={isAdmin ? undefined : openTimeChange}
         />
       )}
-
-      <TimeChangeRequestModal
-        day={timeChangeDay}
-        onClose={() => setTimeChangeDay(null)}
-      />
 
       {/* Employee detail panel */}
       {modalEmployee && (
@@ -1437,6 +1429,7 @@ const AttendancePage: React.FC = () => {
           }
           dayRows={dayRows}
           onSelectDay={setSelectedDay}
+          onRequestTimeChange={isAdmin ? undefined : openTimeChange}
           onViewFullRecord={
             dayRows.length ? () => setShowFullAttendance(true) : undefined
           }

@@ -417,13 +417,17 @@ export const RateRow: React.FC<{
  * Rendered as a button when the row opens something, so it is reachable by
  * keyboard and announced as a control rather than being a div that happens to
  * respond to a tap.
+ *
+ * `footer` sits under the row, outside the button, for a control of its own:
+ * a button inside the row's button would not be reachable on its own.
  */
 export const HistoryRow: React.FC<{
   date: React.ReactNode;
   detail: React.ReactNode;
   badge?: React.ReactNode;
   onClick?: () => void;
-}> = ({ date, detail, badge, onClick }) => {
+  footer?: React.ReactNode;
+}> = ({ date, detail, badge, onClick, footer }) => {
   const inner = (
     <>
       <span className="w-[78px] flex-none truncate text-start text-[12.5px] font-semibold text-gray-900 dark:text-gray-100">
@@ -436,10 +440,13 @@ export const HistoryRow: React.FC<{
     </>
   );
 
-  const shared =
-    "flex w-full items-center justify-between gap-2 border-b border-black/5 py-[11px] last:border-b-0 last:pb-0 dark:border-white/[0.07]";
+  const rule =
+    "border-b border-black/5 last:border-b-0 last:pb-0 dark:border-white/[0.07]";
+  const shared = `flex w-full items-center justify-between gap-2 py-[11px] ${
+    footer ? "" : rule
+  }`;
 
-  return onClick ? (
+  const row = onClick ? (
     <button
       type="button"
       onClick={onClick}
@@ -449,6 +456,14 @@ export const HistoryRow: React.FC<{
     </button>
   ) : (
     <div className={shared}>{inner}</div>
+  );
+
+  if (!footer) return row;
+  return (
+    <div className={rule}>
+      {row}
+      <div className="flex justify-end pb-[11px]">{footer}</div>
+    </div>
   );
 };
 

@@ -32,9 +32,62 @@ import { panelSpring } from "../../lib/motion";
 interface Props {
   open: boolean;
   closePanel: () => void;
+  /** The launcher's viewport rect; the desktop card opens beside it. */
+  anchor?: DOMRect | null;
 }
 
-const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
+const PANEL_WIDTH = 392; // 24.5rem
+const PANEL_MAX_HEIGHT = 608; // 38rem
+const PANEL_GAP = 12;
+const VIEWPORT_MARGIN = 16;
+
+/**
+ * Where the desktop card goes relative to a launcher that can be dragged
+ * anywhere. Above it when there is room, then below, then to whichever side
+ * is free, clamped so the card never leaves the viewport. The transform
+ * origin points back at the launcher so the card grows out of it.
+ */
+function placePanel(anchor: DOMRect): React.CSSProperties {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const height = Math.min(PANEL_MAX_HEIGHT, vh - 2 * VIEWPORT_MARGIN);
+  const clamp = (v: number, min: number, max: number) =>
+    Math.max(min, Math.min(v, max));
+
+  const onRight = anchor.left + anchor.width / 2 > vw / 2;
+  const spaceAbove = anchor.top - PANEL_GAP - VIEWPORT_MARGIN;
+  const spaceBelow = vh - anchor.bottom - PANEL_GAP - VIEWPORT_MARGIN;
+
+  let top: number;
+  let left: number;
+  let originY: string;
+  let originX = onRight ? "right" : "left";
+
+  if (spaceAbove >= height || spaceBelow >= height) {
+    const above = spaceAbove >= height;
+    top = above ? anchor.top - PANEL_GAP - height : anchor.bottom + PANEL_GAP;
+    originY = above ? "bottom" : "top";
+    left = onRight ? anchor.right - PANEL_WIDTH : anchor.left;
+  } else {
+    // Launcher is mid-height on a short screen: open to the side instead.
+    top = anchor.top + anchor.height / 2 - height / 2;
+    originY = "center";
+    const goLeft = anchor.left >= vw - anchor.right;
+    left = goLeft ? anchor.left - PANEL_GAP - PANEL_WIDTH : anchor.right + PANEL_GAP;
+    originX = goLeft ? "right" : "left";
+  }
+
+  return {
+    top: clamp(top, VIEWPORT_MARGIN, vh - height - VIEWPORT_MARGIN),
+    left: clamp(left, VIEWPORT_MARGIN, vw - PANEL_WIDTH - VIEWPORT_MARGIN),
+    right: "auto",
+    bottom: "auto",
+    height,
+    transformOrigin: `${originY} ${originX}`,
+  };
+}
+
+const AssistantPanel: React.FC<Props> = ({ open, closePanel, anchor }) => {
   // Conversation state lives with the panel rather than the launcher, so the
   // knowledge base is only downloaded once someone actually opens it.
   const { context, messages, typing, suggestions, ask, reset } = useAssistant();
@@ -44,6 +97,25 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
   const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const [isDesktop, setIsDesktop] = useState(
+    () => window.innerWidth >= MOBILE_BREAKPOINT
+  );
+  useEffect(() => {
+    const onResize = () => setIsDesktop(window.innerWidth >= MOBILE_BREAKPOINT);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // The phone sheet fills the screen, so only the desktop card follows the
+  // launcher. Without an anchor yet, the CSS default (bottom-right) applies.
+  const placement = useMemo<React.CSSProperties>(
+    () =>
+      isDesktop && anchor
+        ? placePanel(anchor)
+        : { transformOrigin: "bottom right" },
+    [isDesktop, anchor]
+  );
 
   const quickActions = useMemo(
     () => resolveActions(quickActionsFor(context), context.role),
@@ -145,9 +217,9 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduce ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.98 }}
             transition={panelSpring}
-            style={{ transformOrigin: "bottom right" }}
+            style={placement}
             className={
-              "fixed z-[90] flex flex-col overflow-hidden border-[var(--border-default)] bg-[var(--surface-overlay)]/95 shadow-2xl backdrop-blur-xl " +
+              "assistant-panel-glow fixed z-[90] flex flex-col overflow-hidden border-[var(--border-default)] bg-[var(--surface-overlay)]/95 backdrop-blur-xl " +
               // Mobile: a sheet filling the screen - no border, because there
               // is no edge for one to sit on. Desktop: a card sitting just
               // above the launcher.
@@ -155,6 +227,8 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
               "sm:inset-auto sm:bottom-24 sm:end-6 sm:top-auto sm:h-[min(38rem,calc(100vh-8rem))] sm:w-[24.5rem] sm:rounded-3xl sm:border"
             }
           >
+            <span aria-hidden="true" className="assistant-edge" data-active={typing} />
+
             {/* ---------------- Header ---------------- */}
             {/* The sheet starts at y=0, so on a notched iPhone the header was
                 drawn inside the status bar: the close and reset buttons were
@@ -166,7 +240,7 @@ const AssistantPanel: React.FC<Props> = ({ open, closePanel }) => {
               className="flex items-center gap-3 border-b border-black/5 px-[max(1rem,var(--safe-left))] pb-3.5 pt-[calc(0.875rem+var(--safe-top))] dark:border-white/10 sm:px-4 sm:pt-3.5"
               style={{ backgroundColor: "var(--accent-wash)" }}
             >
-              <span className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-2xl text-blue-600 dark:text-blue-400">
+              <span className="assistant-logo-glow grid h-10 w-10 flex-shrink-0 place-items-center rounded-2xl text-blue-600 dark:text-blue-400">
                 <AppLogo size={24} />
               </span>
               <div className="min-w-0 flex-1">

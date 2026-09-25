@@ -27,6 +27,7 @@ const NexoraAssistant: React.FC = () => {
     useAssistantLauncher();
 
   const [panelRequested, setPanelRequested] = useState(false);
+  const [anchor, setAnchor] = useState<DOMRect | null>(null);
 
   useEffect(() => {
     if (open) setPanelRequested(true);
@@ -42,12 +43,13 @@ const NexoraAssistant: React.FC = () => {
         greeting={greeting}
         onOpen={openPanel}
         onDismissGreeting={dismissGreeting}
+        onAnchorChange={setAnchor}
       />
       {panelRequested && (
         // No fallback: the chunk lands in a few hundred milliseconds and an
         // empty flash reads better than a skeleton for something this small.
         <Suspense fallback={null}>
-          <AssistantPanel open={open} closePanel={closePanel} />
+          <AssistantPanel open={open} closePanel={closePanel} anchor={anchor} />
         </Suspense>
       )}
     </>

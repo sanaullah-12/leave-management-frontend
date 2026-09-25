@@ -6,6 +6,7 @@ import {
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import StatusBadge from "./StatusBadge";
+import { LateDayTimeChange } from "./TimeChangeAction";
 import type { RosterDayRow } from "./RosterTables";
 import { byArrival } from "./rosterGrouping";
 import { toneOf } from "./rosterTone";
@@ -97,7 +98,7 @@ const arrivalNote = (status: string) => {
 const ROW_SURFACE = "shadow-[shadow:var(--glass-sheen),var(--glass-drop)]";
 
 const COLS =
-  "grid grid-cols-[minmax(0,1fr)_9.5rem_8.5rem_9.5rem_2.25rem] items-center gap-3";
+  "grid grid-cols-[minmax(0,1fr)_9.5rem_8.5rem_11rem_2.25rem] items-center gap-3";
 
 const RosterRow: React.FC<{ row: RosterDayRow }> = ({ row }) => {
   const [open, setOpen] = useState(false);
@@ -166,7 +167,9 @@ const RosterRow: React.FC<{ row: RosterDayRow }> = ({ row }) => {
         </div>
 
         {/* ---- Late ---- */}
-        <div className="min-w-0 text-sm">
+        {/* On the viewer's own day the time change sits under the late time
+            it is about. Anyone else's row shows the minutes alone. */}
+        <div className="flex min-w-0 flex-col items-start gap-1.5 text-sm">
           {late ? (
             <span className="font-semibold tabular-nums text-[var(--warning-text)]">
               {late}
@@ -174,6 +177,18 @@ const RosterRow: React.FC<{ row: RosterDayRow }> = ({ row }) => {
           ) : (
             <span className="text-gray-400 dark:text-gray-500">-</span>
           )}
+          <LateDayTimeChange
+            day={{
+              employeeCode: row.employeeId,
+              date: row.date,
+              dateDisplay: row.dateDisplay,
+              isLate: row.status === "Late",
+              arrival: row.checkIn,
+              lateMinutes: row.lateMinutes,
+              corrected: row.timeCorrected,
+              machineCheckInDisplay: row.machineCheckInDisplay,
+            }}
+          />
         </div>
 
         {/* ---- The rest of the row ---- */}

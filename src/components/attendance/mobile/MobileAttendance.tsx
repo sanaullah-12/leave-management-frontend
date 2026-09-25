@@ -89,6 +89,8 @@ interface Props {
   onSelectEmployee: (employee: RosterEmployee) => void;
   dayRows: DayRow[];
   onSelectDay: (row: DayRow) => void;
+  /** Offered on a late day. Omit where the viewer cannot raise a request. */
+  onRequestTimeChange?: (row: DayRow) => void;
   onViewFullRecord?: () => void;
   statusFilter: string;
   onStatusFilterChange: (next: string) => void;
@@ -145,6 +147,7 @@ const MobileAttendance: React.FC<Props> = (props) => {
     dayRows,
     onSelectDay,
     onViewFullRecord,
+    onRequestTimeChange,
     statusFilter,
     onStatusFilterChange,
     ip,
@@ -500,6 +503,7 @@ const MobileAttendance: React.FC<Props> = (props) => {
           statusFilter={statusFilter}
           onStatusFilterChange={onStatusFilterChange}
           onViewFull={onViewFullRecord}
+          onRequestTimeChange={onRequestTimeChange}
         />
       )}
 

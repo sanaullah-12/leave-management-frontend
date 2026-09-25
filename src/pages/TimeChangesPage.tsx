@@ -4,6 +4,7 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   PencilSquareIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import { XCircleIcon as XCircleSolid } from "@heroicons/react/24/solid";
 import SectionHeader from "../components/ui/SectionHeader";
@@ -13,7 +14,13 @@ import Select from "../components/ui/Select";
 import Modal from "../components/ui/Modal";
 import InlineLoader from "../components/InlineLoader";
 import TimeChangeTable from "../components/attendance/TimeChangeTable";
+import LateDayList from "../components/attendance/LateDayList";
+import {
+  MAX_AGE_DAYS,
+  isoDaysAgo,
+} from "../components/attendance/TimeChangeAction";
 import { useAuth } from "../context/AuthContext";
+import { useLateHours } from "../hooks/useLateHours";
 import {
   useCancelTimeChange,
   useMyTimeChanges,
@@ -26,9 +33,11 @@ import { showErrorToast, showSuccessToast } from "../utils/toastHelpers";
 /**
  * Time Change Requests
  * --------------------
- * An admin reviews requests to have a late day read at an agreed arrival time;
- * an employee sees the requests they have raised. Requests are raised from the
- * employee's own attendance, next to the late day they are about.
+ * An admin reviews requests to have a late day read at an agreed arrival time.
+ * An employee sees their late days from the request window, each with its
+ * Request time change button or the state of the request already raised, and
+ * below them the requests themselves. The same button sits next to every late
+ * time elsewhere in the app; all of them open one form (TimeChangeProvider).
  *
  * Approving changes nothing in the device record. The approved time becomes
  * the day's effective arrival on the server, so every attendance screen,
@@ -55,6 +64,31 @@ const TimeChangesPage: React.FC = () => {
 
   const queue = useTimeChangeQueue(status, isAdmin);
   const mine = useMyTimeChanges(!isAdmin);
+
+  // The employee's late days across the whole window a request is accepted
+  // for. Judged by the server with approved changes applied, so a corrected
+  // day comes back on time and is kept only to show that it was corrected.
+  const lateWindow = useMemo(
+    () => ({ startDate: isoDaysAgo(MAX_AGE_DAYS), endDate: isoDaysAgo(0) }),
+    []
+  );
+  const lateHours = useLateHours(user?.employeeId, {
+    ...lateWindow,
+    enabled: !isAdmin && Boolean(user?.employeeId),
+  });
+  const lateDays = useMemo(
+    () => lateHours.entries.filter((e) => e.lateMinutes > 0 || e.timeCorrected),
+    [lateHours.entries]
+  );
+  const openLateDays = useMemo(() => {
+    const asked = new Set(
+      (mine.data ?? [])
+        .filter((r) => r.status === "pending" || r.status === "approved")
+        .map((r) => r.date)
+    );
+    return lateDays.filter((e) => e.lateMinutes > 0 && !asked.has(e.date))
+      .length;
+  }, [lateDays, mine.data]);
   const review = useReviewTimeChange();
   const cancel = useCancelTimeChange();
 
@@ -141,6 +175,15 @@ const TimeChangesPage: React.FC = () => {
   };
 
   const tiles = [
+    ...(isAdmin
+      ? []
+      : [
+          {
+            label: "Late, not requested",
+            value: lateHours.isLoading ? "-" : openLateDays,
+            icon: <ExclamationTriangleIcon className="h-6 w-6" />,
+          },
+        ]),
     {
       label: "Pending",
       value: counts?.pending ?? "-",
@@ -167,14 +210,38 @@ const TimeChangesPage: React.FC = () => {
         description={
           isAdmin
             ? "Review requests to record a late arrival from an agreed time. The machine check-in is always kept."
-            : "Requests you have raised to correct a late check-in. Raise a new one from a late day on your attendance page."
+            : `Your late days from the last ${MAX_AGE_DAYS} days and the requests you have raised. Request a change right from the late day.`
         }
         illustration={sectionIllustration("attendance")}
       />
 
       <section aria-label="Time change summary">
-        <StatCardRow tiles={tiles} />
+        <StatCardRow tiles={tiles} fourUp={!isAdmin} />
       </section>
+
+      {!isAdmin && (
+        <section className="space-y-2.5" aria-label="Late days">
+          <div className="flex min-w-0 items-center gap-2 px-1">
+            <ClockIcon className="h-4 w-4 shrink-0 text-gray-400" />
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              Late days
+            </h2>
+            <span className="text-xs text-gray-400">
+              Last {MAX_AGE_DAYS} days
+              {lateDays.length ? ` - ${lateDays.length} shown` : ""}
+            </span>
+          </div>
+          <LateDayList
+            entries={lateDays}
+            loading={lateHours.isLoading}
+            emptyMessage={
+              user?.employeeId
+                ? `Every check-in in the last ${MAX_AGE_DAYS} days was on time.`
+                : "Your account is not linked to a device ID yet, so there are no check-ins to show."
+            }
+          />
+        </section>
+      )}
 
       <section className="space-y-2.5">
         <div className="flex flex-col gap-2.5 px-1 sm:flex-row sm:items-center sm:gap-3">
@@ -209,7 +276,7 @@ const TimeChangesPage: React.FC = () => {
               ? status === "pending"
                 ? "No requests are waiting for a decision."
                 : "When someone requests a time change it will appear here."
-              : "Use Request Time Change on a late day in your attendance to raise one."
+              : "Use Request time change on a late day above to raise one."
           }
         />
       </section>
